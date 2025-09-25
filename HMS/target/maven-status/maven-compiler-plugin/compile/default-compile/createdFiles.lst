@@ -1,0 +1,10 @@
+filter\AuthFilter.class
+controller\LoginServlet.class
+Model\User.class
+com\mycompany\hms\HMS.class
+DAO\DbContext.class
+com\mycompany\hms\JakartaRestConfiguration.class
+com\mycompany\hms\resources\JakartaEE10Resource.class
+DAO\UserDAO.class
+Model\UserPermission.class
+Model\Permission.class

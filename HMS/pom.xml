@@ -5,7 +5,7 @@
     <artifactId>HMS</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>war</packaging>
-    <name>HMS-1.0-SNAPSHOT</name>
+    <name>HMS</name>
     
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
@@ -23,11 +23,11 @@
             <version>${jakartaee}</version>
             <scope>provided</scope>
         </dependency>
-<dependency>
-    <groupId>com.microsoft.sqlserver</groupId>
-    <artifactId>mssql-jdbc</artifactId>
-    <version>13.2.0.jre11</version>
-</dependency>
+        <dependency>
+            <groupId>com.microsoft.sqlserver</groupId>
+            <artifactId>mssql-jdbc</artifactId>
+            <version>13.2.0.jre11</version>
+        </dependency>
     </dependencies>
     
     <build>
@@ -47,7 +47,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
-                <version>2.3</version>
+                <version>3.3.2</version>
                 <configuration>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                 </configuration>

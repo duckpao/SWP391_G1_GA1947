@@ -18,7 +18,7 @@ public class CreateMedicationRequestServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        HttpSession session = request.getSession(false); // Không tạo session mới
+        HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("role") == null || !"Doctor".equals(session.getAttribute("role"))) {
             response.sendRedirect("login");
             return;
@@ -26,7 +26,11 @@ public class CreateMedicationRequestServlet extends HttpServlet {
 
         MedicationRequestDAO dao = new MedicationRequestDAO();
         List<Medicine> medicines = dao.getAllMedicines();
-        request.setAttribute("medicines", medicines);
+        if (medicines == null) {
+            request.setAttribute("error", "Không thể tải danh sách thuốc!");
+        } else {
+            request.setAttribute("medicines", medicines);
+        }
         request.getRequestDispatcher("/WEB-INF/jsp/createRequest.jsp").forward(request, response);
     }
 
@@ -38,18 +42,17 @@ public class CreateMedicationRequestServlet extends HttpServlet {
             return;
         }
         int doctorId = (Integer) session.getAttribute("userId");
+        System.out.println("Doctor ID: " + doctorId); // Debug log
 
         String notes = request.getParameter("notes");
-        MedicationRequest req = new MedicationRequest(); // Đã có default constructor
+        MedicationRequest req = new MedicationRequest();
         req.setDoctorId(doctorId);
-        req.setNotes(notes != null ? notes : ""); // Tránh null
+        req.setNotes(notes != null ? notes : "");
 
-        // Parse items từ form
         List<MedicationRequestItem> items = new ArrayList<>();
         String[] medicineIds = request.getParameterValues("medicine_id");
         String[] quantities = request.getParameterValues("quantity");
 
-        // Kiểm tra null và length khớp
         if (medicineIds == null || quantities == null || medicineIds.length != quantities.length) {
             request.setAttribute("error", "Dữ liệu thuốc không hợp lệ!");
             doGet(request, response);
@@ -71,7 +74,7 @@ public class CreateMedicationRequestServlet extends HttpServlet {
                 items.add(item);
             }
         } catch (NumberFormatException e) {
-            request.setAttribute("error", "Dữ liệu số không hợp lệ!");
+            request.setAttribute("error", "Dữ liệu số không hợp lệ! " + e.getMessage());
             doGet(request, response);
             return;
         }
@@ -80,9 +83,15 @@ public class CreateMedicationRequestServlet extends HttpServlet {
 
         MedicationRequestDAO dao = new MedicationRequestDAO();
         int requestId = dao.createRequest(req);
+        System.out.println("Request ID returned: " + requestId); // Debug log
         if (requestId != -1) {
-            dao.addRequestItems(requestId, items);
-            response.sendRedirect("doctor-dashboard?message=request_success"); // Redirect về dashboard
+            try {
+                dao.addRequestItems(requestId, items);
+                response.sendRedirect("doctor-dashboard?message=request_success");
+            } catch (Exception e) {
+                request.setAttribute("error", "Lỗi khi thêm chi tiết yêu cầu: " + e.getMessage());
+                doGet(request, response);
+            }
         } else {
             request.setAttribute("error", "Không thể tạo yêu cầu. Vui lòng thử lại.");
             doGet(request, response);

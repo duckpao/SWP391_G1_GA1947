@@ -3,8 +3,12 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/web/jsp/doctorDashboard.jsp</file>
+            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/Controller/RegisterServlet.java</file>
             <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/Controller/CreateMedicationRequestServlet.java</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/DAO/MedicationRequestDAO.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/web/WEB-INF/web.xml</file>
+            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/model/User.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/Controller/LoginServlet.java</file>
             <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/Controller/DoctorDashboardServlet.java</file>
         </group>
     </open-files>

@@ -1,6 +1,0 @@
-com\mycompany\hms\HMS.class
-DAO\DbContext.class
-com\mycompany\hms\JakartaRestConfiguration.class
-com\mycompany\hms\resources\JakartaEE10Resource.class
-Controller\HomeController.class
-.netbeans_automatic_build

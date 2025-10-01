@@ -1,8 +1,8 @@
 package DAO;
 
-import Model.MedicationRequest;
-import Model.MedicationRequestItem;
-import Model.Medicine;
+import model.MedicationRequest;
+import model.MedicationRequestItem;
+import model.Medicine;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;

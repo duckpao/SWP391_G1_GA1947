@@ -2,9 +2,9 @@
 package Controller;
 
 import DAO.MedicationRequestDAO;
-import Model.MedicationRequest;
-import Model.MedicationRequestItem;
-import Model.Medicine;
+import model.MedicationRequest;
+import model.MedicationRequestItem;
+import model.Medicine;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,7 +31,7 @@ public class CreateMedicationRequestServlet extends HttpServlet {
         } else {
             request.setAttribute("medicines", medicines);
         }
-        request.getRequestDispatcher("/WEB-INF/jsp/createRequest.jsp").forward(request, response);
+        request.getRequestDispatcher("/jsp/createRequest.jsp").forward(request, response);
     }
 
     @Override

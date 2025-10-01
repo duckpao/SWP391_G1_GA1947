@@ -11,7 +11,7 @@ import java.io.*;
  */
 public class User {
 
-    private int userId; // Thêm userId
+    private int userId;
     private String username;
     private String email;
     private String phone;

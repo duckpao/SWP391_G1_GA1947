@@ -1,4 +1,4 @@
-package Model;
+package model;
 
 public class Medicine {
     private int medicineId;

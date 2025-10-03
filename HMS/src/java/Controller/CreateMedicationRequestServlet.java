@@ -1,4 +1,3 @@
-
 package Controller;
 
 import DAO.MedicationRequestDAO;
@@ -42,9 +41,12 @@ public class CreateMedicationRequestServlet extends HttpServlet {
             return;
         }
         int doctorId = (Integer) session.getAttribute("userId");
-        System.out.println("Doctor ID: " + doctorId); // Debug log
+        System.out.println("=== START CREATE REQUEST ===");
+        System.out.println("Doctor ID: " + doctorId);
 
         String notes = request.getParameter("notes");
+        System.out.println("Notes: " + notes);
+
         MedicationRequest req = new MedicationRequest();
         req.setDoctorId(doctorId);
         req.setNotes(notes != null ? notes : "");
@@ -53,7 +55,11 @@ public class CreateMedicationRequestServlet extends HttpServlet {
         String[] medicineIds = request.getParameterValues("medicine_id");
         String[] quantities = request.getParameterValues("quantity");
 
+        System.out.println("Medicine IDs: " + (medicineIds != null ? String.join(",", medicineIds) : "NULL"));
+        System.out.println("Quantities: " + (quantities != null ? String.join(",", quantities) : "NULL"));
+
         if (medicineIds == null || quantities == null || medicineIds.length != quantities.length) {
+            System.out.println("ERROR: Invalid medicine data");
             request.setAttribute("error", "Dữ liệu thuốc không hợp lệ!");
             doGet(request, response);
             return;
@@ -63,7 +69,10 @@ public class CreateMedicationRequestServlet extends HttpServlet {
             for (int i = 0; i < medicineIds.length; i++) {
                 int medicineId = Integer.parseInt(medicineIds[i]);
                 int quantity = Integer.parseInt(quantities[i]);
+                System.out.println("Item " + i + ": Medicine ID=" + medicineId + ", Quantity=" + quantity);
+
                 if (quantity <= 0) {
+                    System.out.println("ERROR: Quantity <= 0");
                     request.setAttribute("error", "Số lượng thuốc phải lớn hơn 0!");
                     doGet(request, response);
                     return;
@@ -74,27 +83,44 @@ public class CreateMedicationRequestServlet extends HttpServlet {
                 items.add(item);
             }
         } catch (NumberFormatException e) {
+            System.out.println("ERROR: Number format exception - " + e.getMessage());
             request.setAttribute("error", "Dữ liệu số không hợp lệ! " + e.getMessage());
             doGet(request, response);
             return;
         }
 
         req.setItems(items);
+        System.out.println("Total items: " + items.size());
 
         MedicationRequestDAO dao = new MedicationRequestDAO();
+        System.out.println("DAO created, calling createRequest...");
+
         int requestId = dao.createRequest(req);
-        System.out.println("Request ID returned: " + requestId); // Debug log
+        System.out.println("Request ID returned: " + requestId);
+
         if (requestId != -1) {
+            System.out.println("Success! Adding request items...");
             try {
                 dao.addRequestItems(requestId, items);
-                response.sendRedirect("doctor-dashboard?message=request_success");
+                System.out.println("Items added successfully!");
+
+                // ✅ thay vì redirect, forward về lại createRequest.jsp và set success
+                List<Medicine> medicines = dao.getAllMedicines();
+                request.setAttribute("medicines", medicines);
+                request.setAttribute("success", "Đặt thuốc thành công!");
+                request.getRequestDispatcher("/jsp/createRequest.jsp").forward(request, response);
+
             } catch (Exception e) {
+                System.out.println("ERROR adding items: " + e.getMessage());
+                e.printStackTrace();
                 request.setAttribute("error", "Lỗi khi thêm chi tiết yêu cầu: " + e.getMessage());
                 doGet(request, response);
             }
         } else {
+            System.out.println("ERROR: createRequest returned -1");
             request.setAttribute("error", "Không thể tạo yêu cầu. Vui lòng thử lại.");
             doGet(request, response);
         }
+        System.out.println("=== END CREATE REQUEST ===");
     }
 }

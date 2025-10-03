@@ -1,8 +1,8 @@
 package DAO;
 
-import Model.MedicationRequest;
-import Model.MedicationRequestItem;
-import Model.Medicine;
+import model.MedicationRequest;
+import model.MedicationRequestItem;
+import model.Medicine;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,22 +11,30 @@ import java.util.List;
 
 public class MedicationRequestDAO extends DBContext {
 
-    // Insert request và trả về ID mới tạo
-    public int createRequest(MedicationRequest request) {
-        String sql = "INSERT INTO MedicationRequests (doctor_id, status, request_date, notes) VALUES (?, 'Pending', GETDATE(), ?)";
-        try (PreparedStatement ps = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
-            ps.setInt(1, request.getDoctorId());
-            ps.setString(2, request.getNotes());
-            ps.executeUpdate();
-            ResultSet rs = ps.getGeneratedKeys();
-            if (rs.next()) {
-                return rs.getInt(1); // Trả về request_id
+ public int createRequest(MedicationRequest request) {
+    String sql = "INSERT INTO MedicationRequests (doctor_id, status, request_date, notes) VALUES (?, 'Pending', GETDATE(), ?)";
+    try (PreparedStatement ps = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+        ps.setInt(1, request.getDoctorId());
+        ps.setString(2, request.getNotes());
+        
+        int affectedRows = ps.executeUpdate();
+        System.out.println("Affected rows: " + affectedRows); // Debug log
+        
+        if (affectedRows > 0) {
+            try (ResultSet rs = ps.getGeneratedKeys()) { // ← Đóng ResultSet trong try-with-resources
+                if (rs.next()) {
+                    int requestId = rs.getInt(1);
+                    System.out.println("Generated request_id: " + requestId); // Debug log
+                    return requestId;
+                }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
-        return -1;
+    } catch (SQLException e) {
+        System.err.println("Error in createRequest: " + e.getMessage()); // ← Thêm message cụ thể
+        e.printStackTrace();
     }
+    return -1;
+}
 
     // Insert items cho request
     public void addRequestItems(int requestId, List<MedicationRequestItem> items) {

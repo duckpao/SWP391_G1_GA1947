@@ -19,7 +19,7 @@ public class DoctorDashboardServlet extends HttpServlet {
 
         String role = (String) session.getAttribute("role");
         if ("Doctor".equals(role)) {
-            request.getRequestDispatcher("/WEB-INF/jsp/doctorDashboard.jsp").forward(request, response);
+            request.getRequestDispatcher("/jsp/doctorDashboard.jsp").forward(request, response);
         } else {
             response.sendRedirect("login"); // Hoặc dashboard khác nếu có
         }

@@ -50,27 +50,28 @@ public class UserDAO extends DBContext {
         return false;
     }
 
-    public User login(String email, String password) {
-        String sql = "SELECT * FROM Users WHERE email=? AND password_hash=? AND is_active=1";
-        try {
-            PreparedStatement ps = connection.prepareStatement(sql);
-            ps.setString(1, email);
-            ps.setString(2, password);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                User u = new User();
-                u.setUsername(rs.getString("username"));
-                u.setEmail(rs.getString("email"));
-                u.setPhone(rs.getString("phone"));
-                u.setPasswordHash(rs.getString("password_hash"));
-                u.setRole(rs.getString("role"));
-                return u;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+public User login(String email, String password) {
+    String sql = "SELECT * FROM Users WHERE email=? AND password_hash=? AND is_active=1";
+    try {
+        PreparedStatement ps = connection.prepareStatement(sql);
+        ps.setString(1, email);
+        ps.setString(2, password);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            User u = new User();
+            u.setUserId(rs.getInt("user_id")); // ← THÊM DÒNG NÀY
+            u.setUsername(rs.getString("username"));
+            u.setEmail(rs.getString("email"));
+            u.setPhone(rs.getString("phone"));
+            u.setPasswordHash(rs.getString("password_hash"));
+            u.setRole(rs.getString("role"));
+            return u;
         }
-        return null;
+    } catch (Exception e) {
+        e.printStackTrace();
     }
+    return null;
+}
 
     public boolean updatePasswordByEmailOrPhone(String newPassword, String emailOrPhone) {
         String sql = "UPDATE Users SET password_hash=? WHERE email=? OR phone=?";

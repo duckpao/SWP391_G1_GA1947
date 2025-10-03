@@ -1,3 +1,4 @@
+
 package model;
 
 import java.lang.*;
@@ -10,6 +11,7 @@ import java.io.*;
  */
 public class User {
 
+    private int userId;
     private String username;
     private String email;
     private String phone;
@@ -19,12 +21,21 @@ public class User {
     public User() {
     }
 
-    public User(String username, String passwordHash, String email, String phone, String role) {
+    public User(int userId, String username, String passwordHash, String email, String phone, String role) {
+        this.userId = userId;
         this.username = username;
         this.passwordHash = passwordHash;
         this.email = email;
         this.phone = phone;
         this.role = role;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 
     public String getUsername() {

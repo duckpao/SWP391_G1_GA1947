@@ -6,6 +6,17 @@
 </head>
 <body>
     <h1>Manage Medication Requests</h1>
+    <!-- Hiển thị thông báo dựa trên tham số message -->
+    <c:if test="${not empty param.message}">
+        <c:choose>
+            <c:when test="${param.message == 'cancel_success'}">
+                <p style="color:green">Hủy yêu cầu thành công!</p>
+            </c:when>
+            <c:when test="${param.message == 'error_cancel'}">
+                <p style="color:red">Hủy yêu cầu thất bại. Vui lòng thử lại!</p>
+            </c:when>
+        </c:choose>
+    </c:if>
     <a href="create-request">Create Medication Request</a><br><br>
     <div style="border: 1px solid black; padding: 10px;">
         <h3>Pending Requests</h3>

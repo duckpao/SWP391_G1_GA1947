@@ -1,81 +1,90 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
-
 package Controller;
 
-import java.io.IOException;
-import java.io.PrintWriter;
+import DAO.MedicationRequestDAO;
+import model.MedicationRequest;
+import model.MedicationRequestItem;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import java.io.IOException;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-/**
- *
- * @author ADMIN
- */
 public class ViewRequestHistoryServlet extends HttpServlet {
-   
-    /** 
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet ViewRequestHistoryServlet</title>");  
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet ViewRequestHistoryServlet at " + request.getContextPath () + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("role") == null || !"Doctor".equals(session.getAttribute("role"))) {
+            response.sendRedirect("login");
+            return;
         }
-    } 
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /** 
-     * Handles the HTTP <code>GET</code> method.
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
-        processRequest(request, response);
-    } 
+        int doctorId = (Integer) session.getAttribute("userId");
+        MedicationRequestDAO dao = new MedicationRequestDAO();
+        List<MedicationRequest> requests = dao.getRequestsByDoctorId(doctorId);
 
-    /** 
-     * Handles the HTTP <code>POST</code> method.
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
-        processRequest(request, response);
+        // Lấy tham số lọc
+        String medicineName = request.getParameter("medicineName");
+        String dateStr = request.getParameter("date");
+
+        // Lọc danh sách
+        if ((medicineName != null && !medicineName.trim().isEmpty()) || (dateStr != null && !dateStr.isEmpty())) {
+            requests = filterRequests(requests, medicineName, dateStr);
+        }
+
+        // Lấy danh sách items cho mỗi request
+        Map<Integer, List<MedicationRequestItem>> requestItemsMap = new HashMap<>();
+        for (MedicationRequest req : requests) {
+            List<MedicationRequestItem> items = dao.getRequestItems(req.getRequestId());
+            requestItemsMap.put(req.getRequestId(), items);
+        }
+
+        request.setAttribute("requests", requests);
+        request.setAttribute("requestItemsMap", requestItemsMap);
+        request.getRequestDispatcher("/jsp/viewRequestHistory.jsp").forward(request, response);
     }
 
-    /** 
-     * Returns a short description of the servlet.
-     * @return a String containing servlet description
-     */
-    @Override
-    public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
+    private List<MedicationRequest> filterRequests(List<MedicationRequest> requests, String medicineName, String dateStr) {
+        try {
+            String searchName = (medicineName != null && !medicineName.trim().isEmpty()) ? medicineName.trim().toLowerCase() : null;
+            java.util.Date date = (dateStr != null && !dateStr.isEmpty()) ? new SimpleDateFormat("yyyy-MM-dd").parse(dateStr) : null;
 
+            return requests.stream().filter(req -> {
+                boolean matchesMedicine = searchName == null || hasMedicineByName(req.getRequestId(), searchName);
+                boolean matchesDate = date == null || isSameDay((Timestamp) req.getRequestDate(), date);
+                return matchesMedicine && matchesDate;
+            }).collect(Collectors.toList());
+        } catch (ParseException e) {
+            System.err.println("Error in filterRequests: " + e.getMessage());
+            return requests; // Trả về danh sách gốc nếu lỗi
+        }
+    }
+
+    private boolean hasMedicineByName(int requestId, String medicineName) {
+        MedicationRequestDAO dao = new MedicationRequestDAO();
+        List<MedicationRequestItem> items = dao.getRequestItems(requestId);
+        return items.stream().anyMatch(item -> 
+            item.getMedicineName() != null && 
+            item.getMedicineName().toLowerCase().contains(medicineName)
+        );
+    }
+
+    private boolean isSameDay(java.sql.Timestamp requestDate, java.util.Date filterDate) {
+        if (requestDate == null || filterDate == null) return false;
+        java.util.Calendar cal1 = java.util.Calendar.getInstance();
+        java.util.Calendar cal2 = java.util.Calendar.getInstance();
+        cal1.setTime(requestDate);
+        cal2.setTime(filterDate);
+        return cal1.get(java.util.Calendar.YEAR) == cal2.get(java.util.Calendar.YEAR) &&
+               cal1.get(java.util.Calendar.MONTH) == cal2.get(java.util.Calendar.MONTH) &&
+               cal1.get(java.util.Calendar.DAY_OF_MONTH) == cal2.get(java.util.Calendar.DAY_OF_MONTH);
+    }
 }

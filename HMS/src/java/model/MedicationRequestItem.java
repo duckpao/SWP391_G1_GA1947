@@ -5,6 +5,7 @@ public class MedicationRequestItem {
     private int requestId;
     private int medicineId;
     private int quantity;
+    private String medicineName; // Thêm field mới
 
     public int getItemId() {
         return itemId;
@@ -38,4 +39,12 @@ public class MedicationRequestItem {
         this.quantity = quantity;
     }
 
+    // Getter và Setter cho medicineName
+    public String getMedicineName() {
+        return medicineName;
+    }
+
+    public void setMedicineName(String medicineName) {
+        this.medicineName = medicineName;
+    }
 }

@@ -92,18 +92,22 @@ public class MedicationRequestDAO extends DBContext {
         return null;
     }
 
-    // ✅ FIX: Thêm setParameter cho PreparedStatement
+    // ✅ FIXED: Thêm JOIN với bảng Medicines để lấy tên thuốc
     public List<MedicationRequestItem> getRequestItems(int requestId) {
         List<MedicationRequestItem> items = new ArrayList<>();
-        String sql = "SELECT request_id, medicine_id, quantity FROM MedicationRequestItems WHERE request_id = ?";
+        String sql = "SELECT mri.request_id, mri.medicine_id, mri.quantity, m.name AS medicine_name " +
+                     "FROM MedicationRequestItems mri " +
+                     "INNER JOIN Medicines m ON mri.medicine_id = m.medicine_id " +
+                     "WHERE mri.request_id = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setInt(1, requestId); // ✅ THÊM DÒNG NÀY
+            ps.setInt(1, requestId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     MedicationRequestItem item = new MedicationRequestItem();
                     item.setRequestId(rs.getInt("request_id"));
                     item.setMedicineId(rs.getInt("medicine_id"));
                     item.setQuantity(rs.getInt("quantity"));
+                    item.setMedicineName(rs.getString("medicine_name")); // ✅ THÊM DÒNG NÀY
                     items.add(item);
                 }
             }
@@ -137,7 +141,6 @@ public class MedicationRequestDAO extends DBContext {
         return requests;
     }
 
-    // ✅ FIX: Thêm log và kiểm tra status trước khi update
     public boolean updateRequest(MedicationRequest req, List<MedicationRequestItem> items) {
         System.out.println("=== UPDATE REQUEST ===");
         System.out.println("Request ID: " + req.getRequestId());
@@ -167,7 +170,6 @@ public class MedicationRequestDAO extends DBContext {
         return false;
     }
 
-    // ✅ Đơn giản hóa: Chỉ UPDATE status thành Cancelled
     public boolean cancelRequest(int requestId) {
         System.out.println("=== CANCEL REQUEST (SIMPLE) ===");
         System.out.println("Request ID: " + requestId);

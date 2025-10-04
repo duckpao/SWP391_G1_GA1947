@@ -43,6 +43,7 @@
             </c:forEach>
         </c:forEach>
     </table>
+       <a href="create-request">Create Medication Request</a><br><br>
     <a href="doctor-dashboard">Back to Dashboard</a>
 </body>
 </html>

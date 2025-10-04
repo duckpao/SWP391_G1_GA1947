@@ -17,7 +17,6 @@
             </c:when>
         </c:choose>
     </c:if>
-    <a href="create-request">Create Medication Request</a><br><br>
     <div style="border: 1px solid black; padding: 10px;">
         <h3>Pending Requests</h3>
         <c:forEach var="req" items="${requests}">

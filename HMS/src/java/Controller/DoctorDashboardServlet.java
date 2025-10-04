@@ -21,7 +21,7 @@ public class DoctorDashboardServlet extends HttpServlet {
         if ("Doctor".equals(role)) {
             request.getRequestDispatcher("/jsp/doctorDashboard.jsp").forward(request, response);
         } else {
-            response.sendRedirect("login"); // Hoặc dashboard khác nếu có
+            response.sendRedirect("login"); 
         }
     }
 }

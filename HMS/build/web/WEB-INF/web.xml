@@ -16,6 +16,10 @@
         <servlet-name>ViewRequestHistoryServlet</servlet-name>
         <servlet-class>Controller.ViewRequestHistoryServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>ViewMedicineServlet</servlet-name>
+        <servlet-class>Controller.ViewMedicineServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>DoctorDashboardServlet</servlet-name>
         <url-pattern>/doctor-dashboard</url-pattern>
@@ -39,6 +43,10 @@
     <servlet-mapping>
         <servlet-name>ViewRequestHistoryServlet</servlet-name>
         <url-pattern>/view-request-history</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ViewMedicineServlet</servlet-name>
+        <url-pattern>/view-medicine</url-pattern>
     </servlet-mapping>
     <welcome-file-list>
         <welcome-file>home.jsp</welcome-file>

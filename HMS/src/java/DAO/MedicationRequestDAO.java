@@ -54,13 +54,18 @@ public class MedicationRequestDAO extends DBContext {
 
     public List<Medicine> getAllMedicines() {
         List<Medicine> medicines = new ArrayList<>();
-        String sql = "SELECT medicine_id, name FROM Medicines";
+        String sql = "SELECT DISTINCT m.medicine_id, m.name, m.category, m.description " +
+                     "FROM Medicines m " +
+                     "INNER JOIN Batches b ON m.medicine_id = b.medicine_id " +
+                     "WHERE b.status = 'Approved' AND b.expiry_date > GETDATE()";
         try (PreparedStatement ps = connection.prepareStatement(sql); 
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 Medicine med = new Medicine();
                 med.setMedicineId(rs.getInt("medicine_id"));
                 med.setName(rs.getString("name"));
+                med.setCategory(rs.getString("category"));
+                med.setDescription(rs.getString("description"));
                 medicines.add(med);
             }
         } catch (SQLException e) {
@@ -92,7 +97,6 @@ public class MedicationRequestDAO extends DBContext {
         return null;
     }
 
-    // ✅ FIXED: Thêm JOIN với bảng Medicines để lấy tên thuốc
     public List<MedicationRequestItem> getRequestItems(int requestId) {
         List<MedicationRequestItem> items = new ArrayList<>();
         String sql = "SELECT mri.request_id, mri.medicine_id, mri.quantity, m.name AS medicine_name " +
@@ -107,7 +111,7 @@ public class MedicationRequestDAO extends DBContext {
                     item.setRequestId(rs.getInt("request_id"));
                     item.setMedicineId(rs.getInt("medicine_id"));
                     item.setQuantity(rs.getInt("quantity"));
-                    item.setMedicineName(rs.getString("medicine_name")); // ✅ THÊM DÒNG NÀY
+                    item.setMedicineName(rs.getString("medicine_name"));
                     items.add(item);
                 }
             }
@@ -205,4 +209,5 @@ public class MedicationRequestDAO extends DBContext {
             e.printStackTrace();
         }
     }
+    
 }

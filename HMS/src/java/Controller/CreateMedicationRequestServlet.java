@@ -104,7 +104,7 @@ public class CreateMedicationRequestServlet extends HttpServlet {
                 dao.addRequestItems(requestId, items);
                 System.out.println("Items added successfully!");
 
-                // ✅ thay vì redirect, forward về lại createRequest.jsp và set success
+                // ✅ Forward về lại createRequest.jsp và set success
                 List<Medicine> medicines = dao.getAllMedicines();
                 request.setAttribute("medicines", medicines);
                 request.setAttribute("success", "Đặt thuốc thành công!");

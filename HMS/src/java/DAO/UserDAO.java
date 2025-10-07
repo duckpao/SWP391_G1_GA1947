@@ -36,6 +36,59 @@ public class UserDAO extends DBContext {
         }
     }
     
+    // Filter users with multiple criteria
+    public List<User> filterUsers(String keyword, String role, String status) throws SQLException {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT user_id, username, email, phone, role, is_active, ");
+        sql.append("failed_attempts, last_login, password_hash FROM Users WHERE 1=1 ");
+        
+        List<Object> params = new ArrayList<>();
+        
+        // Filter by keyword (username, email, phone)
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql.append("AND (username LIKE ? OR email LIKE ? OR phone LIKE ?) ");
+            String searchPattern = "%" + keyword.trim() + "%";
+            params.add(searchPattern);
+            params.add(searchPattern);
+            params.add(searchPattern);
+        }
+        
+        // Filter by role
+        if (role != null && !role.trim().isEmpty()) {
+            sql.append("AND role = ? ");
+            params.add(role.trim());
+        }
+        
+        // Filter by status (active/locked)
+        if (status != null && !status.trim().isEmpty()) {
+            if ("active".equalsIgnoreCase(status.trim())) {
+                sql.append("AND is_active = 1 ");
+            } else if ("locked".equalsIgnoreCase(status.trim())) {
+                sql.append("AND is_active = 0 ");
+            }
+        }
+        
+        sql.append("ORDER BY user_id DESC");
+        
+        System.out.println("DEBUG SQL: " + sql.toString());
+        System.out.println("DEBUG Params: keyword=" + keyword + ", role=" + role + ", status=" + status);
+        
+        try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
+            // Set parameters
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                List<User> list = new ArrayList<>();
+                while (rs.next()) {
+                    list.add(mapRow(rs));
+                }
+                return list;
+            }
+        }
+    }
+    
     // Find user by ID
     public User findById(int id) throws SQLException {
         String sql = "SELECT * FROM Users WHERE user_id=?";
@@ -94,8 +147,14 @@ public class UserDAO extends DBContext {
         }
     }
     
-    // Delete user by ID
+    // Delete user by ID (không cho phép xóa Admin)
     public boolean delete(int userId) throws SQLException {
+        // Kiểm tra xem user có phải Admin không
+        User user = findById(userId);
+        if (user != null && "Admin".equals(user.getRole())) {
+            throw new SQLException("Không thể xóa tài khoản Admin!");
+        }
+        
         String sql = "DELETE FROM Users WHERE user_id=?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, userId);
@@ -148,6 +207,36 @@ public class UserDAO extends DBContext {
             ps.setString(1, searchPattern);
             ps.setString(2, searchPattern);
             ps.setString(3, searchPattern);
+            try (ResultSet rs = ps.executeQuery()) {
+                List<User> list = new ArrayList<>();
+                while (rs.next()) {
+                    list.add(mapRow(rs));
+                }
+                return list;
+            }
+        }
+    }
+    
+    // Find users by role
+    public List<User> findByRole(String role) throws SQLException {
+        String sql = "SELECT * FROM Users WHERE role = ? ORDER BY user_id DESC";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, role);
+            try (ResultSet rs = ps.executeQuery()) {
+                List<User> list = new ArrayList<>();
+                while (rs.next()) {
+                    list.add(mapRow(rs));
+                }
+                return list;
+            }
+        }
+    }
+    
+    // Find users by status
+    public List<User> findByStatus(boolean isActive) throws SQLException {
+        String sql = "SELECT * FROM Users WHERE is_active = ? ORDER BY user_id DESC";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setBoolean(1, isActive);
             try (ResultSet rs = ps.executeQuery()) {
                 List<User> list = new ArrayList<>();
                 while (rs.next()) {

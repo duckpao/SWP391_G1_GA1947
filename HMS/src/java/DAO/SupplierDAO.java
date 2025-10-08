@@ -174,5 +174,88 @@ public class SupplierDAO extends DBContext{
         
         return supplier;
     }
+      public List<Supplier> filterSuppliers(String name, Double minRating, Double maxRating, 
+                                          String email, String phone) {
+        List<Supplier> suppliers = new ArrayList<>();
+        StringBuilder sql = new StringBuilder(
+            "SELECT [supplier_id], [name], [contact_email], [contact_phone], " +
+            "[address], [performance_rating], [created_at], [updated_at] " +
+            "FROM [SWP391].[dbo].[Suppliers] WHERE 1=1"
+        );
+        
+        // Build dynamic WHERE clause
+        if (name != null && !name.isEmpty()) {
+            sql.append(" AND [name] LIKE ?");
+        }
+        if (minRating != null) {
+            sql.append(" AND [performance_rating] >= ?");
+        }
+        if (maxRating != null) {
+            sql.append(" AND [performance_rating] <= ?");
+        }
+        if (email != null && !email.isEmpty()) {
+            sql.append(" AND [contact_email] LIKE ?");
+        }
+        if (phone != null && !phone.isEmpty()) {
+            sql.append(" AND [contact_phone] LIKE ?");
+        }
+        
+        try (PreparedStatement stmt = connection.prepareStatement(sql.toString())) {
+            int paramIndex = 1;
+            
+            // Set parameters
+            if (name != null && !name.isEmpty()) {
+                stmt.setString(paramIndex++, "%" + name + "%");
+            }
+            if (minRating != null) {
+                stmt.setDouble(paramIndex++, minRating);
+            }
+            if (maxRating != null) {
+                stmt.setDouble(paramIndex++, maxRating);
+            }
+            if (email != null && !email.isEmpty()) {
+                stmt.setString(paramIndex++, "%" + email + "%");
+            }
+            if (phone != null && !phone.isEmpty()) {
+                stmt.setString(paramIndex++, "%" + phone + "%");
+            }
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    suppliers.add(mapResultSetToSupplier(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return suppliers;
+    }
     
+    /**
+     * Search suppliers by name only
+     * @param name Supplier name to search for (partial match)
+     * @return List of suppliers matching the name
+     */
+    public List<Supplier> searchByName(String name) {
+        return filterSuppliers(name, null, null, null, null);
+    }
+    
+    /**
+     * Get suppliers by performance rating range
+     * @param minRating Minimum rating (inclusive)
+     * @param maxRating Maximum rating (inclusive)
+     * @return List of suppliers within the rating range
+     */
+    public List<Supplier> getSuppliersByRating(double minRating, double maxRating) {
+        return filterSuppliers(null, minRating, maxRating, null, null);
+    }
+    
+    /**
+     * Get top-rated suppliers (rating >= 4.0)
+     * @return List of top-rated suppliers
+     */
+    public List<Supplier> getTopRatedSuppliers() {
+        return filterSuppliers(null, 4.0, null, null, null);
+    }
 }

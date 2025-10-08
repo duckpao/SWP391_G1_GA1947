@@ -20,7 +20,7 @@ import jakarta.servlet.http.HttpSession;
  * Các chức năng: View, Add, Edit, Delete, Filter Suppliers
  */
 @WebServlet(name = "ManagerDashboardServlet", urlPatterns = {"/manager/dashboard"})
-public class ManagerDashboardServlet extends HttpServlet {
+public class ManagerDashboardServelet extends HttpServlet {
     
     // Database configuration
     private static final String DB_URL = "jdbc:sqlserver://localhost:1433;databaseName=SWP391";

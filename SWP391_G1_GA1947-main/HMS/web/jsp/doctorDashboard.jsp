@@ -9,6 +9,7 @@
     <p>Manage your medication requests and medicine information.</p>
     <a href="manage-requests">Manage Medication Request</a><br>
     <a href="view-medicine">View Medicine</a><br>
+    <a href="record-Expired">Record Expired/Damaged</a><br>
     <a href="logout">Logout</a>
 </body>
 </html>

@@ -214,6 +214,43 @@ public boolean updateMedicine(Medicine med, Batches batch) {
     }
 
     
+     // ===================== Record Expired/Damaged Medicines =====================
+    public boolean recordExpiredOrDamaged(int batchId, int userId, int quantity, String reason, String notes) {
+        String insertSql = "INSERT INTO Transactions (batch_id, user_id, type, quantity, transaction_date, notes) " +
+                           "VALUES (?, ?, ?, ?, GETDATE(), ?)";
+        String updateSql = "UPDATE Batches SET current_quantity = current_quantity - ? WHERE batch_id = ?";
+
+        try (Connection conn = dbContext.getConnection()) {
+            conn.setAutoCommit(false);
+
+            // 1. Insert log vào Transactions
+            try (PreparedStatement ps = conn.prepareStatement(insertSql)) {
+                ps.setInt(1, batchId);
+                ps.setInt(2, userId);
+                ps.setString(3, reason);   // "Expired" hoặc "Damaged"
+                ps.setInt(4, quantity);
+                ps.setString(5, notes);
+                ps.executeUpdate();
+            }
+
+            // 2. Update tồn kho trong Batches
+            try (PreparedStatement ps2 = conn.prepareStatement(updateSql)) {
+                ps2.setInt(1, quantity);
+                ps2.setInt(2, batchId);
+                ps2.executeUpdate();
+            }
+
+            conn.commit();
+            return true;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+   
+    
+    
     // Helper method để xử lý ResultSet
     private List<Medicine> processMedicineResultSet(ResultSet rs) throws SQLException {
         List<Medicine> medicines = new ArrayList<>();

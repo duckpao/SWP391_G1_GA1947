@@ -24,6 +24,10 @@
         <servlet-name>CrudMedicine</servlet-name>
         <servlet-class>Controller.CrudMedicine</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>RecordExpiredServlet</servlet-name>
+        <servlet-class>Controller.RecordExpiredServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>DoctorDashboardServlet</servlet-name>
         <url-pattern>/doctor-dashboard</url-pattern>
@@ -55,6 +59,10 @@
     <servlet-mapping>
         <servlet-name>CrudMedicine</servlet-name>
         <url-pattern>/Medicine/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>RecordExpiredServlet</servlet-name>
+        <url-pattern>/record-Expired</url-pattern>
     </servlet-mapping>
     <welcome-file-list>
         <welcome-file>home.jsp</welcome-file>

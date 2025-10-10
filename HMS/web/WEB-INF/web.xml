@@ -20,6 +20,10 @@
         <servlet-name>DeleteUserServlet</servlet-name>
         <servlet-class>controllers.DeleteUserServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>ManagePermissionsServlet</servlet-name>
+        <servlet-class>controllers.ManagePermissionsServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>UserServlet</servlet-name>
         <url-pattern>/admin/users</url-pattern>
@@ -39,5 +43,9 @@
     <servlet-mapping>
         <servlet-name>DeleteUserServlet</servlet-name>
         <url-pattern>/admin/users/delete</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ManagePermissionsServlet</servlet-name>
+        <url-pattern>/admin/permissions</url-pattern>
     </servlet-mapping>
 </web-app>

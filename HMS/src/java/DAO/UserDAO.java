@@ -1,11 +1,28 @@
 package DAO;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import model.User;
 
 public class UserDAO extends DBContext {
 
+    // Map 1 row -> User
+    private User mapRow(ResultSet rs) throws SQLException {
+        User u = new User();
+        u.setUserId(rs.getInt("user_id"));
+        u.setUsername(rs.getString("username"));
+        u.setPasswordHash(rs.getString("password_hash"));
+        u.setEmail(rs.getString("email"));
+        u.setPhone(rs.getString("phone"));
+        u.setRole(rs.getString("role"));
+        u.setIsActive(rs.getBoolean("is_active"));
+        u.setFailedAttempts(rs.getInt("failed_attempts"));
+        u.setLastLogin(rs.getTimestamp("last_login"));
+        return u;
+    }
+
+    // Check if user exists by email or phone
     public boolean checkUserExists(String emailOrPhone) {
         String sql = "SELECT user_id FROM Users WHERE email = ? OR phone = ?";
         try {
@@ -20,6 +37,7 @@ public class UserDAO extends DBContext {
         return false;
     }
 
+    // Register new user
     public boolean register(User u) {
         String sql = "INSERT INTO Users(username,password_hash,email,phone,role,is_active) VALUES(?,?,?,?,?,1)";
         try {
@@ -29,7 +47,6 @@ public class UserDAO extends DBContext {
             ps.setString(3, u.getEmail());
             ps.setString(4, u.getPhone());
             ps.setString(5, u.getRole());
-
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();
@@ -37,6 +54,7 @@ public class UserDAO extends DBContext {
         return false;
     }
 
+    // Update user password
     public boolean updatePassword(String email, String newPassword) {
         String sql = "UPDATE Users SET password_hash=? WHERE email=?";
         try {
@@ -50,36 +68,32 @@ public class UserDAO extends DBContext {
         return false;
     }
 
-public User login(String email, String password) {
-    String sql = "SELECT * FROM Users WHERE email=? AND password_hash=? AND is_active=1";
-    try {
-        PreparedStatement ps = connection.prepareStatement(sql);
-        ps.setString(1, email);
-        ps.setString(2, password);
-        ResultSet rs = ps.executeQuery();
-        if (rs.next()) {
-            User u = new User();
-            u.setUserId(rs.getInt("user_id")); // ← THÊM DÒNG NÀY
-            u.setUsername(rs.getString("username"));
-            u.setEmail(rs.getString("email"));
-            u.setPhone(rs.getString("phone"));
-            u.setPasswordHash(rs.getString("password_hash"));
-            u.setRole(rs.getString("role"));
-            return u;
+    // Login a user
+    public User login(String email, String password) {
+        String sql = "SELECT * FROM Users WHERE email=? AND password_hash=? AND is_active=1";
+        try {
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setString(1, email);
+            ps.setString(2, password);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                User u = mapRow(rs);
+                return u;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-    } catch (Exception e) {
-        e.printStackTrace();
+        return null;
     }
-    return null;
-}
 
+    // Update password by email or phone
     public boolean updatePasswordByEmailOrPhone(String newPassword, String emailOrPhone) {
         String sql = "UPDATE Users SET password_hash=? WHERE email=? OR phone=?";
         try {
             PreparedStatement ps = connection.prepareStatement(sql);
-            ps.setString(1, newPassword); // Mật khẩu mới
-            ps.setString(2, emailOrPhone); // Email hoặc phone (tùy thông tin người dùng nhập)
-            ps.setString(3, emailOrPhone); // Email hoặc phone (tùy thông tin người dùng nhập)
+            ps.setString(1, newPassword); // New password
+            ps.setString(2, emailOrPhone); // Email or phone (depending on user input)
+            ps.setString(3, emailOrPhone); // Email or phone (depending on user input)
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();
@@ -87,4 +101,128 @@ public User login(String email, String password) {
         return false;
     }
 
+    // Find all users
+    public List<User> findAll() throws SQLException {
+        String sql = "SELECT user_id, username, email, phone, role, is_active, failed_attempts, last_login, password_hash FROM Users ORDER BY user_id DESC";
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            List<User> list = new ArrayList<>();
+            while (rs.next()) {
+                list.add(mapRow(rs));
+            }
+            return list;
+        }
+    }
+
+    // Filter users with multiple criteria
+    public List<User> filterUsers(String keyword, String role, String status) throws SQLException {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT user_id, username, email, phone, role, is_active, failed_attempts, last_login, password_hash FROM Users WHERE 1=1 ");
+        
+        List<Object> params = new ArrayList<>();
+        
+        // Filter by keyword (username, email, phone)
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql.append("AND (username LIKE ? OR email LIKE ? OR phone LIKE ?) ");
+            String searchPattern = "%" + keyword.trim() + "%";
+            params.add(searchPattern);
+            params.add(searchPattern);
+            params.add(searchPattern);
+        }
+        
+        // Filter by role
+        if (role != null && !role.trim().isEmpty()) {
+            sql.append("AND role = ? ");
+            params.add(role.trim());
+        }
+        
+        // Filter by status (active/locked)
+        if (status != null && !status.trim().isEmpty()) {
+            if ("active".equalsIgnoreCase(status.trim())) {
+                sql.append("AND is_active = 1 ");
+            } else if ("locked".equalsIgnoreCase(status.trim())) {
+                sql.append("AND is_active = 0 ");
+            }
+        }
+        
+        sql.append("ORDER BY user_id DESC");
+        
+        try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
+            // Set parameters
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                List<User> list = new ArrayList<>();
+                while (rs.next()) {
+                    list.add(mapRow(rs));
+                }
+                return list;
+            }
+        }
+    }
+
+    // Delete user by ID (ensure no deletion of Admin)
+    public boolean delete(int userId) throws SQLException {
+        // Check if user is Admin
+        User user = findById(userId);
+        if (user != null && "Admin".equals(user.getRole())) {
+            throw new SQLException("Cannot delete Admin account!");
+        }
+        
+        String sql = "DELETE FROM Users WHERE user_id=?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+        }
+    }
+
+    // Find user by ID
+    public User findById(int id) throws SQLException {
+        String sql = "SELECT * FROM Users WHERE user_id=?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? mapRow(rs) : null;
+            }
+        }
+    }
+
+    // Count total users
+    public int countAll() throws SQLException {
+        String sql = "SELECT COUNT(*) as total FROM Users";
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt("total");
+            }
+            return 0;
+        }
+    }
+
+    // Count active users
+    public int countActive() throws SQLException {
+        String sql = "SELECT COUNT(*) as total FROM Users WHERE is_active=1";
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt("total");
+            }
+            return 0;
+        }
+    }
+
+    // Count inactive users
+    public int countInactive() throws SQLException {
+        String sql = "SELECT COUNT(*) as total FROM Users WHERE is_active=0";
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt("total");
+            }
+            return 0;
+        }
+    }
 }

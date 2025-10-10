@@ -88,7 +88,7 @@ public class RegisterServlet extends HttpServlet {
             return;
         }
 
-        User newUser = new User(0, username, password, email, phone, role);
+        User newUser = new User(0, username, email, phone, role);
         boolean ok = dao.register(newUser);
 
         if (ok) {

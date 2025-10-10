@@ -1,5 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app version="6.0" xmlns="https://jakarta.ee/xml/ns/jakartaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd">
+    <!-- User Management Servlets -->
+    <servlet>
+        <servlet-name>UserServlet</servlet-name>
+        <servlet-class>Controller.UserServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ToggleUserServlet</servlet-name>
+        <servlet-class>Controller.ToggleUserServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>EditServlet</servlet-name>
+        <servlet-class>Controller.EditServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>CreateServlet</servlet-name>
+        <servlet-class>Controller.CreateServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>DeleteUserServlet</servlet-name>
+        <servlet-class>Controller.DeleteUserServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ManagePermissionsServlet</servlet-name>
+        <servlet-class>Controller.ManagePermissionsServlet</servlet-class>
+    </servlet>
+
+    <!-- Servlet Mappings for User Management -->
+    <servlet-mapping>
+        <servlet-name>UserServlet</servlet-name>
+        <url-pattern>/admin/users</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ToggleUserServlet</servlet-name>
+        <url-pattern>/admin/users/toggle</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>EditServlet</servlet-name>
+        <url-pattern>/admin/users/edit</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CreateServlet</servlet-name>
+        <url-pattern>/admin/users/create</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>DeleteUserServlet</servlet-name>
+        <url-pattern>/admin/users/delete</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ManagePermissionsServlet</servlet-name>
+        <url-pattern>/admin/permissions</url-pattern>
+    </servlet-mapping>
+
+    <!-- Medication Request Servlets -->
     <servlet>
         <servlet-name>ManageRequestsServlet</servlet-name>
         <servlet-class>Controller.ManageRequestsServlet</servlet-class>
@@ -20,6 +73,8 @@
         <servlet-name>ViewMedicineServlet</servlet-name>
         <servlet-class>Controller.ViewMedicineServlet</servlet-class>
     </servlet>
+
+    <!-- Servlet Mappings for Medication Requests -->
     <servlet-mapping>
         <servlet-name>DoctorDashboardServlet</servlet-name>
         <url-pattern>/doctor-dashboard</url-pattern>
@@ -48,9 +103,8 @@
         <servlet-name>ViewMedicineServlet</servlet-name>
         <url-pattern>/view-medicine</url-pattern>
     </servlet-mapping>
-    <welcome-file-list>
-        <welcome-file>home.jsp</welcome-file>
-    </welcome-file-list>
+
+    <!-- Additional Servlets -->
     <servlet>
         <servlet-name>RegisterServlet</servlet-name>
         <servlet-class>Controller.RegisterServlet</servlet-class>
@@ -87,6 +141,8 @@
         <servlet-name>CreateMedicationRequestServlet</servlet-name>
         <servlet-class>Controller.CreateMedicationRequestServlet</servlet-class>
     </servlet>
+
+    <!-- Servlet Mappings for Additional Servlets -->
     <servlet-mapping>
         <servlet-name>RegisterServlet</servlet-name>
         <url-pattern>/register</url-pattern>
@@ -115,4 +171,9 @@
         <servlet-name>HomeServlet</servlet-name>
         <url-pattern>/home</url-pattern>
     </servlet-mapping>
+
+    <!-- Welcome File -->
+    <welcome-file-list>
+        <welcome-file>home.jsp</welcome-file>
+    </welcome-file-list>
 </web-app>

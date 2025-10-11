@@ -1,4 +1,3 @@
-
 package Controller;
 
 import DAO.UserDAO;
@@ -50,15 +49,39 @@ public class LoginServlet extends HttpServlet {
 
         if (user != null) {
             HttpSession session = request.getSession();
-            session.setAttribute("userId", user.getUserId()); // Lưu userId
-            session.setAttribute("role", user.getRole());     // Lưu role
-            session.setAttribute("username", user.getUsername()); // Lưu username để hiển thị "Xin chào"
+            session.setAttribute("userId", user.getUserId());
+            session.setAttribute("role", user.getRole());
+            session.setAttribute("username", user.getUsername());
 
             // Redirect dựa trên role
-            if ("Doctor".equals(user.getRole())) {
-                response.sendRedirect("doctor-dashboard");
-            } else {
-                response.sendRedirect("home.jsp"); // Placeholder cho các role khác
+            switch (user.getRole()) {
+                case "Doctor":
+                    response.sendRedirect("doctor-dashboard");
+                    break;
+                case "Manager":
+                    response.sendRedirect("manager-dashboard");
+                    break;
+                case "Pharmacist":
+                    response.sendRedirect("pharmacist-dashboard");
+                    break;
+                case "Auditor":
+                    response.sendRedirect("auditor-dashboard");
+                    break;
+                case "Admin":
+                    response.sendRedirect("admin-dashboard");
+                    break;
+                case "Supplier":
+                    response.sendRedirect("supplier-dashboard");
+                    break;
+                case "ProcurementOfficer":
+                    response.sendRedirect("procurement-dashboard");
+                    break;
+                case "Patient":
+                    response.sendRedirect("patient-dashboard");
+                    break;
+                default:
+                    response.sendRedirect("home.jsp"); // Fallback cho role không xác định
+                    break;
             }
         } else {
             request.setAttribute("error", "Sai email hoặc mật khẩu!");

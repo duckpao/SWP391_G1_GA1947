@@ -20,6 +20,18 @@
         <servlet-name>ViewMedicineServlet</servlet-name>
         <servlet-class>Controller.ViewMedicineServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>ManagerDashboardServlet</servlet-name>
+        <servlet-class>Controller.ManagerDashboardServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ApproveStockServlet</servlet-name>
+        <servlet-class>Controller.ApproveStockServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>CreateStockServlet</servlet-name>
+        <servlet-class>Controller.CreateStockServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>DoctorDashboardServlet</servlet-name>
         <url-pattern>/doctor-dashboard</url-pattern>
@@ -47,6 +59,18 @@
     <servlet-mapping>
         <servlet-name>ViewMedicineServlet</servlet-name>
         <url-pattern>/view-medicine</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ManagerDashboardServlet</servlet-name>
+        <url-pattern>/manager-dashboard</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ApproveStockServlet</servlet-name>
+        <url-pattern>/approve-stock</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CreateStockServlet</servlet-name>
+        <url-pattern>/create-stock</url-pattern>
     </servlet-mapping>
     <welcome-file-list>
         <welcome-file>home.jsp</welcome-file>

@@ -83,17 +83,16 @@ public class UserDAO extends DBContext {
         return false;
     }
 
-    // Login a user
-    public User login(String email, String password) {
-        String sql = "SELECT * FROM Users WHERE email=? AND password_hash=? AND is_active=1";
-        try {
-            PreparedStatement ps = connection.prepareStatement(sql);
-            ps.setString(1, email);
-            ps.setString(2, password);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                User u = mapRow(rs);
-                return u;
+    // Login user by email or username
+    public User findByEmailOrUsername(String emailOrUsername) {
+        String sql = "SELECT * FROM Users WHERE (email = ? OR username = ?) AND is_active = 1";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, emailOrUsername);
+            ps.setString(2, emailOrUsername);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapRow(rs); // mapRow cần set cả passwordHash vào User
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -104,8 +103,7 @@ public class UserDAO extends DBContext {
     // Find all users
     public List<User> findAll() throws SQLException {
         String sql = "SELECT user_id, username, email, phone, role, is_active, failed_attempts, last_login, password_hash FROM Users ORDER BY user_id DESC";
-        try (PreparedStatement ps = connection.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             List<User> list = new ArrayList<>();
             while (rs.next()) {
                 list.add(mapRow(rs));
@@ -118,9 +116,9 @@ public class UserDAO extends DBContext {
     public List<User> filterUsers(String keyword, String role, String status) throws SQLException {
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT user_id, username, email, phone, role, is_active, failed_attempts, last_login, password_hash FROM Users WHERE 1=1 ");
-        
+
         List<Object> params = new ArrayList<>();
-        
+
         // Filter by keyword (username, email, phone)
         if (keyword != null && !keyword.trim().isEmpty()) {
             sql.append("AND (username LIKE ? OR email LIKE ? OR phone LIKE ?) ");
@@ -129,13 +127,13 @@ public class UserDAO extends DBContext {
             params.add(searchPattern);
             params.add(searchPattern);
         }
-        
+
         // Filter by role
         if (role != null && !role.trim().isEmpty()) {
             sql.append("AND role = ? ");
             params.add(role.trim());
         }
-        
+
         // Filter by status (active/locked)
         if (status != null && !status.trim().isEmpty()) {
             if ("active".equalsIgnoreCase(status.trim())) {
@@ -144,15 +142,15 @@ public class UserDAO extends DBContext {
                 sql.append("AND is_active = 0 ");
             }
         }
-        
+
         sql.append("ORDER BY user_id DESC");
-        
+
         try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
             // Set parameters
             for (int i = 0; i < params.size(); i++) {
                 ps.setObject(i + 1, params.get(i));
             }
-            
+
             try (ResultSet rs = ps.executeQuery()) {
                 List<User> list = new ArrayList<>();
                 while (rs.next()) {
@@ -228,7 +226,7 @@ public class UserDAO extends DBContext {
         if (user != null && "Admin".equals(user.getRole())) {
             throw new SQLException("Cannot delete Admin account!");
         }
-        
+
         String sql = "DELETE FROM Users WHERE user_id=?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, userId);
@@ -240,8 +238,7 @@ public class UserDAO extends DBContext {
     // Count total users
     public int countAll() throws SQLException {
         String sql = "SELECT COUNT(*) as total FROM Users";
-        try (PreparedStatement ps = connection.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
                 return rs.getInt("total");
             }
@@ -252,8 +249,7 @@ public class UserDAO extends DBContext {
     // Count active users
     public int countActive() throws SQLException {
         String sql = "SELECT COUNT(*) as total FROM Users WHERE is_active=1";
-        try (PreparedStatement ps = connection.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
                 return rs.getInt("total");
             }
@@ -264,8 +260,7 @@ public class UserDAO extends DBContext {
     // Count inactive users
     public int countInactive() throws SQLException {
         String sql = "SELECT COUNT(*) as total FROM Users WHERE is_active=0";
-        try (PreparedStatement ps = connection.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
                 return rs.getInt("total");
             }

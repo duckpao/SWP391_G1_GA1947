@@ -44,6 +44,17 @@ public class User {
         this.failedAttempts = failedAttempts;
         this.lastLogin = lastLogin;
     }
+
+    public User(int userId, String username, String email, String phone, String hashedPassword, String role) {
+        this.userId = userId;
+        this.username = username;
+        this.email = email;
+        this.phone = phone;
+        this.passwordHash = hashedPassword;
+        this.role = role;
+    }
+    
+    
     
     // Getters and Setters
     public int getUserId() {

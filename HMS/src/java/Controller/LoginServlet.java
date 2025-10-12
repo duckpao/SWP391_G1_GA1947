@@ -1,4 +1,3 @@
-
 package Controller;
 
 import DAO.UserDAO;
@@ -10,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.User;
+import util.PasswordUtils;
 
 /**
  *
@@ -42,26 +42,43 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String email = request.getParameter("email");
+        String emailOrUsername = request.getParameter("emailOrUsername"); // Email hoặc Username
         String password = request.getParameter("password");
 
         UserDAO dao = new UserDAO();
-        User user = dao.login(email, password);
+        // Tìm kiếm người dùng theo email hoặc username
+        User user = dao.findByEmailOrUsername(emailOrUsername);
 
-        if (user != null) {
+        if (user != null && PasswordUtils.verify(password, user.getPasswordHash())) {
             HttpSession session = request.getSession();
             session.setAttribute("userId", user.getUserId()); // Lưu userId
             session.setAttribute("role", user.getRole());     // Lưu role
             session.setAttribute("username", user.getUsername()); // Lưu username để hiển thị "Xin chào"
 
             // Redirect dựa trên role
-            if ("Doctor".equals(user.getRole())) {
-                response.sendRedirect("doctor-dashboard");
-            } else {
-                response.sendRedirect("home.jsp"); // Placeholder cho các role khác
+            String role = user.getRole();
+            switch (role) {
+                case "Doctor":
+                    response.sendRedirect("doctor-dashboard"); // Điều hướng đến dashboard của bác sĩ
+                    break;
+                case "Staff":
+                    response.sendRedirect("jsp/staff-dashboard.jsp"); // Điều hướng đến dashboard của nhân viên
+                    break;
+                case "Admin":
+                    response.sendRedirect("admin/dashboard.jsp"); // Điều hướng đến dashboard của quản trị viên
+                    break;
+                case "Supplier":
+                    response.sendRedirect("jsp/supplier-dashboard.jsp"); // Điều hướng đến dashboard của nhà cung cấp
+                    break;
+                case "Auditor":
+                    response.sendRedirect("jsp/auditor-dashboard.jsp"); // Điều hướng đến dashboard của kiểm toán viên
+                    break;
+                default:
+                    response.sendRedirect("home.jsp"); // Mặc định điều hướng về trang chủ
+                    break;
             }
         } else {
-            request.setAttribute("error", "Sai email hoặc mật khẩu!");
+            request.setAttribute("error", "Sai email/username hoặc mật khẩu!");
             request.getRequestDispatcher("login.jsp").forward(request, response);
         }
     }

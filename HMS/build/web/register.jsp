@@ -322,18 +322,6 @@
                     <span class="match-status" id="match"></span>
                 </div>
 
-                <div class="form-group">
-                    <label>Vai trò</label>
-                    <select name="role" required>
-                        <option value="">-- Chọn vai trò --</option>
-                        <option value="Doctor">👨‍⚕️ Bác sĩ</option>
-                        <option value="Pharmacist">💊 Dược sĩ</option>
-                        <option value="Manager">👔 Quản lý</option>
-                        <option value="Auditor">📊 Kiểm toán</option>
-                        <option value="Supplier">🚚 Nhà cung cấp</option>
-                    </select>
-                </div>
-
                 <button type="submit" class="btn btn-register">
                     🚀 Đăng ký
                 </button>

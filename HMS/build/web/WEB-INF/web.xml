@@ -25,7 +25,10 @@
         <servlet-name>ManagePermissionsServlet</servlet-name>
         <servlet-class>Controller.ManagePermissionsServlet</servlet-class>
     </servlet>
-
+    <servlet>
+        <servlet-name>pharmacistdashboard</servlet-name>
+        <servlet-class>Controller.pharmacistdashboard</servlet-class>
+    </servlet>
     <!-- Servlet Mappings for User Management -->
     <servlet-mapping>
         <servlet-name>UserServlet</servlet-name>
@@ -103,7 +106,10 @@
         <servlet-name>ViewMedicineServlet</servlet-name>
         <url-pattern>/view-medicine</url-pattern>
     </servlet-mapping>
-
+    <servlet-mapping>
+        <servlet-name>pharmacistdashboard</servlet-name>
+        <url-pattern>/pharmacist-dashboard</url-pattern>
+    </servlet-mapping>
     <!-- Additional Servlets -->
     <servlet>
         <servlet-name>RegisterServlet</servlet-name>

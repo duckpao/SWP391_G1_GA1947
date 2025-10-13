@@ -61,6 +61,9 @@ public class LoginServlet extends HttpServlet {
                 case "Doctor":
                     response.sendRedirect("doctor-dashboard"); // Điều hướng đến dashboard của bác sĩ
                     break;
+                case "Pharmacist":
+                    response.sendRedirect("pharmacist-dashboard"); // Điều hướng đến dashboard của dược sĩ
+                    break;
                 case "Staff":
                     response.sendRedirect("jsp/staff-dashboard.jsp"); // Điều hướng đến dashboard của nhân viên
                     break;

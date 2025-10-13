@@ -75,6 +75,10 @@
     </servlet>
 
     <!-- Servlet Mappings for Medication Requests -->
+     <servlet>
+        <servlet-name>pharmacistdashboard</servlet-name>
+        <servlet-class>Controller.pharmacistdashboard</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>DoctorDashboardServlet</servlet-name>
         <url-pattern>/doctor-dashboard</url-pattern>
@@ -102,6 +106,10 @@
     <servlet-mapping>
         <servlet-name>ViewMedicineServlet</servlet-name>
         <url-pattern>/view-medicine</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>pharmacistdashboard</servlet-name>
+        <url-pattern>/pharmacist-dashboard</url-pattern>
     </servlet-mapping>
 
     <!-- Additional Servlets -->

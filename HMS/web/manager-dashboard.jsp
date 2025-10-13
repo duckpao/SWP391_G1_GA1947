@@ -219,8 +219,17 @@
                                                 </small>
                                             </c:if>
                                         </div>
-                                        <c:if test="${order.status == 'Sent'}">
-                                            <div class="btn-group-vertical ms-2">
+                                        <div class="btn-group-vertical ms-2">
+                                            <c:if test="${order.status == 'Draft'}">
+                                                <a href="edit-stock?poId=${order.poId}" class="btn btn-sm btn-warning mb-1">
+                                                    <i class="fas fa-edit"></i> Edit
+                                                </a>
+                                                <button class="btn btn-sm btn-danger mb-1" 
+                                                        onclick="deleteOrder(${order.poId})">
+                                                    <i class="fas fa-trash"></i> Delete
+                                                </button>
+                                            </c:if>
+                                            <c:if test="${order.status == 'Sent'}">
                                                 <button class="btn btn-sm btn-success mb-1" 
                                                         onclick="approveOrder(${order.poId})">
                                                     <i class="fas fa-check"></i> Approve
@@ -229,8 +238,8 @@
                                                         onclick="rejectOrder(${order.poId})">
                                                     <i class="fas fa-times"></i> Reject
                                                 </button>
-                                            </div>
-                                        </c:if>
+                                            </c:if>
+                                        </div>
                                     </div>
                                     <c:if test="${not empty order.notes}">
                                         <div class="mt-2 p-2 bg-light rounded">
@@ -301,15 +310,42 @@
                         <input type="hidden" name="action" value="reject">
                         <input type="hidden" name="poId" id="rejectPoId">
                         <div class="mb-3">
-                            <label class="form-label">Reason for Rejection:</label>
+                            <label class="form-label">Reason for Rejection <span class="text-danger">*</span></label>
                             <textarea class="form-control" name="reason" rows="4" 
-                                      placeholder="Enter reason for rejecting this request..." required></textarea>
+                                      placeholder="Enter reason for rejecting this request (minimum 5 characters)..." required></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-danger">
                             <i class="fas fa-times"></i> Reject Request
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Order Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-trash"></i> Delete Stock Request
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="manage-stock" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" name="action" value="delete">
+                        <input type="hidden" name="poId" id="deletePoId">
+                        <p>Are you sure you want to delete this stock request? This action cannot be undone.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Delete Request
                         </button>
                     </div>
                 </form>
@@ -345,6 +381,12 @@
         function rejectOrder(poId) {
             document.getElementById('rejectPoId').value = poId;
             const modal = new bootstrap.Modal(document.getElementById('rejectModal'));
+            modal.show();
+        }
+
+        function deleteOrder(poId) {
+            document.getElementById('deletePoId').value = poId;
+            const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
             modal.show();
         }
 

@@ -32,6 +32,10 @@
         <servlet-name>CreateStockServlet</servlet-name>
         <servlet-class>Controller.CreateStockServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>ManageStockServlet</servlet-name>
+        <servlet-class>Controller.ManageStockServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>DoctorDashboardServlet</servlet-name>
         <url-pattern>/doctor-dashboard</url-pattern>
@@ -72,6 +76,14 @@
         <servlet-name>CreateStockServlet</servlet-name>
         <url-pattern>/create-stock</url-pattern>
     </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ManageStockServlet</servlet-name>
+        <url-pattern>/manage-stock</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+    <servlet-name>ManageStockServlet</servlet-name>
+    <url-pattern>/edit-stock</url-pattern>
+</servlet-mapping>
     <welcome-file-list>
         <welcome-file>home.jsp</welcome-file>
     </welcome-file-list>

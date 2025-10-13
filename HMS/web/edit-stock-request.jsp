@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Stock Request - Hospital System</title>
+    <title>Edit Stock Request - Hospital System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -51,21 +51,25 @@
                 <div class="card form-card">
                     <div class="form-header">
                         <h3 class="mb-0">
-                            <i class="fas fa-plus-circle"></i> Create New Stock Request
+                            <i class="fas fa-edit"></i> Edit Stock Request #${purchaseOrder.poId}
                         </h3>
-                        <p class="mb-0 mt-2">Fill in the details to create a purchase order</p>
+                        <p class="mb-0 mt-2">Update the details of the purchase order</p>
                     </div>
                     <div class="card-body p-4">
-                        <form action="create-stock" method="post" id="stockRequestForm">
+                        <form action="manage-stock" method="post" id="stockRequestForm">
+                            <input type="hidden" name="action" value="edit">
+                            <input type="hidden" name="poId" value="${purchaseOrder.poId}">
+
                             <!-- Supplier Selection -->
                             <div class="mb-4">
                                 <label for="supplierId" class="form-label">
                                     <i class="fas fa-truck"></i> Select Supplier (Optional)
                                 </label>
                                 <select class="form-select form-select-lg" id="supplierId" name="supplierId">
-                                    <option value="">-- Choose a supplier (or leave empty to assign later) --</option>
+                                    <option value="">-- Choose a supplier (or leave empty) --</option>
                                     <c:forEach items="${suppliers}" var="supplier">
-                                        <option value="${supplier.supplierId}">
+                                        <option value="${supplier.supplierId}" 
+                                                <c:if test="${supplier.supplierId == purchaseOrder.supplierId}">selected</c:if>>
                                             ${supplier.name}
                                             <c:if test="${not empty supplier.contactPhone}">
                                                 - ${supplier.contactPhone}
@@ -77,7 +81,7 @@
                                     </c:forEach>
                                 </select>
                                 <div class="form-text">
-                                    You can select a supplier now or assign one later during approval
+                                    You can update the supplier or leave it empty
                                 </div>
                             </div>
 
@@ -87,49 +91,53 @@
                                     <i class="fas fa-pills"></i> Medicine Items <span class="text-danger">*</span>
                                 </label>
                                 <div id="itemContainer">
-                                    <div class="item-row">
-                                        <div class="row">
-                                            <div class="col-md-4 mb-3">
-                                                <label class="form-label">Medicine</label>
-                                                <select class="form-select" name="medicineId" required>
-                                                    <option value="">-- Select Medicine --</option>
-                                                    <c:forEach items="${medicines}" var="medicine">
-                                                        <option value="${medicine.medicineId}">
-                                                            ${medicine.name} (${medicine.category})
-                                                        </option>
-                                                    </c:forEach>
-                                                </select>
+                                    <c:forEach items="${items}" var="item">
+                                        <div class="item-row">
+                                            <div class="row">
+                                                <div class="col-md-4 mb-3">
+                                                    <label class="form-label">Medicine</label>
+                                                    <select class="form-select" name="medicineId" required>
+                                                        <option value="">-- Select Medicine --</option>
+                                                        <c:forEach items="${medicines}" var="medicine">
+                                                            <option value="${medicine.medicineId}" 
+                                                                    <c:if test="${medicine.medicineId == item.medicineId}">selected</c:if>>
+                                                                ${medicine.name} (${medicine.category})
+                                                            </option>
+                                                        </c:forEach>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-2 mb-3">
+                                                    <label class="form-label">Quantity</label>
+                                                    <select class="form-select" name="quantity" required>
+                                                        <option value="">-- Select Quantity --</option>
+                                                        <option value="10" <c:if test="${item.quantity == 10}">selected</c:if>>10</option>
+                                                        <option value="50" <c:if test="${item.quantity == 50}">selected</c:if>>50</option>
+                                                        <option value="100" <c:if test="${item.quantity == 100}">selected</c:if>>100</option>
+                                                        <option value="500" <c:if test="${item.quantity == 500}">selected</c:if>>500</option>
+                                                        <option value="1000" <c:if test="${item.quantity == 1000}">selected</c:if>>1000</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-2 mb-3">
+                                                    <label class="form-label">Priority</label>
+                                                    <select class="form-select" name="priority" required>
+                                                        <option value="">-- Select Priority --</option>
+                                                        <option value="Low" <c:if test="${item.priority == 'Low'}">selected</c:if>>Low</option>
+                                                        <option value="Medium" <c:if test="${item.priority == 'Medium'}">selected</c:if>>Medium</option>
+                                                        <option value="High" <c:if test="${item.priority == 'High'}">selected</c:if>>High</option>
+                                                        <option value="Critical" <c:if test="${item.priority == 'Critical'}">selected</c:if>>Critical</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-4 mb-3">
+                                                    <label class="form-label">Item Notes</label>
+                                                    <textarea class="form-control" name="itemNotes" rows="2" 
+                                                              placeholder="Additional notes for this item...">${item.notes}</textarea>
+                                                </div>
                                             </div>
-                                            <div class="col-md-2 mb-3">
-                                                <label class="form-label">Quantity</label>
-                                                <select class="form-select" name="quantity" required>
-                                                    <option value="">-- Select Quantity --</option>
-                                                    <option value="10">10</option>
-                                                    <option value="50">50</option>
-                                                    <option value="100">100</option>
-                                                    <option value="500">500</option>
-                                                    <option value="1000">1000</option>
-                                                </select>
-                                            </div>
-                                            <div class="col-md-2 mb-3">
-                                                <label class="form-label">Priority</label>
-                                                <select class="form-select" name="priority" required>
-                                                    <option value="">-- Select Priority --</option>
-                                                    <option value="Low">Low</option>
-                                                    <option value="Medium">Medium</option>
-                                                    <option value="High">High</option>
-                                                    <option value="Critical">Critical</option>
-                                                </select>
-                                            </div>
-                                            <div class="col-md-4 mb-3">
-                                                <label class="form-label">Item Notes</label>
-                                                <textarea class="form-control" name="itemNotes" rows="2" placeholder="Additional notes for this item..."></textarea>
-                                            </div>
+                                            <button type="button" class="btn btn-danger btn-sm remove-item">
+                                                <i class="fas fa-trash"></i> Remove
+                                            </button>
                                         </div>
-                                        <button type="button" class="btn btn-danger btn-sm remove-item">
-                                            <i class="fas fa-trash"></i> Remove
-                                        </button>
-                                    </div>
+                                    </c:forEach>
                                 </div>
                                 <button type="button" class="btn btn-success btn-sm mt-2" id="addItem">
                                     <i class="fas fa-plus"></i> Add Another Medicine
@@ -145,7 +153,7 @@
                                           id="notes" 
                                           name="notes" 
                                           rows="4" 
-                                          placeholder="Additional notes for the entire request..."></textarea>
+                                          placeholder="Additional notes for the entire request...">${purchaseOrder.notes}</textarea>
                                 <div class="form-text">
                                     Any special requirements or comments for the entire order
                                 </div>
@@ -160,6 +168,7 @@
                                        class="form-control form-control-lg" 
                                        id="expectedDeliveryDate" 
                                        name="expectedDeliveryDate" 
+                                       value="${purchaseOrder.expectedDeliveryDate}" 
                                        required>
                                 <div class="form-text">
                                     When do you need these medicines delivered?
@@ -172,7 +181,7 @@
                                     <i class="fas fa-times"></i> Cancel
                                 </a>
                                 <button type="submit" class="btn btn-primary btn-lg">
-                                    <i class="fas fa-paper-plane"></i> Create Stock Request
+                                    <i class="fas fa-save"></i> Save Changes
                                 </button>
                             </div>
                         </form>
@@ -187,9 +196,6 @@
         // Set minimum date to today
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('expectedDeliveryDate').min = today;
-        const nextWeek = new Date();
-        nextWeek.setDate(nextWeek.getDate() + 7);
-        document.getElementById('expectedDeliveryDate').value = nextWeek.toISOString().split('T')[0];
 
         // Add new medicine item
         document.getElementById('addItem').addEventListener('click', function() {
@@ -263,7 +269,7 @@
                 return false;
             }
 
-            if (!confirm('Are you sure you want to create this stock request?')) {
+            if (!confirm('Are you sure you want to save these changes?')) {
                 e.preventDefault();
                 return false;
             }

@@ -1,11 +1,13 @@
 package DAO;
 import model.Medicine;
+import model.Batches;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.sql.Statement; 
 
 public class MedicineDAO {
     private DBContext dbContext;
@@ -116,7 +118,138 @@ public class MedicineDAO {
         
         return categories;
     }
+
+
+       // ===================== Add Medicine + Batch =====================
+    public boolean addMedicine(Medicine med, Batches batch) {
+        String sqlMedicine = "INSERT INTO Medicines(name, category, description, created_at, updated_at) VALUES(?,?,?,GETDATE(),GETDATE())";
+        String sqlBatch = "INSERT INTO Batches(medicine_id, supplier_id, lot_number, expiry_date, initial_quantity, current_quantity, status, created_at, updated_at) VALUES(?,?,?,?,?,?,?,GETDATE(),GETDATE())";
+
+        try (Connection conn = dbContext.getConnection()) {
+            conn.setAutoCommit(false);
+
+            // 1. Insert medicine
+            try (PreparedStatement psMed = conn.prepareStatement(sqlMedicine, Statement.RETURN_GENERATED_KEYS)) {
+                psMed.setString(1, med.getName());
+                psMed.setString(2, med.getCategory());
+                psMed.setString(3, med.getDescription());
+                psMed.executeUpdate();
+
+                ResultSet rs = psMed.getGeneratedKeys();
+                if (rs.next()) {
+                    int medicineId = rs.getInt(1);
+                    batch.setMedicineId(medicineId);
+                }
+            }
+
+            // 2. Insert batch
+            try (PreparedStatement psBatch = conn.prepareStatement(sqlBatch)) {
+                psBatch.setInt(1, batch.getMedicineId());
+                psBatch.setInt(2, batch.getSupplierId());
+                psBatch.setString(3, batch.getLotNumber());
+                psBatch.setDate(4, new java.sql.Date(batch.getExpiryDate().getTime()));
+                psBatch.setInt(5, batch.getInitialQuantity());
+                psBatch.setInt(6, batch.getCurrentQuantity());
+                psBatch.setString(7, batch.getStatus());
+                psBatch.executeUpdate();
+            }
+
+            conn.commit();
+            return true;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+// Update Medicine + Batch
+public boolean updateMedicine(Medicine med, Batches batch) {
+    String sqlMed = "UPDATE Medicines SET name=?, category=?, description=?, updated_at=GETDATE() WHERE medicine_id=?";
+    String sqlBatch = "UPDATE Batches SET supplier_id=?, lot_number=?, expiry_date=?, current_quantity=?, status=?, updated_at=GETDATE() WHERE batch_id=?";
+
+    try (Connection conn = dbContext.getConnection()) {
+        conn.setAutoCommit(false);
+
+        // Update medicine
+        try (PreparedStatement psMed = conn.prepareStatement(sqlMed)) {
+            psMed.setString(1, med.getName());
+            psMed.setString(2, med.getCategory());
+            psMed.setString(3, med.getDescription());
+            psMed.setInt(4, med.getMedicineId());
+            psMed.executeUpdate();
+        }
+
+        // Update batch
+        try (PreparedStatement psBatch = conn.prepareStatement(sqlBatch)) {
+            psBatch.setInt(1, batch.getSupplierId()); // lấy từ request
+            psBatch.setString(2, batch.getLotNumber());
+            psBatch.setDate(3, new java.sql.Date(batch.getExpiryDate().getTime()));
+            psBatch.setInt(4, batch.getCurrentQuantity());
+            psBatch.setString(5, batch.getStatus());
+            psBatch.setInt(6, batch.getBatchId());
+            psBatch.executeUpdate();
+        }
+
+        conn.commit();
+        return true;
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+        return false;
+    }
+}
+
+
+    // ===================== Delete Medicine =====================
+    public boolean deleteMedicine(int medicineId) {
+        String sql = "DELETE FROM Medicines WHERE medicine_id=?";
+        try (Connection conn = dbContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, medicineId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     
+     // ===================== Record Expired/Damaged Medicines =====================
+    public boolean recordExpiredOrDamaged(int batchId, int userId, int quantity, String reason, String notes) {
+        String insertSql = "INSERT INTO Transactions (batch_id, user_id, type, quantity, transaction_date, notes) " +
+                           "VALUES (?, ?, ?, ?, GETDATE(), ?)";
+        String updateSql = "UPDATE Batches SET current_quantity = current_quantity - ? WHERE batch_id = ?";
+
+        try (Connection conn = dbContext.getConnection()) {
+            conn.setAutoCommit(false);
+
+            // 1. Insert log vào Transactions
+            try (PreparedStatement ps = conn.prepareStatement(insertSql)) {
+                ps.setInt(1, batchId);
+                ps.setInt(2, userId);
+                ps.setString(3, reason);   // "Expired" hoặc "Damaged"
+                ps.setInt(4, quantity);
+                ps.setString(5, notes);
+                ps.executeUpdate();
+            }
+
+            // 2. Update tồn kho trong Batches
+            try (PreparedStatement ps2 = conn.prepareStatement(updateSql)) {
+                ps2.setInt(1, quantity);
+                ps2.setInt(2, batchId);
+                ps2.executeUpdate();
+            }
+
+            conn.commit();
+            return true;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+   
     // Helper method để xử lý ResultSet
     private List<Medicine> processMedicineResultSet(ResultSet rs) throws SQLException {
         List<Medicine> medicines = new ArrayList<>();

@@ -25,10 +25,7 @@
         <servlet-name>ManagePermissionsServlet</servlet-name>
         <servlet-class>Controller.ManagePermissionsServlet</servlet-class>
     </servlet>
-    <servlet>
-        <servlet-name>pharmacistdashboard</servlet-name>
-        <servlet-class>Controller.pharmacistdashboard</servlet-class>
-    </servlet>
+
     <!-- Servlet Mappings for User Management -->
     <servlet-mapping>
         <servlet-name>UserServlet</servlet-name>
@@ -78,6 +75,10 @@
     </servlet>
 
     <!-- Servlet Mappings for Medication Requests -->
+     <servlet>
+        <servlet-name>pharmacistdashboard</servlet-name>
+        <servlet-class>Controller.pharmacistdashboard</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>DoctorDashboardServlet</servlet-name>
         <url-pattern>/doctor-dashboard</url-pattern>
@@ -110,6 +111,7 @@
         <servlet-name>pharmacistdashboard</servlet-name>
         <url-pattern>/pharmacist-dashboard</url-pattern>
     </servlet-mapping>
+
     <!-- Additional Servlets -->
     <servlet>
         <servlet-name>RegisterServlet</servlet-name>
@@ -177,7 +179,20 @@
         <servlet-name>HomeServlet</servlet-name>
         <url-pattern>/home</url-pattern>
     </servlet-mapping>
+    
 
+<!-- ASN Servlet Configuration -->
+<servlet>
+    <servlet-name>ASNServlet</servlet-name>
+    <servlet-class>Controller.ASNServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>ASNServlet</servlet-name>
+    <url-pattern>/asn</url-pattern>
+    <url-pattern>/asn/*</url-pattern>
+</servlet-mapping>
     <!-- Welcome File -->
     <welcome-file-list>
         <welcome-file>home.jsp</welcome-file>

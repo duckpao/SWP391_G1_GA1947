@@ -179,7 +179,20 @@
         <servlet-name>HomeServlet</servlet-name>
         <url-pattern>/home</url-pattern>
     </servlet-mapping>
+    
 
+<!-- ASN Servlet Configuration -->
+<servlet>
+    <servlet-name>ASNServlet</servlet-name>
+    <servlet-class>Controller.ASNServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>ASNServlet</servlet-name>
+    <url-pattern>/asn</url-pattern>
+    <url-pattern>/asn/*</url-pattern>
+</servlet-mapping>
     <!-- Welcome File -->
     <welcome-file-list>
         <welcome-file>home.jsp</welcome-file>

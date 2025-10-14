@@ -2,20 +2,6 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group>
-            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/web/home.jsp</file>
-            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/src/java/Controller/ManageRequestsServlet.java</file>
-            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/src/java/Controller/ToggleUserServlet.java</file>
-            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/web/reset-password.jsp</file>
-            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/web/admin/dashboard.jsp</file>
-            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/web/forgot-password.jsp</file>
-            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/web/register.jsp</file>
-            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/src/java/Controller/RegisterServlet.java</file>
-            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/src/java/Controller/UserServlet.java</file>
-            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/web/change-password.jsp</file>
-            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/web/WEB-INF/web.xml</file>
-            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/web/login.jsp</file>
-            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/src/java/Controller/LoginServlet.java</file>
-        </group>
+        <group/>
     </open-files>
 </project-private>

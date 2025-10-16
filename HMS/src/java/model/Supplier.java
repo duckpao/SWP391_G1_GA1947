@@ -18,9 +18,9 @@ public class Supplier {
     }
 
     // Constructor có tham số
-    public Supplier(int supplierId, String name, String contactEmail, String contactPhone, 
-                   String address, Double performanceRating, LocalDateTime createdAt, 
-                   LocalDateTime updatedAt) {
+    public Supplier(int supplierId, String name, String contactEmail, String contactPhone,
+            String address, Double performanceRating, LocalDateTime createdAt,
+            LocalDateTime updatedAt) {
         this.supplierId = supplierId;
         this.name = name;
         this.contactEmail = contactEmail;
@@ -96,17 +96,4 @@ public class Supplier {
         this.updatedAt = updatedAt;
     }
 
-    @Override
-    public String toString() {
-        return "Supplier{" +
-                "supplierId=" + supplierId +
-                ", name='" + name + '\'' +
-                ", contactEmail='" + contactEmail + '\'' +
-                ", contactPhone='" + contactPhone + '\'' +
-                ", address='" + address + '\'' +
-                ", performanceRating=" + performanceRating +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                '}';
-    }
 }

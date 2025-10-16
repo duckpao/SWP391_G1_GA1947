@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app version="6.0" xmlns="https://jakarta.ee/xml/ns/jakartaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd">
+<<<<<<< HEAD
     <!-- User Management Servlets -->
     <servlet>
         <servlet-name>UserServlet</servlet-name>
@@ -53,6 +54,8 @@
     </servlet-mapping>
 
     <!-- Medication Request Servlets -->
+=======
+>>>>>>> vu2
     <servlet>
         <servlet-name>ManageRequestsServlet</servlet-name>
         <servlet-class>Controller.ManageRequestsServlet</servlet-class>
@@ -73,11 +76,29 @@
         <servlet-name>ViewMedicineServlet</servlet-name>
         <servlet-class>Controller.ViewMedicineServlet</servlet-class>
     </servlet>
+<<<<<<< HEAD
 
     <!-- Servlet Mappings for Medication Requests -->
      <servlet>
         <servlet-name>pharmacistdashboard</servlet-name>
         <servlet-class>Controller.pharmacistdashboard</servlet-class>
+=======
+    <servlet>
+        <servlet-name>ManagerDashboardServlet</servlet-name>
+        <servlet-class>Controller.ManagerDashboardServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ApproveStockServlet</servlet-name>
+        <servlet-class>Controller.ApproveStockServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>CreateStockServlet</servlet-name>
+        <servlet-class>Controller.CreateStockServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ManageStockServlet</servlet-name>
+        <servlet-class>Controller.ManageStockServlet</servlet-class>
+>>>>>>> vu2
     </servlet>
     <servlet-mapping>
         <servlet-name>DoctorDashboardServlet</servlet-name>
@@ -108,11 +129,36 @@
         <url-pattern>/view-medicine</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
+<<<<<<< HEAD
         <servlet-name>pharmacistdashboard</servlet-name>
         <url-pattern>/pharmacist-dashboard</url-pattern>
     </servlet-mapping>
 
     <!-- Additional Servlets -->
+=======
+        <servlet-name>ManagerDashboardServlet</servlet-name>
+        <url-pattern>/manager-dashboard</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ApproveStockServlet</servlet-name>
+        <url-pattern>/approve-stock</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CreateStockServlet</servlet-name>
+        <url-pattern>/create-stock</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ManageStockServlet</servlet-name>
+        <url-pattern>/manage-stock</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+    <servlet-name>ManageStockServlet</servlet-name>
+    <url-pattern>/edit-stock</url-pattern>
+</servlet-mapping>
+    <welcome-file-list>
+        <welcome-file>home.jsp</welcome-file>
+    </welcome-file-list>
+>>>>>>> vu2
     <servlet>
         <servlet-name>RegisterServlet</servlet-name>
         <servlet-class>Controller.RegisterServlet</servlet-class>
@@ -149,8 +195,11 @@
         <servlet-name>CreateMedicationRequestServlet</servlet-name>
         <servlet-class>Controller.CreateMedicationRequestServlet</servlet-class>
     </servlet>
+<<<<<<< HEAD
 
     <!-- Servlet Mappings for Additional Servlets -->
+=======
+>>>>>>> vu2
     <servlet-mapping>
         <servlet-name>RegisterServlet</servlet-name>
         <url-pattern>/register</url-pattern>
@@ -179,6 +228,7 @@
         <servlet-name>HomeServlet</servlet-name>
         <url-pattern>/home</url-pattern>
     </servlet-mapping>
+<<<<<<< HEAD
     
 
 <!-- ASN Servlet Configuration -->
@@ -197,4 +247,6 @@
     <welcome-file-list>
         <welcome-file>home.jsp</welcome-file>
     </welcome-file-list>
+=======
+>>>>>>> vu2
 </web-app>

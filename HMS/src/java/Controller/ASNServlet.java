@@ -115,26 +115,27 @@ public class ASNServlet extends HttpServlet {
 
     private void createASN(HttpServletRequest req, PrintWriter out) throws SQLException {
         ASN asn = new ASN();
-        
+
         // Required fields
         asn.setPoId(Integer.parseInt(req.getParameter("poId")));
         asn.setSupplierId(Integer.parseInt(req.getParameter("supplierId")));
         asn.setShipmentDate(LocalDate.parse(req.getParameter("shipmentDate")));
         asn.setCarrier(req.getParameter("carrier"));
         asn.setTrackingNumber(req.getParameter("trackingNumber"));
-        
+
         // Optional fields
         String notes = req.getParameter("notes");
         if (notes != null) {
             asn.setNotes(notes);
         }
-        
+
         // Set default status to DRAFT
         asn.setStatus("DRAFT");
 
         boolean success = asnDAO.addASN(asn);
         if (success) {
-            out.print("{\"message\": \"ASN created successfully\", \"id\": " + asn.getAsnId() + ", \"status\": \"DRAFT\"}");
+            out.print("{\"message\": \"ASN created successfully\", \"id\": " + asn.getAsnId()
+                    + ", \"status\": \"DRAFT\"}");
         } else {
             out.print("{\"error\": \"Failed to create ASN\"}");
         }
@@ -142,7 +143,7 @@ public class ASNServlet extends HttpServlet {
 
     private void updateASN(HttpServletRequest req, PrintWriter out) throws SQLException {
         int asnId = Integer.parseInt(req.getParameter("asnId"));
-        
+
         Optional<ASN> optionalASN = asnDAO.getASNById(asnId);
         if (!optionalASN.isPresent()) {
             out.print("{\"error\": \"ASN not found\"}");
@@ -150,7 +151,7 @@ public class ASNServlet extends HttpServlet {
         }
 
         ASN asn = optionalASN.get();
-        
+
         // Only allow updates if status is DRAFT
         if (!asn.isDraft()) {
             out.print("{\"error\": \"Can only update ASN in DRAFT status. Current status: " + asn.getStatus() + "\"}");
@@ -226,7 +227,8 @@ public class ASNServlet extends HttpServlet {
 
         boolean success = asnDAO.approveASN(asnId, approvedBy);
         if (success) {
-            out.print("{\"message\": \"ASN approved successfully. Supplier can now ship the goods.\", \"status\": \"APPROVED\"}");
+            out.print(
+                    "{\"message\": \"ASN approved successfully. Supplier can now ship the goods.\", \"status\": \"APPROVED\"}");
         } else {
             out.print("{\"error\": \"Failed to approve ASN\"}");
         }
@@ -341,13 +343,14 @@ public class ASNServlet extends HttpServlet {
     }
 
     private String escapeJson(String value) {
-        if (value == null) return "";
+        if (value == null)
+            return "";
         return value.replace("\\", "\\\\")
-                   .replace("\"", "\\\"")
-                   .replace("\b", "\\b")
-                   .replace("\f", "\\f")
-                   .replace("\n", "\\n")
-                   .replace("\r", "\\r")
-                   .replace("\t", "\\t");
+                .replace("\"", "\\\"")
+                .replace("\b", "\\b")
+                .replace("\f", "\\f")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r")
+                .replace("\t", "\\t");
     }
 }

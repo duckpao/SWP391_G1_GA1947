@@ -11,6 +11,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import model.User;
 import util.PasswordUtils;
 
@@ -91,20 +92,33 @@ public class RegisterServlet extends HttpServlet {
             return;
         }
 
-        // Set the role to "staff"
-        String hashedPassword = PasswordUtils.hash(password);
+        // Tạo OTP ngẫu nhiên
+        int otp = (int) (Math.random() * 900000) + 100000; // 6 chữ số
 
-        User newUser = new User(0, username, email, phone, hashedPassword, "Pharmacist");
+        try {
+            // Gửi email OTP
+            util.EmailSender.sendEmail(
+                    email,
+                    "Mã xác nhận đăng ký tài khoản",
+                    "Xin chào " + username + ",\n\nMã OTP xác nhận của bạn là: " + otp + "\n\nVui lòng nhập mã này để hoàn tất đăng ký."
+            );
 
-        boolean ok = dao.register(newUser);
+            // Lưu thông tin tạm vào session
+            HttpSession session = request.getSession();
+            session.setAttribute("otp", otp);
+            session.setAttribute("username", username);
+            session.setAttribute("email", email);
+            session.setAttribute("phone", phone);
+            session.setAttribute("password", password);
 
-        if (ok) {
-            request.setAttribute("message", "Đăng ký thành công! Bây giờ bạn có thể đăng nhập.");
-        } else {
-            request.setAttribute("error", "Đăng ký thất bại. Vui lòng thử lại.");
+            // Chuyển sang trang nhập OTP
+            response.sendRedirect("verify_otp.jsp");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.setAttribute("error", "Không thể gửi OTP. Vui lòng kiểm tra lại email hoặc thử lại sau.");
+            request.getRequestDispatcher("register.jsp").forward(request, response);
         }
-
-        request.getRequestDispatcher("register.jsp").forward(request, response);
     }
 
     /**

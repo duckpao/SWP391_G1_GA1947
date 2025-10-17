@@ -4,7 +4,6 @@
  */
 package Controller;
 
-import DAO.UserDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -12,14 +11,12 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import java.util.Random;
-import util.EmailSender;
 
 /**
  *
  * @author ADMIN
  */
-public class ForgotPasswordServlet extends HttpServlet {
+public class VerifyResetServlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -38,10 +35,10 @@ public class ForgotPasswordServlet extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet ForgotPasswordServlet</title>");
+            out.println("<title>Servlet VerifyResetServlet</title>");
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet ForgotPasswordServlet at " + request.getContextPath() + "</h1>");
+            out.println("<h1>Servlet VerifyResetServlet at " + request.getContextPath() + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
@@ -73,47 +70,22 @@ public class ForgotPasswordServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String emailOrPhone = request.getParameter("emailOrPhone");
-        UserDAO dao = new UserDAO();
+        HttpSession session = request.getSession(false);
+        String otpInput = request.getParameter("otp");
 
-        // Kiểm tra có tồn tại user không
-        if (!dao.checkUserExists(emailOrPhone)) {
-            request.setAttribute("error", "Tài khoản không tồn tại trong hệ thống!");
-            request.getRequestDispatcher("forgot-password.jsp").forward(request, response);
+        if (session == null || session.getAttribute("resetOTP") == null) {
+            response.sendRedirect("forgot-password.jsp");
             return;
         }
 
-        // Sinh mã OTP ngẫu nhiên 6 chữ số
-        String otp = String.format("%06d", new Random().nextInt(999999));
+        String correctOTP = (String) session.getAttribute("resetOTP");
 
-        try {
-            // Gửi OTP qua email
-            String subject = "Mã xác nhận đặt lại mật khẩu - Hệ thống quản lý kho bệnh viện";
-            String htmlMessage = "<div style='font-family: Arial, sans-serif;'>"
-                                + "<h2 style='color:#4f46e5;'>🔐 Mã xác nhận của bạn</h2>"
-                                + "<p>Xin chào,</p>"
-                                + "<p>Bạn vừa yêu cầu đặt lại mật khẩu. Mã OTP để xác nhận là:</p>"
-                                + "<h3 style='font-size: 22px; color:#2563eb;'>" + otp + "</h3>"
-                                + "<p>Mã này chỉ có hiệu lực trong 5 phút. Nếu bạn không yêu cầu, vui lòng bỏ qua email này.</p>"
-                                + "<hr>"
-                                + "<p style='font-size:13px; color:#6b7280;'>© 2025 Hệ thống quản lý kho bệnh viện</p>"
-                                + "</div>";
-
-            // Gửi OTP qua email
-            EmailSender.sendEmail(emailOrPhone, subject, htmlMessage);
-
-            // Lưu OTP & email vào session (thời hạn 5 phút)
-            HttpSession session = request.getSession();
-            session.setAttribute("resetOTP", otp);
-            session.setAttribute("emailOrPhone", emailOrPhone);
-            session.setMaxInactiveInterval(300);
-
-            // Chuyển tới trang xác nhận OTP
-            response.sendRedirect("verifyReset.jsp");  // Chuyển hướng đúng tới trang verify-reset.jsp
-        } catch (Exception e) {
-            e.printStackTrace();
-            request.setAttribute("error", "Không thể gửi OTP. Vui lòng thử lại sau!");
-            request.getRequestDispatcher("forgot-password.jsp").forward(request, response);
+        if (otpInput != null && otpInput.equals(correctOTP)) {
+            // OTP đúng => chuyển đến trang reset mật khẩu
+            response.sendRedirect("reset-password.jsp");
+        } else {
+            request.setAttribute("error", "Mã OTP không hợp lệ hoặc đã hết hạn!");
+            request.getRequestDispatcher("verifyReset.jsp").forward(request, response);
         }
     }
 

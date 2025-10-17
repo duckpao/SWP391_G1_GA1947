@@ -12,14 +12,14 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import java.util.Random;
-import util.EmailSender;
+import model.User;
+import util.PasswordUtils;
 
 /**
  *
  * @author ADMIN
  */
-public class ForgotPasswordServlet extends HttpServlet {
+public class VerifyOTPServlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -38,10 +38,10 @@ public class ForgotPasswordServlet extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet ForgotPasswordServlet</title>");
+            out.println("<title>Servlet VerifyOTPServlet</title>");
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet ForgotPasswordServlet at " + request.getContextPath() + "</h1>");
+            out.println("<h1>Servlet VerifyOTPServlet at " + request.getContextPath() + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
@@ -73,47 +73,43 @@ public class ForgotPasswordServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String emailOrPhone = request.getParameter("emailOrPhone");
-        UserDAO dao = new UserDAO();
+        HttpSession session = request.getSession();
+        String enteredOtp = request.getParameter("otp");
+        Object otpObj = session.getAttribute("otp");
 
-        // Kiểm tra có tồn tại user không
-        if (!dao.checkUserExists(emailOrPhone)) {
-            request.setAttribute("error", "Tài khoản không tồn tại trong hệ thống!");
-            request.getRequestDispatcher("forgot-password.jsp").forward(request, response);
+        if (otpObj == null) {
+            request.setAttribute("error", "Phiên xác nhận đã hết hạn. Vui lòng đăng ký lại.");
+            request.getRequestDispatcher("register.jsp").forward(request, response);
             return;
         }
 
-        // Sinh mã OTP ngẫu nhiên 6 chữ số
-        String otp = String.format("%06d", new Random().nextInt(999999));
+        int realOtp = (int) otpObj;
 
-        try {
-            // Gửi OTP qua email
-            String subject = "Mã xác nhận đặt lại mật khẩu - Hệ thống quản lý kho bệnh viện";
-            String htmlMessage = "<div style='font-family: Arial, sans-serif;'>"
-                                + "<h2 style='color:#4f46e5;'>🔐 Mã xác nhận của bạn</h2>"
-                                + "<p>Xin chào,</p>"
-                                + "<p>Bạn vừa yêu cầu đặt lại mật khẩu. Mã OTP để xác nhận là:</p>"
-                                + "<h3 style='font-size: 22px; color:#2563eb;'>" + otp + "</h3>"
-                                + "<p>Mã này chỉ có hiệu lực trong 5 phút. Nếu bạn không yêu cầu, vui lòng bỏ qua email này.</p>"
-                                + "<hr>"
-                                + "<p style='font-size:13px; color:#6b7280;'>© 2025 Hệ thống quản lý kho bệnh viện</p>"
-                                + "</div>";
+        if (String.valueOf(realOtp).equals(enteredOtp)) {
+            String username = (String) session.getAttribute("username");
+            String email = (String) session.getAttribute("email");
+            String phone = (String) session.getAttribute("phone");
+            String password = (String) session.getAttribute("password");
 
-            // Gửi OTP qua email
-            EmailSender.sendEmail(emailOrPhone, subject, htmlMessage);
+            String hashedPassword = PasswordUtils.hash(password);
+            User newUser = new User(0, username, email, phone, hashedPassword, "Pharmacist");
 
-            // Lưu OTP & email vào session (thời hạn 5 phút)
-            HttpSession session = request.getSession();
-            session.setAttribute("resetOTP", otp);
-            session.setAttribute("emailOrPhone", emailOrPhone);
-            session.setMaxInactiveInterval(300);
+            UserDAO dao = new UserDAO();
+            boolean ok = dao.register(newUser);
 
-            // Chuyển tới trang xác nhận OTP
-            response.sendRedirect("verifyReset.jsp");  // Chuyển hướng đúng tới trang verify-reset.jsp
-        } catch (Exception e) {
-            e.printStackTrace();
-            request.setAttribute("error", "Không thể gửi OTP. Vui lòng thử lại sau!");
-            request.getRequestDispatcher("forgot-password.jsp").forward(request, response);
+            if (ok) {
+                request.setAttribute("message", "Đăng ký thành công! Bây giờ bạn có thể đăng nhập.");
+            } else {
+                request.setAttribute("error", "Đăng ký thất bại. Vui lòng thử lại.");
+            }
+
+            // Xóa session sau khi xác nhận
+            session.invalidate();
+            request.getRequestDispatcher("register.jsp").forward(request, response);
+
+        } else {
+            request.setAttribute("error", "Mã OTP không chính xác!");
+            request.getRequestDispatcher("verify_otp.jsp").forward(request, response);
         }
     }
 

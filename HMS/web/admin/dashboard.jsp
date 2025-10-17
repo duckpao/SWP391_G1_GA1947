@@ -450,6 +450,9 @@
                     Quản lý người dùng
                 </h1>
                 <div style="display: flex; gap: 12px;">
+                    <a class="btn btn-primary" href="${pageContext.request.contextPath}/admin-dashboard/config">
+                        ⚙️ Cấu hình
+                    </a>
                     <a class="btn btn-primary" href="${pageContext.request.contextPath}/admin/permissions">
                         🔐 Phân quyền
                     </a>

@@ -58,7 +58,7 @@ public class ManagePermissionsServlet extends HttpServlet {
             
         } catch (SQLException e) {
             e.printStackTrace();
-            response.sendRedirect(request.getContextPath() + "/admin/users?error=database_error");
+            response.sendRedirect(request.getContextPath() + "/admin-dashboard?error=database_error");
         }
     }
     

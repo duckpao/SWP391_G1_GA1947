@@ -44,7 +44,7 @@ public class CreateServlet extends HttpServlet {
 
         try {
             userDAO.create(newUser);
-            response.sendRedirect(request.getContextPath() + "/admin/users");
+            response.sendRedirect(request.getContextPath() + "/admin-dashboard");
         } catch (SQLException e) {
             throw new ServletException(e);
         }

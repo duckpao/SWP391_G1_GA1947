@@ -164,6 +164,117 @@
       border-color: #667eea;
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
+
+    /* Search Box Styles */
+    .search-wrapper {
+      position: relative;
+      margin-bottom: 12px;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6b7280;
+      font-size: 16px;
+    }
+
+    .search-input {
+      padding-left: 42px;
+      padding-right: 42px;
+    }
+
+    .clear-search {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #6b7280;
+      cursor: pointer;
+      font-size: 18px;
+      padding: 4px;
+      display: none;
+      transition: color 0.2s;
+    }
+
+    .clear-search:hover {
+      color: #374151;
+    }
+
+    .clear-search.visible {
+      display: block;
+    }
+
+    /* Custom Select with Search Results */
+    .select-wrapper {
+      position: relative;
+    }
+
+    .user-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid #d1d5db;
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      max-height: 300px;
+      overflow-y: auto;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      display: none;
+    }
+
+    .user-dropdown.active {
+      display: block;
+    }
+
+    .user-option {
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: background 0.2s;
+      border-bottom: 1px solid #f3f4f6;
+    }
+
+    .user-option:hover {
+      background: #f9fafb;
+    }
+
+    .user-option:last-child {
+      border-bottom: none;
+    }
+
+    .user-option-name {
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 4px;
+    }
+
+    .user-option-meta {
+      font-size: 12px;
+      color: #6b7280;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .no-results {
+      padding: 20px;
+      text-align: center;
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    .search-info {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 8px;
+      font-style: italic;
+    }
     
     .permissions-grid {
       display: grid;
@@ -418,25 +529,57 @@
         </div>
       </c:if>
       
-      <!-- Step 1: Select User -->
+      <!-- Step 1: Select User with Search -->
       <div class="section">
         <div class="section-header">
           👤 Bước 1: Chọn người dùng
         </div>
         
-        <form method="get" action="${pageContext.request.contextPath}/admin/permissions">
-          <div class="form-group">
-            <label for="userId">Chọn người dùng để phân quyền:</label>
-            <select id="userId" name="userId" class="form-control" onchange="this.form.submit()" required>
-              <option value="">-- Chọn người dùng --</option>
+        <div class="form-group">
+          <label for="userSearch">Tìm kiếm và chọn người dùng:</label>
+          
+          <div class="search-wrapper select-wrapper">
+            <span class="search-icon">🔍</span>
+            <input 
+              type="text" 
+              id="userSearch" 
+              class="form-control search-input" 
+              placeholder="Nhập tên, email hoặc số điện thoại..."
+              autocomplete="off"
+              value="${not empty selectedUser ? selectedUser.username : ''}">
+            <button type="button" class="clear-search" id="clearSearch" onclick="clearSearch()">✕</button>
+            
+            <div class="user-dropdown" id="userDropdown">
               <c:forEach var="user" items="${users}">
-                <option value="${user.userId}" ${param.userId == user.userId ? 'selected' : ''}>
-                  ${user.username} - ${user.role} (${user.email})
-                </option>
+                <div class="user-option" 
+                     data-user-id="${user.userId}"
+                     data-username="${user.username}"
+                     data-role="${user.role}"
+                     data-email="${user.email}"
+                     data-phone="${user.phone}"
+                     onclick="selectUser(this)">
+                  <div class="user-option-name">${user.username}</div>
+                  <div class="user-option-meta">
+                    <span class="role-badge role-${user.role.toLowerCase()}">${user.role}</span>
+                    <span>📧 ${user.email != null ? user.email : '-'}</span>
+                  </div>
+                </div>
               </c:forEach>
-            </select>
+              
+              <div class="no-results" id="noResults" style="display: none;">
+                Không tìm thấy người dùng nào
+              </div>
+            </div>
           </div>
-        </form>
+          
+          <div class="search-info">
+            💡 Gợi ý: Bắt đầu nhập để tìm kiếm người dùng
+          </div>
+          
+          <form method="get" action="${pageContext.request.contextPath}/admin/permissions" id="userSelectForm" style="display: none;">
+            <input type="hidden" name="userId" id="selectedUserId" value="${param.userId}">
+          </form>
+        </div>
       </div>
       
       <!-- Step 2: Assign Permissions (only show if user is selected) -->
@@ -539,7 +682,7 @@
           <div class="empty-state">
             <div class="empty-state-icon">👆</div>
             <h3>Chọn người dùng để bắt đầu</h3>
-            <p>Vui lòng chọn một người dùng từ danh sách trên để phân quyền</p>
+            <p>Vui lòng tìm và chọn một người dùng từ ô tìm kiếm trên để phân quyền</p>
           </div>
         </c:otherwise>
       </c:choose>
@@ -547,14 +690,96 @@
   </div>
   
   <script>
-    // Toggle card selection
+    const searchInput = document.getElementById('userSearch');
+    const userDropdown = document.getElementById('userDropdown');
+    const clearBtn = document.getElementById('clearSearch');
+    const noResults = document.getElementById('noResults');
+    const userOptions = document.querySelectorAll('.user-option');
+
+    // Show/hide dropdown and filter users
+    searchInput.addEventListener('input', function() {
+      const searchTerm = this.value.toLowerCase().trim();
+      
+      // Show/hide clear button
+      if (searchTerm) {
+        clearBtn.classList.add('visible');
+      } else {
+        clearBtn.classList.remove('visible');
+      }
+      
+      // Filter users
+      let hasResults = false;
+      userOptions.forEach(option => {
+        const username = option.dataset.username.toLowerCase();
+        const email = (option.dataset.email || '').toLowerCase();
+        const phone = (option.dataset.phone || '').toLowerCase();
+        const role = option.dataset.role.toLowerCase();
+        
+        if (username.includes(searchTerm) || 
+            email.includes(searchTerm) || 
+            phone.includes(searchTerm) ||
+            role.includes(searchTerm)) {
+          option.style.display = 'block';
+          hasResults = true;
+        } else {
+          option.style.display = 'none';
+        }
+      });
+      
+      // Show dropdown if there's input
+      if (searchTerm) {
+        userDropdown.classList.add('active');
+        noResults.style.display = hasResults ? 'none' : 'block';
+      } else {
+        userDropdown.classList.remove('active');
+      }
+    });
+
+    // Show dropdown on focus
+    searchInput.addEventListener('focus', function() {
+      if (this.value.trim()) {
+        userDropdown.classList.add('active');
+      }
+    });
+
+    // Hide dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.select-wrapper')) {
+        userDropdown.classList.remove('active');
+      }
+    });
+
+    // Select user
+    function selectUser(option) {
+      const userId = option.dataset.userId;
+      const username = option.dataset.username;
+      
+      searchInput.value = username;
+      userDropdown.classList.remove('active');
+      
+      // Submit form to load user permissions
+      document.getElementById('selectedUserId').value = userId;
+      document.getElementById('userSelectForm').submit();
+    }
+
+    // Clear search
+    function clearSearch() {
+      searchInput.value = '';
+      clearBtn.classList.remove('visible');
+      userDropdown.classList.remove('active');
+      userOptions.forEach(option => {
+        option.style.display = 'block';
+      });
+      searchInput.focus();
+    }
+
+    // Permission management functions
     function toggleCard(card) {
       const checkbox = card.querySelector('input[type="checkbox"]');
       checkbox.checked = !checkbox.checked;
       updateCard(checkbox);
     }
     
-    // Update card visual state
     function updateCard(checkbox) {
       const card = checkbox.closest('.permission-card');
       if (checkbox.checked) {
@@ -566,7 +791,6 @@
       updateSelectAllState();
     }
     
-    // Update selected count
     function updateSelectedCount() {
       const checked = document.querySelectorAll('.permission-input:checked').length;
       const countElement = document.getElementById('selectedCount');
@@ -575,7 +799,6 @@
       }
     }
     
-    // Toggle all permissions
     function toggleAllPermissions(checkbox) {
       const allCheckboxes = document.querySelectorAll('.permission-input');
       const isChecked = checkbox.checked;
@@ -593,7 +816,6 @@
       updateSelectedCount();
     }
     
-    // Update select all checkbox state
     function updateSelectAllState() {
       const selectAll = document.getElementById('selectAll');
       if (!selectAll) return;
@@ -617,6 +839,11 @@
     document.addEventListener('DOMContentLoaded', function() {
       updateSelectedCount();
       updateSelectAllState();
+      
+      // Show clear button if search has value
+      if (searchInput.value.trim()) {
+        clearBtn.classList.add('visible');
+      }
     });
   </script>
 </body>

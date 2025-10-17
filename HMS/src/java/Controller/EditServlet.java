@@ -45,7 +45,7 @@ public class EditServlet extends HttpServlet {
         User u = new User(id, username, email, phone, role);
         try {
             userDAO.update(u);
-            resp.sendRedirect(req.getContextPath() + "/admin/users");
+            resp.sendRedirect(req.getContextPath() + "/admin-dashboard");
         } catch (SQLException e) {
             throw new ServletException(e);
         }

@@ -27,7 +27,7 @@ public class ToggleUserServlet extends HttpServlet {
         boolean active = Boolean.parseBoolean(req.getParameter("active"));
         try {
             userDAO.setActive(id, active);
-            resp.sendRedirect(req.getContextPath() + "/admin/users");
+            resp.sendRedirect(req.getContextPath() + "/admin-dashboard");
         } catch (SQLException e) {
             throw new ServletException(e);
         }

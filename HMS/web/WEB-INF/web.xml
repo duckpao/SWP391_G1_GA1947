@@ -25,6 +25,12 @@
         <servlet-name>ManagePermissionsServlet</servlet-name>
         <servlet-class>Controller.ManagePermissionsServlet</servlet-class>
     </servlet>
+    
+    <!-- System Configuration Servlet -->
+    <servlet>
+        <servlet-name>SystemConfigServlet</servlet-name>
+        <servlet-class>Controller.SystemConfigServlet</servlet-class>
+    </servlet>
 
     <!-- Servlet Mappings for User Management -->
     <servlet-mapping>
@@ -55,6 +61,12 @@
     <servlet-mapping>
         <servlet-name>ManagePermissionsServlet</servlet-name>
         <url-pattern>/admin/permissions</url-pattern>
+    </servlet-mapping>
+    
+    <!-- System Configuration Mapping -->
+    <servlet-mapping>
+        <servlet-name>SystemConfigServlet</servlet-name>
+        <url-pattern>/admin-dashboard/config</url-pattern>
     </servlet-mapping>
 
 

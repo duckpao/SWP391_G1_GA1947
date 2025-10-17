@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app version="6.0" xmlns="https://jakarta.ee/xml/ns/jakartaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd">
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> origin/developer
     <!-- User Management Servlets -->
     <servlet>
         <servlet-name>UserServlet</servlet-name>
@@ -54,8 +57,11 @@
     </servlet-mapping>
 
     <!-- Medication Request Servlets -->
+<<<<<<< HEAD
 =======
 >>>>>>> vu2
+=======
+>>>>>>> origin/developer
     <servlet>
         <servlet-name>ManageRequestsServlet</servlet-name>
         <servlet-class>Controller.ManageRequestsServlet</servlet-class>
@@ -77,11 +83,15 @@
         <servlet-class>Controller.ViewMedicineServlet</servlet-class>
     </servlet>
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> origin/developer
 
     <!-- Servlet Mappings for Medication Requests -->
      <servlet>
         <servlet-name>pharmacistdashboard</servlet-name>
         <servlet-class>Controller.pharmacistdashboard</servlet-class>
+<<<<<<< HEAD
 =======
     <servlet>
         <servlet-name>ManagerDashboardServlet</servlet-name>
@@ -99,6 +109,8 @@
         <servlet-name>ManageStockServlet</servlet-name>
         <servlet-class>Controller.ManageStockServlet</servlet-class>
 >>>>>>> vu2
+=======
+>>>>>>> origin/developer
     </servlet>
     <servlet-mapping>
         <servlet-name>DoctorDashboardServlet</servlet-name>
@@ -130,11 +142,15 @@
     </servlet-mapping>
     <servlet-mapping>
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> origin/developer
         <servlet-name>pharmacistdashboard</servlet-name>
         <url-pattern>/pharmacist-dashboard</url-pattern>
     </servlet-mapping>
 
     <!-- Additional Servlets -->
+<<<<<<< HEAD
 =======
         <servlet-name>ManagerDashboardServlet</servlet-name>
         <url-pattern>/manager-dashboard</url-pattern>
@@ -159,6 +175,8 @@
         <welcome-file>home.jsp</welcome-file>
     </welcome-file-list>
 >>>>>>> vu2
+=======
+>>>>>>> origin/developer
     <servlet>
         <servlet-name>RegisterServlet</servlet-name>
         <servlet-class>Controller.RegisterServlet</servlet-class>
@@ -196,10 +214,15 @@
         <servlet-class>Controller.CreateMedicationRequestServlet</servlet-class>
     </servlet>
 <<<<<<< HEAD
+<<<<<<< HEAD
 
     <!-- Servlet Mappings for Additional Servlets -->
 =======
 >>>>>>> vu2
+=======
+
+    <!-- Servlet Mappings for Additional Servlets -->
+>>>>>>> origin/developer
     <servlet-mapping>
         <servlet-name>RegisterServlet</servlet-name>
         <url-pattern>/register</url-pattern>
@@ -229,6 +252,7 @@
         <url-pattern>/home</url-pattern>
     </servlet-mapping>
 <<<<<<< HEAD
+<<<<<<< HEAD
     
 
 <!-- ASN Servlet Configuration -->
@@ -243,10 +267,16 @@
     <url-pattern>/asn</url-pattern>
     <url-pattern>/asn/*</url-pattern>
 </servlet-mapping>
+=======
+
+>>>>>>> origin/developer
     <!-- Welcome File -->
     <welcome-file-list>
         <welcome-file>home.jsp</welcome-file>
     </welcome-file-list>
+<<<<<<< HEAD
 =======
 >>>>>>> vu2
+=======
+>>>>>>> origin/developer
 </web-app>

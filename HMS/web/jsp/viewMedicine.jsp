@@ -6,293 +6,187 @@
 <head>
     <meta charset="UTF-8">
     <title>Medicine Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         body {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f3f4f6;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f5f5f5;
-            padding: 20px;
         }
-        
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: white;
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(180deg, #6d28d9, #4f46e5);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            padding-top: 15px;
+        }
+
+        .profile {
+            text-align: center;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 10px;
+        }
+
+        .profile img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 2px solid #a78bfa;
+            margin-bottom: 10px;
+        }
+
+        .profile h5 {
+            margin: 0;
+            color: #fff;
+        }
+
+        .profile span {
+            font-size: 13px;
+            color: #d1d5db;
+        }
+
+        .menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 25px;
+            color: #e5e7eb;
+            text-decoration: none;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+
+        .menu a i {
+            width: 20px;
+            margin-right: 10px;
+        }
+
+        .menu a:hover, .menu a.active {
+            background-color: rgba(255,255,255,0.15);
+            color: #fff;
+        }
+
+        /* Main content */
+        .main {
+            flex: 1;
             padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-        
+
         h1 {
-            color: #333;
-            margin-bottom: 30px;
-            font-size: 28px;
+            font-size: 26px;
+            margin-bottom: 25px;
+            font-weight: 600;
+            color: #111827;
         }
-        
-        /* Search Form Styles */
+
         .search-container {
             background: #f8f9fa;
             padding: 20px;
             border-radius: 8px;
-            margin-bottom: 30px;
-            border: 1px solid #e0e0e0;
+            border: 1px solid #ddd;
+            margin-bottom: 25px;
         }
-        
+
         .search-form {
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr auto;
+            grid-template-columns: 2fr 1fr 1fr auto auto;
             gap: 15px;
             align-items: end;
         }
-        
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .form-group label {
-            font-weight: 600;
-            margin-bottom: 5px;
-            color: #555;
-            font-size: 14px;
-        }
-        
-        .form-group input,
-        .form-group select {
-            padding: 10px 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
-            transition: border-color 0.3s;
-        }
-        
-        .form-group input:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #4CAF50;
-        }
-        
-        .btn {
-            padding: 10px 25px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        
-        .btn-search {
-            background: #4CAF50;
-            color: white;
-        }
-        
-        .btn-search:hover {
-            background: #45a049;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
-        }
-        
-        .btn-reset {
-            background: #6c757d;
-            color: white;
-            margin-left: 10px;
-        }
-        
-        .btn-reset:hover {
-            background: #5a6268;
-        }
-        
-        /* Results Info */
-        .results-info {
-            margin-bottom: 20px;
-            padding: 10px 15px;
-            background: #e7f3ff;
-            border-left: 4px solid #2196F3;
-            border-radius: 4px;
-            color: #0d47a1;
-        }
-        
-        /* Navigation Links */
-        .nav-links {
-            margin-bottom: 20px;
-        }
-        
-        .nav-links a {
-            display: inline-block;
-            padding: 10px 20px;
-            margin-right: 10px;
-            background: #2196F3;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            transition: background 0.3s;
-        }
-        
-        .nav-links a:hover {
-            background: #1976D2;
-        }
-        
-        /* Table Styles */
+
         table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
             background: white;
+            border-collapse: collapse;
+            width: 100%;
         }
-        
+
         thead {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #7c3aed, #6366f1);
             color: white;
         }
-        
-        th {
-            padding: 15px;
-            text-align: left;
-            font-weight: 600;
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        td {
-            padding: 12px 15px;
+
+        th, td {
+            padding: 12px;
             border-bottom: 1px solid #e0e0e0;
-            font-size: 14px;
-            color: #333;
         }
-        
-        tbody tr {
-            transition: background-color 0.3s;
-        }
-        
-        tbody tr:hover {
-            background-color: #f5f5f5;
-        }
-        
-        /* Status Badge */
+
         .status-badge {
-            padding: 5px 12px;
+            padding: 4px 10px;
             border-radius: 20px;
             font-size: 12px;
-            font-weight: 600;
-            display: inline-block;
         }
-        
-        .status-approved {
-            background: #d4edda;
-            color: #155724;
-        }
-        
-        .status-low {
-            background: #fff3cd;
-            color: #856404;
-        }
-        
-        .status-out {
-            background: #f8d7da;
-            color: #721c24;
-        }
-        
-        /* Empty State */
+
+        .status-approved { background: #d4edda; color: #155724; }
+        .status-low { background: #fff3cd; color: #856404; }
+        .status-out { background: #f8d7da; color: #721c24; }
+
         .empty-state {
             text-align: center;
-            padding: 60px 20px;
-            color: #666;
-        }
-        
-        .empty-state svg {
-            width: 100px;
-            height: 100px;
-            margin-bottom: 20px;
-            opacity: 0.5;
-        }
-        
-        .empty-state h3 {
-            font-size: 20px;
-            margin-bottom: 10px;
-        }
-        
-        .empty-state p {
-            font-size: 14px;
-        }
-        
-        @media (max-width: 1024px) {
-            .search-form {
-                grid-template-columns: 1fr;
-            }
-            
-            .btn-reset {
-                margin-left: 0;
-                margin-top: 10px;
-            }
+            color: #777;
+            padding: 50px;
         }
     </style>
 </head>
+
 <body>
-    <div class="container">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="profile">
+            <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="User">
+            <h5>${sessionScope.username}</h5>
+            <span>${sessionScope.role}</span>
+        </div>
+        <div class="menu">
+            <a href="${pageContext.request.contextPath}/home.jsp"><i class="fa fa-home"></i> Trang chủ</a>
+            <a href="${pageContext.request.contextPath}/view-medicine" class="active"><i class="fa fa-pills"></i> Quản lý thuốc</a>
+            <a href="${pageContext.request.contextPath}/create-request"><i class="fa fa-file-medical"></i> Yêu cầu thuốc</a>
+            <a href="${pageContext.request.contextPath}/warehouse"><i class="fa fa-warehouse"></i> Quản lý kho</a>
+            <a href="${pageContext.request.contextPath}/doctor-management"><i class="fa fa-user-md"></i> Quản lý bác sĩ</a>
+            <a href="${pageContext.request.contextPath}/report"><i class="fa fa-chart-line"></i> Báo cáo thống kê</a>
+            <a href="${pageContext.request.contextPath}/logout"><i class="fa fa-sign-out-alt"></i> Đăng xuất</a>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="main">
         <h1>Medicine Details</h1>
-        
-        <!-- Search Form -->
+
+        <!-- Search -->
         <div class="search-container">
-            <form action="view-medicine" method="get" class="search-form">
-                <div class="form-group">
-                    <label for="keyword">Search by Name or Description</label>
-                    <input type="text" 
-                           id="keyword" 
-                           name="keyword" 
-                           placeholder="Enter medicine name or description..."
-                           value="${keyword}">
-                </div>
-                
-                <div class="form-group">
-                    <label for="category">Category</label>
-                    <select id="category" name="category">
-                        <option value="All" ${selectedCategory == 'All' ? 'selected' : ''}>All Categories</option>
-                        <c:forEach var="cat" items="${categories}">
-                            <option value="${cat}" ${selectedCategory == cat ? 'selected' : ''}>${cat}</option>
-                        </c:forEach>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="status">Stock Status</label>
-                    <select id="status" name="status">
-                        <option value="" ${selectedStatus == '' ? 'selected' : ''}>All Status</option>
-                        <option value="In Stock" ${selectedStatus == 'In Stock' ? 'selected' : ''}>In Stock (&gt;50)</option>
-                        <option value="Low Stock" ${selectedStatus == 'Low Stock' ? 'selected' : ''}>Low Stock (1-50)</option>
-                        <option value="Out of Stock" ${selectedStatus == 'Out of Stock' ? 'selected' : ''}>Out of Stock (0)</option>
-                    </select>
-                </div>
-                
-                <div class="form-group" style="flex-direction: row; align-items: center;">
-                    <button type="submit" class="btn btn-search">🔍 Search</button>
-                    <a href="view-medicine" class="btn btn-reset">🔄 Reset</a>
-                </div>
+            <form action="${pageContext.request.contextPath}/view-medicine" method="get" class="search-form">
+                <input type="text" name="keyword" value="${keyword}" placeholder="🔍 Search medicine..." class="form-control">
+                <select name="category" class="form-select">
+                    <option value="All" ${selectedCategory == 'All' ? 'selected' : ''}>All Categories</option>
+                    <c:forEach var="cat" items="${categories}">
+                        <option value="${cat}" ${selectedCategory == cat ? 'selected' : ''}>${cat}</option>
+                    </c:forEach>
+                </select>
+                <select name="status" class="form-select">
+                    <option value="" ${selectedStatus == '' ? 'selected' : ''}>All Status</option>
+                    <option value="In Stock" ${selectedStatus == 'In Stock' ? 'selected' : ''}>In Stock</option>
+                    <option value="Low Stock" ${selectedStatus == 'Low Stock' ? 'selected' : ''}>Low Stock</option>
+                    <option value="Out of Stock" ${selectedStatus == 'Out of Stock' ? 'selected' : ''}>Out of Stock</option>
+                </select>
+                <button type="submit" class="btn btn-success">Tìm kiếm</button>
+                <a href="${pageContext.request.contextPath}/view-medicine" class="btn btn-secondary">Reset</a>
             </form>
         </div>
-        
-        <!-- Results Info -->
-        <c:if test="${not empty keyword or selectedCategory != 'All' or not empty selectedStatus}">
-            <div class="results-info">
-                <strong>Search Results:</strong> Found ${medicines.size()} medicine(s)
-                <c:if test="${not empty keyword}"> matching "${keyword}"</c:if>
-                <c:if test="${selectedCategory != 'All'}"> in category "${selectedCategory}"</c:if>
-                <c:if test="${not empty selectedStatus}"> with status "${selectedStatus}"</c:if>
-            </div>
-        </c:if>
-        
-        <!-- Navigation Links -->
-        <div class="nav-links">
-            <a href="create-request">📝 Create Medication Request</a>
-            <a href="doctor-dashboard">🏠 Back to Dashboard</a>
+
+        <!-- Buttons -->
+        <div class="d-flex mb-3">
+            <a href="${pageContext.request.contextPath}/create-request" class="btn btn-primary">📝 Create Request</a>
+            <c:if test="${sessionScope.role eq 'Pharmacist'}">
+                <button class="btn btn-success ms-auto" data-bs-toggle="modal" data-bs-target="#addMedicineModal">➕ Add New Medicine</button>
+            </c:if>
         </div>
-        
+
         <!-- Medicine Table -->
         <c:choose>
             <c:when test="${not empty medicines}">
@@ -304,18 +198,21 @@
                             <th>Category</th>
                             <th>Description</th>
                             <th>Batch ID</th>
-                            <th>Lot Number</th>
-                            <th>Expiry Date</th>
-                            <th>Current Quantity</th>
+                            <th>Lot</th>
+                            <th>Expiry</th>
+                            <th>Quantity</th>
                             <th>Status</th>
-                            <th>Received Date</th>
+                            <th>Received</th>
+                            <c:if test="${sessionScope.role eq 'Pharmacist'}">
+                                <th>Edit</th><th>Delete</th>
+                            </c:if>
                         </tr>
                     </thead>
                     <tbody>
                         <c:forEach var="medicine" items="${medicines}">
-                            <c:forEach var="batch" items="${medicine.batches}" varStatus="batchStatus">
+                            <c:forEach var="batch" items="${medicine.batches}" varStatus="st">
                                 <tr>
-                                    <c:if test="${batchStatus.first}">
+                                    <c:if test="${st.first}">
                                         <td rowspan="${medicine.batches.size()}">${medicine.medicineId}</td>
                                         <td rowspan="${medicine.batches.size()}"><strong>${medicine.name}</strong></td>
                                         <td rowspan="${medicine.batches.size()}">${medicine.category}</td>
@@ -324,19 +221,29 @@
                                     <td>${batch.batchId}</td>
                                     <td>${batch.lotNumber}</td>
                                     <td><fmt:formatDate value="${batch.expiryDate}" pattern="dd/MM/yyyy"/></td>
+                                    <td>${batch.currentQuantity}</td>
                                     <td>
-                                        <strong>${batch.currentQuantity}</strong>
-                                        <c:choose>
-                                            <c:when test="${batch.currentQuantity == 0}">
-                                                <span class="status-badge status-out">Out</span>
-                                            </c:when>
-                                            <c:when test="${batch.currentQuantity <= 50}">
-                                                <span class="status-badge status-low">Low</span>
-                                            </c:when>
-                                        </c:choose>
+                                        <span class="status-badge
+                                            ${batch.status == 'In Stock' ? 'status-approved' :
+                                              batch.status == 'Low Stock' ? 'status-low' : 'status-out'}">
+                                            ${batch.status}
+                                        </span>
                                     </td>
-                                    <td><span class="status-badge status-approved">${batch.status}</span></td>
                                     <td><fmt:formatDate value="${batch.receivedDate}" pattern="dd/MM/yyyy"/></td>
+                                    <c:if test="${sessionScope.role eq 'Pharmacist'}">
+                                        <td>
+                                            <button class="btn btn-warning btn-sm"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#editMedicineModal"
+                                                    onclick="fillEditForm('${medicine.medicineId}','${medicine.name}','${medicine.category}','${medicine.description}','${batch.batchId}','${batch.lotNumber}','${batch.expiryDate}','${batch.currentQuantity}')">✏️</button>
+                                        </td>
+                                        <td>
+                                            <form action="${pageContext.request.contextPath}/Medicine/delete" method="post" onsubmit="return confirm('Delete this medicine?');">
+                                                <input type="hidden" name="id" value="${medicine.medicineId}">
+                                                <button type="submit" class="btn btn-danger btn-sm">🗑</button>
+                                            </form>
+                                        </td>
+                                    </c:if>
                                 </tr>
                             </c:forEach>
                         </c:forEach>
@@ -345,14 +252,127 @@
             </c:when>
             <c:otherwise>
                 <div class="empty-state">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
                     <h3>No medicines found</h3>
-                    <p>Try adjusting your search criteria or reset the filters.</p>
+                    <p>Try adjusting your search filters.</p>
                 </div>
             </c:otherwise>
         </c:choose>
+
+        <!-- Modal Add Medicine -->
+            <div class="modal fade" id="addMedicineModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">➕ Add New Medicine</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="post" action="${pageContext.request.contextPath}/Medicine/add">
+                                <div class="mb-3">
+                                    <label class="form-label">Medicine Name</label>
+                                    <input type="text" class="form-control" name="name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Category</label>
+                                    <input type="text" class="form-control" name="category" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Description</label>
+                                    <textarea class="form-control" name="description"></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Supplier ID</label>
+                                    <input type="number" class="form-control" name="supplierId" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Lot Number</label>
+                                    <input type="text" class="form-control" name="lotNumber" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Expiry Date</label>
+                                    <input type="date" class="form-control" name="expiryDate"
+                                           required min="<%= java.time.LocalDate.now() %>">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Quantity</label>
+                                    <input type="number" class="form-control" name="quantity" required>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" class="btn btn-success">Save</button>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+         <!-- Modal Edit Medicine -->
+<div class="modal fade" id="editMedicineModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">✏ Edit Medicine</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="${pageContext.request.contextPath}/Medicine/update">
+                    <input type="hidden" name="id" id="edit-id">
+                    <input type="hidden" name="batchId" id="edit-batchId">
+                    <input type="hidden" name="supplierId" id="edit-supplierId"> <!-- Thêm dòng này -->
+
+                    <div class="mb-3">
+                        <label class="form-label">Medicine Name</label>
+                        <input type="text" class="form-control" name="name" id="edit-name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Category</label>
+                        <input type="text" class="form-control" name="category" id="edit-category" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" name="description" id="edit-description"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Batch ID</label>
+                        <input type="text" class="form-control" name="batchId" id="edit-batchId" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Lot Number</label>
+                        <input type="text" class="form-control" name="lotNumber" id="edit-lotNumber" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Expiry Date</label>
+                        <input type="date" class="form-control" name="expiryDate" id="edit-expiryDate" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Quantity</label>
+                        <input type="number" class="form-control" name="quantity" id="edit-quantity" required>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success">Update</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
+</div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function fillEditForm(id, name, category, description, batchId, lotNumber, expiryDate, quantity) {
+            document.getElementById('edit-id').value = id;
+            document.getElementById('edit-name').value = name;
+            document.getElementById('edit-category').value = category;
+            document.getElementById('edit-description').value = description;
+            document.getElementById('edit-batchId').value = batchId;
+            document.getElementById('edit-lotNumber').value = lotNumber;
+            document.getElementById('edit-expiryDate').value = expiryDate;
+            document.getElementById('edit-quantity').value = quantity;
+        }
+    </script>
 </body>
 </html>

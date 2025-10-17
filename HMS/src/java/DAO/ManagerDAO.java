@@ -466,8 +466,8 @@ public class ManagerDAO extends DBContext {
                 if (!rs.wasNull()) {
                     supplier.setPerformanceRating(rating);
                 }
-                supplier.setCreatedAt(rs.getTimestamp("created_at"));
-                supplier.setUpdatedAt(rs.getTimestamp("updated_at"));
+                supplier.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                supplier.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
                 suppliers.add(supplier);
             }
             System.out.println("Loaded " + suppliers.size() + " suppliers.");
@@ -491,8 +491,8 @@ public class ManagerDAO extends DBContext {
                 supplier.setContactPhone(rs.getString("contact_phone"));
                 supplier.setAddress(rs.getString("address"));
                 supplier.setPerformanceRating(rs.getDouble("performance_rating"));
-                supplier.setCreatedAt(rs.getTimestamp("created_at"));
-                supplier.setUpdatedAt(rs.getTimestamp("updated_at"));
+                supplier.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                supplier.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
                 System.out.println("Loaded Supplier #" + supplierId);
                 return supplier;
             }

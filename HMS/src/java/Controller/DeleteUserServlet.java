@@ -34,9 +34,9 @@ public class DeleteUserServlet extends HttpServlet {
 
                 // Chuyển hướng đến trang quản lý người dùng với thông báo thành công hoặc thất bại
                 if (isDeleted) {
-                    response.sendRedirect(request.getContextPath() + "/admin/users?message=deleteSuccess");
+                    response.sendRedirect(request.getContextPath() + "/admin-dashboard?message=deleteSuccess");
                 } else {
-                    response.sendRedirect(request.getContextPath() + "/admin/users?message=deleteFail");
+                    response.sendRedirect(request.getContextPath() + "/admin-dashboard?message=deleteFail");
                 }
             } catch (Exception e) {
                 e.printStackTrace();

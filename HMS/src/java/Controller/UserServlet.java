@@ -14,7 +14,6 @@ import model.User;
 /**
  * Servlet for managing users with filter support
  */
-@WebServlet(name = "UserServlet", urlPatterns = {"/admin/users"})
 public class UserServlet extends HttpServlet {
     
     private final UserDAO userDAO = new UserDAO();
@@ -94,7 +93,7 @@ public class UserServlet extends HttpServlet {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            response.sendRedirect(request.getContextPath() + "/admin/users?error=" + e.getMessage());
+            response.sendRedirect(request.getContextPath() + "/admin-dashboard?error=" + e.getMessage());
         }
     }
     
@@ -115,7 +114,7 @@ public class UserServlet extends HttpServlet {
             if (user != null && "Admin".equals(user.getRole())) {
                 // Không cho phép khóa/mở Admin
                 response.sendRedirect(request.getContextPath() + 
-                    "/admin/users?error=cannot_modify_admin");
+                    "/admin-dashboard?error=cannot_modify_admin");
                 return;
             }
             
@@ -124,7 +123,7 @@ public class UserServlet extends HttpServlet {
         }
         
         // Redirect back to list
-        response.sendRedirect(request.getContextPath() + "/admin/users");
+        response.sendRedirect(request.getContextPath() + "/admin-dashboard");
     }
     
     /**
@@ -143,19 +142,19 @@ public class UserServlet extends HttpServlet {
             if (user != null && "Admin".equals(user.getRole())) {
                 // Không cho phép xóa Admin
                 response.sendRedirect(request.getContextPath() + 
-                    "/admin/users?error=cannot_delete_admin");
+                    "/admin-dashboard?error=cannot_delete_admin");
                 return;
             }
             
             boolean deleted = userDAO.delete(userId);
             
             if (deleted) {
-                response.sendRedirect(request.getContextPath() + "/admin/users?success=deleted");
+                response.sendRedirect(request.getContextPath() + "/admin-dashboard?success=deleted");
             } else {
-                response.sendRedirect(request.getContextPath() + "/admin/users?error=delete_failed");
+                response.sendRedirect(request.getContextPath() + "/admin-dashboard?error=delete_failed");
             }
         } else {
-            response.sendRedirect(request.getContextPath() + "/admin/users");
+            response.sendRedirect(request.getContextPath() + "/admin-dashboard");
         }
     }
     

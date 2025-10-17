@@ -25,32 +25,50 @@
         <servlet-name>ManagePermissionsServlet</servlet-name>
         <servlet-class>Controller.ManagePermissionsServlet</servlet-class>
     </servlet>
+    
+    <!-- System Configuration Servlet -->
+    <servlet>
+        <servlet-name>SystemConfigServlet</servlet-name>
+        <servlet-class>Controller.SystemConfigServlet</servlet-class>
+    </servlet>
 
     <!-- Servlet Mappings for User Management -->
     <servlet-mapping>
         <servlet-name>UserServlet</servlet-name>
-        <url-pattern>/admin/users</url-pattern>
+        <url-pattern>/admin-dashboard</url-pattern>
     </servlet-mapping>
+
     <servlet-mapping>
         <servlet-name>ToggleUserServlet</servlet-name>
-        <url-pattern>/admin/users/toggle</url-pattern>
+        <url-pattern>/admin-dashboard/toggle</url-pattern>
     </servlet-mapping>
+
     <servlet-mapping>
         <servlet-name>EditServlet</servlet-name>
-        <url-pattern>/admin/users/edit</url-pattern>
+        <url-pattern>/admin-dashboard/edit</url-pattern>
     </servlet-mapping>
+
     <servlet-mapping>
         <servlet-name>CreateServlet</servlet-name>
-        <url-pattern>/admin/users/create</url-pattern>
+        <url-pattern>/admin-dashboard/create</url-pattern>
     </servlet-mapping>
+
     <servlet-mapping>
         <servlet-name>DeleteUserServlet</servlet-name>
-        <url-pattern>/admin/users/delete</url-pattern>
+        <url-pattern>/admin-dashboard/delete</url-pattern>
     </servlet-mapping>
+
     <servlet-mapping>
         <servlet-name>ManagePermissionsServlet</servlet-name>
         <url-pattern>/admin/permissions</url-pattern>
     </servlet-mapping>
+    
+    <!-- System Configuration Mapping -->
+    <servlet-mapping>
+        <servlet-name>SystemConfigServlet</servlet-name>
+        <url-pattern>/admin-dashboard/config</url-pattern>
+    </servlet-mapping>
+
 
     <!-- Medication Request Servlets -->
     <servlet>
@@ -75,7 +93,7 @@
     </servlet>
 
     <!-- Servlet Mappings for Medication Requests -->
-     <servlet>
+    <servlet>
         <servlet-name>pharmacistdashboard</servlet-name>
         <servlet-class>Controller.pharmacistdashboard</servlet-class>
     </servlet>
@@ -179,20 +197,7 @@
         <servlet-name>HomeServlet</servlet-name>
         <url-pattern>/home</url-pattern>
     </servlet-mapping>
-    
 
-<!-- ASN Servlet Configuration -->
-<servlet>
-    <servlet-name>ASNServlet</servlet-name>
-    <servlet-class>Controller.ASNServlet</servlet-class>
-    <load-on-startup>1</load-on-startup>
-</servlet>
-
-<servlet-mapping>
-    <servlet-name>ASNServlet</servlet-name>
-    <url-pattern>/asn</url-pattern>
-    <url-pattern>/asn/*</url-pattern>
-</servlet-mapping>
     <!-- Welcome File -->
     <welcome-file-list>
         <welcome-file>home.jsp</welcome-file>

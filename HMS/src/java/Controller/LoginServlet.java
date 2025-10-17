@@ -68,7 +68,7 @@ public class LoginServlet extends HttpServlet {
                     response.sendRedirect("jsp/staff-dashboard.jsp"); // Điều hướng đến dashboard của nhân viên
                     break;
                 case "Admin":
-                    response.sendRedirect("admin/dashboard.jsp"); // Điều hướng đến dashboard của quản trị viên
+                    response.sendRedirect("admin-dashboard"); // Điều hướng đến dashboard của quản trị viên
                     break;
                 case "Supplier":
                     response.sendRedirect("jsp/supplier-dashboard.jsp"); // Điều hướng đến dashboard của nhà cung cấp

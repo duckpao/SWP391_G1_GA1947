@@ -169,7 +169,7 @@
         💡 Tài khoản mới sẽ được kích hoạt tự động sau khi tạo
       </div>
       
-      <form action="${pageContext.request.contextPath}/admin/users/create" method="post">
+      <form action="${pageContext.request.contextPath}/admin-dashboard/create" method="post">
         <div class="form-group">
           <label>Tên đăng nhập <span>*</span></label>
           <input type="text" name="username" placeholder="Nhập tên đăng nhập" required minlength="3">
@@ -208,7 +208,7 @@
           <button type="submit" class="btn btn-primary">
             ✓ Tạo tài khoản
           </button>
-          <a href="${pageContext.request.contextPath}/admin/users" class="btn btn-secondary">
+          <a href="${pageContext.request.contextPath}/admin-dashboard" class="btn btn-secondary">
             ← Quay lại
           </a>
         </div>

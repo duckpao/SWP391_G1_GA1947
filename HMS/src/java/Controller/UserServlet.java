@@ -14,7 +14,6 @@ import model.User;
 /**
  * Servlet for managing users with filter support
  */
-@WebServlet(name = "UserServlet", urlPatterns = {"/admin/users"})
 public class UserServlet extends HttpServlet {
     
     private final UserDAO userDAO = new UserDAO();

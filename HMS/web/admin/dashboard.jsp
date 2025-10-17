@@ -453,7 +453,7 @@
                     <a class="btn btn-primary" href="${pageContext.request.contextPath}/admin/permissions">
                         🔐 Phân quyền
                     </a>
-                    <a class="btn btn-primary" href="${pageContext.request.contextPath}/admin/users/create">
+                    <a class="btn btn-primary" href="${pageContext.request.contextPath}/admin-dashboard/create">
                         ➕ Tạo tài khoản mới
                     </a>
                 </div>
@@ -516,7 +516,7 @@
                         <h2>🔍 Tìm kiếm & Lọc</h2>
                     </div>
 
-                    <form method="get" action="${pageContext.request.contextPath}/admin/users">
+                    <form method="get" action="${pageContext.request.contextPath}/admin-dashboard">
                         <div class="filter-grid">
                             <div class="form-group">
                                 <label for="keyword">Từ khóa</label>
@@ -554,7 +554,7 @@
                         </div>
 
                         <div class="filter-actions">
-                            <a href="${pageContext.request.contextPath}/admin/users" class="btn btn-reset">
+                            <a href="${pageContext.request.contextPath}/admin-dashboard" class="btn btn-reset">
                                 🔄 Xóa bộ lọc
                             </a>
                             <button type="submit" class="btn btn-primary">
@@ -568,7 +568,7 @@
                                 <c:if test="${not empty param.keyword}">
                                     <span class="filter-tag">
                                         Từ khóa: "${param.keyword}"
-                                        <a href="${pageContext.request.contextPath}/admin/users?role=${param.role}&status=${param.status}">
+                                        <a href="${pageContext.request.contextPath}/admin-dashboard?role=${param.role}&status=${param.status}">
                                             <button type="button">×</button>
                                         </a>
                                     </span>
@@ -576,7 +576,7 @@
                                 <c:if test="${not empty param.role}">
                                     <span class="filter-tag">
                                         Vai trò: ${param.role}
-                                        <a href="${pageContext.request.contextPath}/admin/users?keyword=${param.keyword}&status=${param.status}">
+                                        <a href="${pageContext.request.contextPath}/admin-dashboard?keyword=${param.keyword}&status=${param.status}">
                                             <button type="button">×</button>
                                         </a>
                                     </span>
@@ -584,7 +584,7 @@
                                 <c:if test="${not empty param.status}">
                                     <span class="filter-tag">
                                         Trạng thái: ${param.status == 'active' ? 'Đang hoạt động' : 'Bị khóa'}
-                                        <a href="${pageContext.request.contextPath}/admin/users?keyword=${param.keyword}&role=${param.role}">
+                                        <a href="${pageContext.request.contextPath}/admin-dashboard?keyword=${param.keyword}&role=${param.role}">
                                             <button type="button">×</button>
                                         </a>
                                     </span>
@@ -649,11 +649,11 @@
                                                             </span>
                                                         </c:when>
                                                         <c:otherwise>
-                                                            <a class="btn btn-edit" href="${pageContext.request.contextPath}/admin/users/edit?id=${u.userId}">
+                                                            <a class="btn btn-edit" href="${pageContext.request.contextPath}/admin-dashboard/edit?id=${u.userId}">
                                                                 ✏️ Sửa
                                                             </a>
 
-                                                            <form class="inline" action="${pageContext.request.contextPath}/admin/users/toggle" method="post">
+                                                            <form class="inline" action="${pageContext.request.contextPath}/admin-dashboard/toggle" method="post">
                                                                 <input type="hidden" name="id" value="${u.userId}" />
                                                                 <input type="hidden" name="active" value="${!u.isActive}" />
                                                                 <button class="btn ${u.isActive ? 'btn-toggle' : 'btn-unlock'}" type="submit">
@@ -689,7 +689,7 @@
                 </div>
                 <div class="modal-actions">
                     <button class="btn btn-cancel" onclick="closeDeleteModal()">Hủy</button>
-                    <form id="deleteForm" class="inline" action="${pageContext.request.contextPath}/admin/users/delete" method="post">
+                    <form id="deleteForm" class="inline" action="${pageContext.request.contextPath}/admin-dashboard/delete" method="post">
                         <input type="hidden" name="id" id="deleteUserId" />
                         <button class="btn btn-delete" type="submit">Xác nhận xóa</button>
                     </form>

@@ -25,35 +25,38 @@
         <servlet-name>ManagePermissionsServlet</servlet-name>
         <servlet-class>Controller.ManagePermissionsServlet</servlet-class>
     </servlet>
-    <servlet>
-        <servlet-name>pharmacistdashboard</servlet-name>
-        <servlet-class>Controller.pharmacistdashboard</servlet-class>
-    </servlet>
+
     <!-- Servlet Mappings for User Management -->
     <servlet-mapping>
         <servlet-name>UserServlet</servlet-name>
-        <url-pattern>/admin/users</url-pattern>
+        <url-pattern>/admin-dashboard</url-pattern>
     </servlet-mapping>
+
     <servlet-mapping>
         <servlet-name>ToggleUserServlet</servlet-name>
-        <url-pattern>/admin/users/toggle</url-pattern>
+        <url-pattern>/admin-dashboard/toggle</url-pattern>
     </servlet-mapping>
+
     <servlet-mapping>
         <servlet-name>EditServlet</servlet-name>
-        <url-pattern>/admin/users/edit</url-pattern>
+        <url-pattern>/admin-dashboard/edit</url-pattern>
     </servlet-mapping>
+
     <servlet-mapping>
         <servlet-name>CreateServlet</servlet-name>
-        <url-pattern>/admin/users/create</url-pattern>
+        <url-pattern>/admin-dashboard/create</url-pattern>
     </servlet-mapping>
+
     <servlet-mapping>
         <servlet-name>DeleteUserServlet</servlet-name>
-        <url-pattern>/admin/users/delete</url-pattern>
+        <url-pattern>/admin-dashboard/delete</url-pattern>
     </servlet-mapping>
+
     <servlet-mapping>
         <servlet-name>ManagePermissionsServlet</servlet-name>
         <url-pattern>/admin/permissions</url-pattern>
     </servlet-mapping>
+
 
     <!-- Medication Request Servlets -->
     <servlet>
@@ -78,6 +81,10 @@
     </servlet>
 
     <!-- Servlet Mappings for Medication Requests -->
+    <servlet>
+        <servlet-name>pharmacistdashboard</servlet-name>
+        <servlet-class>Controller.pharmacistdashboard</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>DoctorDashboardServlet</servlet-name>
         <url-pattern>/doctor-dashboard</url-pattern>
@@ -110,6 +117,7 @@
         <servlet-name>pharmacistdashboard</servlet-name>
         <url-pattern>/pharmacist-dashboard</url-pattern>
     </servlet-mapping>
+
     <!-- Additional Servlets -->
     <servlet>
         <servlet-name>RegisterServlet</servlet-name>

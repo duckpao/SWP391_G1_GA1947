@@ -377,7 +377,7 @@
         <span class="header-icon">🔐</span>
         Quản lý phân quyền
       </h1>
-      <a class="btn btn-back" href="${pageContext.request.contextPath}/admin/users">
+      <a class="btn btn-back" href="${pageContext.request.contextPath}/admin-dashboard">
         ← Quay lại danh sách
       </a>
     </div>
@@ -578,10 +578,19 @@
     // Toggle all permissions
     function toggleAllPermissions(checkbox) {
       const allCheckboxes = document.querySelectorAll('.permission-input');
+      const isChecked = checkbox.checked;
+      
       allCheckboxes.forEach(cb => {
-        cb.checked = checkbox.checked;
-        updateCard(cb);
+        cb.checked = isChecked;
+        const card = cb.closest('.permission-card');
+        if (isChecked) {
+          card.classList.add('selected');
+        } else {
+          card.classList.remove('selected');
+        }
       });
+      
+      updateSelectedCount();
     }
     
     // Update select all checkbox state

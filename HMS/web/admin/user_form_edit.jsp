@@ -215,7 +215,7 @@
                     ℹ️ Không thể thay đổi tên đăng nhập. Để đổi mật khẩu, vui lòng sử dụng chức năng riêng.
                 </div>
 
-                <form action="${pageContext.request.contextPath}/admin/users/edit" method="post">
+                <form action="${pageContext.request.contextPath}/admin-dashboard/edit" method="post">
                     <input type="hidden" name="userId" value="${user.userId}">
                     <input type="hidden" name="username" value="${user.username}">  <!-- Add this -->
 
@@ -251,7 +251,7 @@
                         <button type="submit" class="btn btn-primary">
                             ✓ Cập nhật
                         </button>
-                        <a href="${pageContext.request.contextPath}/admin/users" class="btn btn-secondary">
+                        <a href="${pageContext.request.contextPath}/admin-dashboard" class="btn btn-secondary">
                             ← Quay lại
                         </a>
                     </div>

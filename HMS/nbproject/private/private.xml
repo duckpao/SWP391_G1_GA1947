@@ -1,45 +1,21 @@
-<<<<<<< HEAD
 <?xml version="1.0" encoding="UTF-8"?>
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/DAO/ManagerDAO.java</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/model/StockAlert.java</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/model/PurchaseOrder.java</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/DAO/DBContext.java</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/Controller/CreateStockServlet.java</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/model/Manager.java</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/web/create-stock-request.jsp</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/Controller/LoginServlet.java</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/model/Supplier.java</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/web/manager-dashboard.jsp</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/web/WEB-INF/web.xml</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/Controller/ApproveStockServlet.java</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/Controller/ManagerDashboardServlet.java</file>
+            <file>file:/E:/SWP391_G1_GA1947/HMS/src/java/Controller/ASNServlet.java</file>
+            <file>file:/E:/SWP391_G1_GA1947/HMS/src/java/Controller/HomeServlet.java</file>
+            <file>file:/E:/SWP391_G1_GA1947/HMS/src/java/Controller/CreateMedicationRequestServlet.java</file>
+            <file>file:/E:/SWP391_G1_GA1947/HMS/web/META-INF/context.xml</file>
+            <file>file:/E:/SWP391_G1_GA1947/HMS/src/java/util/PasswordUtils.java</file>
+            <file>file:/E:/SWP391_G1_GA1947/HMS/src/java/Controller/CancelMedicationRequestServlet.java</file>
+            <file>file:/E:/SWP391_G1_GA1947/HMS/src/java/Controller/ForgotPasswordServlet.java</file>
+            <file>file:/E:/SWP391_G1_GA1947/HMS/src/java/Controller/DoctorDashboardServlet.java</file>
+            <file>file:/E:/SWP391_G1_GA1947/HMS/src/java/DAO/SupplierDAO.java</file>
+            <file>file:/E:/SWP391_G1_GA1947/HMS/web/WEB-INF/web.xml</file>
+            <file>file:/E:/SWP391_G1_GA1947/HMS/src/java/Controller/ChangePasswordServlet.java</file>
+            <file>file:/E:/SWP391_G1_GA1947/HMS/src/java/model/ASN.java</file>
+            <file>file:/E:/SWP391_G1_GA1947/HMS/web/change-password.jsp</file>
         </group>
     </open-files>
 </project-private>
-=======
-<?xml version="1.0" encoding="UTF-8"?>
-<project-private xmlns="http://www.netbeans.org/ns/project-private/1">
-    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
-    <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group>
-            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/web/home.jsp</file>
-            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/src/java/Controller/ManageRequestsServlet.java</file>
-            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/src/java/Controller/ToggleUserServlet.java</file>
-            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/web/reset-password.jsp</file>
-            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/web/admin/dashboard.jsp</file>
-            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/web/forgot-password.jsp</file>
-            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/web/register.jsp</file>
-            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/src/java/Controller/RegisterServlet.java</file>
-            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/src/java/Controller/UserServlet.java</file>
-            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/web/change-password.jsp</file>
-            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/web/WEB-INF/web.xml</file>
-            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/web/login.jsp</file>
-            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/src/java/Controller/LoginServlet.java</file>
-        </group>
-    </open-files>
-</project-private>
->>>>>>> origin/developer

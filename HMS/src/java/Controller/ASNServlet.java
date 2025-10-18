@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class ASNServlet extends HttpServlet {
+
     private ASNDAO asnDAO;
 
     @Override
@@ -101,6 +102,9 @@ public class ASNServlet extends HttpServlet {
                         break;
                     case "delete":
                         deleteASN(req, out);
+                        break;
+                    case "createBySupplier":
+                        createASNBySupplier(req, out);
                         break;
                     default:
                         out.print("{\"error\": \"Invalid action\"}");
@@ -342,9 +346,36 @@ public class ASNServlet extends HttpServlet {
         return json.toString();
     }
 
+    private void createASNBySupplier(HttpServletRequest req, PrintWriter out) throws SQLException {
+        // Lấy supplierId từ session (sau khi đăng nhập)
+        Integer supplierId = (Integer) req.getSession().getAttribute("supplierId");
+
+        if (supplierId == null) {
+            out.print("{\"error\": \"Unauthorized. Please login as supplier.\"}");
+            return;
+        }
+
+        ASN asn = new ASN();
+        asn.setSupplierId(supplierId); // tự động gán supplierId từ session
+        asn.setPoId(Integer.parseInt(req.getParameter("poId")));
+        asn.setShipmentDate(LocalDate.parse(req.getParameter("shipmentDate")));
+        asn.setCarrier(req.getParameter("carrier"));
+        asn.setTrackingNumber(req.getParameter("trackingNumber"));
+        asn.setNotes(req.getParameter("notes"));
+        asn.setStatus("DRAFT");
+
+        boolean success = asnDAO.addASN(asn);
+        if (success) {
+            out.print("{\"message\": \"ASN created successfully by supplier\", \"asnId\": " + asn.getAsnId() + "}");
+        } else {
+            out.print("{\"error\": \"Failed to create ASN\"}");
+        }
+    }
+
     private String escapeJson(String value) {
-        if (value == null)
+        if (value == null) {
             return "";
+        }
         return value.replace("\\", "\\\\")
                 .replace("\"", "\\\"")
                 .replace("\b", "\\b")

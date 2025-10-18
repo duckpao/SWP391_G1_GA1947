@@ -12,10 +12,6 @@ import jakarta.servlet.http.HttpSession;
 import model.User;
 import util.PasswordUtils;
 
-/**
- *
- * @author ADMIN
- */
 public class LoginServlet extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)

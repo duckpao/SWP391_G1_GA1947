@@ -15,17 +15,17 @@ import java.util.List;
 
 public class ManagerDAO extends DBContext {
 
-    // Approve Stock Request
+    // Approve Stock Request - Chuyển từ Draft sang Sent
     public boolean approveStockRequest(int poId, int managerId) {
-        String query = "UPDATE PurchaseOrders SET status = 'Approved', manager_id = ?, updated_at = GETDATE() " +
-                      "WHERE po_id = ? AND TRIM(status) = 'Sent'";
+        String query = "UPDATE PurchaseOrders SET status = 'Sent', manager_id = ?, updated_at = GETDATE() " +
+                      "WHERE po_id = ? AND status = 'Draft'";
         try (PreparedStatement ps = connection.prepareStatement(query)) {
             ps.setInt(1, managerId);
             ps.setInt(2, poId);
             int result = ps.executeUpdate();
             System.out.println("Approve PO #" + poId + " by Manager #" + managerId + ": Affected rows = " + result);
             if (result == 0) {
-                System.out.println("Approve failed: PO #" + poId + " not found or status is not 'Sent'. Current status: " +
+                System.out.println("Approve failed: PO #" + poId + " not found or status is not 'Draft'. Current status: " +
                     getCurrentStatus(poId));
             }
             return result > 0;
@@ -40,19 +40,41 @@ public class ManagerDAO extends DBContext {
     public boolean rejectStockRequest(int poId, String reason) {
         String query = "UPDATE PurchaseOrders SET status = 'Rejected', " +
                       "notes = CONCAT(COALESCE(notes, ''), '\nRejection Reason: ', ?), updated_at = GETDATE() " +
-                      "WHERE po_id = ? AND TRIM(status) IN ('Draft', 'Sent')";
+                      "WHERE po_id = ? AND status = 'Draft'";
         try (PreparedStatement ps = connection.prepareStatement(query)) {
             ps.setString(1, reason);
             ps.setInt(2, poId);
             int result = ps.executeUpdate();
             System.out.println("Reject PO #" + poId + ": Affected rows = " + result);
             if (result == 0) {
-                System.out.println("Reject failed: PO #" + poId + " not found or status is not 'Draft' or 'Sent'. Current status: " +
+                System.out.println("Reject failed: PO #" + poId + " not found or status is not 'Draft'. Current status: " +
                     getCurrentStatus(poId));
             }
             return result > 0;
         } catch (SQLException e) {
             System.err.println("Error rejecting stock request #" + poId + ": " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // Cancel Stock Request - Chỉ cancel được khi status là Sent
+    public boolean cancelStockRequest(int poId, String reason) {
+        String query = "UPDATE PurchaseOrders SET status = 'Cancelled', " +
+                      "notes = CONCAT(COALESCE(notes, ''), '\nCancellation Reason: ', ?), updated_at = GETDATE() " +
+                      "WHERE po_id = ? AND status = 'Sent'";
+        try (PreparedStatement ps = connection.prepareStatement(query)) {
+            ps.setString(1, reason);
+            ps.setInt(2, poId);
+            int result = ps.executeUpdate();
+            System.out.println("Cancel PO #" + poId + ": Affected rows = " + result);
+            if (result == 0) {
+                System.out.println("Cancel failed: PO #" + poId + " not found or status is not 'Sent'. Current status: " +
+                    getCurrentStatus(poId));
+            }
+            return result > 0;
+        } catch (SQLException e) {
+            System.err.println("Error cancelling stock request #" + poId + ": " + e.getMessage());
             e.printStackTrace();
             return false;
         }
@@ -66,8 +88,7 @@ public class ManagerDAO extends DBContext {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 String status = rs.getString("status");
-                System.out.println("Current status for PO #" + poId + ": '" + status + "', Length: " + status.length() + 
-                                   ", Bytes: " + status.getBytes().length);
+                System.out.println("Current status for PO #" + poId + ": '" + status + "'");
                 return status;
             }
             return "Not found";
@@ -77,7 +98,6 @@ public class ManagerDAO extends DBContext {
         }
     }
 
-    // Các phương thức khác giữ nguyên
     public List<Medicine> getAllMedicines() {
         List<Medicine> medicines = new ArrayList<>();
         String query = "SELECT medicine_id, name, category, description FROM Medicines ORDER BY name";
@@ -124,8 +144,8 @@ public class ManagerDAO extends DBContext {
 
     public int createPurchaseOrder(int managerId, Integer supplierId, Date expectedDeliveryDate, String notes, 
                                   List<PurchaseOrderItem> items) {
-        String poQuery = "INSERT INTO PurchaseOrders (manager_id, supplier_id, status, order_date, expected_delivery_date, notes) " +
-                        "VALUES (?, ?, 'Draft', GETDATE(), ?, ?)";
+        String poQuery = "INSERT INTO PurchaseOrders (manager_id, supplier_id, status, order_date, expected_delivery_date, notes, updated_at) " +
+                        "VALUES (?, ?, 'Draft', GETDATE(), ?, ?, GETDATE())";
         String itemQuery = "INSERT INTO PurchaseOrderItems (po_id, medicine_id, quantity, priority, notes) " +
                          "VALUES (?, ?, ?, ?, ?)";
         
@@ -186,7 +206,8 @@ public class ManagerDAO extends DBContext {
 
     public boolean updatePurchaseOrder(int poId, Integer supplierId, Date expectedDeliveryDate, String notes, 
                                       List<PurchaseOrderItem> items) {
-        String poQuery = "UPDATE PurchaseOrders SET supplier_id = ?, expected_delivery_date = ?, notes = ? WHERE po_id = ? AND status = 'Draft'";
+        String poQuery = "UPDATE PurchaseOrders SET supplier_id = ?, expected_delivery_date = ?, notes = ?, updated_at = GETDATE() " +
+                        "WHERE po_id = ? AND status = 'Draft'";
         String deleteItemsQuery = "DELETE FROM PurchaseOrderItems WHERE po_id = ?";
         String itemQuery = "INSERT INTO PurchaseOrderItems (po_id, medicine_id, quantity, priority, notes) " +
                          "VALUES (?, ?, ?, ?, ?)";
@@ -392,7 +413,7 @@ public class ManagerDAO extends DBContext {
                       "FROM PurchaseOrders po " +
                       "LEFT JOIN Suppliers s ON po.supplier_id = s.supplier_id " +
                       "LEFT JOIN Users u ON po.manager_id = u.user_id " +
-                      "WHERE TRIM(po.status) IN ('Draft', 'Sent') " +
+                      "WHERE po.status IN ('Draft', 'Sent') " +
                       "ORDER BY po.order_date DESC";
         
         try (PreparedStatement ps = connection.prepareStatement(query);
@@ -503,4 +524,37 @@ public class ManagerDAO extends DBContext {
         }
         return null;
     }
+    public List<PurchaseOrder> getCancelledStockRequests() {
+    List<PurchaseOrder> requests = new ArrayList<>();
+    String query = "SELECT po.po_id, po.manager_id, po.supplier_id, po.status, " +
+                  "po.order_date, po.expected_delivery_date, po.notes, " +
+                  "s.name as supplier_name, u.username as manager_name " +
+                  "FROM PurchaseOrders po " +
+                  "LEFT JOIN Suppliers s ON po.supplier_id = s.supplier_id " +
+                  "LEFT JOIN Users u ON po.manager_id = u.user_id " +
+                  "WHERE TRIM(po.status) = 'Cancelled' " +
+                  "ORDER BY po.order_date DESC";
+    
+    try (PreparedStatement ps = connection.prepareStatement(query);
+         ResultSet rs = ps.executeQuery()) {
+        while (rs.next()) {
+            PurchaseOrder po = new PurchaseOrder();
+            po.setPoId(rs.getInt("po_id"));
+            po.setManagerId(rs.getInt("manager_id"));
+            po.setSupplierId(rs.getInt("supplier_id"));
+            po.setStatus(rs.getString("status"));
+            po.setOrderDate(rs.getDate("order_date"));
+            po.setExpectedDeliveryDate(rs.getDate("expected_delivery_date"));
+            po.setNotes(rs.getString("notes"));
+            po.setSupplierName(rs.getString("supplier_name"));
+            po.setManagerName(rs.getString("manager_name"));
+            requests.add(po);
+        }
+        System.out.println("Loaded " + requests.size() + " cancelled stock requests.");
+    } catch (SQLException e) {
+        System.err.println("Error getting cancelled stock requests: " + e.getMessage());
+        e.printStackTrace();
+    }
+    return requests;
+}
 }

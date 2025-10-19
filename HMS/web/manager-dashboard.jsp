@@ -96,6 +96,7 @@
                 <p class="text-muted">Welcome back, ${manager.username}!</p>
             </div>
         </div>
+            
 
         <!-- Statistics Cards -->
         <div class="row">
@@ -138,6 +139,9 @@
                             <a href="cancelled-tasks" class="btn btn-secondary btn-sm">
                                 <i class="fas fa-ban"></i> View Cancelled Tasks
                             </a>
+                                    <a href="tasks/assign" class="btn btn-info btn-sm">
+            <i class="fas fa-tasks"></i> Assign Tasks
+        </a>
                         </div>
                     </div>
                     <div class="card-body">

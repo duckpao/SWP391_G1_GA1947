@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
+import model.Task;
 
 public class ManagerDAO extends DBContext {
 
@@ -556,5 +557,178 @@ public class ManagerDAO extends DBContext {
         e.printStackTrace();
     }
     return requests;
+}
+    public List<Manager> getAllAuditors() {
+        List<Manager> auditors = new ArrayList<>();
+        String query = "SELECT * FROM Users WHERE role = 'Auditor' AND is_active = 1 ORDER BY username";
+        try (PreparedStatement ps = connection.prepareStatement(query);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Manager auditor = new Manager();
+                auditor.setUserId(rs.getInt("user_id"));
+                auditor.setUsername(rs.getString("username"));
+                auditor.setEmail(rs.getString("email"));
+                auditor.setPhone(rs.getString("phone"));
+                auditors.add(auditor);
+            }
+            System.out.println("Loaded " + auditors.size() + " auditors.");
+        } catch (SQLException e) {
+            System.err.println("Error getting auditors: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return auditors;
+    }
+
+    // Thêm dữ liệu Auditor mẫu nếu chưa có
+    public void initializeAuditors() {
+        String checkQuery = "SELECT COUNT(*) FROM Users WHERE role = 'Auditor'";
+        try (PreparedStatement ps = connection.prepareStatement(checkQuery);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next() && rs.getInt(1) == 0) {
+                String insertQuery = "INSERT INTO Users (username, email, phone, role, is_active, password) VALUES (?, ?, ?, 'Auditor', 1, ?)";
+                try (PreparedStatement insertPs = connection.prepareStatement(insertQuery)) {
+                    insertPs.setString(1, "auditor1");
+                    insertPs.setString(2, "auditor1@example.com");
+                    insertPs.setString(3, "0907654321");
+                    insertPs.setString(4, "password123");
+                    insertPs.executeUpdate();
+                    System.out.println("Initialized 1 auditor member.");
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error initializing auditors: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    // Gán nhiệm vụ cho Auditor
+    public boolean assignTask(int poId, int auditorId, String taskType, Date deadline) {
+        String query = "INSERT INTO Tasks (po_id, staff_id, task_type, deadline, status) VALUES (?, ?, ?, ?, 'Pending')";
+        try (PreparedStatement ps = connection.prepareStatement(query)) {
+            ps.setInt(1, poId);
+            ps.setInt(2, auditorId);
+            ps.setString(3, taskType);
+            ps.setDate(4, deadline);
+            int result = ps.executeUpdate();
+            System.out.println("Assigned task for PO #" + poId + " to Auditor #" + auditorId + ": Affected rows = " + result);
+            return result > 0;
+        } catch (SQLException e) {
+            System.err.println("Error assigning task for PO #" + poId + ": " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // Lấy danh sách nhiệm vụ
+    public List<Task> getTasks() {
+        List<Task> tasks = new ArrayList<>();
+        String query = "SELECT t.task_id, t.po_id, t.staff_id, t.task_type, t.deadline, t.status, " +
+                      "u.username as staff_name, po.notes as po_notes " +
+                      "FROM Tasks t " +
+                      "LEFT JOIN Users u ON t.staff_id = u.user_id " +
+                      "LEFT JOIN PurchaseOrders po ON t.po_id = po.po_id " +
+                      "ORDER BY t.deadline DESC";
+        try (PreparedStatement ps = connection.prepareStatement(query);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Task task = new Task();
+                task.setTaskId(rs.getInt("task_id"));
+                task.setPoId(rs.getInt("po_id"));
+                task.setStaffId(rs.getInt("staff_id"));
+                task.setTaskType(rs.getString("task_type"));
+                task.setDeadline(rs.getDate("deadline"));
+                task.setStatus(rs.getString("status"));
+                task.setStaffName(rs.getString("staff_name"));
+                task.setPoNotes(rs.getString("po_notes"));
+                tasks.add(task);
+            }
+            System.out.println("Loaded " + tasks.size() + " tasks.");
+        } catch (SQLException e) {
+            System.err.println("Error getting tasks: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return tasks;
+    }
+    // Thêm các method này vào class ManagerDAO
+
+// Cancel task
+public boolean cancelTask(int taskId) {
+    String query = "UPDATE Tasks SET status = 'Cancelled', updated_at = GETDATE() " +
+                  "WHERE task_id = ? AND status != 'Completed'";
+    try (PreparedStatement ps = connection.prepareStatement(query)) {
+        ps.setInt(1, taskId);
+        int result = ps.executeUpdate();
+        System.out.println("Cancel Task #" + taskId + ": Affected rows = " + result);
+        return result > 0;
+    } catch (SQLException e) {
+        System.err.println("Error cancelling task #" + taskId + ": " + e.getMessage());
+        e.printStackTrace();
+        return false;
+    }
+}
+
+// Get task by ID with full details
+public Task getTaskById(int taskId) {
+    String query = "SELECT t.task_id, t.po_id, t.staff_id, t.task_type, t.deadline, t.status, " +
+                  "t.created_at, t.updated_at, " +
+                  "u.username as staff_name, u.email as staff_email, " +
+                  "po.notes as po_notes, po.order_date, po.expected_delivery_date, po.status as po_status, " +
+                  "s.name as supplier_name " +
+                  "FROM Tasks t " +
+                  "LEFT JOIN Users u ON t.staff_id = u.user_id " +
+                  "LEFT JOIN PurchaseOrders po ON t.po_id = po.po_id " +
+                  "LEFT JOIN Suppliers s ON po.supplier_id = s.supplier_id " +
+                  "WHERE t.task_id = ?";
+    try (PreparedStatement ps = connection.prepareStatement(query)) {
+        ps.setInt(1, taskId);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            Task task = new Task();
+            task.setTaskId(rs.getInt("task_id"));
+            task.setPoId(rs.getInt("po_id"));
+            task.setStaffId(rs.getInt("staff_id"));
+            task.setTaskType(rs.getString("task_type"));
+            task.setDeadline(rs.getDate("deadline"));
+            task.setStatus(rs.getString("status"));
+            task.setCreatedAt(rs.getDate("created_at"));
+            task.setUpdatedAt(rs.getDate("updated_at"));
+            task.setStaffName(rs.getString("staff_name"));
+            task.setPoNotes(rs.getString("po_notes"));
+            
+            // Additional fields - bạn cần thêm vào model Task nếu muốn dùng
+            // task.setStaffEmail(rs.getString("staff_email"));
+            // task.setSupplierName(rs.getString("supplier_name"));
+            // task.setOrderDate(rs.getDate("order_date"));
+            // task.setExpectedDeliveryDate(rs.getDate("expected_delivery_date"));
+            // task.setPoStatus(rs.getString("po_status"));
+            
+            System.out.println("Loaded Task #" + taskId);
+            return task;
+        }
+        System.out.println("Task #" + taskId + " not found.");
+    } catch (SQLException e) {
+        System.err.println("Error getting task #" + taskId + ": " + e.getMessage());
+        e.printStackTrace();
+    }
+    return null;
+}
+
+// Update task
+public boolean updateTask(int taskId, int auditorId, String taskType, Date deadline) {
+    String query = "UPDATE Tasks SET staff_id = ?, task_type = ?, deadline = ?, updated_at = GETDATE() " +
+                  "WHERE task_id = ? AND status = 'Pending'";
+    try (PreparedStatement ps = connection.prepareStatement(query)) {
+        ps.setInt(1, auditorId);
+        ps.setString(2, taskType);
+        ps.setDate(3, deadline);
+        ps.setInt(4, taskId);
+        int result = ps.executeUpdate();
+        System.out.println("Update Task #" + taskId + ": Affected rows = " + result);
+        return result > 0;
+    } catch (SQLException e) {
+        System.err.println("Error updating task #" + taskId + ": " + e.getMessage());
+        e.printStackTrace();
+        return false;
+    }
 }
 }

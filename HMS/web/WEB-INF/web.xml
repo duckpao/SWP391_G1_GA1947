@@ -40,6 +40,10 @@
         <servlet-name>CancelledTasksServlet</servlet-name>
         <servlet-class>Controller.CancelledTasksServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>AssignTasksServlet</servlet-name>
+        <servlet-class>Controller.AssignTasksServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>DoctorDashboardServlet</servlet-name>
         <url-pattern>/doctor-dashboard</url-pattern>
@@ -91,6 +95,10 @@
     <servlet-mapping>
         <servlet-name>CancelledTasksServlet</servlet-name>
         <url-pattern>/cancelled-tasks</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AssignTasksServlet</servlet-name>
+        <url-pattern>/tasks/assign</url-pattern>
     </servlet-mapping>
     <welcome-file-list>
         <welcome-file>home.jsp</welcome-file>

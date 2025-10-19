@@ -30,7 +30,7 @@
         <servlet-name>SystemConfigServlet</servlet-name>
         <servlet-class>Controller.SystemConfigServlet</servlet-class>
     </servlet>
-    <!-- Servlet Mappings for User Management -->
+    <!-- OTP and Reset Verification Servlets -->
     <servlet>
         <servlet-name>VerifyOTPServlet</servlet-name>
         <servlet-class>Controller.VerifyOTPServlet</servlet-class>
@@ -39,6 +39,8 @@
         <servlet-name>VerifyResetServlet</servlet-name>
         <servlet-class>Controller.VerifyResetServlet</servlet-class>
     </servlet>
+
+    <!-- User Management Servlet Mappings -->
     <servlet-mapping>
         <servlet-name>UserServlet</servlet-name>
         <url-pattern>/admin-dashboard</url-pattern>
@@ -63,11 +65,19 @@
         <servlet-name>ManagePermissionsServlet</servlet-name>
         <url-pattern>/admin/permissions</url-pattern>
     </servlet-mapping>
-    <!-- System Configuration Mapping -->
     <servlet-mapping>
         <servlet-name>SystemConfigServlet</servlet-name>
         <url-pattern>/admin-dashboard/config</url-pattern>
     </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>VerifyOTPServlet</servlet-name>
+        <url-pattern>/VerifyOTPServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>VerifyResetServlet</servlet-name>
+        <url-pattern>/VerifyResetServlet</url-pattern>
+    </servlet-mapping>
+
     <!-- Medication Request Servlets -->
     <servlet>
         <servlet-name>ManageRequestsServlet</servlet-name>
@@ -89,44 +99,52 @@
         <servlet-name>ViewMedicineServlet</servlet-name>
         <servlet-class>Controller.ViewMedicineServlet</servlet-class>
     </servlet>
-    <!-- Servlet Mappings for Medication Requests -->
+
+    <!-- Pharmacist Dashboard Servlet -->
     <servlet>
         <servlet-name>pharmacistdashboard</servlet-name>
         <servlet-class>Controller.pharmacistdashboard</servlet-class>
     </servlet>
-    <servlet-mapping>
-        <servlet-name>DoctorDashboardServlet</servlet-name>
-        <url-pattern>/doctor-dashboard</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>CreateMedicationRequestServlet</servlet-name>
-        <url-pattern>/create-request</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>ManageRequestsServlet</servlet-name>
-        <url-pattern>/manage-requests</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>UpdateMedicationRequestServlet</servlet-name>
-        <url-pattern>/update-request</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>CancelMedicationRequestServlet</servlet-name>
-        <url-pattern>/cancel-request</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>ViewRequestHistoryServlet</servlet-name>
-        <url-pattern>/view-request-history</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>ViewMedicineServlet</servlet-name>
-        <url-pattern>/view-medicine</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>pharmacistdashboard</servlet-name>
-        <url-pattern>/pharmacist-dashboard</url-pattern>
-    </servlet-mapping>
-    <!-- Additional Servlets -->
+
+    <!-- Manager Dashboard and Stock Management Servlets -->
+    <servlet>
+        <servlet-name>ManagerDashboardServlet</servlet-name>
+        <servlet-class>Controller.ManagerDashboardServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ApproveStockServlet</servlet-name>
+        <servlet-class>Controller.ApproveStockServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>CreateStockServlet</servlet-name>
+        <servlet-class>Controller.CreateStockServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ManageStockServlet</servlet-name>
+        <servlet-class>Controller.ManageStockServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>CancelledTasksServlet</servlet-name>
+        <servlet-class>Controller.CancelledTasksServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>AssignTasksServlet</servlet-name>
+        <servlet-class>Controller.AssignTasksServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>StockAlertsServlet</servlet-name>
+        <servlet-class>Controller.StockAlertsServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ExpiryReportServlet</servlet-name>
+        <servlet-class>Controller.ExpiryReportServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>InventoryReportServlet</servlet-name>
+        <servlet-class>Controller.InventoryReportServlet</servlet-class>
+    </servlet>
+
+    <!-- Authentication Servlets -->
     <servlet>
         <servlet-name>RegisterServlet</servlet-name>
         <servlet-class>Controller.RegisterServlet</servlet-class>
@@ -163,7 +181,86 @@
         <servlet-name>CreateMedicationRequestServlet</servlet-name>
         <servlet-class>Controller.CreateMedicationRequestServlet</servlet-class>
     </servlet>
-    <!-- Servlet Mappings for Additional Servlets -->
+
+    <!-- Medication Request Servlet Mappings -->
+    <servlet-mapping>
+        <servlet-name>DoctorDashboardServlet</servlet-name>
+        <url-pattern>/doctor-dashboard</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CreateMedicationRequestServlet</servlet-name>
+        <url-pattern>/create-request</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ManageRequestsServlet</servlet-name>
+        <url-pattern>/manage-requests</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>UpdateMedicationRequestServlet</servlet-name>
+        <url-pattern>/update-request</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CancelMedicationRequestServlet</servlet-name>
+        <url-pattern>/cancel-request</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ViewRequestHistoryServlet</servlet-name>
+        <url-pattern>/view-request-history</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ViewMedicineServlet</servlet-name>
+        <url-pattern>/view-medicine</url-pattern>
+    </servlet-mapping>
+
+    <!-- Pharmacist Dashboard Mapping -->
+    <servlet-mapping>
+        <servlet-name>pharmacistdashboard</servlet-name>
+        <url-pattern>/pharmacist-dashboard</url-pattern>
+    </servlet-mapping>
+
+    <!-- Manager Dashboard and Stock Management Mappings -->
+    <servlet-mapping>
+        <servlet-name>ManagerDashboardServlet</servlet-name>
+        <url-pattern>/manager-dashboard</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ApproveStockServlet</servlet-name>
+        <url-pattern>/approve-stock</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CreateStockServlet</servlet-name>
+        <url-pattern>/create-stock</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ManageStockServlet</servlet-name>
+        <url-pattern>/manage-stock</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ManageStockServlet</servlet-name>
+        <url-pattern>/edit-stock</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CancelledTasksServlet</servlet-name>
+        <url-pattern>/cancelled-tasks</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AssignTasksServlet</servlet-name>
+        <url-pattern>/tasks/assign</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>StockAlertsServlet</servlet-name>
+        <url-pattern>/stock-alerts</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ExpiryReportServlet</servlet-name>
+        <url-pattern>/expiry-report</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>InventoryReportServlet</servlet-name>
+        <url-pattern>/inventory-report</url-pattern>
+    </servlet-mapping>
+
+    <!-- Authentication Servlet Mappings -->
     <servlet-mapping>
         <servlet-name>RegisterServlet</servlet-name>
         <url-pattern>/register</url-pattern>
@@ -192,15 +289,8 @@
         <servlet-name>HomeServlet</servlet-name>
         <url-pattern>/home</url-pattern>
     </servlet-mapping>
+
     <!-- Welcome File -->
-    <servlet-mapping>
-        <servlet-name>VerifyOTPServlet</servlet-name>
-        <url-pattern>/VerifyOTPServlet</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>VerifyResetServlet</servlet-name>
-        <url-pattern>/VerifyResetServlet</url-pattern>
-    </servlet-mapping>
     <welcome-file-list>
         <welcome-file>home.jsp</welcome-file>
     </welcome-file-list>

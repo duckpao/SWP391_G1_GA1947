@@ -42,42 +42,57 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String emailOrUsername = request.getParameter("emailOrUsername"); // Email hoặc Username
+        // Chấp nhận cả email và username
+        String emailOrUsername = request.getParameter("emailOrUsername");
+        if (emailOrUsername == null || emailOrUsername.isEmpty()) {
+            // Fallback nếu form gửi "email" thay vì "emailOrUsername"
+            emailOrUsername = request.getParameter("email");
+        }
         String password = request.getParameter("password");
 
         UserDAO dao = new UserDAO();
         // Tìm kiếm người dùng theo email hoặc username
         User user = dao.findByEmailOrUsername(emailOrUsername);
 
+        // Xác thực mật khẩu với password hashing
         if (user != null && PasswordUtils.verify(password, user.getPasswordHash())) {
             HttpSession session = request.getSession();
-            session.setAttribute("userId", user.getUserId()); // Lưu userId
-            session.setAttribute("role", user.getRole());     // Lưu role
-            session.setAttribute("username", user.getUsername()); // Lưu username để hiển thị "Xin chào"
+            session.setAttribute("userId", user.getUserId());
+            session.setAttribute("role", user.getRole());
+            session.setAttribute("username", user.getUsername());
 
             // Redirect dựa trên role
             String role = user.getRole();
             switch (role) {
                 case "Doctor":
-                    response.sendRedirect("doctor-dashboard"); // Điều hướng đến dashboard của bác sĩ
+                    response.sendRedirect("doctor-dashboard");
+                    break;
+                case "Manager":
+                    response.sendRedirect("manager-dashboard");
                     break;
                 case "Pharmacist":
-                    response.sendRedirect("pharmacist-dashboard"); // Điều hướng đến dashboard của dược sĩ
+                    response.sendRedirect("pharmacist-dashboard");
                     break;
                 case "Staff":
-                    response.sendRedirect("jsp/staff-dashboard.jsp"); // Điều hướng đến dashboard của nhân viên
+                    response.sendRedirect("jsp/staff-dashboard.jsp");
                     break;
                 case "Admin":
-                    response.sendRedirect("admin-dashboard"); // Điều hướng đến dashboard của quản trị viên
+                    response.sendRedirect("admin-dashboard");
                     break;
                 case "Supplier":
-                    response.sendRedirect("jsp/supplier-dashboard.jsp"); // Điều hướng đến dashboard của nhà cung cấp
+                    response.sendRedirect("jsp/supplier-dashboard.jsp");
                     break;
                 case "Auditor":
-                    response.sendRedirect("jsp/auditor-dashboard.jsp"); // Điều hướng đến dashboard của kiểm toán viên
+                    response.sendRedirect("jsp/auditor-dashboard.jsp");
+                    break;
+                case "ProcurementOfficer":
+                    response.sendRedirect("procurement-dashboard");
+                    break;
+                case "Patient":
+                    response.sendRedirect("patient-dashboard");
                     break;
                 default:
-                    response.sendRedirect("home.jsp"); // Mặc định điều hướng về trang chủ
+                    response.sendRedirect("home.jsp");
                     break;
             }
         } else {

@@ -3,6 +3,7 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+            <!-- Files từ nhánh HEAD (Admin/System Config) -->
             <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/src/java/DAO/SystemConfigDAO.java</file>
             <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/web/admin/system-config.jsp</file>
             <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/src/java/Controller/ViewMedicineServlet.java</file>
@@ -11,6 +12,22 @@
             <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/src/java/model/SystemConfig.java</file>
             <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/web/WEB-INF/web.xml</file>
             <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/src/java/Controller/SystemConfigServlet.java</file>
+            
+            <!-- Files từ nhánh vu2 (Manager/Stock Management) -->
+            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/DAO/ManagerDAO.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/Controller/ExpiryReportServlet.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/model/Task.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/Controller/StockAlertsServlet.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/DAO/DBContext.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/Controller/AssignTasksServlet.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/model/ExpiryReport.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/Controller/InventoryReportServlet.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/web/assign-tasks.jsp</file>
+            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/model/InventoryReport.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/DAO/ReportDAO.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/web/manager-dashboard.jsp</file>
+            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/web/stock-alerts.jsp</file>
+            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/Controller/ManagerDashboardServlet.java</file>
         </group>
     </open-files>
 </project-private>

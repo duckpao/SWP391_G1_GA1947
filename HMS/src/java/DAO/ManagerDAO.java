@@ -355,56 +355,75 @@ public class ManagerDAO extends DBContext {
         return "Error fetching status";
     }
 
-    public List<StockAlert> getStockAlerts() {
-        List<StockAlert> alerts = new ArrayList<>();
-        String thresholdQuery = "SELECT config_value FROM SystemConfig WHERE config_key = 'low_stock_threshold'";
-        int threshold = 10;
-        
-        try {
-            try (PreparedStatement psThreshold = connection.prepareStatement(thresholdQuery);
-                 ResultSet rsThreshold = psThreshold.executeQuery()) {
-                if (rsThreshold.next()) {
-                    threshold = Integer.parseInt(rsThreshold.getString("config_value"));
-                }
+public List<StockAlert> getStockAlerts() {
+    List<StockAlert> alerts = new ArrayList<>();
+    String thresholdQuery = "SELECT config_value FROM SystemConfig WHERE config_key = 'low_stock_threshold'";
+    int threshold = 10;
+    
+    try {
+        // Get threshold
+        try (PreparedStatement psThreshold = connection.prepareStatement(thresholdQuery);
+             ResultSet rsThreshold = psThreshold.executeQuery()) {
+            if (rsThreshold.next()) {
+                threshold = Integer.parseInt(rsThreshold.getString("config_value"));
             }
-
-            String query = "SELECT m.medicine_id, m.name, m.category, " +
-                          "SUM(b.current_quantity) as total_quantity, " +
-                          "MIN(b.expiry_date) as nearest_expiry " +
-                          "FROM Batches b " +
-                          "JOIN Medicines m ON b.medicine_id = m.medicine_id " +
-                          "WHERE b.status != 'Expired' " +
-                          "GROUP BY m.medicine_id, m.name, m.category " +
-                          "HAVING SUM(b.current_quantity) < ?";
-            
-            try (PreparedStatement ps = connection.prepareStatement(query)) {
-                ps.setInt(1, threshold);
-                ResultSet rs = ps.executeQuery();
-                while (rs.next()) {
-                    StockAlert alert = new StockAlert();
-                    alert.setMedicineId(rs.getInt("medicine_id"));
-                    alert.setMedicineName(rs.getString("name"));
-                    alert.setCategory(rs.getString("category"));
-                    alert.setCurrentQuantity(rs.getInt("total_quantity"));
-                    alert.setThreshold(threshold);
-                    alert.setNearestExpiry(rs.getDate("nearest_expiry"));
-                    alert.setAlertLevel(calculateAlertLevel(rs.getInt("total_quantity"), threshold));
-                    alerts.add(alert);
-                }
-                System.out.println("Loaded " + alerts.size() + " stock alerts.");
-            }
-        } catch (SQLException e) {
-            System.err.println("Error getting stock alerts: " + e.getMessage());
-            e.printStackTrace();
         }
-        return alerts;
-    }
 
-    private String calculateAlertLevel(int quantity, int threshold) {
-        if (quantity == 0) return "Critical";
-        if (quantity < threshold / 2) return "High";
-        return "Medium";
+        // FIX: Đơn giản hóa logic - sử dụng SUM(b.current_quantity) cho tất cả medicines
+        // và so sánh với threshold một cách chính xác
+        String query = "SELECT m.medicine_id, m.name, m.category, " +
+                      "COALESCE(SUM(CASE WHEN b.status NOT IN ('Expired', 'Rejected') " +
+                      "                  THEN b.current_quantity ELSE 0 END), 0) as total_quantity, " +
+                      "MIN(CASE WHEN b.status NOT IN ('Expired', 'Rejected') " +
+                      "          THEN b.expiry_date ELSE NULL END) as nearest_expiry " +
+                      "FROM Medicines m " +
+                      "LEFT JOIN Batches b ON m.medicine_id = b.medicine_id " +
+                      "GROUP BY m.medicine_id, m.name, m.category " +
+                      "HAVING COALESCE(SUM(CASE WHEN b.status NOT IN ('Expired', 'Rejected') " +
+                      "                         THEN b.current_quantity ELSE 0 END), 0) <= ? " +
+                      "ORDER BY total_quantity ASC, m.name";
+        
+        try (PreparedStatement ps = connection.prepareStatement(query)) {
+            ps.setInt(1, threshold);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                StockAlert alert = new StockAlert();
+                alert.setMedicineId(rs.getInt("medicine_id"));
+                alert.setMedicineName(rs.getString("name"));
+                alert.setCategory(rs.getString("category"));
+                alert.setCurrentQuantity(rs.getInt("total_quantity"));
+                alert.setThreshold(threshold);
+                
+                java.sql.Date nearestExpiry = rs.getDate("nearest_expiry");
+                alert.setNearestExpiry(nearestExpiry);
+                
+                // Calculate alert level
+                int quantity = rs.getInt("total_quantity");
+                if (quantity == 0) {
+                    alert.setAlertLevel("Critical");
+                } else if (quantity < threshold / 2) {
+                    alert.setAlertLevel("High");
+                } else {
+                    alert.setAlertLevel("Medium");
+                }
+                
+                alerts.add(alert);
+            }
+            System.out.println("Loaded " + alerts.size() + " stock alerts (threshold: " + threshold + ").");
+        }
+    } catch (SQLException e) {
+        System.err.println("Error getting stock alerts: " + e.getMessage());
+        e.printStackTrace();
     }
+    return alerts;
+}
+
+// Helper method (giữ nguyên)
+private String calculateAlertLevel(int quantity, int threshold) {
+    if (quantity == 0) return "Critical";
+    if (quantity < threshold / 2) return "High";
+    return "Medium";
+}
 
     public List<PurchaseOrder> getPendingStockRequests() {
         List<PurchaseOrder> requests = new ArrayList<>();

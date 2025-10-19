@@ -44,6 +44,18 @@
         <servlet-name>AssignTasksServlet</servlet-name>
         <servlet-class>Controller.AssignTasksServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>StockAlertsServlet</servlet-name>
+        <servlet-class>Controller.StockAlertsServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ExpiryReportServlet</servlet-name>
+        <servlet-class>Controller.ExpiryReportServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>InventoryReportServlet</servlet-name>
+        <servlet-class>Controller.InventoryReportServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>DoctorDashboardServlet</servlet-name>
         <url-pattern>/doctor-dashboard</url-pattern>
@@ -99,6 +111,18 @@
     <servlet-mapping>
         <servlet-name>AssignTasksServlet</servlet-name>
         <url-pattern>/tasks/assign</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>StockAlertsServlet</servlet-name>
+        <url-pattern>/stock-alerts</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ExpiryReportServlet</servlet-name>
+        <url-pattern>/expiry-report</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>InventoryReportServlet</servlet-name>
+        <url-pattern>/inventory-report</url-pattern>
     </servlet-mapping>
     <welcome-file-list>
         <welcome-file>home.jsp</welcome-file>

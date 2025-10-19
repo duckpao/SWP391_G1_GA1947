@@ -20,6 +20,11 @@
             border-radius: 10px;
             color: white;
             margin-bottom: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
         }
         .stat-card-blue { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
         .stat-card-green { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
@@ -59,6 +64,10 @@
         .priority-high { color: #dc3545; font-weight: bold; }
         .priority-medium { color: #ffc107; font-weight: bold; }
         .priority-low { color: #17a2b8; font-weight: bold; }
+        .report-button {
+            display: inline-block;
+            margin: 5px;
+        }
     </style>
 </head>
 <body>
@@ -96,7 +105,6 @@
                 <p class="text-muted">Welcome back, ${manager.username}!</p>
             </div>
         </div>
-            
 
         <!-- Statistics Cards -->
         <div class="row">
@@ -123,9 +131,76 @@
             </div>
         </div>
 
-        <!-- Main Content -->
+        <!-- Quick Actions - Reports Section -->
         <div class="row mt-4">
-            <!-- Stock Requests Section -->
+            <div class="col-12">
+                <div class="card dashboard-card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-bar"></i> Reports & Actions
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Inventory Report -->
+                            <div class="col-md-6">
+                                <div class="card border-info mb-3">
+                                    <div class="card-body">
+                                        <h5 class="card-title">
+                                            <i class="fas fa-boxes text-info"></i> Inventory Report
+                                        </h5>
+                                        <p class="card-text">View detailed inventory information including medicine stock levels, batches, and supplier performance.</p>
+                                        <div class="btn-group w-100" role="group">
+                                            <a href="${pageContext.request.contextPath}/inventory-report?type=summary" 
+                                               class="btn btn-info btn-sm">
+                                                <i class="fas fa-chart-pie"></i> Summary
+                                            </a>
+                                            <a href="${pageContext.request.contextPath}/inventory-report?type=supplier" 
+                                               class="btn btn-info btn-sm">
+                                                <i class="fas fa-building"></i> By Supplier
+                                            </a>
+                                            <a href="${pageContext.request.contextPath}/inventory-report?type=batch" 
+                                               class="btn btn-info btn-sm">
+                                                <i class="fas fa-cube"></i> Batch Details
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Expiry Report -->
+                            <div class="col-md-6">
+                                <div class="card border-danger mb-3">
+                                    <div class="card-body">
+                                        <h5 class="card-title">
+                                            <i class="fas fa-calendar-times text-danger"></i> Expiry Report
+                                        </h5>
+                                        <p class="card-text">Monitor medicines expiring soon and manage batch expiry dates to prevent expired stock.</p>
+                                        <div class="btn-group w-100" role="group">
+                                            <a href="${pageContext.request.contextPath}/expiry-report?days=7" 
+                                               class="btn btn-danger btn-sm">
+                                                <i class="fas fa-exclamation-circle"></i> 7 Days
+                                            </a>
+                                            <a href="${pageContext.request.contextPath}/expiry-report?days=30" 
+                                               class="btn btn-danger btn-sm">
+                                                <i class="fas fa-calendar-alt"></i> 30 Days
+                                            </a>
+                                            <a href="${pageContext.request.contextPath}/expiry-report?days=60" 
+                                               class="btn btn-danger btn-sm">
+                                                <i class="fas fa-history"></i> 60 Days
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content - Stock Requests Section -->
+        <div class="row mt-4">
             <div class="col-12">
                 <div class="card dashboard-card">
                     <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
@@ -136,12 +211,12 @@
                             <a href="create-stock" class="btn btn-light btn-sm me-2">
                                 <i class="fas fa-plus"></i> New Request
                             </a>
-                            <a href="cancelled-tasks" class="btn btn-secondary btn-sm">
+                            <a href="cancelled-tasks" class="btn btn-secondary btn-sm me-2">
                                 <i class="fas fa-ban"></i> View Cancelled Tasks
                             </a>
-                                    <a href="tasks/assign" class="btn btn-info btn-sm">
-            <i class="fas fa-tasks"></i> Assign Tasks
-        </a>
+                            <a href="tasks/assign" class="btn btn-info btn-sm">
+                                <i class="fas fa-tasks"></i> Assign Tasks
+                            </a>
                         </div>
                     </div>
                     <div class="card-body">
@@ -336,77 +411,19 @@
             </div>
         </div>
 
-        <!-- Stock Alerts Section -->
+        <!-- Stock Alerts Card -->
         <div class="row mt-4">
-            <div class="col-12">
+            <div class="col-md-12">
                 <div class="card dashboard-card">
-                    <div class="card-header bg-warning text-dark">
-                        <h5 class="mb-0">
-                            <i class="fas fa-bell"></i> Stock Alerts (${stockAlerts.size()})
-                        </h5>
-                    </div>
                     <div class="card-body">
-                        <c:if test="${empty stockAlerts}">
-                            <div class="alert alert-success">
-                                <i class="fas fa-check-circle"></i> All stocks are at safe levels!
-                            </div>
-                        </c:if>
-                        
-                        <c:if test="${not empty stockAlerts}">
-                            <div class="table-responsive">
-                                <table class="table table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>Medicine</th>
-                                            <th>Category</th>
-                                            <th>Current Stock</th>
-                                            <th>Threshold</th>
-                                            <th>Alert Level</th>
-                                            <th>Expiry Date</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <c:forEach items="${stockAlerts}" var="alert">
-                                            <tr>
-                                                <td><strong>${alert.medicineName}</strong></td>
-                                                <td>${alert.category}</td>
-                                                <td>${alert.currentQuantity} units</td>
-                                                <td>${alert.threshold} units</td>
-                                                <td>
-                                                    <c:choose>
-                                                        <c:when test="${alert.alertLevel == 'Critical'}">
-                                                            <span class="badge bg-danger">Critical</span>
-                                                        </c:when>
-                                                        <c:when test="${alert.alertLevel == 'High'}">
-                                                            <span class="badge bg-warning">High</span>
-                                                        </c:when>
-                                                        <c:otherwise>
-                                                            <span class="badge bg-info">Medium</span>
-                                                        </c:otherwise>
-                                                    </c:choose>
-                                                </td>
-                                                <td>
-                                                    <c:choose>
-                                                        <c:when test="${not empty alert.nearestExpiry}">
-                                                            ${alert.nearestExpiry}
-                                                        </c:when>
-                                                        <c:otherwise>
-                                                            <span class="text-muted">N/A</span>
-                                                        </c:otherwise>
-                                                    </c:choose>
-                                                </td>
-                                                <td>
-                                                    <a href="create-stock" class="btn btn-sm btn-primary">
-                                                        <i class="fas fa-plus"></i> Order
-                                                    </a>
-                                                </td>
-                                            </tr>
-                                        </c:forEach>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </c:if>
+                        <h6 class="card-subtitle mb-2 text-muted">
+                            <i class="fas fa-exclamation-triangle"></i> Stock Alerts
+                        </h6>
+                        <h2 class="card-title">${stockAlerts.size()}</h2>
+                        <p class="card-text">Currently have ${stockAlerts.size()} medicines below stock threshold</p>
+                        <a href="${pageContext.request.contextPath}/stock-alerts" class="btn btn-warning">
+                            <i class="fas fa-eye"></i> View All Alerts
+                        </a>
                     </div>
                 </div>
             </div>
@@ -531,3 +548,5 @@
             });
         }, 5000);
     </script>
+</body>
+</html>

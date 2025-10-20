@@ -14,28 +14,59 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             margin-bottom: 20px;
         }
-        .alert-item {
-            border-left: 4px solid;
-            padding: 10px;
-            margin-bottom: 10px;
-            background: #f8f9fa;
-        }
-        .alert-critical { border-color: #dc3545; }
-        .alert-high { border-color: #ffc107; }
-        .alert-medium { border-color: #17a2b8; }
         .stat-card {
             text-align: center;
             padding: 20px;
             border-radius: 10px;
             color: white;
             margin-bottom: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
         }
         .stat-card-blue { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
         .stat-card-green { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
         .stat-card-orange { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
-        .modal-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status-draft { background-color: #6c757d; color: white; }
+        .status-sent { background-color: #0dcaf0; color: white; }
+        .status-rejected { background-color: #dc3545; color: white; }
+        .status-cancelled { background-color: #6c757d; color: white; }
+        .details-row {
+            background-color: #f8f9fa;
+            border-left: 3px solid #0d6efd;
+        }
+        .details-content {
+            padding: 15px;
+        }
+        .item-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .item-list li {
+            padding: 10px;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .item-list li:last-child {
+            border-bottom: none;
+        }
+        .priority-high { color: #dc3545; font-weight: bold; }
+        .priority-medium { color: #ffc107; font-weight: bold; }
+        .priority-low { color: #17a2b8; font-weight: bold; }
+        .report-button {
+            display: inline-block;
+            margin: 5px;
         }
     </style>
 </head>
@@ -46,22 +77,13 @@
             <a class="navbar-brand" href="#">
                 <i class="fas fa-hospital"></i> Hospital Manager
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <span class="nav-link">
-                            <i class="fas fa-user"></i> ${manager.username}
-                        </span>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="logout">
-                            <i class="fas fa-sign-out-alt"></i> Logout
-                        </a>
-                    </li>
-                </ul>
+            <div class="ms-auto d-flex align-items-center">
+                <span class="text-white me-3">
+                    <i class="fas fa-user"></i> ${manager.username}
+                </span>
+                <a class="btn btn-outline-light btn-sm" href="logout">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
             </div>
         </div>
     </nav>
@@ -103,234 +125,316 @@
             <div class="col-md-4">
                 <div class="stat-card stat-card-orange">
                     <h3><i class="fas fa-clipboard-list"></i></h3>
-                    <p>Pending Requests</p>
+                    <p>Stock Requests</p>
                     <h5>${pendingRequests.size()} Orders</h5>
                 </div>
             </div>
         </div>
 
-        <!-- Main Content -->
-        <div class="row mt-4">
-            <!-- Stock Alerts Section -->
-            <div class="col-lg-6">
-                <div class="card dashboard-card">
-                    <div class="card-header bg-warning text-dark">
-                        <h5 class="mb-0">
-                            <i class="fas fa-bell"></i> Stock Alerts
-                        </h5>
-                    </div>
-                    <div class="card-body" style="max-height: 400px; overflow-y: auto;">
-                        <c:if test="${empty stockAlerts}">
-                            <div class="alert alert-success">
-                                <i class="fas fa-check-circle"></i> All stocks are at safe levels!
-                            </div>
-                        </c:if>
-                        <c:forEach items="${stockAlerts}" var="alert">
-                            <div class="alert-item alert-${alert.alertLevel.toLowerCase()}">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div>
-                                        <h6 class="mb-1">
-                                            <strong>${alert.medicineName}</strong>
-                                            <span class="${alert.alertLevelBadgeClass}">${alert.alertLevel}</span>
-                                        </h6>
-                                        <small class="text-muted">
-                                            <i class="fas fa-tag"></i> ${alert.category}
-                                        </small>
-                                        <br>
-                                        <small>
-                                            <i class="fas fa-boxes"></i> Current: ${alert.currentQuantity} units
-                                            | Threshold: ${alert.threshold} units
-                                        </small>
-                                        <c:if test="${not empty alert.nearestExpiry}">
-                                            <br>
-                                            <small class="text-danger">
-                                                <i class="fas fa-calendar-times"></i> 
-                                                Nearest Expiry: ${alert.nearestExpiry}
-                                            </small>
-                                        </c:if>
-                                    </div>
-                                    <button class="btn btn-sm btn-primary" 
-                                            onclick="quickOrder(${alert.medicineId}, '${alert.medicineName}')">
-                                        <i class="fas fa-plus"></i> Order
-                                    </button>
-                                </div>
-                            </div>
-                        </c:forEach>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Pending Stock Requests Section -->
-            <div class="col-lg-6">
-                <div class="card dashboard-card">
-                    <div class="card-header bg-primary text-white">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">
-                                <i class="fas fa-clipboard-list"></i> Pending Stock Requests
-                            </h5>
-                            <a href="create-stock" class="btn btn-light btn-sm">
-                                <i class="fas fa-plus"></i> New Request
-                            </a>
-                        </div>
-                    </div>
-                    <div class="card-body" style="max-height: 400px; overflow-y: auto;">
-                        <c:if test="${empty pendingRequests}">
-                            <div class="alert alert-info">
-                                <i class="fas fa-info-circle"></i> No pending requests at the moment.
-                            </div>
-                        </c:if>
-                        <c:forEach items="${pendingRequests}" var="order">
-                            <div class="card mb-3 border-start border-3 border-${order.status == 'Sent' ? 'warning' : 'secondary'}">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-start">
-                                        <div class="flex-grow-1">
-                                            <h6>
-                                                PO #${order.poId}
-                                                <span class="${order.statusBadgeClass}">${order.status}</span>
-                                            </h6>
-                                            <c:choose>
-                                                <c:when test="${not empty order.supplierName}">
-                                                    <p class="mb-1">
-                                                        <i class="fas fa-truck"></i> 
-                                                        <strong>Supplier:</strong> ${order.supplierName}
-                                                    </p>
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <p class="mb-1">
-                                                        <i class="fas fa-truck"></i> 
-                                                        <strong>Supplier:</strong> <span class="text-muted">Not assigned yet</span>
-                                                    </p>
-                                                </c:otherwise>
-                                            </c:choose>
-                                            <small class="text-muted">
-                                                <i class="fas fa-calendar"></i> Order Date: ${order.orderDate}
-                                            </small>
-                                            <c:if test="${not empty order.managerName}">
-                                                <br>
-                                                <small class="text-muted">
-                                                    <i class="fas fa-user"></i> Manager: ${order.managerName}
-                                                </small>
-                                            </c:if>
-                                            <c:if test="${not empty order.expectedDeliveryDate}">
-                                                <br>
-                                                <small class="text-info">
-                                                    <i class="fas fa-shipping-fast"></i> 
-                                                    Expected: ${order.expectedDeliveryDate}
-                                                </small>
-                                            </c:if>
-                                        </div>
-                                        <div class="btn-group-vertical ms-2">
-                                            <c:if test="${order.status == 'Draft'}">
-                                                <a href="edit-stock?poId=${order.poId}" class="btn btn-sm btn-warning mb-1">
-                                                    <i class="fas fa-edit"></i> Edit
-                                                </a>
-                                                <button class="btn btn-sm btn-danger mb-1" 
-                                                        onclick="deleteOrder(${order.poId})">
-                                                    <i class="fas fa-trash"></i> Delete
-                                                </button>
-                                            </c:if>
-                                            <c:if test="${order.status == 'Sent'}">
-                                                <button class="btn btn-sm btn-success mb-1" 
-                                                        onclick="approveOrder(${order.poId})">
-                                                    <i class="fas fa-check"></i> Approve
-                                                </button>
-                                                <button class="btn btn-sm btn-danger" 
-                                                        onclick="rejectOrder(${order.poId})">
-                                                    <i class="fas fa-times"></i> Reject
-                                                </button>
-                                            </c:if>
-                                        </div>
-                                    </div>
-                                    <c:if test="${not empty order.notes}">
-                                        <div class="mt-2 p-2 bg-light rounded">
-                                            <small><strong>Details:</strong></small>
-                                            <pre class="mb-0" style="font-size: 11px; white-space: pre-wrap;">${order.notes}</pre>
-                                        </div>
-                                    </c:if>
-                                </div>
-                            </div>
-                        </c:forEach>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Quick Actions -->
+        <!-- Quick Actions - Reports Section -->
         <div class="row mt-4">
             <div class="col-12">
                 <div class="card dashboard-card">
-                    <div class="card-header bg-dark text-white">
-                        <h5 class="mb-0"><i class="fas fa-bolt"></i> Quick Actions</h5>
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-bar"></i> Reports & Actions
+                        </h5>
                     </div>
                     <div class="card-body">
-                        <div class="row text-center">
-                            <div class="col-md-3">
-                                <a href="create-stock" class="btn btn-outline-primary btn-lg w-100">
-                                    <i class="fas fa-plus-circle fa-2x d-block mb-2"></i>
-                                    Create Stock Request
-                                </a>
+                        <div class="row">
+                            <!-- Inventory Report -->
+                            <div class="col-md-6">
+                                <div class="card border-info mb-3">
+                                    <div class="card-body">
+                                        <h5 class="card-title">
+                                            <i class="fas fa-boxes text-info"></i> Inventory Report
+                                        </h5>
+                                        <p class="card-text">View detailed inventory information including medicine stock levels, batches, and supplier performance.</p>
+                                        <div class="btn-group w-100" role="group">
+                                            <a href="${pageContext.request.contextPath}/inventory-report?type=summary" 
+                                               class="btn btn-info btn-sm">
+                                                <i class="fas fa-chart-pie"></i> Summary
+                                            </a>
+                                            <a href="${pageContext.request.contextPath}/inventory-report?type=supplier" 
+                                               class="btn btn-info btn-sm">
+                                                <i class="fas fa-building"></i> By Supplier
+                                            </a>
+                                            <a href="${pageContext.request.contextPath}/inventory-report?type=batch" 
+                                               class="btn btn-info btn-sm">
+                                                <i class="fas fa-cube"></i> Batch Details
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-md-3">
-                                <a href="view-inventory" class="btn btn-outline-info btn-lg w-100">
-                                    <i class="fas fa-boxes fa-2x d-block mb-2"></i>
-                                    View Inventory
-                                </a>
-                            </div>
-                            <div class="col-md-3">
-                                <a href="suppliers" class="btn btn-outline-success btn-lg w-100">
-                                    <i class="fas fa-truck fa-2x d-block mb-2"></i>
-                                    Manage Suppliers
-                                </a>
-                            </div>
-                            <div class="col-md-3">
-                                <a href="reports" class="btn btn-outline-warning btn-lg w-100">
-                                    <i class="fas fa-chart-bar fa-2x d-block mb-2"></i>
-                                    View Reports
-                                </a>
+
+                            <!-- Expiry Report -->
+                            <div class="col-md-6">
+                                <div class="card border-danger mb-3">
+                                    <div class="card-body">
+                                        <h5 class="card-title">
+                                            <i class="fas fa-calendar-times text-danger"></i> Expiry Report
+                                        </h5>
+                                        <p class="card-text">Monitor medicines expiring soon and manage batch expiry dates to prevent expired stock.</p>
+                                        <div class="btn-group w-100" role="group">
+                                            <a href="${pageContext.request.contextPath}/expiry-report?days=7" 
+                                               class="btn btn-danger btn-sm">
+                                                <i class="fas fa-exclamation-circle"></i> 7 Days
+                                            </a>
+                                            <a href="${pageContext.request.contextPath}/expiry-report?days=30" 
+                                               class="btn btn-danger btn-sm">
+                                                <i class="fas fa-calendar-alt"></i> 30 Days
+                                            </a>
+                                            <a href="${pageContext.request.contextPath}/expiry-report?days=60" 
+                                               class="btn btn-danger btn-sm">
+                                                <i class="fas fa-history"></i> 60 Days
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Reject Order Modal -->
-    <div class="modal fade" id="rejectModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="fas fa-times-circle"></i> Reject Stock Request
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <form action="approve-stock" method="post">
-                    <div class="modal-body">
-                        <input type="hidden" name="action" value="reject">
-                        <input type="hidden" name="poId" id="rejectPoId">
-                        <div class="mb-3">
-                            <label class="form-label">Reason for Rejection <span class="text-danger">*</span></label>
-                            <textarea class="form-control" name="reason" rows="4" 
-                                      placeholder="Enter reason for rejecting this request (minimum 5 characters)..." required></textarea>
+        <!-- Main Content - Stock Requests Section -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card dashboard-card">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-clipboard-list"></i> Stock Requests
+                        </h5>
+                        <div>
+                            <a href="create-stock" class="btn btn-light btn-sm me-2">
+                                <i class="fas fa-plus"></i> New Request
+                            </a>
+                            <a href="cancelled-tasks" class="btn btn-secondary btn-sm me-2">
+                                <i class="fas fa-ban"></i> View Cancelled Tasks
+                            </a>
+                            <a href="tasks/assign" class="btn btn-info btn-sm">
+                                <i class="fas fa-tasks"></i> Assign Tasks
+                            </a>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-danger">
-                            <i class="fas fa-times"></i> Reject Request
-                        </button>
+                    <div class="card-body">
+                        <c:if test="${empty pendingRequests}">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i> No stock requests at the moment.
+                            </div>
+                        </c:if>
+
+                        <c:if test="${not empty pendingRequests}">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th width="80">PO #</th>
+                                            <th width="100">Status</th>
+                                            <th>Supplier</th>
+                                            <th>Order Date</th>
+                                            <th>Expected Delivery</th>
+                                            <th>Manager</th>
+                                            <th width="300">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <c:forEach items="${pendingRequests}" var="order">
+                                            <tr>
+                                                <td><strong>#${order.poId}</strong></td>
+                                                <td>
+                                                    <c:choose>
+                                                        <c:when test="${order.status == 'Draft'}">
+                                                            <span class="status-badge status-draft">Draft</span>
+                                                        </c:when>
+                                                        <c:when test="${order.status == 'Sent'}">
+                                                            <span class="status-badge status-sent">Sent</span>
+                                                        </c:when>
+                                                        <c:when test="${order.status == 'Cancelled'}">
+                                                            <span class="status-badge status-cancelled">Cancelled</span>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <span class="status-badge status-rejected">Rejected</span>
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </td>
+                                                <td>
+                                                    <c:choose>
+                                                        <c:when test="${not empty order.supplierName}">
+                                                            ${order.supplierName}
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <span class="text-muted">Not assigned</span>
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </td>
+                                                <td>${order.orderDate}</td>
+                                                <td>
+                                                    <c:choose>
+                                                        <c:when test="${not empty order.expectedDeliveryDate}">
+                                                            ${order.expectedDeliveryDate}
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <span class="text-muted">N/A</span>
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </td>
+                                                <td>${order.managerName}</td>
+                                                <td>
+                                                    <button class="btn btn-info btn-sm" 
+                                                            onclick="toggleDetails(${order.poId})" 
+                                                            title="View Details">
+                                                        <i class="fas fa-eye"></i> Details
+                                                    </button>
+                                                    <c:choose>
+                                                        <c:when test="${order.status == 'Draft'}">
+                                                            <button class="btn btn-success btn-sm" 
+                                                                    onclick="approveOrder(${order.poId})" 
+                                                                    title="Send to Supplier">
+                                                                <i class="fas fa-paper-plane"></i> Send
+                                                            </button>
+                                                            <a href="edit-stock?poId=${order.poId}" 
+                                                               class="btn btn-warning btn-sm" 
+                                                               title="Edit">
+                                                                <i class="fas fa-edit"></i>
+                                                            </a>
+                                                            <button class="btn btn-danger btn-sm" 
+                                                                    onclick="deleteOrder(${order.poId})" 
+                                                                    title="Delete">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        </c:when>
+                                                        <c:when test="${order.status == 'Sent'}">
+                                                            <button class="btn btn-warning btn-sm" 
+                                                                    onclick="cancelOrder(${order.poId})" 
+                                                                    title="Cancel Request">
+                                                                <i class="fas fa-ban"></i> Cancel
+                                                            </button>
+                                                        </c:when>
+                                                    </c:choose>
+                                                </td>
+                                            </tr>
+                                            <!-- Details Row (Hidden by default) -->
+                                            <tr id="details-${order.poId}" class="details-row" style="display: none;">
+                                                <td colspan="7">
+                                                    <div class="details-content">
+                                                        <div class="row">
+                                                            <div class="col-md-6">
+                                                                <h6><i class="fas fa-info-circle"></i> General Information</h6>
+                                                                <table class="table table-sm table-borderless">
+                                                                    <tr>
+                                                                        <td width="150"><strong>PO ID:</strong></td>
+                                                                        <td>#${order.poId}</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td><strong>Status:</strong></td>
+                                                                        <td>${order.status}</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td><strong>Manager:</strong></td>
+                                                                        <td>${order.managerName}</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td><strong>Order Date:</strong></td>
+                                                                        <td>${order.orderDate}</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td><strong>Expected Delivery:</strong></td>
+                                                                        <td>
+                                                                            <c:choose>
+                                                                                <c:when test="${not empty order.expectedDeliveryDate}">
+                                                                                    ${order.expectedDeliveryDate}
+                                                                                </c:when>
+                                                                                <c:otherwise>N/A</c:otherwise>
+                                                                            </c:choose>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                                <c:if test="${not empty order.notes}">
+                                                                    <h6 class="mt-3"><i class="fas fa-sticky-note"></i> Notes</h6>
+                                                                    <div class="alert alert-secondary">
+                                                                        <small style="white-space: pre-wrap;">${order.notes}</small>
+                                                                    </div>
+                                                                </c:if>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <h6><i class="fas fa-pills"></i> Order Items</h6>
+                                                                <c:set var="items" value="${poItemsMap[order.poId]}" />
+                                                                <c:choose>
+                                                                    <c:when test="${not empty items}">
+                                                                        <ul class="item-list">
+                                                                            <c:forEach items="${items}" var="item">
+                                                                                <li>
+                                                                                    <div>
+                                                                                        <strong>${item.medicineName}</strong>
+                                                                                        <br>
+                                                                                        <small class="priority-${item.priority == 'High' ? 'high' : item.priority == 'Medium' ? 'medium' : 'low'}">
+                                                                                            <i class="fas fa-flag"></i> Priority: ${item.priority}
+                                                                                        </small>
+                                                                                        <c:if test="${not empty item.notes}">
+                                                                                            <br>
+                                                                                            <small class="text-muted">
+                                                                                                <i class="fas fa-comment"></i> ${item.notes}
+                                                                                            </small>
+                                                                                        </c:if>
+                                                                                    </div>
+                                                                                    <div class="text-end">
+                                                                                        <span class="badge bg-primary fs-6">${item.quantity} units</span>
+                                                                                    </div>
+                                                                                </li>
+                                                                            </c:forEach>
+                                                                        </ul>
+                                                                        <div class="mt-2 text-end">
+                                                                            <strong>Total Items: ${items.size()}</strong>
+                                                                        </div>
+                                                                    </c:when>
+                                                                    <c:otherwise>
+                                                                        <div class="alert alert-warning">
+                                                                            <i class="fas fa-exclamation-triangle"></i> No items found
+                                                                        </div>
+                                                                    </c:otherwise>
+                                                                </c:choose>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </c:forEach>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </c:if>
                     </div>
-                </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stock Alerts Card -->
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card dashboard-card">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">
+                            <i class="fas fa-exclamation-triangle"></i> Stock Alerts
+                        </h6>
+                        <h2 class="card-title">${stockAlerts.size()}</h2>
+                        <p class="card-text">Currently have ${stockAlerts.size()} medicines below stock threshold</p>
+                        <a href="${pageContext.request.contextPath}/stock-alerts" class="btn btn-warning">
+                            <i class="fas fa-eye"></i> View All Alerts
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Delete Order Modal -->
+    <!-- Delete Confirmation Modal -->
     <div class="modal fade" id="deleteModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
+                <div class="modal-header bg-danger text-white">
                     <h5 class="modal-title">
                         <i class="fas fa-trash"></i> Delete Stock Request
                     </h5>
@@ -345,7 +449,43 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-danger">
-                            <i class="fas fa-trash"></i> Delete Request
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cancel Order Modal -->
+    <div class="modal fade" id="cancelModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title">
+                        <i class="fas fa-ban"></i> Cancel Stock Request
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="approve-stock" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" name="action" value="cancel">
+                        <input type="hidden" name="poId" id="cancelPoId">
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i> 
+                            <strong>Warning:</strong> This will cancel the purchase order that has been sent to the supplier.
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Cancellation Reason <span class="text-danger">*</span></label>
+                            <textarea class="form-control" name="reason" rows="3" 
+                                      placeholder="Enter reason for cancellation (minimum 10 characters)..." 
+                                      required minlength="10"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fas fa-ban"></i> Cancel Order
                         </button>
                     </div>
                 </form>
@@ -355,8 +495,17 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        function toggleDetails(poId) {
+            const detailsRow = document.getElementById('details-' + poId);
+            if (detailsRow.style.display === 'none') {
+                detailsRow.style.display = 'table-row';
+            } else {
+                detailsRow.style.display = 'none';
+            }
+        }
+
         function approveOrder(poId) {
-            if (confirm('Are you sure you want to approve this stock request?')) {
+            if (confirm('Send this purchase order to supplier?')) {
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = 'approve-stock';
@@ -378,22 +527,26 @@
             }
         }
 
-        function rejectOrder(poId) {
-            document.getElementById('rejectPoId').value = poId;
-            const modal = new bootstrap.Modal(document.getElementById('rejectModal'));
-            modal.show();
-        }
-
         function deleteOrder(poId) {
             document.getElementById('deletePoId').value = poId;
             const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
             modal.show();
         }
 
-        function quickOrder(medicineId, medicineName) {
-            alert('Quick order feature for: ' + medicineName + '\nRedirecting to create stock request...');
-            window.location.href = 'create-stock';
+        function cancelOrder(poId) {
+            document.getElementById('cancelPoId').value = poId;
+            const modal = new bootstrap.Modal(document.getElementById('cancelModal'));
+            modal.show();
         }
+
+        // Auto-dismiss alerts after 5 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert-dismissible');
+            alerts.forEach(function(alert) {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
     </script>
 </body>
 </html>

@@ -201,24 +201,5 @@ public class ASN {
         return isPending();
     }
 
-    @Override
-    public String toString() {
-        return "ASN{" +
-                "asnId=" + asnId +
-                ", poId=" + poId +
-                ", supplierId=" + supplierId +
-                ", shipmentDate=" + shipmentDate +
-                ", carrier='" + carrier + '\'' +
-                ", trackingNumber='" + trackingNumber + '\'' +
-                ", status='" + status + '\'' +
-                ", notes='" + notes + '\'' +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                ", submittedBy='" + submittedBy + '\'' +
-                ", approvedBy='" + approvedBy + '\'' +
-                ", submittedAt=" + submittedAt +
-                ", approvedAt=" + approvedAt +
-                ", rejectionReason='" + rejectionReason + '\'' +
-                '}';
-    }
+
 }

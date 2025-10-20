@@ -1,4 +1,3 @@
-
 package Controller;
 
 import DAO.UserDAO;
@@ -12,6 +11,10 @@ import jakarta.servlet.http.HttpSession;
 import model.User;
 import util.PasswordUtils;
 
+/**
+ *
+ * @author ADMIN
+ */
 public class LoginServlet extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
@@ -65,10 +68,10 @@ public class LoginServlet extends HttpServlet {
                     response.sendRedirect("jsp/staff-dashboard.jsp"); // Điều hướng đến dashboard của nhân viên
                     break;
                 case "Admin":
-                    response.sendRedirect("admin/users"); // Điều hướng đến dashboard của quản trị viên
+                    response.sendRedirect("admin-dashboard"); // Điều hướng đến dashboard của quản trị viên
                     break;
                 case "Supplier":
-                    response.sendRedirect("jsp/supplier-dashboard.jsp"); // Điều hướng đến dashboard của nhà cung cấp
+                    response.sendRedirect("supplier/supplier-dashboard.jsp"); // Điều hướng đến dashboard của nhà cung cấp
                     break;
                 case "Auditor":
                     response.sendRedirect("jsp/auditor-dashboard.jsp"); // Điều hướng đến dashboard của kiểm toán viên
@@ -83,6 +86,8 @@ public class LoginServlet extends HttpServlet {
         }
     }
 
- 
+    @Override
+    public String getServletInfo() {
+        return "Servlet for user login";
+    }
 }
-

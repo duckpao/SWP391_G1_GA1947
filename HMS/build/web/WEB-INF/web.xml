@@ -30,7 +30,20 @@
         <servlet-name>ManagePermissionsServlet</servlet-name>
         <servlet-class>Controller.ManagePermissionsServlet</servlet-class>
     </servlet>
-
+    <!-- System Configuration Servlet -->
+    <servlet>
+        <servlet-name>SystemConfigServlet</servlet-name>
+        <servlet-class>Controller.SystemConfigServlet</servlet-class>
+    </servlet>
+    <!-- Servlet Mappings for User Management -->
+    <servlet>
+        <servlet-name>VerifyOTPServlet</servlet-name>
+        <servlet-class>Controller.VerifyOTPServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>VerifyResetServlet</servlet-name>
+        <servlet-class>Controller.VerifyResetServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>UserServlet</servlet-name>
         <url-pattern>/admin-dashboard</url-pattern>
@@ -55,9 +68,12 @@
         <servlet-name>ManagePermissionsServlet</servlet-name>
         <url-pattern>/admin/permissions</url-pattern>
     </servlet-mapping>
-
-
-    <!-- ================= Medication Request Servlets ================= -->
+    <!-- System Configuration Mapping -->
+    <servlet-mapping>
+        <servlet-name>SystemConfigServlet</servlet-name>
+        <url-pattern>/admin-dashboard/config</url-pattern>
+    </servlet-mapping>
+    <!-- Medication Request Servlets -->
     <servlet>
         <servlet-name>ManageRequestsServlet</servlet-name>
         <servlet-class>Controller.ManageRequestsServlet</servlet-class>
@@ -78,6 +94,7 @@
         <servlet-name>ViewMedicineServlet</servlet-name>
         <servlet-class>Controller.ViewMedicineServlet</servlet-class>
     </servlet>
+    <!-- Servlet Mappings for Medication Requests -->
     <servlet>
         <servlet-name>pharmacistdashboard</servlet-name>
         <servlet-class>Controller.pharmacistdashboard</servlet-class>
@@ -139,29 +156,7 @@
         <servlet-name>pharmacistdashboard</servlet-name>
         <url-pattern>/pharmacist-dashboard</url-pattern>
     </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>ManagerDashboardServlet</servlet-name>
-        <url-pattern>/manager-dashboard</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>ApproveStockServlet</servlet-name>
-        <url-pattern>/approve-stock</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>CreateStockServlet</servlet-name>
-        <url-pattern>/create-stock</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>ManageStockServlet</servlet-name>
-        <url-pattern>/manage-stock</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>ManageStockServlet</servlet-name>
-        <url-pattern>/edit-stock</url-pattern>
-    </servlet-mapping>
-
-
-    <!-- ================= Auth Servlets ================= -->
+    <!-- Additional Servlets -->
     <servlet>
         <servlet-name>RegisterServlet</servlet-name>
         <servlet-class>Controller.RegisterServlet</servlet-class>
@@ -190,7 +185,15 @@
         <servlet-name>HomeServlet</servlet-name>
         <servlet-class>Controller.HomeServlet</servlet-class>
     </servlet>
-
+    <servlet>
+        <servlet-name>DoctorDashboardServlet</servlet-name>
+        <servlet-class>Controller.DoctorDashboardServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>CreateMedicationRequestServlet</servlet-name>
+        <servlet-class>Controller.CreateMedicationRequestServlet</servlet-class>
+    </servlet>
+    <!-- Servlet Mappings for Additional Servlets -->
     <servlet-mapping>
         <servlet-name>RegisterServlet</servlet-name>
         <url-pattern>/register</url-pattern>
@@ -219,27 +222,27 @@
         <servlet-name>HomeServlet</servlet-name>
         <url-pattern>/home</url-pattern>
     </servlet-mapping>
-
-
-    <!-- ================= ASN Servlet ================= -->
+    
+    <!-- supplier-->
     <servlet>
-        <servlet-name>ASNServlet</servlet-name>
-        <servlet-class>Controller.ASNServlet</servlet-class>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
+    <servlet-name>SupplierDashboard</servlet-name>
+    <servlet-class>Controller.SupplierDashboard</servlet-class>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>SupplierDashboard</servlet-name>
+    <url-pattern>/supplier-dashboard</url-pattern>
+</servlet-mapping>
+    <!-- Welcome File -->
     <servlet-mapping>
-        <servlet-name>ASNServlet</servlet-name>
-        <url-pattern>/asn</url-pattern>
+        <servlet-name>VerifyOTPServlet</servlet-name>
+        <url-pattern>/VerifyOTPServlet</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>ASNServlet</servlet-name>
-        <url-pattern>/asn/*</url-pattern>
+        <servlet-name>VerifyResetServlet</servlet-name>
+        <url-pattern>/VerifyResetServlet</url-pattern>
     </servlet-mapping>
-
-
-    <!-- ================= Welcome Page ================= -->
     <welcome-file-list>
         <welcome-file>home.jsp</welcome-file>
     </welcome-file-list>
-
 </web-app>

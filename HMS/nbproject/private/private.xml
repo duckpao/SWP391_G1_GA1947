@@ -15,6 +15,21 @@
             <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/web/verify_otp.jsp</file>
             <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/src/java/Controller/CancelMedicationRequestServlet.java</file>
             <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/src/java/Controller/ResetPasswordServlet.java</file>
+            <file>file:/E:/SWP391_G1_GA1947/HMS/src/java/Controller/HomeServlet.java</file>
+            <file>file:/E:/SWP391_G1_GA1947/HMS/src/java/Controller/CreateMedicationRequestServlet.java</file>
+            <file>file:/E:/SWP391_G1_GA1947/HMS/web/META-INF/context.xml</file>
+            <file>file:/E:/SWP391_G1_GA1947/HMS/src/java/util/PasswordUtils.java</file>
+            <file>file:/E:/SWP391_G1_GA1947/HMS/web/verify_otp.jsp</file>
+            <file>file:/E:/SWP391_G1_GA1947/HMS/src/java/Controller/LoginServlet.java</file>
+            <file>file:/E:/SWP391_G1_GA1947/HMS/src/java/Controller/CancelMedicationRequestServlet.java</file>
+            <file>file:/E:/SWP391_G1_GA1947/HMS/src/java/Controller/ForgotPasswordServlet.java</file>
+            <file>file:/E:/SWP391_G1_GA1947/HMS/src/java/Controller/DoctorDashboardServlet.java</file>
+            <file>file:/E:/SWP391_G1_GA1947/HMS/web/login.jsp</file>
+            <file>file:/E:/SWP391_G1_GA1947/HMS/web/pharmacist/pharmacist-dashboard.jsp</file>
+            <file>file:/E:/SWP391_G1_GA1947/HMS/web/WEB-INF/web.xml</file>
+            <file>file:/E:/SWP391_G1_GA1947/HMS/src/java/Controller/ChangePasswordServlet.java</file>
+            <file>file:/E:/SWP391_G1_GA1947/HMS/src/java/util/EmailSender.java</file>
+            <file>file:/E:/SWP391_G1_GA1947/HMS/web/change-password.jsp</file>
         </group>
     </open-files>
 </project-private>

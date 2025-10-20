@@ -1,6 +1,13 @@
+<<<<<<< HEAD
 package model;
 
 import java.sql.Timestamp;
+=======
+
+package model;
+
+import java.time.LocalDateTime;
+>>>>>>> 4645b2a (tam)
 
 public class Supplier {
     private int supplierId;
@@ -8,6 +15,7 @@ public class Supplier {
     private String contactEmail;
     private String contactPhone;
     private String address;
+<<<<<<< HEAD
     private Double performanceRating;
     private Timestamp createdAt;
     private Timestamp updatedAt;
@@ -16,6 +24,31 @@ public class Supplier {
     }
 
     // Getters and Setters
+=======
+    private Double performanceRating; // Có thể null
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
+    // Constructor mặc định
+    public Supplier() {
+    }
+
+    // Constructor có tham số
+    public Supplier(int supplierId, String name, String contactEmail, String contactPhone,
+            String address, Double performanceRating, LocalDateTime createdAt,
+            LocalDateTime updatedAt) {
+        this.supplierId = supplierId;
+        this.name = name;
+        this.contactEmail = contactEmail;
+        this.contactPhone = contactPhone;
+        this.address = address;
+        this.performanceRating = performanceRating;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
+    // Getter và Setter
+>>>>>>> 4645b2a (tam)
     public int getSupplierId() {
         return supplierId;
     }
@@ -64,6 +97,7 @@ public class Supplier {
         this.performanceRating = performanceRating;
     }
 
+<<<<<<< HEAD
     public Timestamp getCreatedAt() {
         return createdAt;
     }
@@ -97,4 +131,22 @@ public class Supplier {
         if (performanceRating >= 3.0) return "badge bg-warning";
         return "badge bg-danger";
     }
+=======
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+>>>>>>> 4645b2a (tam)
 }

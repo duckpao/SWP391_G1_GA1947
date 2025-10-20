@@ -459,6 +459,9 @@
                     <a class="btn btn-primary" href="${pageContext.request.contextPath}/admin-dashboard/create">
                         ➕ Tạo tài khoản mới
                     </a>
+                    <a class="btn btn-primary" href="${pageContext.request.contextPath}/home">
+                        ️Logout 
+                    </a>
                 </div>
             </div>
 

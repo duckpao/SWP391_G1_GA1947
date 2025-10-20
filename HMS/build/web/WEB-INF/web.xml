@@ -192,6 +192,17 @@
         <servlet-name>HomeServlet</servlet-name>
         <url-pattern>/home</url-pattern>
     </servlet-mapping>
+    
+    <!-- supplier-->
+    <servlet>
+    <servlet-name>SupplierDashboard</servlet-name>
+    <servlet-class>Controller.SupplierDashboard</servlet-class>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>SupplierDashboard</servlet-name>
+    <url-pattern>/supplier-dashboard</url-pattern>
+</servlet-mapping>
     <!-- Welcome File -->
     <servlet-mapping>
         <servlet-name>VerifyOTPServlet</servlet-name>

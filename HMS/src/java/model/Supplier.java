@@ -1,43 +1,26 @@
-<<<<<<< HEAD
-package model;
-
-import java.sql.Timestamp;
-=======
-
 package model;
 
 import java.time.LocalDateTime;
->>>>>>> 4645b2a (tam)
 
 public class Supplier {
     private int supplierId;
+    private int userId;
     private String name;
     private String contactEmail;
     private String contactPhone;
     private String address;
-<<<<<<< HEAD
-    private Double performanceRating;
-    private Timestamp createdAt;
-    private Timestamp updatedAt;
-
-    public Supplier() {
-    }
-
-    // Getters and Setters
-=======
     private Double performanceRating; // Có thể null
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    // Constructor mặc định
     public Supplier() {
     }
 
-    // Constructor có tham số
-    public Supplier(int supplierId, String name, String contactEmail, String contactPhone,
-            String address, Double performanceRating, LocalDateTime createdAt,
-            LocalDateTime updatedAt) {
+    public Supplier(int supplierId, int userId, String name, String contactEmail,
+                    String contactPhone, String address, Double performanceRating,
+                    LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.supplierId = supplierId;
+        this.userId = userId;
         this.name = name;
         this.contactEmail = contactEmail;
         this.contactPhone = contactPhone;
@@ -47,14 +30,21 @@ public class Supplier {
         this.updatedAt = updatedAt;
     }
 
-    // Getter và Setter
->>>>>>> 4645b2a (tam)
+    // Getters and Setters
     public int getSupplierId() {
         return supplierId;
     }
 
     public void setSupplierId(int supplierId) {
         this.supplierId = supplierId;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 
     public String getName() {
@@ -97,41 +87,6 @@ public class Supplier {
         this.performanceRating = performanceRating;
     }
 
-<<<<<<< HEAD
-    public Timestamp getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Timestamp createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public Timestamp getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(Timestamp updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    // Helper method for display
-    public String getRatingStars() {
-        if (performanceRating == null) return "N/A";
-        int stars = (int) Math.round(performanceRating);
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 5; i++) {
-            sb.append(i < stars ? "★" : "☆");
-        }
-        return sb.toString();
-    }
-
-    public String getRatingBadgeClass() {
-        if (performanceRating == null) return "badge bg-secondary";
-        if (performanceRating >= 4.0) return "badge bg-success";
-        if (performanceRating >= 3.0) return "badge bg-warning";
-        return "badge bg-danger";
-    }
-=======
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -147,6 +102,4 @@ public class Supplier {
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
-
->>>>>>> 4645b2a (tam)
 }

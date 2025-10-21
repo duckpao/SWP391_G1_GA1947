@@ -659,6 +659,13 @@
                                                                 ✏️ Sửa
                                                             </a>
 
+                                                            <!-- Nút chuyển thành Supplier -->
+                                                            <c:if test="${u.role != 'Supplier'}">
+                                                              <a class="btn btn-warning" href="${pageContext.request.contextPath}/admin-dashboard/convert-supplier?userId=${u.userId}">
+    🚀 Chuyển sang Supplier
+</a>
+                                                            </c:if>
+
                                                             <form class="inline" action="${pageContext.request.contextPath}/admin-dashboard/toggle" method="post">
                                                                 <input type="hidden" name="id" value="${u.userId}" />
                                                                 <input type="hidden" name="active" value="${!u.isActive}" />

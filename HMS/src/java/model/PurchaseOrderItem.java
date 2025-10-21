@@ -1,16 +1,12 @@
 package model;
 
 public class PurchaseOrderItem {
-<<<<<<< HEAD
     private int itemId;
-=======
->>>>>>> 4645b2a (tam)
     private int poId;
     private int medicineId;
     private int quantity;
     private String priority;
     private String notes;
-<<<<<<< HEAD
     private double unitPrice;
     
     // Transient field - không lưu trong DB
@@ -37,10 +33,6 @@ public class PurchaseOrderItem {
         this.itemId = itemId;
     }
 
-=======
-
-    // Getters and Setters
->>>>>>> 4645b2a (tam)
     public int getPoId() {
         return poId;
     }
@@ -80,7 +72,6 @@ public class PurchaseOrderItem {
     public void setNotes(String notes) {
         this.notes = notes;
     }
-<<<<<<< HEAD
 
     public double getUnitPrice() {
         return unitPrice;
@@ -97,19 +88,4 @@ public class PurchaseOrderItem {
     public void setMedicineName(String medicineName) {
         this.medicineName = medicineName;
     }
-
-    @Override
-    public String toString() {
-        return "PurchaseOrderItem{" +
-                "itemId=" + itemId +
-                ", poId=" + poId +
-                ", medicineId=" + medicineId +
-                ", medicineName='" + medicineName + '\'' +
-                ", quantity=" + quantity +
-                ", priority='" + priority + '\'' +
-                ", unitPrice=" + unitPrice +
-                '}';
-    }
-=======
->>>>>>> 4645b2a (tam)
 }

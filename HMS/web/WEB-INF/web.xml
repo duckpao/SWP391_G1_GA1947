@@ -289,9 +289,7 @@
         <servlet-name>HomeServlet</servlet-name>
         <url-pattern>/home</url-pattern>
     </servlet-mapping>
-<<<<<<< HEAD
 
-=======
     
     <!-- supplier-->
     <servlet>
@@ -303,7 +301,27 @@
     <servlet-name>SupplierDashboard</servlet-name>
     <url-pattern>/supplier-dashboard</url-pattern>
 </servlet-mapping>
->>>>>>> 4645b2a (tam)
+
+<servlet>
+    <servlet-name>ASNServlet</servlet-name>
+    <servlet-class>Controller.ASNServlet</servlet-class>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>ASNServlet</servlet-name>
+    <url-pattern>/ASNServlet</url-pattern>
+</servlet-mapping>
+<!-- Convert normal user to Supplier -->
+<servlet>
+    <servlet-name>ConvertToSupplier</servlet-name>
+    <servlet-class>Controller.ConvertToSupplier</servlet-class>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>ConvertToSupplier</servlet-name>
+    <url-pattern>/admin-dashboard/convert-supplier</url-pattern>
+</servlet-mapping>
+
     <!-- Welcome File -->
     <welcome-file-list>
         <welcome-file>home.jsp</welcome-file>

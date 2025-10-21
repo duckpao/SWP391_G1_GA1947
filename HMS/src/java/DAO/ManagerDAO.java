@@ -1,5 +1,6 @@
 package DAO;
 
+import java.sql.Timestamp;
 import model.Manager;
 import model.PurchaseOrder;
 import model.StockAlert;
@@ -12,7 +13,6 @@ import java.sql.SQLException;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
-<<<<<<< HEAD
 import model.Task;
 
 public class ManagerDAO extends DBContext {
@@ -21,26 +21,13 @@ public class ManagerDAO extends DBContext {
     public boolean approveStockRequest(int poId, int managerId) {
         String query = "UPDATE PurchaseOrders SET status = 'Sent', manager_id = ?, updated_at = GETDATE() " +
                       "WHERE po_id = ? AND status = 'Draft'";
-=======
-
-public class ManagerDAO extends DBContext {
-
-    // Approve Stock Request
-    public boolean approveStockRequest(int poId, int managerId) {
-        String query = "UPDATE PurchaseOrders SET status = 'Approved', manager_id = ?, updated_at = GETDATE() " +
-                      "WHERE po_id = ? AND TRIM(status) = 'Sent'";
->>>>>>> 4645b2a (tam)
         try (PreparedStatement ps = connection.prepareStatement(query)) {
             ps.setInt(1, managerId);
             ps.setInt(2, poId);
             int result = ps.executeUpdate();
             System.out.println("Approve PO #" + poId + " by Manager #" + managerId + ": Affected rows = " + result);
             if (result == 0) {
-<<<<<<< HEAD
                 System.out.println("Approve failed: PO #" + poId + " not found or status is not 'Draft'. Current status: " +
-=======
-                System.out.println("Approve failed: PO #" + poId + " not found or status is not 'Sent'. Current status: " +
->>>>>>> 4645b2a (tam)
                     getCurrentStatus(poId));
             }
             return result > 0;
@@ -55,22 +42,14 @@ public class ManagerDAO extends DBContext {
     public boolean rejectStockRequest(int poId, String reason) {
         String query = "UPDATE PurchaseOrders SET status = 'Rejected', " +
                       "notes = CONCAT(COALESCE(notes, ''), '\nRejection Reason: ', ?), updated_at = GETDATE() " +
-<<<<<<< HEAD
                       "WHERE po_id = ? AND status = 'Draft'";
-=======
-                      "WHERE po_id = ? AND TRIM(status) IN ('Draft', 'Sent')";
->>>>>>> 4645b2a (tam)
         try (PreparedStatement ps = connection.prepareStatement(query)) {
             ps.setString(1, reason);
             ps.setInt(2, poId);
             int result = ps.executeUpdate();
             System.out.println("Reject PO #" + poId + ": Affected rows = " + result);
             if (result == 0) {
-<<<<<<< HEAD
                 System.out.println("Reject failed: PO #" + poId + " not found or status is not 'Draft'. Current status: " +
-=======
-                System.out.println("Reject failed: PO #" + poId + " not found or status is not 'Draft' or 'Sent'. Current status: " +
->>>>>>> 4645b2a (tam)
                     getCurrentStatus(poId));
             }
             return result > 0;
@@ -81,7 +60,6 @@ public class ManagerDAO extends DBContext {
         }
     }
 
-<<<<<<< HEAD
     // Cancel Stock Request - Chỉ cancel được khi status là Sent
     public boolean cancelStockRequest(int poId, String reason) {
         String query = "UPDATE PurchaseOrders SET status = 'Cancelled', " +
@@ -104,8 +82,6 @@ public class ManagerDAO extends DBContext {
         }
     }
 
-=======
->>>>>>> 4645b2a (tam)
     // Helper method to get current status for debugging
     private String getCurrentStatus(int poId) {
         String query = "SELECT status FROM PurchaseOrders WHERE po_id = ?";
@@ -114,12 +90,7 @@ public class ManagerDAO extends DBContext {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 String status = rs.getString("status");
-<<<<<<< HEAD
                 System.out.println("Current status for PO #" + poId + ": '" + status + "'");
-=======
-                System.out.println("Current status for PO #" + poId + ": '" + status + "', Length: " + status.length() + 
-                                   ", Bytes: " + status.getBytes().length);
->>>>>>> 4645b2a (tam)
                 return status;
             }
             return "Not found";
@@ -129,10 +100,6 @@ public class ManagerDAO extends DBContext {
         }
     }
 
-<<<<<<< HEAD
-=======
-    // Các phương thức khác giữ nguyên
->>>>>>> 4645b2a (tam)
     public List<Medicine> getAllMedicines() {
         List<Medicine> medicines = new ArrayList<>();
         String query = "SELECT medicine_id, name, category, description FROM Medicines ORDER BY name";
@@ -179,13 +146,8 @@ public class ManagerDAO extends DBContext {
 
     public int createPurchaseOrder(int managerId, Integer supplierId, Date expectedDeliveryDate, String notes, 
                                   List<PurchaseOrderItem> items) {
-<<<<<<< HEAD
         String poQuery = "INSERT INTO PurchaseOrders (manager_id, supplier_id, status, order_date, expected_delivery_date, notes, updated_at) " +
                         "VALUES (?, ?, 'Draft', GETDATE(), ?, ?, GETDATE())";
-=======
-        String poQuery = "INSERT INTO PurchaseOrders (manager_id, supplier_id, status, order_date, expected_delivery_date, notes) " +
-                        "VALUES (?, ?, 'Draft', GETDATE(), ?, ?)";
->>>>>>> 4645b2a (tam)
         String itemQuery = "INSERT INTO PurchaseOrderItems (po_id, medicine_id, quantity, priority, notes) " +
                          "VALUES (?, ?, ?, ?, ?)";
         
@@ -246,12 +208,8 @@ public class ManagerDAO extends DBContext {
 
     public boolean updatePurchaseOrder(int poId, Integer supplierId, Date expectedDeliveryDate, String notes, 
                                       List<PurchaseOrderItem> items) {
-<<<<<<< HEAD
         String poQuery = "UPDATE PurchaseOrders SET supplier_id = ?, expected_delivery_date = ?, notes = ?, updated_at = GETDATE() " +
                         "WHERE po_id = ? AND status = 'Draft'";
-=======
-        String poQuery = "UPDATE PurchaseOrders SET supplier_id = ?, expected_delivery_date = ?, notes = ? WHERE po_id = ? AND status = 'Draft'";
->>>>>>> 4645b2a (tam)
         String deleteItemsQuery = "DELETE FROM PurchaseOrderItems WHERE po_id = ?";
         String itemQuery = "INSERT INTO PurchaseOrderItems (po_id, medicine_id, quantity, priority, notes) " +
                          "VALUES (?, ?, ?, ?, ?)";
@@ -398,7 +356,6 @@ public class ManagerDAO extends DBContext {
         return "Error fetching status";
     }
 
-<<<<<<< HEAD
 public List<StockAlert> getStockAlerts() {
     List<StockAlert> alerts = new ArrayList<>();
     String thresholdQuery = "SELECT config_value FROM SystemConfig WHERE config_key = 'low_stock_threshold'";
@@ -468,58 +425,6 @@ private String calculateAlertLevel(int quantity, int threshold) {
     if (quantity < threshold / 2) return "High";
     return "Medium";
 }
-=======
-    public List<StockAlert> getStockAlerts() {
-        List<StockAlert> alerts = new ArrayList<>();
-        String thresholdQuery = "SELECT config_value FROM SystemConfig WHERE config_key = 'low_stock_threshold'";
-        int threshold = 10;
-        
-        try {
-            try (PreparedStatement psThreshold = connection.prepareStatement(thresholdQuery);
-                 ResultSet rsThreshold = psThreshold.executeQuery()) {
-                if (rsThreshold.next()) {
-                    threshold = Integer.parseInt(rsThreshold.getString("config_value"));
-                }
-            }
-
-            String query = "SELECT m.medicine_id, m.name, m.category, " +
-                          "SUM(b.current_quantity) as total_quantity, " +
-                          "MIN(b.expiry_date) as nearest_expiry " +
-                          "FROM Batches b " +
-                          "JOIN Medicines m ON b.medicine_id = m.medicine_id " +
-                          "WHERE b.status != 'Expired' " +
-                          "GROUP BY m.medicine_id, m.name, m.category " +
-                          "HAVING SUM(b.current_quantity) < ?";
-            
-            try (PreparedStatement ps = connection.prepareStatement(query)) {
-                ps.setInt(1, threshold);
-                ResultSet rs = ps.executeQuery();
-                while (rs.next()) {
-                    StockAlert alert = new StockAlert();
-                    alert.setMedicineId(rs.getInt("medicine_id"));
-                    alert.setMedicineName(rs.getString("name"));
-                    alert.setCategory(rs.getString("category"));
-                    alert.setCurrentQuantity(rs.getInt("total_quantity"));
-                    alert.setThreshold(threshold);
-                    alert.setNearestExpiry(rs.getDate("nearest_expiry"));
-                    alert.setAlertLevel(calculateAlertLevel(rs.getInt("total_quantity"), threshold));
-                    alerts.add(alert);
-                }
-                System.out.println("Loaded " + alerts.size() + " stock alerts.");
-            }
-        } catch (SQLException e) {
-            System.err.println("Error getting stock alerts: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return alerts;
-    }
-
-    private String calculateAlertLevel(int quantity, int threshold) {
-        if (quantity == 0) return "Critical";
-        if (quantity < threshold / 2) return "High";
-        return "Medium";
-    }
->>>>>>> 4645b2a (tam)
 
     public List<PurchaseOrder> getPendingStockRequests() {
         List<PurchaseOrder> requests = new ArrayList<>();
@@ -529,11 +434,7 @@ private String calculateAlertLevel(int quantity, int threshold) {
                       "FROM PurchaseOrders po " +
                       "LEFT JOIN Suppliers s ON po.supplier_id = s.supplier_id " +
                       "LEFT JOIN Users u ON po.manager_id = u.user_id " +
-<<<<<<< HEAD
                       "WHERE po.status IN ('Draft', 'Sent') " +
-=======
-                      "WHERE TRIM(po.status) IN ('Draft', 'Sent') " +
->>>>>>> 4645b2a (tam)
                       "ORDER BY po.order_date DESC";
         
         try (PreparedStatement ps = connection.prepareStatement(query);
@@ -607,13 +508,11 @@ private String calculateAlertLevel(int quantity, int threshold) {
                 if (!rs.wasNull()) {
                     supplier.setPerformanceRating(rating);
                 }
-<<<<<<< HEAD
-                supplier.setCreatedAt(rs.getTimestamp("created_at"));
-                supplier.setUpdatedAt(rs.getTimestamp("updated_at"));
-=======
-                supplier.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
-                supplier.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
->>>>>>> 4645b2a (tam)
+                Timestamp createdTs = rs.getTimestamp("created_at");
+if (createdTs != null) supplier.setCreatedAt(createdTs.toLocalDateTime());
+
+              Timestamp updatedTs = rs.getTimestamp("updated_at");
+if (updatedTs != null) supplier.setUpdatedAt(updatedTs.toLocalDateTime());
                 suppliers.add(supplier);
             }
             System.out.println("Loaded " + suppliers.size() + " suppliers.");
@@ -637,13 +536,11 @@ private String calculateAlertLevel(int quantity, int threshold) {
                 supplier.setContactPhone(rs.getString("contact_phone"));
                 supplier.setAddress(rs.getString("address"));
                 supplier.setPerformanceRating(rs.getDouble("performance_rating"));
-<<<<<<< HEAD
-                supplier.setCreatedAt(rs.getTimestamp("created_at"));
-                supplier.setUpdatedAt(rs.getTimestamp("updated_at"));
-=======
-                supplier.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
-                supplier.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
->>>>>>> 4645b2a (tam)
+              Timestamp createdTs = rs.getTimestamp("created_at");
+if (createdTs != null) supplier.setCreatedAt(createdTs.toLocalDateTime());
+
+              Timestamp updatedTs = rs.getTimestamp("updated_at");
+if (updatedTs != null) supplier.setUpdatedAt(updatedTs.toLocalDateTime());
                 System.out.println("Loaded Supplier #" + supplierId);
                 return supplier;
             }
@@ -654,7 +551,6 @@ private String calculateAlertLevel(int quantity, int threshold) {
         }
         return null;
     }
-<<<<<<< HEAD
     public List<PurchaseOrder> getCancelledStockRequests() {
     List<PurchaseOrder> requests = new ArrayList<>();
     String query = "SELECT po.po_id, po.manager_id, po.supplier_id, po.status, " +
@@ -861,6 +757,4 @@ public boolean updateTask(int taskId, int auditorId, String taskType, Date deadl
         return false;
     }
 }
-=======
->>>>>>> 4645b2a (tam)
 }

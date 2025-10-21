@@ -1,5 +1,12 @@
-IF DB_ID('SWP391') IS NOT NULL 
-    DROP DATABASE	SWP391;
+USE master;
+GO
+
+-- Safely drop and recreate the database
+IF EXISTS (SELECT name FROM sys.databases WHERE name = 'SWP391')
+BEGIN
+    ALTER DATABASE SWP391 SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+    DROP DATABASE SWP391;
+END
 GO
 
 CREATE DATABASE SWP391;
@@ -8,104 +15,127 @@ GO
 USE SWP391;
 GO
 
-IF OBJECT_ID('Permissions', 'U') IS NOT NULL DROP TABLE Permissions; 
-CREATE TABLE Permissions ( 
-	permission_id INT IDENTITY(1,1) PRIMARY KEY, 
-	permission_name NVARCHAR(100) UNIQUE NOT NULL, 
-	description NVARCHAR(MAX) 
-);
-
-IF OBJECT_ID('Suppliers', 'U') IS NOT NULL DROP TABLE Suppliers; 
-CREATE TABLE Suppliers ( supplier_id INT IDENTITY(1,1) PRIMARY KEY, 
-	name NVARCHAR(100) NOT NULL, contact_email NVARCHAR(255), 
-	contact_phone NVARCHAR(50), 
-	address NVARCHAR(MAX), 
-	performance_rating DECIMAL(3,2) DEFAULT 0.0, created_at DATETIME DEFAULT GETDATE(), 
-	updated_at DATETIME DEFAULT GETDATE() 
-);
-
-IF OBJECT_ID('Users', 'U') IS NOT NULL DROP TABLE Users; 
-CREATE TABLE Users ( 
-	user_id INT IDENTITY(1,1) PRIMARY KEY, 
-	username NVARCHAR(50) UNIQUE NOT NULL, 
-	password_hash NVARCHAR(255) NOT NULL, 
-	email NVARCHAR(255), 
-	phone NVARCHAR(50), 
-	role NVARCHAR(50) NOT NULL CHECK (role IN ('Doctor', 'Pharmacist', 'Manager', 'Auditor', 'Admin', 'ProcurementOfficer', 'Supplier')), 
-	supplier_id INT NULL FOREIGN KEY REFERENCES Suppliers(supplier_id), 
-	is_active BIT DEFAULT 1, 
-	failed_attempts INT DEFAULT 0 CHECK (failed_attempts <= 5), 
-	last_login DATETIME NULL, created_at DATETIME DEFAULT GETDATE(), updated_at DATETIME DEFAULT GETDATE() 
-);
-
-IF OBJECT_ID('UserPermissions', 'U') IS NOT NULL DROP TABLE UserPermissions; 
-CREATE TABLE UserPermissions ( 
-	user_id INT FOREIGN KEY REFERENCES Users(user_id) ON DELETE CASCADE,
-	permission_id INT FOREIGN KEY REFERENCES Permissions(permission_id) ON DELETE CASCADE, 
-	PRIMARY KEY (user_id, permission_id) 
-);
-
-IF OBJECT_ID('Medicines', 'U') IS NOT NULL DROP TABLE Medicines; 
-CREATE TABLE Medicines ( 
-	medicine_id INT IDENTITY(1,1) PRIMARY KEY, 
-	name NVARCHAR(100) NOT NULL, 
-	category NVARCHAR(50), 
-	description NVARCHAR(MAX), 
-	created_at DATETIME DEFAULT GETDATE(), 
-	updated_at DATETIME DEFAULT GETDATE() 
-);
-
-IF OBJECT_ID('Batches', 'U') IS NOT NULL DROP TABLE Batches; 
-CREATE TABLE Batches ( 
-	batch_id INT IDENTITY(1,1) PRIMARY KEY, 
-	medicine_id INT FOREIGN KEY REFERENCES Medicines(medicine_id) ON DELETE CASCADE, 
-	supplier_id INT FOREIGN KEY REFERENCES Suppliers(supplier_id), 
-	lot_number NVARCHAR(50) NOT NULL, 
-	expiry_date DATE NOT NULL CHECK (expiry_date > GETDATE()), 
-	received_date DATE DEFAULT GETDATE(), 
-	initial_quantity INT NOT NULL CHECK (initial_quantity >= 0),
-	current_quantity INT NOT NULL CHECK (current_quantity >= 0), 
-	status NVARCHAR(20) DEFAULT 'Quarantined' CHECK (status IN ('Received','Quarantined','Approved','Rejected','Expired')), 
-	quarantine_notes NVARCHAR(MAX), 
-	created_at DATETIME DEFAULT GETDATE(), 
-	updated_at DATETIME DEFAULT GETDATE() 
-);
-
-IF OBJECT_ID('MedicationRequests', 'U') IS NOT NULL DROP TABLE MedicationRequests; 
-CREATE TABLE MedicationRequests ( 
-	request_id INT IDENTITY(1,1) PRIMARY KEY, 
-	doctor_id INT FOREIGN KEY REFERENCES Users(user_id) ON DELETE SET NULL, 
-	status NVARCHAR(20) DEFAULT 'Pending' CHECK (status IN ('Pending','Approved','Rejected','Canceled','Fulfilled')), 
-	request_date DATETIME DEFAULT GETDATE(), notes NVARCHAR(MAX) 
-);
-
-IF OBJECT_ID('MedicationRequestItems', 'U') IS NOT NULL DROP TABLE MedicationRequestItems; 
-CREATE TABLE MedicationRequestItems ( 
-	item_id INT IDENTITY(1,1) PRIMARY KEY, 
-	request_id INT FOREIGN KEY REFERENCES MedicationRequests(request_id) ON DELETE CASCADE, 
-	medicine_id INT FOREIGN KEY REFERENCES Medicines(medicine_id) ON DELETE CASCADE, 
-	quantity INT NOT NULL CHECK (quantity > 0) 
-);
-
-IF OBJECT_ID('PurchaseOrders', 'U') IS NOT NULL DROP TABLE PurchaseOrders; 
-CREATE TABLE PurchaseOrders ( 
-	po_id INT IDENTITY(1,1) PRIMARY KEY, 
-	manager_id INT FOREIGN KEY REFERENCES Users(user_id) ON DELETE SET NULL, 
-	supplier_id INT FOREIGN KEY REFERENCES Suppliers(supplier_id) ON DELETE CASCADE, 
-	status NVARCHAR(20) DEFAULT 'Draft' CHECK (status IN ('Draft','Sent','Received','Rejected','Completed')), 
-	order_date DATETIME DEFAULT GETDATE(), expected_delivery_date DATE, notes NVARCHAR(MAX) 
-);
-
-IF OBJECT_ID('PurchaseOrderItems', 'U') IS NOT NULL DROP TABLE PurchaseOrderItems; 
-CREATE TABLE PurchaseOrderItems ( 
-	item_id INT IDENTITY(1,1) PRIMARY KEY, 
-	po_id INT FOREIGN KEY REFERENCES PurchaseOrders(po_id) ON DELETE CASCADE, 
-	medicine_id INT FOREIGN KEY REFERENCES Medicines(medicine_id) ON DELETE CASCADE, 
-	quantity INT NOT NULL CHECK (quantity > 0),
-	unit_price DECIMAL(10,2) 
-);
-
+-- Drop all tables in reverse dependency order to avoid FK issues
+IF OBJECT_ID('AuditReports', 'U') IS NOT NULL DROP TABLE AuditReports;
+IF OBJECT_ID('SystemLogs', 'U') IS NOT NULL DROP TABLE SystemLogs;
+IF OBJECT_ID('Transactions', 'U') IS NOT NULL DROP TABLE Transactions;
+IF OBJECT_ID('Invoices', 'U') IS NOT NULL DROP TABLE Invoices;
+IF OBJECT_ID('DeliveryNotes', 'U') IS NOT NULL DROP TABLE DeliveryNotes;
+IF OBJECT_ID('ASNItems', 'U') IS NOT NULL DROP TABLE ASNItems;
 IF OBJECT_ID('AdvancedShippingNotices', 'U') IS NOT NULL DROP TABLE AdvancedShippingNotices;
+IF OBJECT_ID('PurchaseOrderItems', 'U') IS NOT NULL DROP TABLE PurchaseOrderItems;
+IF OBJECT_ID('PurchaseOrders', 'U') IS NOT NULL DROP TABLE PurchaseOrders;
+IF OBJECT_ID('MedicationRequestItems', 'U') IS NOT NULL DROP TABLE MedicationRequestItems;
+IF OBJECT_ID('MedicationRequests', 'U') IS NOT NULL DROP TABLE MedicationRequests;
+IF OBJECT_ID('Batches', 'U') IS NOT NULL DROP TABLE Batches;
+IF OBJECT_ID('Medicines', 'U') IS NOT NULL DROP TABLE Medicines;
+IF OBJECT_ID('UserPermissions', 'U') IS NOT NULL DROP TABLE UserPermissions;
+IF OBJECT_ID('Suppliers', 'U') IS NOT NULL DROP TABLE Suppliers;
+IF OBJECT_ID('Users', 'U') IS NOT NULL DROP TABLE Users;
+IF OBJECT_ID('Permissions', 'U') IS NOT NULL DROP TABLE Permissions;
+IF OBJECT_ID('SystemConfig', 'U') IS NOT NULL DROP TABLE SystemConfig;
+GO
+
+-- Create core tables in dependency order
+CREATE TABLE Permissions ( 
+    permission_id INT IDENTITY(1,1) PRIMARY KEY, 
+    permission_name NVARCHAR(100) UNIQUE NOT NULL, 
+    description NVARCHAR(MAX) 
+);
+
+CREATE TABLE Users (
+    user_id INT IDENTITY(1,1) PRIMARY KEY,
+    username NVARCHAR(50) UNIQUE NOT NULL,
+    password_hash NVARCHAR(255) NOT NULL,
+    email NVARCHAR(255),
+    phone NVARCHAR(50),
+    role NVARCHAR(50) NOT NULL CHECK (role IN ('Doctor', 'Pharmacist', 'Manager', 'Auditor', 'Admin', 'Supplier')),
+    is_active BIT DEFAULT 1,
+    failed_attempts INT DEFAULT 0 CHECK (failed_attempts <= 5),
+    last_login DATETIME NULL,
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE()
+);
+
+CREATE TABLE Suppliers (
+    supplier_id INT IDENTITY(1,1) PRIMARY KEY,
+    user_id INT UNIQUE FOREIGN KEY REFERENCES Users(user_id),
+    name NVARCHAR(100) NOT NULL,
+    contact_email NVARCHAR(255),
+    contact_phone NVARCHAR(50),
+    address NVARCHAR(MAX),
+    performance_rating DECIMAL(3,2) DEFAULT 0.0,
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE(),
+    CONSTRAINT CHK_Supplier_UserRole CHECK (user_id IS NOT NULL)
+);
+
+CREATE TABLE UserPermissions ( 
+    user_id INT FOREIGN KEY REFERENCES Users(user_id) ON DELETE CASCADE,
+    permission_id INT FOREIGN KEY REFERENCES Permissions(permission_id) ON DELETE CASCADE, 
+    PRIMARY KEY (user_id, permission_id) 
+);
+
+CREATE TABLE Medicines ( 
+    medicine_id INT IDENTITY(1,1) PRIMARY KEY, 
+    name NVARCHAR(100) NOT NULL, 
+    category NVARCHAR(50), 
+    description NVARCHAR(MAX), 
+    created_at DATETIME DEFAULT GETDATE(), 
+    updated_at DATETIME DEFAULT GETDATE() 
+);
+
+CREATE TABLE Batches ( 
+    batch_id INT IDENTITY(1,1) PRIMARY KEY, 
+    medicine_id INT FOREIGN KEY REFERENCES Medicines(medicine_id) ON DELETE CASCADE, 
+    supplier_id INT FOREIGN KEY REFERENCES Suppliers(supplier_id), 
+    lot_number NVARCHAR(50) NOT NULL, 
+    expiry_date DATE NOT NULL CHECK (expiry_date > GETDATE()), 
+    received_date DATE DEFAULT GETDATE(), 
+    initial_quantity INT NOT NULL CHECK (initial_quantity >= 0),
+    current_quantity INT NOT NULL CHECK (current_quantity >= 0), 
+    status NVARCHAR(20) DEFAULT 'Quarantined' CHECK (status IN ('Received','Quarantined','Approved','Rejected','Expired')), 
+    quarantine_notes NVARCHAR(MAX), 
+    created_at DATETIME DEFAULT GETDATE(), 
+    updated_at DATETIME DEFAULT GETDATE() 
+);
+
+CREATE TABLE MedicationRequests ( 
+    request_id INT IDENTITY(1,1) PRIMARY KEY, 
+    doctor_id INT FOREIGN KEY REFERENCES Users(user_id) ON DELETE SET NULL, 
+    status NVARCHAR(20) DEFAULT 'Pending' CHECK (status IN ('Pending','Approved','Rejected','Canceled','Fulfilled')), 
+    request_date DATETIME DEFAULT GETDATE(), 
+    notes NVARCHAR(MAX) 
+);
+
+CREATE TABLE MedicationRequestItems ( 
+    item_id INT IDENTITY(1,1) PRIMARY KEY, 
+    request_id INT FOREIGN KEY REFERENCES MedicationRequests(request_id) ON DELETE CASCADE, 
+    medicine_id INT FOREIGN KEY REFERENCES Medicines(medicine_id) ON DELETE CASCADE, 
+    quantity INT NOT NULL CHECK (quantity > 0) 
+);
+
+CREATE TABLE PurchaseOrders ( 
+    po_id INT IDENTITY(1,1) PRIMARY KEY, 
+    manager_id INT FOREIGN KEY REFERENCES Users(user_id) ON DELETE SET NULL, 
+    supplier_id INT FOREIGN KEY REFERENCES Suppliers(supplier_id) ON DELETE CASCADE, 
+    status NVARCHAR(20) DEFAULT 'Draft' CHECK (status IN ('Draft','Sent','Approved','Received','Rejected','Completed')), 
+    order_date DATETIME DEFAULT GETDATE(), 
+    expected_delivery_date DATE, 
+    notes NVARCHAR(MAX),
+    updated_at DATETIME DEFAULT GETDATE()
+);
+
+CREATE TABLE PurchaseOrderItems ( 
+    item_id INT IDENTITY(1,1) PRIMARY KEY, 
+    po_id INT FOREIGN KEY REFERENCES PurchaseOrders(po_id) ON DELETE CASCADE, 
+    medicine_id INT FOREIGN KEY REFERENCES Medicines(medicine_id) ON DELETE CASCADE, 
+    quantity INT NOT NULL CHECK (quantity > 0),
+    unit_price DECIMAL(10,2),
+    priority VARCHAR(20),
+    notes NVARCHAR(500)
+);
+
 CREATE TABLE AdvancedShippingNotices (
     asn_id INT IDENTITY(1,1) PRIMARY KEY,
     po_id INT FOREIGN KEY REFERENCES PurchaseOrders(po_id) ON DELETE CASCADE,
@@ -115,14 +145,15 @@ CREATE TABLE AdvancedShippingNotices (
     tracking_number NVARCHAR(50),
     status NVARCHAR(20) DEFAULT 'Sent' CHECK (status IN ('Sent','InTransit','Delivered')),
     notes NVARCHAR(MAX),
+    submitted_by NVARCHAR(100),
+    approved_by NVARCHAR(100),
+    submitted_at DATETIME,
+    approved_at DATETIME,
+    rejection_reason NVARCHAR(500),
     created_at DATETIME DEFAULT GETDATE(),
     updated_at DATETIME DEFAULT GETDATE()
 );
 
--- =========================================
--- ASNItems
--- =========================================
-IF OBJECT_ID('ASNItems', 'U') IS NOT NULL DROP TABLE ASNItems;
 CREATE TABLE ASNItems (
     item_id INT IDENTITY(1,1) PRIMARY KEY,
     asn_id INT FOREIGN KEY REFERENCES AdvancedShippingNotices(asn_id) ON DELETE CASCADE,
@@ -131,10 +162,6 @@ CREATE TABLE ASNItems (
     lot_number NVARCHAR(50)
 );
 
--- =========================================
--- DeliveryNotes
--- =========================================
-IF OBJECT_ID('DeliveryNotes', 'U') IS NOT NULL DROP TABLE DeliveryNotes;
 CREATE TABLE DeliveryNotes (
     dn_id INT IDENTITY(1,1) PRIMARY KEY,
     asn_id INT FOREIGN KEY REFERENCES AdvancedShippingNotices(asn_id) ON DELETE SET NULL,
@@ -146,11 +173,6 @@ CREATE TABLE DeliveryNotes (
     created_at DATETIME DEFAULT GETDATE()
 );
 
-
--- =========================================
--- Invoices
--- =========================================
-IF OBJECT_ID('Invoices', 'U') IS NOT NULL DROP TABLE Invoices;
 CREATE TABLE Invoices (
     invoice_id INT IDENTITY(1,1) PRIMARY KEY,
     po_id INT FOREIGN KEY REFERENCES PurchaseOrders(po_id) ON DELETE CASCADE,
@@ -165,26 +187,17 @@ CREATE TABLE Invoices (
     updated_at DATETIME DEFAULT GETDATE()
 );
 
--- =========================================
--- Transactions
--- =========================================
-IF OBJECT_ID('Transactions', 'U') IS NOT NULL DROP TABLE Transactions;
 CREATE TABLE Transactions (
     transaction_id INT IDENTITY(1,1) PRIMARY KEY,
     batch_id INT FOREIGN KEY REFERENCES Batches(batch_id) ON DELETE CASCADE,
     user_id INT FOREIGN KEY REFERENCES Users(user_id) ON DELETE SET NULL,
     dn_id INT FOREIGN KEY REFERENCES DeliveryNotes(dn_id) ON DELETE SET NULL,
-    type NVARCHAR(30) NOT NULL CHECK (type IN 
-        ('In','Out','Expired','Damaged','Adjustment','QuarantineRelease')),
+    type NVARCHAR(30) NOT NULL CHECK (type IN ('In','Out','Expired','Damaged','Adjustment','QuarantineRelease')),
     quantity INT NOT NULL,
     transaction_date DATETIME DEFAULT GETDATE(),
     notes NVARCHAR(MAX)
 );
 
--- =========================================
--- SystemLogs
--- =========================================
-IF OBJECT_ID('SystemLogs', 'U') IS NOT NULL DROP TABLE SystemLogs;
 CREATE TABLE SystemLogs (
     log_id INT IDENTITY(1,1) PRIMARY KEY,
     user_id INT,
@@ -198,34 +211,24 @@ CREATE TABLE SystemLogs (
     log_date DATETIME DEFAULT GETDATE()
 );
 
--- =========================================
--- AuditReports
--- =========================================
-IF OBJECT_ID('AuditReports', 'U') IS NOT NULL DROP TABLE AuditReports;
 CREATE TABLE AuditReports (
     report_id INT IDENTITY(1,1) PRIMARY KEY,
     auditor_id INT FOREIGN KEY REFERENCES Users(user_id) ON DELETE SET NULL,
-    report_type NVARCHAR(50) NOT NULL CHECK (report_type IN 
-        ('SupplierPerformance','PurchaseHistory','InventoryAudit','UserActivity')),
+    report_type NVARCHAR(50) NOT NULL CHECK (report_type IN ('SupplierPerformance','PurchaseHistory','InventoryAudit','UserActivity')),
     generated_date DATETIME DEFAULT GETDATE(),
     data NVARCHAR(MAX),
     exported_format NVARCHAR(10) CHECK (exported_format IN ('Excel','PDF')),
     notes NVARCHAR(MAX)
 );
 
--- =========================================
--- SystemConfig
--- =========================================
-IF OBJECT_ID('SystemConfig', 'U') IS NOT NULL DROP TABLE SystemConfig;
 CREATE TABLE SystemConfig (
     config_key NVARCHAR(50) PRIMARY KEY,
     config_value NVARCHAR(MAX),
     updated_at DATETIME DEFAULT GETDATE()
 );
+GO
 
--- =========================================
--- Indexes (safe re-run)
--- =========================================
+-- Create indexes (safe re-run)
 IF EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'idx_username' AND object_id = OBJECT_ID('Users'))
     DROP INDEX idx_username ON Users;
 CREATE UNIQUE INDEX idx_username ON Users(username);
@@ -257,10 +260,9 @@ CREATE INDEX idx_asn_po ON AdvancedShippingNotices(po_id);
 IF EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'idx_invoice_po' AND object_id = OBJECT_ID('Invoices'))
     DROP INDEX idx_invoice_po ON Invoices;
 CREATE INDEX idx_invoice_po ON Invoices(po_id);
+GO
 
--- =========================================
--- Initial Data (safe insert)
--- =========================================
+-- Initial data inserts (safe, only if not exists)
 IF NOT EXISTS (SELECT 1 FROM SystemConfig WHERE config_key = 'low_stock_threshold')
     INSERT INTO SystemConfig (config_key, config_value) VALUES ('low_stock_threshold', '10');
 
@@ -290,3 +292,28 @@ IF NOT EXISTS (SELECT 1 FROM Permissions WHERE permission_name = 'create_asn')
 
 IF NOT EXISTS (SELECT 1 FROM Permissions WHERE permission_name = 'confirm_delivery')
     INSERT INTO Permissions (permission_name, description) VALUES ('confirm_delivery', 'Confirm deliveries and create delivery notes');
+GO
+
+-- Legacy role update (safe, no-op if no matches)
+UPDATE Users SET role = 'Supplier' WHERE role = 'ProcurementOfficer';
+GO
+
+-- Insert admin user (corrected: no 'supplier_id' column in Users)
+IF NOT EXISTS (SELECT 1 FROM Users WHERE username = 'admin')
+    INSERT INTO Users (username, password_hash, email, phone, role, is_active, failed_attempts, last_login, created_at, updated_at)
+    VALUES ('admin', '$2a$12$K9nUjmnWq6sNYy0npqvGEuvghhATiOb2jCck9yA/foqghFG9lYK4u', 'admin@example.com', '12345678901', 'Admin', 1, 0, NULL, GETDATE(), GETDATE());
+GO
+
+-- Update existing PurchaseOrders updated_at (if any records exist)
+UPDATE PurchaseOrders SET updated_at = COALESCE(updated_at, GETDATE()) WHERE updated_at IS NULL;
+GO
+
+-- Additional constraint for MedicationRequests (overrides inline if needed, but inline already covers)
+ALTER TABLE MedicationRequests
+ADD CONSTRAINT CK_MedicationRequests_Status
+CHECK (status IN ('Pending', 'Approved', 'Rejected', 'Cancelled'));
+GO
+
+PRINT 'SWP391 database cleaned and setup completed successfully.';
+
+

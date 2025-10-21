@@ -348,6 +348,7 @@ public class ASNServlet extends HttpServlet {
 
     private void createASNBySupplier(HttpServletRequest req, PrintWriter out) throws SQLException {
         // Lấy supplierId từ session (sau khi đăng nhập)
+        
         Integer supplierId = (Integer) req.getSession().getAttribute("supplierId");
 
         if (supplierId == null) {

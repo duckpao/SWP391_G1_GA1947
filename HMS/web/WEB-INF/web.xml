@@ -233,6 +233,27 @@
     <servlet-name>SupplierDashboard</servlet-name>
     <url-pattern>/supplier-dashboard</url-pattern>
 </servlet-mapping>
+
+
+<!-- ========== Supplier ASN Servlets ========== -->
+<servlet>
+    <servlet-name>ASNServlet</servlet-name>
+    <servlet-class>Controller.ASNServlet</servlet-class>
+</servlet>
+
+
+
+<!-- ========== Supplier ASN Servlet Mappings ========== -->
+<servlet-mapping>
+    <servlet-name>ASNServlet</servlet-name>
+    <url-pattern>/supplier/create-asn</url-pattern>
+</servlet-mapping>
+
+<servlet-mapping>
+    <servlet-name>ASNServlet</servlet-name>
+    <url-pattern>/supplier/view-asn</url-pattern>
+</servlet-mapping>
+
     <!-- Welcome File -->
     <servlet-mapping>
         <servlet-name>VerifyOTPServlet</servlet-name>

@@ -8,8 +8,8 @@
 <body class="bg-light">
 <div class="container mt-5">
     <h2 class="mb-4">📦 Tạo ASN (Advanced Shipping Notice)</h2>
-   <form action="${pageContext.request.contextPath}/ASNServlet" method="post">
-    <input type="hidden" name="action" value="createBySupplier">
+<form action="${pageContext.request.contextPath}/supplier/create-asn" method="post">
+    <input type="hidden" name="action" value="create">
     <input type="hidden" name="poId" value="${param.poId}"> <!-- Hoặc servlet gán -->
     <input type="hidden" name="trackingNumber" id="trackingNumber">
 

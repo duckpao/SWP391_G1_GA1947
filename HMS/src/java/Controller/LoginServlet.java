@@ -71,6 +71,8 @@ public class LoginServlet extends HttpServlet {
                     response.sendRedirect("admin-dashboard"); // Điều hướng đến dashboard của quản trị viên
                     break;
                 case "Supplier":
+                    int supplierId = dao.getSupplierIdByUserId(user.getUserId()); // hàm này bạn cần tạo trong UserDAO
+                    session.setAttribute("supplierId", supplierId);
                     response.sendRedirect("supplier/supplier-dashboard.jsp"); // Điều hướng đến dashboard của nhà cung cấp
                     break;
                 case "Auditor":

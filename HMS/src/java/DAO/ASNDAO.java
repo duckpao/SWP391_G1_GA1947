@@ -1,115 +1,85 @@
 package DAO;
-
 import model.ASN;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class ASNDAO extends DBContext{
-    
-    public ASNDAO() {
-        
-    }
-    
-  
-    // Get all ASNs
+public class ASNDAO extends DBContext {
+
     public List<ASN> getAllASNs() throws SQLException {
-        List<ASN> asns = new ArrayList<>();
         String sql = "SELECT * FROM AdvancedShippingNotices ORDER BY created_at DESC";
-        
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-            
-            while (rs.next()) {
-                asns.add(mapResultSetToASN(rs));
-            }
+        try (Connection c = getConnection();
+             PreparedStatement ps = c.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            List<ASN> list = new ArrayList<>();
+            while (rs.next()) list.add(map(rs));
+            return list;
         }
-        return asns;
     }
 
-    // Get ASN by ID
-    public Optional<ASN> getASNById(int asnId) throws SQLException {
+    public Optional<ASN> getASNById(int id) throws SQLException {
         String sql = "SELECT * FROM AdvancedShippingNotices WHERE asn_id = ?";
-        
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            stmt.setInt(1, asnId);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return Optional.of(mapResultSetToASN(rs));
-                }
+        try (Connection c = getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return Optional.of(map(rs));
             }
         }
         return Optional.empty();
     }
 
-    // Get ASNs by Supplier ID
-    public List<ASN> getASNsBySupplierId(int supplierId) throws SQLException {
-        List<ASN> asns = new ArrayList<>();
+    public List<ASN> getASNsBySupplierId(int sid) throws SQLException {
         String sql = "SELECT * FROM AdvancedShippingNotices WHERE supplier_id = ? ORDER BY created_at DESC";
-        
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            stmt.setInt(1, supplierId);
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    asns.add(mapResultSetToASN(rs));
-                }
+        try (Connection c = getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, sid);
+            try (ResultSet rs = ps.executeQuery()) {
+                List<ASN> list = new ArrayList<>();
+                while (rs.next()) list.add(map(rs));
+                return list;
             }
         }
-        return asns;
     }
 
-    // Get ASNs by Status
     public List<ASN> getASNsByStatus(String status) throws SQLException {
-        List<ASN> asns = new ArrayList<>();
         String sql = "SELECT * FROM AdvancedShippingNotices WHERE status = ? ORDER BY created_at DESC";
-        
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            stmt.setString(1, status);
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    asns.add(mapResultSetToASN(rs));
-                }
+        try (Connection c = getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, status);
+            try (ResultSet rs = ps.executeQuery()) {
+                List<ASN> list = new ArrayList<>();
+                while (rs.next()) list.add(map(rs));
+                return list;
             }
         }
-        return asns;
     }
 
-    // Get ASNs pending approval
     public List<ASN> getPendingApprovalASNs() throws SQLException {
         return getASNsByStatus("PENDING_APPROVAL");
     }
 
-    // Add new ASN
-    public boolean addASN(ASN asn) throws SQLException {
-        String sql = "INSERT INTO AdvancedShippingNotices (po_id, supplier_id, shipment_date, carrier, tracking_number, status, notes, created_at, updated_at) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, GETDATE(), GETDATE())";
-        
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            
-            stmt.setInt(1, asn.getPoId());
-            stmt.setInt(2, asn.getSupplierId());
-            stmt.setDate(3, Date.valueOf(asn.getShipmentDate()));
-            stmt.setString(4, asn.getCarrier());
-            stmt.setString(5, asn.getTrackingNumber());
-            stmt.setString(6, asn.getStatus());
-            stmt.setString(7, asn.getNotes());
-            
-            int affectedRows = stmt.executeUpdate();
-            
-            if (affectedRows > 0) {
-                try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
-                    if (generatedKeys.next()) {
-                        asn.setAsnId(generatedKeys.getInt(1));
-                    }
+    public boolean addASN(ASN a) throws SQLException {
+        String sql = """
+            INSERT INTO AdvancedShippingNotices 
+            (po_id, supplier_id, shipment_date, carrier, tracking_number, status, notes, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, GETDATE(), GETDATE())
+            """;
+        try (Connection c = getConnection();
+             PreparedStatement ps = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setInt(1, a.getPoId());
+            ps.setInt(2, a.getSupplierId());
+            ps.setDate(3, Date.valueOf(a.getShipmentDate()));
+            ps.setString(4, a.getCarrier());
+            ps.setString(5, a.getTrackingNumber());
+            ps.setString(6, a.getStatus());
+            ps.setString(7, a.getNotes());
+            if (ps.executeUpdate() > 0) {
+                try (ResultSet rs = ps.getGeneratedKeys()) {
+                    if (rs.next()) a.setAsnId(rs.getInt(1));
                 }
                 return true;
             }
@@ -117,141 +87,83 @@ public class ASNDAO extends DBContext{
         return false;
     }
 
-    // Update ASN
-    public boolean updateASN(ASN asn) throws SQLException {
-        String sql = "UPDATE AdvancedShippingNotices SET po_id = ?, supplier_id = ?, shipment_date = ?, carrier = ?, tracking_number = ?, status = ?, notes = ?, updated_at = GETDATE() " +
-                    "WHERE asn_id = ?";
-        
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            stmt.setInt(1, asn.getPoId());
-            stmt.setInt(2, asn.getSupplierId());
-            stmt.setDate(3, Date.valueOf(asn.getShipmentDate()));
-            stmt.setString(4, asn.getCarrier());
-            stmt.setString(5, asn.getTrackingNumber());
-            stmt.setString(6, asn.getStatus());
-            stmt.setString(7, asn.getNotes());
-            stmt.setInt(8, asn.getAsnId());
-            
-            int affectedRows = stmt.executeUpdate();
-            return affectedRows > 0;
+    public boolean updateASN(ASN a) throws SQLException {
+        String sql = """
+            UPDATE AdvancedShippingNotices SET po_id=?, shipment_date=?, carrier=?, tracking_number=?, status=?, notes=?, updated_at=GETDATE()
+            WHERE asn_id=?
+            """;
+        try (Connection c = getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, a.getPoId());
+            ps.setDate(2, Date.valueOf(a.getShipmentDate()));
+            ps.setString(3, a.getCarrier());
+            ps.setString(4, a.getTrackingNumber());
+            ps.setString(5, a.getStatus());
+            ps.setString(6, a.getNotes());
+            ps.setInt(7, a.getAsnId());
+            return ps.executeUpdate() > 0;
         }
     }
 
-    // Submit ASN for approval
-    public boolean submitForApproval(int asnId, String submittedBy) throws SQLException {
-        String sql = "UPDATE AdvancedShippingNotices SET status = 'PENDING_APPROVAL', submitted_by = ?, submitted_at = GETDATE(), updated_at = GETDATE() WHERE asn_id = ?";
-        
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            stmt.setString(1, submittedBy);
-            stmt.setInt(2, asnId);
-            
-            int affectedRows = stmt.executeUpdate();
-            return affectedRows > 0;
+    public boolean submitForApproval(int id, String by) throws SQLException {
+        return updateStatus(id, "PENDING_APPROVAL", "submitted_by", by);
+    }
+
+    public boolean approveASN(int id, String by) throws SQLException {
+        return updateStatus(id, "APPROVED", "approved_by", by);
+    }
+
+    public boolean rejectASN(int id, String by, String reason) throws SQLException {
+        String sql = """
+            UPDATE AdvancedShippingNotices SET status='REJECTED', approved_by=?, rejection_reason=?, updated_at=GETDATE() WHERE asn_id=?
+            """;
+        try (Connection c = getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, by);
+            ps.setString(2, reason);
+            ps.setInt(3, id);
+            return ps.executeUpdate() > 0;
         }
     }
 
-    // Approve ASN
-    public boolean approveASN(int asnId, String approvedBy) throws SQLException {
-        String sql = "UPDATE AdvancedShippingNotices SET status = 'APPROVED', approved_by = ?, approved_at = GETDATE(), updated_at = GETDATE() WHERE asn_id = ?";
-        
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            stmt.setString(1, approvedBy);
-            stmt.setInt(2, asnId);
-            
-            int affectedRows = stmt.executeUpdate();
-            return affectedRows > 0;
+    public boolean updateASNStatus(int id, String status) throws SQLException {
+        return updateStatus(id, status, null, null);
+    }
+
+    public boolean deleteASN(int id) throws SQLException {
+        String sql = "DELETE FROM AdvancedShippingNotices WHERE asn_id=?";
+        try (Connection c = getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            return ps.executeUpdate() > 0;
         }
     }
 
-    // Reject ASN
-    public boolean rejectASN(int asnId, String rejectedBy, String rejectionReason) throws SQLException {
-        String sql = "UPDATE AdvancedShippingNotices SET status = 'REJECTED', approved_by = ?, rejection_reason = ?, updated_at = GETDATE() WHERE asn_id = ?";
-        
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            stmt.setString(1, rejectedBy);
-            stmt.setString(2, rejectionReason);
-            stmt.setInt(3, asnId);
-            
-            int affectedRows = stmt.executeUpdate();
-            return affectedRows > 0;
+    // helper
+    private boolean updateStatus(int id, String status, String field, String value) throws SQLException {
+        String sql = "UPDATE AdvancedShippingNotices SET status=?, updated_at=GETDATE()"
+                + (field != null ? ", " + field + "=?" : "")
+                + " WHERE asn_id=?";
+        try (Connection c = getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, status);
+            int i = 2;
+            if (field != null) ps.setString(i++, value);
+            ps.setInt(i, id);
+            return ps.executeUpdate() > 0;
         }
     }
 
-    // Update ASN status
-    public boolean updateASNStatus(int asnId, String status) throws SQLException {
-        String sql = "UPDATE AdvancedShippingNotices SET status = ?, updated_at = GETDATE() WHERE asn_id = ?";
-        
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            stmt.setString(1, status);
-            stmt.setInt(2, asnId);
-            
-            int affectedRows = stmt.executeUpdate();
-            return affectedRows > 0;
-        }
-    }
-
-    // Delete ASN
-    public boolean deleteASN(int asnId) throws SQLException {
-        String sql = "DELETE FROM AdvancedShippingNotices WHERE asn_id = ?";
-        
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            stmt.setInt(1, asnId);
-            int affectedRows = stmt.executeUpdate();
-            return affectedRows > 0;
-        }
-    }
-
-    // Helper method to map ResultSet to ASN object
-    private ASN mapResultSetToASN(ResultSet rs) throws SQLException {
-        ASN asn = new ASN();
-        asn.setAsnId(rs.getInt("asn_id"));
-        asn.setPoId(rs.getInt("po_id"));
-        asn.setSupplierId(rs.getInt("supplier_id"));
-        
-        Date shipmentDate = rs.getDate("shipment_date");
-        if (shipmentDate != null) {
-            asn.setShipmentDate(shipmentDate.toLocalDate());
-        }
-        
-        asn.setCarrier(rs.getString("carrier"));
-        asn.setTrackingNumber(rs.getString("tracking_number"));
-        asn.setStatus(rs.getString("status"));
-        asn.setNotes(rs.getString("notes"));
-        asn.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
-        
-        Timestamp updatedAt = rs.getTimestamp("updated_at");
-        if (updatedAt != null) {
-            asn.setUpdatedAt(updatedAt.toLocalDateTime());
-        }
-
-        // Các trường workflow
-        asn.setSubmittedBy(rs.getString("submitted_by"));
-        asn.setApprovedBy(rs.getString("approved_by"));
-        
-        Timestamp submittedAt = rs.getTimestamp("submitted_at");
-        if (submittedAt != null) {
-            asn.setSubmittedAt(submittedAt.toLocalDateTime());
-        }
-        
-        Timestamp approvedAt = rs.getTimestamp("approved_at");
-        if (approvedAt != null) {
-            asn.setApprovedAt(approvedAt.toLocalDateTime());
-        }
-        
-        asn.setRejectionReason(rs.getString("rejection_reason"));
-        
-        return asn;
+    private ASN map(ResultSet rs) throws SQLException {
+        ASN a = new ASN();
+        a.setAsnId(rs.getInt("asn_id"));
+        a.setPoId(rs.getInt("po_id"));
+        a.setSupplierId(rs.getInt("supplier_id"));
+        Date sd = rs.getDate("shipment_date");
+        if (sd != null) a.setShipmentDate(sd.toLocalDate());
+        a.setCarrier(rs.getString("carrier"));
+        a.setTrackingNumber(rs.getString("tracking_number"));
+        a.setStatus(rs.getString("status"));
+        a.setNotes(rs.getString("notes"));
+        a.setSubmittedBy(rs.getString("submitted_by"));
+        a.setApprovedBy(rs.getString("approved_by"));
+        a.setRejectionReason(rs.getString("rejection_reason"));
+        return a;
     }
 }

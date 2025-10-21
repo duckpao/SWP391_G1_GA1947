@@ -38,21 +38,59 @@ public class UserDAO extends DBContext {
     }
 
     // Register new user
-    public boolean register(User u) {
-        String sql = "INSERT INTO Users(username, password_hash, email, phone, role, is_active) VALUES(?,?,?,?,?,1)";
-        try {
-            PreparedStatement ps = connection.prepareStatement(sql);
-            ps.setString(1, u.getUsername());
-            ps.setString(2, u.getPasswordHash());
-            ps.setString(3, u.getEmail());
-            ps.setString(4, u.getPhone());
-            ps.setString(5, u.getRole());
-            return ps.executeUpdate() > 0;
-        } catch (Exception e) {
+  public boolean register(User u) {
+    String sqlUser = "INSERT INTO Users(username, password_hash, email, phone, role, is_active) VALUES(?,?,?,?,?,1)";
+    String sqlSupplier = "INSERT INTO Suppliers (name, contact_email, contact_phone, address, performance_rating, created_at, updated_at, supplier_id) VALUES (?, ?, ?, '', NULL, GETDATE(), GETDATE(), ?)";
+
+    try (Connection conn = getConnection()) {
+        conn.setAutoCommit(false); // Bắt đầu transaction
+
+        // 1️⃣ Thêm vào bảng Users
+        try (PreparedStatement psUser = conn.prepareStatement(sqlUser, Statement.RETURN_GENERATED_KEYS)) {
+            psUser.setString(1, u.getUsername());
+            psUser.setString(2, u.getPasswordHash());
+            psUser.setString(3, u.getEmail());
+            psUser.setString(4, u.getPhone());
+            psUser.setString(5, u.getRole());
+            int affectedRows = psUser.executeUpdate();
+
+            if (affectedRows == 0) {
+                conn.rollback();
+                return false;
+            }
+
+            // Lấy user_id vừa tạo
+            int userId = -1;
+            try (ResultSet rs = psUser.getGeneratedKeys()) {
+                if (rs.next()) {
+                    userId = rs.getInt(1);
+                }
+            }
+
+            // 2️⃣ Nếu là Supplier thì thêm vào bảng Suppliers
+            if ("Supplier".equalsIgnoreCase(u.getRole())) {
+                try (PreparedStatement psSupp = conn.prepareStatement(sqlSupplier)) {
+                    psSupp.setString(1, u.getUsername());
+                    psSupp.setString(2, u.getEmail());
+                    psSupp.setString(3, u.getPhone());
+                    psSupp.setInt(4, userId);
+                    psSupp.executeUpdate();
+                }
+            }
+
+            conn.commit(); // Hoàn tất transaction
+            return true;
+        } catch (SQLException e) {
+            conn.rollback();
             e.printStackTrace();
+        } finally {
+            conn.setAutoCommit(true);
         }
-        return false;
+    } catch (SQLException e) {
+        e.printStackTrace();
     }
+    return false;
+}
 
     // Update user password
     public boolean updatePassword(String email, String newPassword) {
@@ -315,4 +353,17 @@ public class UserDAO extends DBContext {
             }
         }
     }
+    public int getSupplierIdByUserId(int userId) {
+    String sql = "SELECT supplier_id FROM Suppliers WHERE user_id = ?";
+    try (Connection conn = getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, userId);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) return rs.getInt("supplier_id");
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return -1; // không tìm thấy
+}
+
 }

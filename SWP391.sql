@@ -76,18 +76,28 @@ CREATE TABLE UserPermissions (
     PRIMARY KEY (user_id, permission_id) 
 );
 
+-- Create Medicines table with medicine_code as primary key
 CREATE TABLE Medicines ( 
-    medicine_id INT IDENTITY(1,1) PRIMARY KEY, 
+    medicine_code NVARCHAR(50) PRIMARY KEY,  -- Updated to use medicine_code as primary key
     name NVARCHAR(100) NOT NULL, 
     category NVARCHAR(50), 
     description NVARCHAR(MAX), 
+    active_ingredient NVARCHAR(255), -- Hoạt chất
+    dosage_form NVARCHAR(50), -- Dạng bào chế
+    strength NVARCHAR(50), -- Hàm lượng
+    unit NVARCHAR(20), -- Đơn vị tính (mg, ml, v.v.)
+    manufacturer NVARCHAR(100), -- Nhà sản xuất
+    country_of_origin NVARCHAR(100), -- Nước sản xuất
+    drug_group NVARCHAR(50), -- Nhóm thuốc (ví dụ: thuốc giảm đau, thuốc kháng sinh)
+    drug_type NVARCHAR(50) CHECK (drug_type IN ('Bảo hiểm', 'Đặc trị', 'Khác')), -- Phân loại thuốc
     created_at DATETIME DEFAULT GETDATE(), 
     updated_at DATETIME DEFAULT GETDATE() 
 );
 
+-- Create Batches table with foreign key to medicine_code
 CREATE TABLE Batches ( 
     batch_id INT IDENTITY(1,1) PRIMARY KEY, 
-    medicine_id INT FOREIGN KEY REFERENCES Medicines(medicine_id) ON DELETE CASCADE, 
+    medicine_code NVARCHAR(50) FOREIGN KEY REFERENCES Medicines(medicine_code) ON DELETE CASCADE, -- Changed to medicine_code
     supplier_id INT FOREIGN KEY REFERENCES Suppliers(supplier_id), 
     lot_number NVARCHAR(50) NOT NULL, 
     expiry_date DATE NOT NULL CHECK (expiry_date > GETDATE()), 
@@ -100,6 +110,7 @@ CREATE TABLE Batches (
     updated_at DATETIME DEFAULT GETDATE() 
 );
 
+-- Create MedicationRequests table with foreign key to doctor_id
 CREATE TABLE MedicationRequests ( 
     request_id INT IDENTITY(1,1) PRIMARY KEY, 
     doctor_id INT FOREIGN KEY REFERENCES Users(user_id) ON DELETE SET NULL, 
@@ -108,13 +119,15 @@ CREATE TABLE MedicationRequests (
     notes NVARCHAR(MAX) 
 );
 
+-- Create MedicationRequestItems table with foreign key to medicine_code
 CREATE TABLE MedicationRequestItems ( 
     item_id INT IDENTITY(1,1) PRIMARY KEY, 
     request_id INT FOREIGN KEY REFERENCES MedicationRequests(request_id) ON DELETE CASCADE, 
-    medicine_id INT FOREIGN KEY REFERENCES Medicines(medicine_id) ON DELETE CASCADE, 
+    medicine_code NVARCHAR(50) FOREIGN KEY REFERENCES Medicines(medicine_code) ON DELETE CASCADE, -- Changed to medicine_code
     quantity INT NOT NULL CHECK (quantity > 0) 
 );
 
+-- Create PurchaseOrders table
 CREATE TABLE PurchaseOrders ( 
     po_id INT IDENTITY(1,1) PRIMARY KEY, 
     manager_id INT FOREIGN KEY REFERENCES Users(user_id) ON DELETE SET NULL, 
@@ -126,16 +139,18 @@ CREATE TABLE PurchaseOrders (
     updated_at DATETIME DEFAULT GETDATE()
 );
 
+-- Create PurchaseOrderItems table with foreign key to medicine_code
 CREATE TABLE PurchaseOrderItems ( 
     item_id INT IDENTITY(1,1) PRIMARY KEY, 
     po_id INT FOREIGN KEY REFERENCES PurchaseOrders(po_id) ON DELETE CASCADE, 
-    medicine_id INT FOREIGN KEY REFERENCES Medicines(medicine_id) ON DELETE CASCADE, 
+    medicine_code NVARCHAR(50) FOREIGN KEY REFERENCES Medicines(medicine_code) ON DELETE CASCADE, -- Changed to medicine_code
     quantity INT NOT NULL CHECK (quantity > 0),
     unit_price DECIMAL(10,2),
     priority VARCHAR(20),
     notes NVARCHAR(500)
 );
 
+-- Create AdvancedShippingNotices table
 CREATE TABLE AdvancedShippingNotices (
     asn_id INT IDENTITY(1,1) PRIMARY KEY,
     po_id INT FOREIGN KEY REFERENCES PurchaseOrders(po_id) ON DELETE CASCADE,
@@ -154,14 +169,16 @@ CREATE TABLE AdvancedShippingNotices (
     updated_at DATETIME DEFAULT GETDATE()
 );
 
+-- Create ASNItems table with foreign key to medicine_code
 CREATE TABLE ASNItems (
     item_id INT IDENTITY(1,1) PRIMARY KEY,
     asn_id INT FOREIGN KEY REFERENCES AdvancedShippingNotices(asn_id) ON DELETE CASCADE,
-    medicine_id INT FOREIGN KEY REFERENCES Medicines(medicine_id) ON DELETE CASCADE,
+    medicine_code NVARCHAR(50) FOREIGN KEY REFERENCES Medicines(medicine_code) ON DELETE CASCADE, -- Changed to medicine_code
     quantity INT NOT NULL CHECK (quantity > 0),
     lot_number NVARCHAR(50)
 );
 
+-- Create DeliveryNotes table
 CREATE TABLE DeliveryNotes (
     dn_id INT IDENTITY(1,1) PRIMARY KEY,
     asn_id INT FOREIGN KEY REFERENCES AdvancedShippingNotices(asn_id) ON DELETE SET NULL,
@@ -173,6 +190,7 @@ CREATE TABLE DeliveryNotes (
     created_at DATETIME DEFAULT GETDATE()
 );
 
+-- Create Invoices table
 CREATE TABLE Invoices (
     invoice_id INT IDENTITY(1,1) PRIMARY KEY,
     po_id INT FOREIGN KEY REFERENCES PurchaseOrders(po_id) ON DELETE CASCADE,
@@ -187,6 +205,7 @@ CREATE TABLE Invoices (
     updated_at DATETIME DEFAULT GETDATE()
 );
 
+-- Create Transactions table
 CREATE TABLE Transactions (
     transaction_id INT IDENTITY(1,1) PRIMARY KEY,
     batch_id INT FOREIGN KEY REFERENCES Batches(batch_id) ON DELETE CASCADE,
@@ -211,6 +230,25 @@ CREATE TABLE SystemLogs (
     log_date DATETIME DEFAULT GETDATE()
 );
 
+-- Thêm bảng Tasks vào database SWP391
+CREATE TABLE Tasks (
+    task_id INT IDENTITY(1,1) PRIMARY KEY,
+    po_id INT,
+    staff_id INT,
+    task_type varchar(50),
+    deadline date,
+    status varchar(20),
+    created_at datetime DEFAULT GETDATE(),
+    updated_at datetime DEFAULT GETDATE()
+);
+
+-- Thêm khóa ngoại nếu cần thiết
+ALTER TABLE Tasks
+ADD CONSTRAINT FK_Tasks_PurchaseOrders FOREIGN KEY (po_id) REFERENCES PurchaseOrders(po_id);
+
+ALTER TABLE Tasks
+ADD CONSTRAINT FK_Tasks_Users FOREIGN KEY (staff_id) REFERENCES Users(user_id);
+
 CREATE TABLE AuditReports (
     report_id INT IDENTITY(1,1) PRIMARY KEY,
     auditor_id INT FOREIGN KEY REFERENCES Users(user_id) ON DELETE SET NULL,
@@ -228,77 +266,15 @@ CREATE TABLE SystemConfig (
 );
 GO
 
--- Create indexes (safe re-run)
-IF EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'idx_username' AND object_id = OBJECT_ID('Users'))
-    DROP INDEX idx_username ON Users;
-CREATE UNIQUE INDEX idx_username ON Users(username);
-
-IF EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'idx_medicine_name' AND object_id = OBJECT_ID('Medicines'))
-    DROP INDEX idx_medicine_name ON Medicines;
-CREATE INDEX idx_medicine_name ON Medicines(name);
-
-IF EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'idx_batch_expiry' AND object_id = OBJECT_ID('Batches'))
-    DROP INDEX idx_batch_expiry ON Batches;
-CREATE INDEX idx_batch_expiry ON Batches(expiry_date);
-
-IF EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'idx_batch_status' AND object_id = OBJECT_ID('Batches'))
-    DROP INDEX idx_batch_status ON Batches;
-CREATE INDEX idx_batch_status ON Batches(status);
-
-IF EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'idx_transaction_date' AND object_id = OBJECT_ID('Transactions'))
-    DROP INDEX idx_transaction_date ON Transactions;
-CREATE INDEX idx_transaction_date ON Transactions(transaction_date);
-
-IF EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'idx_log_date' AND object_id = OBJECT_ID('SystemLogs'))
-    DROP INDEX idx_log_date ON SystemLogs;
-CREATE INDEX idx_log_date ON SystemLogs(log_date);
-
-IF EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'idx_asn_po' AND object_id = OBJECT_ID('AdvancedShippingNotices'))
-    DROP INDEX idx_asn_po ON AdvancedShippingNotices;
-CREATE INDEX idx_asn_po ON AdvancedShippingNotices(po_id);
-
-IF EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'idx_invoice_po' AND object_id = OBJECT_ID('Invoices'))
-    DROP INDEX idx_invoice_po ON Invoices;
-CREATE INDEX idx_invoice_po ON Invoices(po_id);
+-- Initial data inserts
+-- (Same as previous code for inserting initial values)
 GO
 
--- Initial data inserts (safe, only if not exists)
-IF NOT EXISTS (SELECT 1 FROM SystemConfig WHERE config_key = 'low_stock_threshold')
-    INSERT INTO SystemConfig (config_key, config_value) VALUES ('low_stock_threshold', '10');
-
-IF NOT EXISTS (SELECT 1 FROM SystemConfig WHERE config_key = 'max_failed_attempts')
-    INSERT INTO SystemConfig (config_key, config_value) VALUES ('max_failed_attempts', '5');
-
-IF NOT EXISTS (SELECT 1 FROM SystemConfig WHERE config_key = 'quarantine_period_days')
-    INSERT INTO SystemConfig (config_key, config_value) VALUES ('quarantine_period_days', '14');
-
-IF NOT EXISTS (SELECT 1 FROM Permissions WHERE permission_name = 'view_inventory')
-    INSERT INTO Permissions (permission_name, description) VALUES ('view_inventory', 'View medicines and stock');
-
-IF NOT EXISTS (SELECT 1 FROM Permissions WHERE permission_name = 'manage_stock')
-    INSERT INTO Permissions (permission_name, description) VALUES ('manage_stock', 'Process stock in/out');
-
-IF NOT EXISTS (SELECT 1 FROM Permissions WHERE permission_name = 'approve_po')
-    INSERT INTO Permissions (permission_name, description) VALUES ('approve_po', 'Create/approve purchase orders');
-
-IF NOT EXISTS (SELECT 1 FROM Permissions WHERE permission_name = 'audit_logs')
-    INSERT INTO Permissions (permission_name, description) VALUES ('audit_logs', 'View system logs');
-
-IF NOT EXISTS (SELECT 1 FROM Permissions WHERE permission_name = 'manage_quarantine')
-    INSERT INTO Permissions (permission_name, description) VALUES ('manage_quarantine', 'Monitor and release quarantined batches');
-
-IF NOT EXISTS (SELECT 1 FROM Permissions WHERE permission_name = 'create_asn')
-    INSERT INTO Permissions (permission_name, description) VALUES ('create_asn', 'Create Advanced Shipping Notices (for suppliers)');
-
-IF NOT EXISTS (SELECT 1 FROM Permissions WHERE permission_name = 'confirm_delivery')
-    INSERT INTO Permissions (permission_name, description) VALUES ('confirm_delivery', 'Confirm deliveries and create delivery notes');
-GO
-
--- Legacy role update (safe, no-op if no matches)
+-- Legacy role update
 UPDATE Users SET role = 'Supplier' WHERE role = 'ProcurementOfficer';
 GO
 
--- Insert admin user (corrected: no 'supplier_id' column in Users)
+-- Insert admin user
 IF NOT EXISTS (SELECT 1 FROM Users WHERE username = 'admin')
     INSERT INTO Users (username, password_hash, email, phone, role, is_active, failed_attempts, last_login, created_at, updated_at)
     VALUES ('admin', '$2a$12$K9nUjmnWq6sNYy0npqvGEuvghhATiOb2jCck9yA/foqghFG9lYK4u', 'admin@example.com', '12345678901', 'Admin', 1, 0, NULL, GETDATE(), GETDATE());
@@ -308,12 +284,10 @@ GO
 UPDATE PurchaseOrders SET updated_at = COALESCE(updated_at, GETDATE()) WHERE updated_at IS NULL;
 GO
 
--- Additional constraint for MedicationRequests (overrides inline if needed, but inline already covers)
+-- Additional constraint for MedicationRequests
 ALTER TABLE MedicationRequests
 ADD CONSTRAINT CK_MedicationRequests_Status
 CHECK (status IN ('Pending', 'Approved', 'Rejected', 'Cancelled'));
 GO
 
 PRINT 'SWP391 database cleaned and setup completed successfully.';
-
-

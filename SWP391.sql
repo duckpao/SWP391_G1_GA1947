@@ -89,7 +89,7 @@ CREATE TABLE Medicines (
     manufacturer NVARCHAR(100), -- Nhà sản xuất
     country_of_origin NVARCHAR(100), -- Nước sản xuất
     drug_group NVARCHAR(50), -- Nhóm thuốc (ví dụ: thuốc giảm đau, thuốc kháng sinh)
-    drug_type NVARCHAR(50) CHECK (drug_type IN ('Bảo hiểm', 'Đặc trị', 'Khác')), -- Phân loại thuốc
+    drug_type NVARCHAR(50) CHECK (drug_type IN (N'Bảo hiểm', N'Đặc trị', N'Khác')), -- Phân loại thuốc
     created_at DATETIME DEFAULT GETDATE(), 
     updated_at DATETIME DEFAULT GETDATE() 
 );
@@ -291,3 +291,4 @@ CHECK (status IN ('Pending', 'Approved', 'Rejected', 'Cancelled'));
 GO
 
 PRINT 'SWP391 database cleaned and setup completed successfully.';
+

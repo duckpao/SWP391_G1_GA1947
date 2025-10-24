@@ -49,15 +49,16 @@ public class LoginServlet extends HttpServlet {
                         break;
 
                     case "Supplier":
-                        // 🔹 Lấy supplierId tương ứng userId
-                        Integer supplierId = supplierDAO.getSupplierIdByUserId(user.getUserId());
-                        if (supplierId == null) {
-                            // Nếu user chưa có supplier record → tự thêm
-                            supplierDAO.addSupplierFromUser(user.getUserId());
-                            supplierId = supplierDAO.getSupplierIdByUserId(user.getUserId());
-                        }
-                        session.setAttribute("supplierId", supplierId);
+//                        // 🔹 Lấy supplierId tương ứng userId
+//                        Integer supplierId = supplierDAO.getSupplierIdByUserId(user.getUserId());
+//                        if (supplierId == null) {
+//                            // Nếu user chưa có supplier record → tự thêm
+//                            supplierDAO.addSupplierFromUser(user.getUserId());
+//                            supplierId = supplierDAO.getSupplierIdByUserId(user.getUserId());
+//                        }
+//                        session.setAttribute("supplierId", supplierId);
                         response.sendRedirect(request.getContextPath() + "/supplier/supplier-dashboard.jsp");
+                        
                         break;
 
                     case "Auditor":

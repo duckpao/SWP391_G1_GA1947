@@ -189,6 +189,66 @@
                 color: #92400e;
                 margin-bottom: 24px;
             }
+
+            .password-section {
+                background: #f0f9ff;
+                border: 2px solid #bae6fd;
+                border-radius: 8px;
+                padding: 20px;
+                margin-bottom: 24px;
+            }
+
+            .password-section h3 {
+                font-size: 16px;
+                color: #075985;
+                margin-bottom: 16px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .password-toggle {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 16px;
+            }
+
+            .password-toggle input[type="checkbox"] {
+                width: auto;
+                cursor: pointer;
+            }
+
+            .password-toggle label {
+                margin: 0;
+                font-weight: 500;
+                font-size: 14px;
+                cursor: pointer;
+            }
+
+            .password-fields {
+                display: none;
+            }
+
+            .password-fields.active {
+                display: block;
+            }
+
+            .password-hint {
+                font-size: 12px;
+                color: #6b7280;
+                margin-top: 4px;
+            }
+
+            .error-message {
+                background: #fee2e2;
+                border: 1px solid #fca5a5;
+                border-radius: 6px;
+                padding: 12px;
+                color: #991b1b;
+                font-size: 13px;
+                margin-bottom: 20px;
+            }
         </style>
     </head>
     <body>
@@ -211,13 +271,19 @@
                     </div>
                 </div>
 
+                <c:if test="${not empty param.error}">
+                    <div class="error-message">
+                        ⚠️ ${param.error}
+                    </div>
+                </c:if>
+
                 <div class="info-note">
-                    ℹ️ Không thể thay đổi tên đăng nhập. Để đổi mật khẩu, vui lòng sử dụng chức năng riêng.
+                    ℹ️ Không thể thay đổi tên đăng nhập. Mật khẩu là tùy chọn - chỉ điền nếu muốn thay đổi.
                 </div>
 
                 <form action="${pageContext.request.contextPath}/admin-dashboard/edit" method="post">
                     <input type="hidden" name="userId" value="${user.userId}">
-                    <input type="hidden" name="username" value="${user.username}">  <!-- Add this -->
+                    <input type="hidden" name="username" value="${user.username}">
 
                     <div class="form-group">
                         <label>Tên đăng nhập</label>
@@ -243,8 +309,36 @@
                             <option value="Pharmacist" ${r=='Pharmacist'?'selected':''}>💊 Pharmacist - Dược sĩ</option>
                             <option value="Manager" ${r=='Manager'?'selected':''}>📊 Manager - Quản lý</option>
                             <option value="Auditor" ${r=='Auditor'?'selected':''}>🔍 Auditor - Kiểm toán</option>
+                            <option value="ProcurementOfficer" ${r=='ProcurementOfficer'?'selected':''}>📦 Procurement Officer</option>
                             <option value="Supplier" ${r=='Supplier'?'selected':''}>🚚 Supplier - Nhà cung cấp</option>
                         </select>
+                    </div>
+
+                    <!-- Password Section -->
+                    <div class="password-section">
+                        <h3>🔐 Đổi mật khẩu</h3>
+                        
+                        <div class="password-toggle">
+                            <input type="checkbox" id="changePassword" onchange="togglePasswordFields()">
+                            <label for="changePassword">Tôi muốn đổi mật khẩu</label>
+                        </div>
+
+                        <div class="password-fields" id="passwordFields">
+                            <div class="form-group">
+                                <label>Mật khẩu mới</label>
+                                <input type="password" name="newPassword" id="newPassword" 
+                                       placeholder="Nhập mật khẩu mới (tối thiểu 6 ký tự)">
+                                <div class="password-hint">
+                                    💡 Mật khẩu nên có ít nhất 6 ký tự, bao gồm chữ và số
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Xác nhận mật khẩu mới</label>
+                                <input type="password" name="confirmPassword" id="confirmPassword" 
+                                       placeholder="Nhập lại mật khẩu mới">
+                            </div>
+                        </div>
                     </div>
 
                     <div class="form-actions">
@@ -258,5 +352,48 @@
                 </form>
             </div>
         </div>
+
+        <script>
+            function togglePasswordFields() {
+                const checkbox = document.getElementById('changePassword');
+                const fields = document.getElementById('passwordFields');
+                const newPassword = document.getElementById('newPassword');
+                const confirmPassword = document.getElementById('confirmPassword');
+                
+                if (checkbox.checked) {
+                    fields.classList.add('active');
+                    newPassword.required = true;
+                    confirmPassword.required = true;
+                } else {
+                    fields.classList.remove('active');
+                    newPassword.required = false;
+                    confirmPassword.required = false;
+                    newPassword.value = '';
+                    confirmPassword.value = '';
+                }
+            }
+
+            // Validate password match before submit
+            document.querySelector('form').addEventListener('submit', function(e) {
+                const changePassword = document.getElementById('changePassword');
+                
+                if (changePassword.checked) {
+                    const newPassword = document.getElementById('newPassword').value;
+                    const confirmPassword = document.getElementById('confirmPassword').value;
+                    
+                    if (newPassword !== confirmPassword) {
+                        e.preventDefault();
+                        alert('⚠️ Mật khẩu xác nhận không khớp!');
+                        return false;
+                    }
+                    
+                    if (newPassword.length < 6) {
+                        e.preventDefault();
+                        alert('⚠️ Mật khẩu phải có ít nhất 6 ký tự!');
+                        return false;
+                    }
+                }
+            });
+        </script>
     </body>
 </html>

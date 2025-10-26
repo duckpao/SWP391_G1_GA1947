@@ -450,6 +450,9 @@
                     Quản lý người dùng
                 </h1>
                 <div style="display: flex; gap: 12px;">
+                    <a class="btn btn-primary" href="${pageContext.request.contextPath}/user-reports/generate">
+                        ⚙️ Báo cáo
+                    </a>
                     <a class="btn btn-primary" href="${pageContext.request.contextPath}/admin-dashboard/config">
                         ⚙️ Cấu hình
                     </a>
@@ -459,8 +462,8 @@
                     <a class="btn btn-primary" href="${pageContext.request.contextPath}/admin-dashboard/create">
                         ➕ Tạo tài khoản mới
                     </a>
-                    <a class="btn btn-primary" href="${pageContext.request.contextPath}/home">
-                        ️Logout 
+                    <a class="btn btn-primary" href="${pageContext.request.contextPath}/logout">
+                        Logout 
                     </a>
                 </div>
             </div>
@@ -661,9 +664,9 @@
 
                                                             <!-- Nút chuyển thành Supplier -->
                                                             <c:if test="${u.role != 'Supplier'}">
-                                                              <a class="btn btn-warning" href="${pageContext.request.contextPath}/admin-dashboard/convert-supplier?userId=${u.userId}">
-    🚀 Chuyển sang Supplier
-</a>
+                                                                <a class="btn btn-warning" href="${pageContext.request.contextPath}/admin-dashboard/convert-supplier?userId=${u.userId}">
+                                                                    🚀 Chuyển sang Supplier
+                                                                </a>
                                                             </c:if>
 
                                                             <form class="inline" action="${pageContext.request.contextPath}/admin-dashboard/toggle" method="post">

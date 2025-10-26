@@ -10,9 +10,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.sql.SQLException;
 import java.util.List;
 import model.User;
+import util.LoggingUtil;
 
 /**
- * Servlet for managing users with filter support
+ * Servlet for managing users with filter support and comprehensive logging
  */
 public class UserServlet extends HttpServlet {
     
@@ -30,7 +31,7 @@ public class UserServlet extends HttpServlet {
             String role = request.getParameter("role");
             String status = request.getParameter("status");
             
-            // Debug: In ra console để kiểm tra
+            // Debug logging
             System.out.println("DEBUG - Filter Parameters:");
             System.out.println("  keyword: " + keyword);
             System.out.println("  role: " + role);
@@ -49,10 +50,23 @@ public class UserServlet extends HttpServlet {
                 // Use filter method
                 users = userDAO.filterUsers(keyword, role, status);
                 System.out.println("  Filtered users count: " + users.size());
+                
+                // Log filter usage
+                String filterDetails = String.format(
+                    "Applied user filters | Keyword: %s | Role: %s | Status: %s | Results: %d",
+                    keyword != null ? keyword : "none",
+                    role != null ? role : "none",
+                    status != null ? status : "none",
+                    users.size()
+                );
+                LoggingUtil.logAction(request, "FILTER_USERS", filterDetails);
             } else {
                 // Get all users
                 users = userDAO.findAll();
                 System.out.println("  All users count: " + users.size());
+                
+                // Log view all
+                LoggingUtil.logView(request, "User Management Dashboard");
             }
             
             // Get statistics
@@ -71,6 +85,11 @@ public class UserServlet extends HttpServlet {
             
         } catch (SQLException e) {
             e.printStackTrace();
+            
+            // Log error
+            LoggingUtil.logAction(request, "VIEW_USERS_ERROR", 
+                "Error loading user list: " + e.getMessage());
+            
             request.setAttribute("error", "Lỗi khi tải danh sách người dùng: " + e.getMessage());
             request.getRequestDispatcher("/admin/dashboard.jsp").forward(request, response);
         }
@@ -93,12 +112,18 @@ public class UserServlet extends HttpServlet {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            response.sendRedirect(request.getContextPath() + "/admin-dashboard?error=" + e.getMessage());
+            
+            // Log error
+            LoggingUtil.logAction(request, "USER_ACTION_ERROR", 
+                String.format("Error in %s action: %s", action, e.getMessage()));
+            
+            response.sendRedirect(request.getContextPath() + 
+                "/admin-dashboard?error=" + e.getMessage());
         }
     }
     
     /**
-     * Toggle user active status
+     * Toggle user active status with logging
      */
     private void handleToggleStatus(HttpServletRequest request, HttpServletResponse response) 
             throws SQLException, IOException {
@@ -108,18 +133,49 @@ public class UserServlet extends HttpServlet {
         
         if (idParam != null && activeParam != null) {
             int userId = Integer.parseInt(idParam);
+            boolean newStatus = Boolean.parseBoolean(activeParam);
             
-            // Kiểm tra xem user có phải Admin không
+            // Get user info for logging
             User user = userDAO.findById(userId);
-            if (user != null && "Admin".equals(user.getRole())) {
-                // Không cho phép khóa/mở Admin
+            
+            if (user == null) {
+                LoggingUtil.logAction(request, "TOGGLE_STATUS_FAILED", 
+                    String.format("User not found (ID: %d)", userId));
+                
+                response.sendRedirect(request.getContextPath() + 
+                    "/admin-dashboard?error=user_not_found");
+                return;
+            }
+            
+            // Check if user is Admin
+            if ("Admin".equals(user.getRole())) {
+                // Log blocked attempt to modify Admin
+                LoggingUtil.logAction(request, "TOGGLE_STATUS_BLOCKED", 
+                    String.format("Blocked attempt to toggle Admin status: %s (ID: %d)", 
+                    user.getUsername(), userId));
+                
                 response.sendRedirect(request.getContextPath() + 
                     "/admin-dashboard?error=cannot_modify_admin");
                 return;
             }
             
-            boolean active = Boolean.parseBoolean(activeParam);
-            userDAO.setActive(userId, active);
+            // Get old status
+            boolean oldStatus = user.getIsActive();
+            
+            // Perform toggle
+            userDAO.setActive(userId, newStatus);
+            
+            // Log status change with details
+            String statusAction = newStatus ? "activated" : "deactivated";
+            String details = String.format(
+                "User %s: %s (ID: %d) | Status changed from %s to %s",
+                statusAction, user.getUsername(), userId,
+                oldStatus ? "Active" : "Inactive",
+                newStatus ? "Active" : "Inactive"
+            );
+            
+            LoggingUtil.logUserToggleStatus(request, user.getUsername(), newStatus);
+            LoggingUtil.logAction(request, "TOGGLE_USER_STATUS_DETAIL", details);
         }
         
         // Redirect back to list
@@ -127,7 +183,7 @@ public class UserServlet extends HttpServlet {
     }
     
     /**
-     * Delete user
+     * Delete user with comprehensive logging
      */
     private void handleDelete(HttpServletRequest request, HttpServletResponse response) 
             throws SQLException, IOException {
@@ -137,29 +193,69 @@ public class UserServlet extends HttpServlet {
         if (idParam != null) {
             int userId = Integer.parseInt(idParam);
             
-            // Kiểm tra xem user có phải Admin không
+            // Get user info before deletion
             User user = userDAO.findById(userId);
-            if (user != null && "Admin".equals(user.getRole())) {
-                // Không cho phép xóa Admin
+            
+            if (user == null) {
+                LoggingUtil.logAction(request, "DELETE_USER_FAILED", 
+                    String.format("User not found (ID: %d)", userId));
+                
+                response.sendRedirect(request.getContextPath() + 
+                    "/admin-dashboard?error=user_not_found");
+                return;
+            }
+            
+            // Check if user is Admin
+            if ("Admin".equals(user.getRole())) {
+                // Log blocked deletion attempt
+                LoggingUtil.logAction(request, "DELETE_USER_BLOCKED", 
+                    String.format("Blocked attempt to delete Admin: %s (ID: %d)", 
+                    user.getUsername(), userId));
+                
                 response.sendRedirect(request.getContextPath() + 
                     "/admin-dashboard?error=cannot_delete_admin");
                 return;
             }
             
+            // Store user details for logging
+            String username = user.getUsername();
+            String role = user.getRole();
+            String email = user.getEmail();
+            
+            // Perform deletion
             boolean deleted = userDAO.delete(userId);
             
             if (deleted) {
-                response.sendRedirect(request.getContextPath() + "/admin-dashboard?success=deleted");
+                // Log successful deletion
+                String details = String.format(
+                    "Deleted user: %s (ID: %d) | Role: %s | Email: %s",
+                    username, userId, role, email != null ? email : "N/A"
+                );
+                
+                LoggingUtil.logUserDelete(request, username);
+                LoggingUtil.logAction(request, "DELETE_USER_DETAIL", details);
+                
+                response.sendRedirect(request.getContextPath() + 
+                    "/admin-dashboard?success=deleted&user=" + username);
             } else {
-                response.sendRedirect(request.getContextPath() + "/admin-dashboard?error=delete_failed");
+                // Log failed deletion
+                LoggingUtil.logAction(request, "DELETE_USER_FAILED", 
+                    String.format("Failed to delete user: %s (ID: %d)", username, userId));
+                
+                response.sendRedirect(request.getContextPath() + 
+                    "/admin-dashboard?error=delete_failed");
             }
         } else {
+            // Log invalid request
+            LoggingUtil.logAction(request, "DELETE_USER_FAILED", 
+                "Delete request with missing user ID");
+            
             response.sendRedirect(request.getContextPath() + "/admin-dashboard");
         }
     }
     
     @Override
     public String getServletInfo() {
-        return "User Management Servlet with Filter Support";
+        return "User Management Servlet with Filter Support and Comprehensive Logging";
     }
 }

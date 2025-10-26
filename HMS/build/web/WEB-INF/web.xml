@@ -39,8 +39,11 @@
         <servlet-name>VerifyResetServlet</servlet-name>
         <servlet-class>Controller.VerifyResetServlet</servlet-class>
     </servlet>
-
     <!-- User Management Servlet Mappings -->
+    <servlet>
+        <servlet-name>UserReportServlet</servlet-name>
+        <servlet-class>Controller.UserReportServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>UserServlet</servlet-name>
         <url-pattern>/admin-dashboard</url-pattern>
@@ -77,7 +80,6 @@
         <servlet-name>VerifyResetServlet</servlet-name>
         <url-pattern>/VerifyResetServlet</url-pattern>
     </servlet-mapping>
-
     <!-- Medication Request Servlets -->
     <servlet>
         <servlet-name>ManageRequestsServlet</servlet-name>
@@ -99,13 +101,11 @@
         <servlet-name>ViewMedicineServlet</servlet-name>
         <servlet-class>Controller.ViewMedicineServlet</servlet-class>
     </servlet>
-
     <!-- Pharmacist Dashboard Servlet -->
     <servlet>
         <servlet-name>pharmacistdashboard</servlet-name>
         <servlet-class>Controller.pharmacistdashboard</servlet-class>
     </servlet>
-
     <!-- Manager Dashboard and Stock Management Servlets -->
     <servlet>
         <servlet-name>ManagerDashboardServlet</servlet-name>
@@ -143,7 +143,6 @@
         <servlet-name>InventoryReportServlet</servlet-name>
         <servlet-class>Controller.InventoryReportServlet</servlet-class>
     </servlet>
-
     <!-- Authentication Servlets -->
     <servlet>
         <servlet-name>RegisterServlet</servlet-name>
@@ -181,7 +180,6 @@
         <servlet-name>CreateMedicationRequestServlet</servlet-name>
         <servlet-class>Controller.CreateMedicationRequestServlet</servlet-class>
     </servlet>
-
     <!-- Medication Request Servlet Mappings -->
     <servlet-mapping>
         <servlet-name>DoctorDashboardServlet</servlet-name>
@@ -211,13 +209,11 @@
         <servlet-name>ViewMedicineServlet</servlet-name>
         <url-pattern>/view-medicine</url-pattern>
     </servlet-mapping>
-
     <!-- Pharmacist Dashboard Mapping -->
     <servlet-mapping>
         <servlet-name>pharmacistdashboard</servlet-name>
         <url-pattern>/pharmacist-dashboard</url-pattern>
     </servlet-mapping>
-
     <!-- Manager Dashboard and Stock Management Mappings -->
     <servlet-mapping>
         <servlet-name>ManagerDashboardServlet</servlet-name>
@@ -259,7 +255,6 @@
         <servlet-name>InventoryReportServlet</servlet-name>
         <url-pattern>/inventory-report</url-pattern>
     </servlet-mapping>
-
     <!-- Authentication Servlet Mappings -->
     <servlet-mapping>
         <servlet-name>RegisterServlet</servlet-name>
@@ -289,40 +284,37 @@
         <servlet-name>HomeServlet</servlet-name>
         <url-pattern>/home</url-pattern>
     </servlet-mapping>
-
-    
     <!-- supplier-->
     <servlet>
-    <servlet-name>SupplierDashboard</servlet-name>
-    <servlet-class>Controller.SupplierDashboard</servlet-class>
-</servlet>
-
-<servlet-mapping>
-    <servlet-name>SupplierDashboard</servlet-name>
-    <url-pattern>/supplier-dashboard</url-pattern>
-</servlet-mapping>
-
-<servlet>
-    <servlet-name>ASNServlet</servlet-name>
-    <servlet-class>Controller.ASNServlet</servlet-class>
-</servlet>
-
-<servlet-mapping>
-    <servlet-name>ASNServlet</servlet-name>
-    <url-pattern>/ASNServlet</url-pattern>
-</servlet-mapping>
-<!-- Convert normal user to Supplier -->
-<servlet>
-    <servlet-name>ConvertToSupplier</servlet-name>
-    <servlet-class>Controller.ConvertToSupplier</servlet-class>
-</servlet>
-
-<servlet-mapping>
-    <servlet-name>ConvertToSupplier</servlet-name>
-    <url-pattern>/admin-dashboard/convert-supplier</url-pattern>
-</servlet-mapping>
-
+        <servlet-name>SupplierDashboard</servlet-name>
+        <servlet-class>Controller.SupplierDashboard</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SupplierDashboard</servlet-name>
+        <url-pattern>/supplier-dashboard</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>ASNServlet</servlet-name>
+        <servlet-class>Controller.ASNServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ASNServlet</servlet-name>
+        <url-pattern>/ASNServlet</url-pattern>
+    </servlet-mapping>
+    <!-- Convert normal user to Supplier -->
+    <servlet>
+        <servlet-name>ConvertToSupplier</servlet-name>
+        <servlet-class>Controller.ConvertToSupplier</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ConvertToSupplier</servlet-name>
+        <url-pattern>/admin-dashboard/convert-supplier</url-pattern>
+    </servlet-mapping>
     <!-- Welcome File -->
+    <servlet-mapping>
+        <servlet-name>UserReportServlet</servlet-name>
+        <url-pattern>/user-reports/generate</url-pattern>
+    </servlet-mapping>
     <welcome-file-list>
         <welcome-file>home.jsp</welcome-file>
     </welcome-file-list>

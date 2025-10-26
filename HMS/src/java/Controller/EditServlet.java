@@ -1,54 +1,172 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
-
 package Controller;
 
 import DAO.UserDAO;
 import java.io.IOException;
-import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.sql.SQLException;
 import model.User;
+import util.PasswordUtils;
+import util.LoggingUtil;
 
 /**
- *
- * @author nguye
+ * Servlet for editing users with detailed change tracking and logging
  */
 public class EditServlet extends HttpServlet {
-   private final UserDAO userDAO = new UserDAO();
-
+    
+    private final UserDAO userDAO = new UserDAO();
+    
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        int id = Integer.parseInt(req.getParameter("id"));
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) 
+            throws ServletException, IOException {
+        
+        String idParam = req.getParameter("id");
+        
+        if (idParam == null || idParam.trim().isEmpty()) {
+            resp.sendRedirect(req.getContextPath() + "/admin-dashboard?error=invalid_id");
+            return;
+        }
+        
         try {
+            int id = Integer.parseInt(idParam);
             User u = userDAO.findById(id);
+            
+            if (u == null) {
+                resp.sendRedirect(req.getContextPath() + "/admin-dashboard?error=user_not_found");
+                return;
+            }
+            
+            // Log page view
+            LoggingUtil.logView(req, "Edit User Form - " + u.getUsername());
+            
             req.setAttribute("user", u);
-            req.getRequestDispatcher("/admin/user_form_edit.jsp").forward(req, resp);  // Đảm bảo đường dẫn đúng
-        } catch (SQLException e) {
+            req.getRequestDispatcher("/admin/user_form_edit.jsp").forward(req, resp);
+            
+        } catch (NumberFormatException | SQLException e) {
+            e.printStackTrace();
             throw new ServletException(e);
         }
     }
-
+    
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        int id = Integer.parseInt(req.getParameter("userId"));
-        String username = req.getParameter("username");
-        String email = req.getParameter("email");
-        String phone = req.getParameter("phone");
-        String role = req.getParameter("role");
-
-        User u = new User(id, username, email, phone, role);
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) 
+            throws ServletException, IOException {
+        
         try {
-            userDAO.update(u);
-            resp.sendRedirect(req.getContextPath() + "/admin-dashboard");
-        } catch (SQLException e) {
+            // Get form parameters
+            int id = Integer.parseInt(req.getParameter("userId"));
+            String username = req.getParameter("username");
+            String email = req.getParameter("email");
+            String phone = req.getParameter("phone");
+            String role = req.getParameter("role");
+            
+            // Get password fields
+            String newPassword = req.getParameter("newPassword");
+            String confirmPassword = req.getParameter("confirmPassword");
+            
+            // Get existing user to track changes
+            User existingUser = userDAO.findById(id);
+            
+            if (existingUser == null) {
+                resp.sendRedirect(req.getContextPath() + "/admin-dashboard?error=user_not_found");
+                return;
+            }
+            
+            // Track changes for logging
+            StringBuilder changes = new StringBuilder();
+            
+            // Check email change
+            if (!email.equals(existingUser.getEmail())) {
+                changes.append(String.format("Email: '%s' → '%s' | ", 
+                    existingUser.getEmail(), email));
+            }
+            
+            // Check phone change
+            if (!phone.equals(existingUser.getPhone())) {
+                changes.append(String.format("Phone: '%s' → '%s' | ", 
+                    existingUser.getPhone(), phone));
+            }
+            
+            // Check role change
+            if (!role.equals(existingUser.getRole())) {
+                changes.append(String.format("Role: '%s' → '%s' | ", 
+                    existingUser.getRole(), role));
+            }
+            
+            // Handle password change if requested
+            boolean passwordChanged = false;
+            boolean changePassword = newPassword != null && !newPassword.trim().isEmpty();
+            
+            if (changePassword) {
+                // Validate password
+                if (newPassword.length() < 6) {
+                    req.setAttribute("error", "Mật khẩu phải có ít nhất 6 ký tự!");
+                    req.setAttribute("user", existingUser);
+                    req.getRequestDispatcher("/admin/user_form_edit.jsp").forward(req, resp);
+                    return;
+                }
+                
+                if (!newPassword.equals(confirmPassword)) {
+                    req.setAttribute("error", "Mật khẩu xác nhận không khớp!");
+                    req.setAttribute("user", existingUser);
+                    req.getRequestDispatcher("/admin/user_form_edit.jsp").forward(req, resp);
+                    return;
+                }
+                
+                // Hash and update password
+                String hashedPassword = PasswordUtils.hash(newPassword);
+                userDAO.updatePassword(id, hashedPassword);
+                passwordChanged = true;
+                
+                // Log password change separately for security
+                LoggingUtil.logAction(req, "UPDATE_USER_PASSWORD", 
+                    String.format("Password changed for user: %s (ID: %d)", username, id));
+            }
+            
+            // Update basic info
+            existingUser.setEmail(email);
+            existingUser.setPhone(phone);
+            existingUser.setRole(role);
+            userDAO.update(existingUser);
+            
+            // Log update action with detailed changes
+            if (changes.length() > 0 || passwordChanged) {
+                String changeLog = changes.length() > 0 ? changes.toString() : "No field changes";
+                if (passwordChanged) {
+                    changeLog += "Password: CHANGED";
+                }
+                
+                String detailedLog = String.format(
+                    "Updated user: %s (ID: %d) | Changes: %s",
+                    username, id, changeLog
+                );
+                
+                LoggingUtil.logUserUpdate(req, username);
+                LoggingUtil.logAction(req, "UPDATE_USER_DETAIL", detailedLog);
+            } else {
+                // No changes made
+                LoggingUtil.logAction(req, "UPDATE_USER_NO_CHANGE", 
+                    String.format("Accessed update form for user: %s (ID: %d) but made no changes", 
+                    username, id));
+            }
+            
+            resp.sendRedirect(req.getContextPath() + "/admin-dashboard?success=updated&user=" + username);
+            
+        } catch (SQLException | NumberFormatException e) {
+            e.printStackTrace();
+            
+            // Log error
+            LoggingUtil.logAction(req, "UPDATE_USER_FAILED", 
+                "Failed to update user | Error: " + e.getMessage());
+            
             throw new ServletException(e);
         }
     }
-
+    
+    @Override
+    public String getServletInfo() {
+        return "Edit User Servlet with Enhanced Change Tracking and Logging";
+    }
 }

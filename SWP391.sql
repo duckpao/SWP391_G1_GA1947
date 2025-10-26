@@ -315,4 +315,314 @@ INSERT INTO Users (username, password_hash, email, phone, role, is_active, faile
 VALUES ('admin', '$2a$12$K9nUjmnWq6sNYy0npqvGEuvghhATiOb2jCck9yA/foqghFG9lYK4u', 'admin@example.com', '12345678901', 'Admin', 1, 0, NULL, GETDATE(), GETDATE());
 GO
 
-PRINT '✅ SWP391 database created successfully with full merged structure.';
+-- =========================================
+-- ADDITIONAL STRUCTURES: USER ACTIVITY REPORTS
+-- =========================================
+-- (Full section from your second script is appended here)
+-- [phần 1: constraints + indexes + summary table + views + stored procedures + trigger + sample data + verification]
+-- 💬 Do you want me to paste the full continuation (~700 lines) here?
+
+-- =========================================
+-- USER ACTIVITY REPORTS EXTENSION
+-- =========================================
+USE SWP391;
+GO
+
+-- =========================================
+-- CONSTRAINTS & CLEANUP
+-- =========================================
+-- Ensure foreign key constraints are consistent
+ALTER TABLE SystemLogs
+ADD CONSTRAINT FK_SystemLogs_Users FOREIGN KEY (user_id)
+REFERENCES Users(user_id);
+
+ALTER TABLE AuditReports
+ADD CONSTRAINT FK_AuditReports_Users FOREIGN KEY (auditor_id)
+REFERENCES Users(user_id);
+
+
+-- =========================================
+-- SUMMARY TABLE FOR USER ACTIVITY REPORTS
+-- =========================================
+IF OBJECT_ID('UserActivitySummary', 'U') IS NOT NULL DROP TABLE UserActivitySummary;
+GO
+
+CREATE TABLE UserActivitySummary (
+    summary_id INT IDENTITY(1,1) PRIMARY KEY,
+    user_id INT FOREIGN KEY REFERENCES Users(user_id),
+    total_logins INT DEFAULT 0,
+    total_actions INT DEFAULT 0,
+    last_activity DATETIME,
+    most_frequent_action NVARCHAR(100),
+    last_updated DATETIME DEFAULT GETDATE()
+);
+GO
+
+
+-- =========================================
+-- VIEW: DETAILED USER ACTIVITY
+-- =========================================
+IF OBJECT_ID('vw_UserActivityDetails', 'V') IS NOT NULL DROP VIEW vw_UserActivityDetails;
+GO
+
+CREATE VIEW vw_UserActivityDetails AS
+SELECT 
+    u.user_id,
+    u.username,
+    u.role,
+    COUNT(sl.log_id) AS total_actions,
+    MIN(sl.log_date) AS first_action,
+    MAX(sl.log_date) AS last_action,
+    MAX(sl.action) AS last_action_type
+FROM Users u
+LEFT JOIN SystemLogs sl ON u.user_id = sl.user_id
+GROUP BY u.user_id, u.username, u.role;
+GO
+
+
+-- =========================================
+-- STORED PROCEDURE: REFRESH USER ACTIVITY SUMMARY
+-- =========================================
+IF OBJECT_ID('sp_RefreshUserActivitySummary', 'P') IS NOT NULL DROP PROCEDURE sp_RefreshUserActivitySummary;
+GO
+
+CREATE PROCEDURE sp_RefreshUserActivitySummary
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    MERGE UserActivitySummary AS target
+    USING (
+        SELECT 
+            u.user_id,
+            COUNT(sl.log_id) AS total_actions,
+            MAX(sl.log_date) AS last_activity,
+            (
+                SELECT TOP 1 sl2.action
+                FROM SystemLogs sl2
+                WHERE sl2.user_id = u.user_id
+                GROUP BY sl2.action
+                ORDER BY COUNT(sl2.action) DESC
+            ) AS most_frequent_action
+        FROM Users u
+        LEFT JOIN SystemLogs sl ON u.user_id = sl.user_id
+        GROUP BY u.user_id
+    ) AS src
+    ON target.user_id = src.user_id
+    WHEN MATCHED THEN
+        UPDATE SET 
+            target.total_actions = src.total_actions,
+            target.last_activity = src.last_activity,
+            target.most_frequent_action = src.most_frequent_action,
+            target.last_updated = GETDATE()
+    WHEN NOT MATCHED THEN
+        INSERT (user_id, total_actions, last_activity, most_frequent_action, last_updated)
+        VALUES (src.user_id, src.total_actions, src.last_activity, src.most_frequent_action, GETDATE());
+END;
+GO
+
+
+-- =========================================
+-- STORED PROCEDURE: GENERATE USER ACTIVITY REPORT
+-- =========================================
+IF OBJECT_ID('sp_GenerateUserActivityReport', 'P') IS NOT NULL DROP PROCEDURE sp_GenerateUserActivityReport;
+GO
+
+CREATE PROCEDURE sp_GenerateUserActivityReport
+    @auditor_id INT,
+    @export_format NVARCHAR(10) = 'Excel'
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @reportData NVARCHAR(MAX);
+
+    SET @reportData = (
+        SELECT 
+            u.username,
+            u.role,
+            s.total_actions,
+            s.last_activity,
+            s.most_frequent_action
+        FROM UserActivitySummary s
+        JOIN Users u ON s.user_id = u.user_id
+        FOR JSON AUTO
+    );
+
+    INSERT INTO AuditReports (auditor_id, report_type, generated_date, data, exported_format, notes)
+    VALUES (@auditor_id, 'UserActivity', GETDATE(), @reportData, @export_format, 'Automated activity report generated.');
+
+END;
+GO
+
+
+-- =========================================
+-- TRIGGER: AUTO LOG USER UPDATES
+-- =========================================
+IF OBJECT_ID('trg_LogUserUpdate', 'TR') IS NOT NULL DROP TRIGGER trg_LogUserUpdate;
+GO
+
+CREATE TRIGGER trg_LogUserUpdate
+ON Users
+AFTER UPDATE
+AS
+BEGIN
+    INSERT INTO SystemLogs (user_id, action, table_name, record_id, old_value, new_value, details, ip_address, log_date)
+    SELECT 
+        i.user_id,
+        'UpdateProfile',
+        'Users',
+        i.user_id,
+        (SELECT STRING_AGG(CONCAT(c.name, ': ', CONVERT(NVARCHAR(MAX), d.value)), ', ') 
+         FROM sys.columns c
+         CROSS APPLY (SELECT CONVERT(NVARCHAR(MAX), d.c.value('(./text())[1]', 'NVARCHAR(MAX)')) AS value) d
+         WHERE c.object_id = OBJECT_ID('Users')),
+        NULL,
+        'User profile updated',
+        '127.0.0.1',
+        GETDATE()
+    FROM inserted i;
+END;
+GO
+
+
+-- =========================================
+-- SAMPLE DATA FOR USER ACTIVITY
+-- =========================================
+INSERT INTO Users (username, password_hash, email, phone, role)
+VALUES 
+('doctor1', 'hash1', 'doctor1@hospital.com', '0900000001', 'Doctor'),
+('pharma1', 'hash2', 'pharma1@hospital.com', '0900000002', 'Pharmacist'),
+('auditor1', 'hash3', 'audit@hospital.com', '0900000003', 'Auditor');
+GO
+
+INSERT INTO SystemLogs (user_id, action, table_name, details, log_date)
+VALUES
+(2, 'Login', 'Users', 'Doctor logged in', GETDATE()-1),
+(2, 'View', 'Medicines', 'Doctor viewed drug list', GETDATE()),
+(3, 'Login', 'Users', 'Pharmacist logged in', GETDATE()-2),
+(3, 'Add', 'Batches', 'Added new medicine batch', GETDATE()-1),
+(3, 'Update', 'Batches', 'Updated stock quantity', GETDATE()),
+(4, 'Login', 'Users', 'Auditor logged in', GETDATE());
+GO
+
+-- =========================================
+-- EXECUTE REFRESH AND GENERATE REPORT
+-- =========================================
+EXEC sp_RefreshUserActivitySummary;
+GO
+
+EXEC sp_GenerateUserActivityReport @auditor_id = 4, @export_format = 'Excel';
+GO
+
+-- =========================================
+-- VALIDATION QUERIES
+-- =========================================
+SELECT * FROM UserActivitySummary;
+SELECT * FROM AuditReports WHERE report_type = 'UserActivity';
+SELECT * FROM vw_UserActivityDetails;
+GO
+
+
+USE SWP391;
+GO
+
+-- =============================================
+-- Stored Procedure: sp_GetUserActivitySummary
+-- =============================================
+IF OBJECT_ID('sp_GetUserActivitySummary', 'P') IS NOT NULL 
+    DROP PROCEDURE sp_GetUserActivitySummary;
+GO
+
+CREATE PROCEDURE sp_GetUserActivitySummary
+    @StartDate DATE = NULL,
+    @EndDate DATE = NULL,
+    @Role NVARCHAR(50) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    SELECT 
+        u.user_id,
+        u.username,
+        u.email,
+        u.role,
+        COUNT(sl.log_id) AS total_actions,
+        COUNT(DISTINCT CAST(sl.log_date AS DATE)) AS active_days,
+        SUM(CASE WHEN sl.action = 'LOGIN' THEN 1 ELSE 0 END) AS login_count,
+        MIN(sl.log_date) AS first_activity,
+        MAX(sl.log_date) AS last_activity,
+        (
+            SELECT TOP 1 action 
+            FROM SystemLogs 
+            WHERE user_id = u.user_id
+            GROUP BY action
+            ORDER BY COUNT(*) DESC
+        ) AS most_common_action
+    FROM Users u
+    LEFT JOIN SystemLogs sl ON u.user_id = sl.user_id
+    WHERE 
+        (@StartDate IS NULL OR CAST(sl.log_date AS DATE) >= @StartDate)
+        AND (@EndDate IS NULL OR CAST(sl.log_date AS DATE) <= @EndDate)
+        AND (@Role IS NULL OR u.role = @Role)
+    GROUP BY u.user_id, u.username, u.email, u.role
+    HAVING COUNT(sl.log_id) > 0
+    ORDER BY total_actions DESC;
+END;
+GO
+
+USE SWP391;
+GO
+
+-- =============================================
+-- Stored Procedure: sp_GetUserActivityReport (DETAILED)
+-- =============================================
+IF OBJECT_ID('sp_GetUserActivityReport', 'P') IS NOT NULL 
+    DROP PROCEDURE sp_GetUserActivityReport;
+GO
+
+CREATE PROCEDURE sp_GetUserActivityReport
+    @StartDate DATE = NULL,
+    @EndDate DATE = NULL,
+    @Role NVARCHAR(50) = NULL,
+    @Username NVARCHAR(50) = NULL,
+    @Action NVARCHAR(100) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    SELECT 
+        sl.log_id,
+        sl.user_id,
+        u.username,
+        u.email,
+        u.role,
+        sl.action,
+        sl.table_name,
+        sl.record_id,
+        sl.old_value,
+        sl.new_value,
+        sl.details,
+        sl.ip_address,
+        sl.log_date
+    FROM SystemLogs sl
+    INNER JOIN Users u ON sl.user_id = u.user_id
+    WHERE 
+        (@StartDate IS NULL OR CAST(sl.log_date AS DATE) >= @StartDate)
+        AND (@EndDate IS NULL OR CAST(sl.log_date AS DATE) <= @EndDate)
+        AND (@Role IS NULL OR u.role = @Role)
+        AND (@Username IS NULL OR u.username LIKE '%' + @Username + '%')
+        AND (@Action IS NULL OR sl.action = @Action)
+    ORDER BY sl.log_date DESC;
+END;
+GO
+
+USE SWP391;
+GO
+
+-- Xóa trigger lỗi
+IF OBJECT_ID('trg_LogUserUpdate', 'TR') IS NOT NULL 
+    DROP TRIGGER trg_LogUserUpdate;
+GO
+
+GO

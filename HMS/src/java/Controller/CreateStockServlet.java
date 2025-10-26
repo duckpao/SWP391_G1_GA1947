@@ -15,7 +15,6 @@ import model.Supplier;
 import model.PurchaseOrderItem;
 import model.Medicine;
 
-@WebServlet(name = "CreateStockServlet", urlPatterns = {"/create-stock"})
 public class CreateStockServlet extends HttpServlet {
 
     @Override
@@ -58,7 +57,7 @@ public class CreateStockServlet extends HttpServlet {
             String supplierIdStr = request.getParameter("supplierId");
             String expectedDateStr = request.getParameter("expectedDeliveryDate");
             String notes = request.getParameter("notes");
-            String[] medicineIds = request.getParameterValues("medicineId");
+            String[] medicineCodes = request.getParameterValues("medicineCode"); // Changed from medicineId
             String[] quantities = request.getParameterValues("quantity");
             String[] priorities = request.getParameterValues("priority");
             String[] itemNotes = request.getParameterValues("itemNotes");
@@ -70,7 +69,7 @@ public class CreateStockServlet extends HttpServlet {
                 return;
             }
 
-            if (medicineIds == null || quantities == null || priorities == null || medicineIds.length == 0) {
+            if (medicineCodes == null || quantities == null || priorities == null || medicineCodes.length == 0) {
                 session.setAttribute("message", "At least one medicine item is required!");
                 session.setAttribute("messageType", "error");
                 response.sendRedirect("create-stock");
@@ -84,9 +83,9 @@ public class CreateStockServlet extends HttpServlet {
             }
 
             List<PurchaseOrderItem> items = new ArrayList<>();
-            for (int i = 0; i < medicineIds.length; i++) {
+            for (int i = 0; i < medicineCodes.length; i++) {
                 PurchaseOrderItem item = new PurchaseOrderItem();
-                item.setMedicineId(Integer.parseInt(medicineIds[i]));
+                item.setMedicineCode(medicineCodes[i]); // Changed from setMedicineId
                 item.setQuantity(Integer.parseInt(quantities[i]));
                 item.setPriority(priorities[i]);
                 item.setNotes(itemNotes != null && i < itemNotes.length ? itemNotes[i] : "");

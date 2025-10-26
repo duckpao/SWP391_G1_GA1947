@@ -17,9 +17,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@WebServlet(name = "ManagerDashboardServlet", urlPatterns = {"/manager-dashboard"})
 public class ManagerDashboardServlet extends HttpServlet {
-
+    
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -42,35 +41,39 @@ public class ManagerDashboardServlet extends HttpServlet {
             response.sendRedirect("login");
             return;
         }
-
+        
         // Load dashboard data
         String warehouseStatus = dao.getWarehouseStatus();
         List<StockAlert> stockAlerts = dao.getStockAlerts();
         List<PurchaseOrder> pendingRequests = dao.getPendingStockRequests();
         
-        // Load all medicines để map medicine_id -> name
+        // Load all medicines to create medicine_code -> name mapping
         List<Medicine> allMedicines = dao.getAllMedicines();
-        Map<Integer, String> medicineMap = new HashMap<>();
+        Map<String, Medicine> medicineMap = new HashMap<>();
         for (Medicine med : allMedicines) {
-            medicineMap.put(med.getMedicineId(), med.getName());
+            medicineMap.put(med.getMedicineCode(), med);
         }
         
-        // Load items cho mỗi PO
+        // Load items for each Purchase Order
         Map<Integer, List<PurchaseOrderItem>> poItemsMap = new HashMap<>();
         for (PurchaseOrder po : pendingRequests) {
             List<PurchaseOrderItem> items = dao.getPurchaseOrderItems(po.getPoId());
             
-            // Set medicine name cho từng item
+            // Set medicine name and details for each item
             for (PurchaseOrderItem item : items) {
-                String medicineName = medicineMap.get(item.getMedicineId());
-                if (medicineName != null) {
-                    item.setMedicineName(medicineName);
+                Medicine medicine = medicineMap.get(item.getMedicineCode());
+                if (medicine != null) {
+                    item.setMedicineName(medicine.getName());
+                    item.setMedicineCategory(medicine.getCategory());
+                    item.setMedicineStrength(medicine.getStrength());
+                    item.setMedicineDosageForm(medicine.getDosageForm());
+                    item.setMedicineManufacturer(medicine.getManufacturer());
                 }
             }
             
             poItemsMap.put(po.getPoId(), items);
         }
-
+        
         // Set attributes
         request.setAttribute("manager", manager);
         request.setAttribute("warehouseStatus", warehouseStatus);
@@ -78,7 +81,7 @@ public class ManagerDashboardServlet extends HttpServlet {
         request.setAttribute("pendingRequests", pendingRequests);
         request.setAttribute("poItemsMap", poItemsMap);
         request.setAttribute("medicineMap", medicineMap);
-
+        
         request.getRequestDispatcher("manager-dashboard.jsp").forward(request, response);
     }
 

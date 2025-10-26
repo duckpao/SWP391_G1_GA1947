@@ -14,7 +14,7 @@
             box-shadow: 0 5px 20px rgba(0,0,0,0.1);
         }
         .form-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             color: white;
             border-radius: 15px 15px 0 0;
             padding: 20px;
@@ -25,6 +25,35 @@
             margin-bottom: 15px;
             border-radius: 8px;
             background: #f8f9fa;
+        }
+        .medicine-info-display {
+            background: #e3f2fd;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 10px;
+            display: none;
+        }
+        .medicine-info-display.show {
+            display: block;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #1976d2;
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+        }
+        .info-value {
+            color: #424242;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+        .medicine-code-badge {
+            background: #1976d2;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.85rem;
         }
     </style>
 </head>
@@ -53,23 +82,23 @@
                         <h3 class="mb-0">
                             <i class="fas fa-edit"></i> Edit Stock Request #${purchaseOrder.poId}
                         </h3>
-                        <p class="mb-0 mt-2">Update the details of the purchase order</p>
+                        <p class="mb-0 mt-2">Update purchase order details</p>
                     </div>
                     <div class="card-body p-4">
                         <form action="manage-stock" method="post" id="stockRequestForm">
                             <input type="hidden" name="action" value="edit">
                             <input type="hidden" name="poId" value="${purchaseOrder.poId}">
-
-                            <!-- Supplier Selection -->
+                            
+                            <!-- Supplier Selection - EDITABLE -->
                             <div class="mb-4">
                                 <label for="supplierId" class="form-label">
                                     <i class="fas fa-truck"></i> Select Supplier (Optional)
                                 </label>
                                 <select class="form-select form-select-lg" id="supplierId" name="supplierId">
-                                    <option value="">-- Choose a supplier (or leave empty) --</option>
+                                    <option value="">-- Choose a supplier (or leave empty to assign later) --</option>
                                     <c:forEach items="${suppliers}" var="supplier">
                                         <option value="${supplier.supplierId}" 
-                                                <c:if test="${supplier.supplierId == purchaseOrder.supplierId}">selected</c:if>>
+                                                ${purchaseOrder.supplierId == supplier.supplierId ? 'selected' : ''}>
                                             ${supplier.name}
                                             <c:if test="${not empty supplier.contactPhone}">
                                                 - ${supplier.contactPhone}
@@ -80,71 +109,35 @@
                                         </option>
                                     </c:forEach>
                                 </select>
-                                <div class="form-text">
-                                    You can update the supplier or leave it empty
-                                </div>
                             </div>
 
-                            <!-- Medicine Items -->
+                            <!-- Medicine Items - FULLY EDITABLE -->
                             <div class="mb-4" id="medicineItems">
                                 <label class="form-label">
                                     <i class="fas fa-pills"></i> Medicine Items <span class="text-danger">*</span>
                                 </label>
                                 <div id="itemContainer">
-                                    <c:forEach items="${items}" var="item">
-                                        <div class="item-row">
-                                            <div class="row">
-                                                <div class="col-md-4 mb-3">
-                                                    <label class="form-label">Medicine</label>
-                                                    <select class="form-select" name="medicineId" required>
-                                                        <option value="">-- Select Medicine --</option>
-                                                        <c:forEach items="${medicines}" var="medicine">
-                                                            <option value="${medicine.medicineId}" 
-                                                                    <c:if test="${medicine.medicineId == item.medicineId}">selected</c:if>>
-                                                                ${medicine.name} (${medicine.category})
-                                                            </option>
-                                                        </c:forEach>
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-2 mb-3">
-                                                    <label class="form-label">Quantity</label>
-                                                    <select class="form-select" name="quantity" required>
-                                                        <option value="">-- Select Quantity --</option>
-                                                        <option value="10" <c:if test="${item.quantity == 10}">selected</c:if>>10</option>
-                                                        <option value="50" <c:if test="${item.quantity == 50}">selected</c:if>>50</option>
-                                                        <option value="100" <c:if test="${item.quantity == 100}">selected</c:if>>100</option>
-                                                        <option value="500" <c:if test="${item.quantity == 500}">selected</c:if>>500</option>
-                                                        <option value="1000" <c:if test="${item.quantity == 1000}">selected</c:if>>1000</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-2 mb-3">
-                                                    <label class="form-label">Priority</label>
-                                                    <select class="form-select" name="priority" required>
-                                                        <option value="">-- Select Priority --</option>
-                                                        <option value="Low" <c:if test="${item.priority == 'Low'}">selected</c:if>>Low</option>
-                                                        <option value="Medium" <c:if test="${item.priority == 'Medium'}">selected</c:if>>Medium</option>
-                                                        <option value="High" <c:if test="${item.priority == 'High'}">selected</c:if>>High</option>
-                                                        <option value="Critical" <c:if test="${item.priority == 'Critical'}">selected</c:if>>Critical</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-4 mb-3">
-                                                    <label class="form-label">Item Notes</label>
-                                                    <textarea class="form-control" name="itemNotes" rows="2" 
-                                                              placeholder="Additional notes for this item...">${item.notes}</textarea>
-                                                </div>
-                                            </div>
-                                            <button type="button" class="btn btn-danger btn-sm remove-item">
-                                                <i class="fas fa-trash"></i> Remove
-                                            </button>
-                                        </div>
-                                    </c:forEach>
+                                    <!-- Existing items will be loaded here -->
                                 </div>
                                 <button type="button" class="btn btn-success btn-sm mt-2" id="addItem">
                                     <i class="fas fa-plus"></i> Add Another Medicine
                                 </button>
                             </div>
 
-                            <!-- General Notes -->
+                            <!-- Expected Delivery Date - EDITABLE -->
+                            <div class="mb-4">
+                                <label for="expectedDeliveryDate" class="form-label">
+                                    <i class="fas fa-calendar-alt"></i> Expected Delivery Date <span class="text-danger">*</span>
+                                </label>
+                                <input type="date" 
+                                       class="form-control form-control-lg" 
+                                       id="expectedDeliveryDate" 
+                                       name="expectedDeliveryDate" 
+                                       value="${purchaseOrder.expectedDeliveryDate}"
+                                       required>
+                            </div>
+
+                            <!-- General Notes - EDITABLE -->
                             <div class="mb-4">
                                 <label for="notes" class="form-label">
                                     <i class="fas fa-sticky-note"></i> General Notes
@@ -154,25 +147,6 @@
                                           name="notes" 
                                           rows="4" 
                                           placeholder="Additional notes for the entire request...">${purchaseOrder.notes}</textarea>
-                                <div class="form-text">
-                                    Any special requirements or comments for the entire order
-                                </div>
-                            </div>
-
-                            <!-- Expected Delivery Date -->
-                            <div class="mb-4">
-                                <label for="expectedDeliveryDate" class="form-label">
-                                    <i class="fas fa-calendar-alt"></i> Expected Delivery Date <span class="text-danger">*</span>
-                                </label>
-                                <input type="date" 
-                                       class="form-control form-control-lg" 
-                                       id="expectedDeliveryDate" 
-                                       name="expectedDeliveryDate" 
-                                       value="${purchaseOrder.expectedDeliveryDate}" 
-                                       required>
-                                <div class="form-text">
-                                    When do you need these medicines delivered?
-                                </div>
                             </div>
 
                             <!-- Action Buttons -->
@@ -181,7 +155,7 @@
                                     <i class="fas fa-times"></i> Cancel
                                 </a>
                                 <button type="submit" class="btn btn-primary btn-lg">
-                                    <i class="fas fa-save"></i> Save Changes
+                                    <i class="fas fa-save"></i> Update Stock Request
                                 </button>
                             </div>
                         </form>
@@ -193,65 +167,222 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Medicines data từ server
+        const medicinesData = [
+            <c:forEach items="${medicines}" var="medicine" varStatus="status">
+            {
+                code: '${medicine.medicineCode}',
+                name: '${medicine.name}',
+                category: '${medicine.category}',
+                strength: '${medicine.strength}',
+                dosageForm: '${medicine.dosageForm}',
+                manufacturer: '${medicine.manufacturer}',
+                activeIngredient: '${medicine.activeIngredient}',
+                unit: '${medicine.unit}',
+                description: '${medicine.description}'
+            }<c:if test="${!status.last}">,</c:if>
+            </c:forEach>
+        ];
+
+        // Existing items data
+        const existingItems = [
+            <c:forEach items="${items}" var="item" varStatus="status">
+            {
+                medicineCode: '${item.medicineCode}',
+                quantity: ${item.quantity},
+                priority: '${item.priority}',
+                notes: '${item.notes}'
+            }<c:if test="${!status.last}">,</c:if>
+            </c:forEach>
+        ];
+
+        let itemCounter = 0;
+
         // Set minimum date to today
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('expectedDeliveryDate').min = today;
 
+        // Function to create medicine options HTML
+        function createMedicineOptions(selectedCode = '') {
+            let html = '<option value="">-- Select Medicine --</option>';
+            medicinesData.forEach(med => {
+                let display = med.name;
+                if (med.strength) display += ' ' + med.strength;
+                if (med.dosageForm) display += ' - ' + med.dosageForm;
+                display += ' [' + med.code + ']';
+                const selected = (med.code === selectedCode) ? 'selected' : '';
+                html += `<option value="${med.code}" ${selected}>${display}</option>`;
+            });
+            return html;
+        }
+
+        // Function to display medicine info
+        function displayMedicineInfo(selectElement) {
+            const selectedCode = selectElement.value;
+            const infoDiv = selectElement.closest('.item-row').querySelector('.medicine-info-display');
+            
+            if (!selectedCode) {
+                infoDiv.classList.remove('show');
+                return;
+            }
+
+            const medicine = medicinesData.find(m => m.code === selectedCode);
+            if (!medicine) {
+                infoDiv.classList.remove('show');
+                return;
+            }
+
+            let infoHtml = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-label">
+                            <i class="fas fa-barcode"></i> Medicine Code
+                        </div>
+                        <div class="info-value">
+                            <span class="medicine-code-badge">${medicine.code}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-label">
+                            <i class="fas fa-tag"></i> Category
+                        </div>
+                        <div class="info-value">${medicine.category || 'N/A'}</div>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-6">
+                        <div class="info-label">
+                            <i class="fas fa-weight"></i> Strength
+                        </div>
+                        <div class="info-value">${medicine.strength || 'N/A'}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-label">
+                            <i class="fas fa-pills"></i> Dosage Form
+                        </div>
+                        <div class="info-value">${medicine.dosageForm || 'N/A'}</div>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-6">
+                        <div class="info-label">
+                            <i class="fas fa-industry"></i> Manufacturer
+                        </div>
+                        <div class="info-value">${medicine.manufacturer || 'N/A'}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-label">
+                            <i class="fas fa-flask"></i> Active Ingredient
+                        </div>
+                        <div class="info-value">${medicine.activeIngredient || 'N/A'}</div>
+                    </div>
+                </div>
+            `;
+
+            if (medicine.description) {
+                infoHtml += `
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <div class="info-label">
+                                <i class="fas fa-info-circle"></i> Description
+                            </div>
+                            <div class="info-value">${medicine.description}</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            infoDiv.innerHTML = infoHtml;
+            infoDiv.classList.add('show');
+        }
+
+        // Function to create new item row
+// Function to create new item row
+function createItemRow(itemData = null) {
+    itemCounter++;
+    const newRow = document.createElement('div');
+    newRow.className = 'item-row';
+    newRow.setAttribute('data-item-id', itemCounter);
+    
+    const medicineCode = itemData ? itemData.medicineCode : '';
+    const quantity = itemData ? itemData.quantity : 100;
+    const priority = itemData ? itemData.priority : 'Medium';
+    const notes = itemData ? itemData.notes : '';
+
+    newRow.innerHTML = `
+        <div class="row">
+            <div class="col-md-5 mb-3">
+                <label class="form-label">Medicine <span class="text-danger">*</span></label>
+                <select class="form-select medicine-select" name="medicineCode" required onchange="displayMedicineInfo(this)">
+                    ${createMedicineOptions(medicineCode)}
+                </select>
+                <div class="medicine-info-display"></div>
+            </div>
+            <div class="col-md-2 mb-3">
+                <label class="form-label">Quantity <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" name="quantity" 
+                       min="1" value="${quantity}" required>
+            </div>
+            <div class="col-md-2 mb-3">
+                <label class="form-label">Priority <span class="text-danger">*</span></label>
+                <select class="form-select" name="priority" required>
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                    <option value="Critical">Critical</option>
+                </select>
+            </div>
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Item Notes</label>
+                <textarea class="form-control" name="itemNotes" rows="2" 
+                          placeholder="Additional notes...">${notes}</textarea>
+            </div>
+        </div>
+        <button type="button" class="btn btn-danger btn-sm remove-item" onclick="removeItem(this)">
+            Remove
+        </button>
+    `;
+
+    // === SET SELECTED PRIORITY SAU KHI CHÈN HTML ===
+    const prioritySelect = newRow.querySelector('select[name="priority"]');
+    if (priority && prioritySelect) {
+        prioritySelect.value = priority; // JS tự động chọn đúng option
+    }
+
+    // Auto-display medicine info
+    if (medicineCode) {
+        setTimeout(() => {
+            const select = newRow.querySelector('.medicine-select');
+            if (select) displayMedicineInfo(select);
+        }, 100);
+    }
+    
+    return newRow;
+}
+
         // Add new medicine item
         document.getElementById('addItem').addEventListener('click', function() {
             const container = document.getElementById('itemContainer');
-            const newRow = document.createElement('div');
-            newRow.className = 'item-row';
-            newRow.innerHTML = `
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Medicine</label>
-                        <select class="form-select" name="medicineId" required>
-                            <option value="">-- Select Medicine --</option>
-                            <c:forEach items="${medicines}" var="medicine">
-                                <option value="${medicine.medicineId}">${medicine.name} (${medicine.category})</option>
-                            </c:forEach>
-                        </select>
-                    </div>
-                    <div class="col-md-2 mb-3">
-                        <label class="form-label">Quantity</label>
-                        <select class="form-select" name="quantity" required>
-                            <option value="">-- Select Quantity --</option>
-                            <option value="10">10</option>
-                            <option value="50">50</option>
-                            <option value="100">100</option>
-                            <option value="500">500</option>
-                            <option value="1000">1000</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2 mb-3">
-                        <label class="form-label">Priority</label>
-                        <select class="form-select" name="priority" required>
-                            <option value="">-- Select Priority --</option>
-                            <option value="Low">Low</option>
-                            <option value="Medium">Medium</option>
-                            <option value="High">High</option>
-                            <option value="Critical">Critical</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Item Notes</label>
-                        <textarea class="form-control" name="itemNotes" rows="2" placeholder="Additional notes for this item..."></textarea>
-                    </div>
-                </div>
-                <button type="button" class="btn btn-danger btn-sm remove-item">
-                    <i class="fas fa-trash"></i> Remove
-                </button>
-            `;
-            container.appendChild(newRow);
+            container.appendChild(createItemRow());
+            updateRemoveButtons();
         });
 
         // Remove medicine item
-        document.addEventListener('click', function(e) {
-            if (e.target.classList.contains('remove-item')) {
-                e.target.closest('.item-row').remove();
-            }
-        });
+        function removeItem(button) {
+            button.closest('.item-row').remove();
+            updateRemoveButtons();
+        }
+
+        // Update remove buttons visibility
+        function updateRemoveButtons() {
+            const items = document.querySelectorAll('.item-row');
+            items.forEach((item, index) => {
+                const removeBtn = item.querySelector('.remove-item');
+                if (removeBtn) {
+                    removeBtn.style.display = items.length > 1 ? 'inline-block' : 'none';
+                }
+            });
+        }
 
         // Form validation
         document.getElementById('stockRequestForm').addEventListener('submit', function(e) {
@@ -269,11 +400,23 @@
                 return false;
             }
 
-            if (!confirm('Are you sure you want to save these changes?')) {
+            if (!confirm('Are you sure you want to update this stock request?')) {
                 e.preventDefault();
                 return false;
             }
         });
+
+        // Initialize with existing items
+        const container = document.getElementById('itemContainer');
+        if (existingItems.length > 0) {
+            existingItems.forEach(item => {
+                container.appendChild(createItemRow(item));
+            });
+        } else {
+            // If no items, add one empty row
+            container.appendChild(createItemRow());
+        }
+        updateRemoveButtons();
     </script>
 </body>
 </html>

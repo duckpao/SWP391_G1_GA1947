@@ -1,36 +1,37 @@
 package model;
 
 public class PurchaseOrderItem {
-    private int itemId;
+    private int poItemId;
     private int poId;
-    private int medicineId;
+    private String medicineCode;
     private int quantity;
     private String priority;
     private String notes;
-    private double unitPrice;
     
-    // Transient field - không lưu trong DB
+    // Joined fields from Medicine table
     private String medicineName;
+    private String medicineCategory;
+    private String medicineStrength;
+    private String medicineDosageForm;
+    private String medicineManufacturer;
 
     // Constructors
-    public PurchaseOrderItem() {
-    }
+    public PurchaseOrderItem() {}
 
-    public PurchaseOrderItem(int poId, int medicineId, int quantity, String priority, String notes) {
+    public PurchaseOrderItem(int poId, String medicineCode, int quantity, String priority) {
         this.poId = poId;
-        this.medicineId = medicineId;
+        this.medicineCode = medicineCode;
         this.quantity = quantity;
         this.priority = priority;
-        this.notes = notes;
     }
 
     // Getters and Setters
-    public int getItemId() {
-        return itemId;
+    public int getPoItemId() {
+        return poItemId;
     }
 
-    public void setItemId(int itemId) {
-        this.itemId = itemId;
+    public void setPoItemId(int poItemId) {
+        this.poItemId = poItemId;
     }
 
     public int getPoId() {
@@ -41,12 +42,12 @@ public class PurchaseOrderItem {
         this.poId = poId;
     }
 
-    public int getMedicineId() {
-        return medicineId;
+    public String getMedicineCode() {
+        return medicineCode;
     }
 
-    public void setMedicineId(int medicineId) {
-        this.medicineId = medicineId;
+    public void setMedicineCode(String medicineCode) {
+        this.medicineCode = medicineCode;
     }
 
     public int getQuantity() {
@@ -73,19 +74,67 @@ public class PurchaseOrderItem {
         this.notes = notes;
     }
 
-    public double getUnitPrice() {
-        return unitPrice;
-    }
-
-    public void setUnitPrice(double unitPrice) {
-        this.unitPrice = unitPrice;
-    }
-
     public String getMedicineName() {
         return medicineName;
     }
 
     public void setMedicineName(String medicineName) {
         this.medicineName = medicineName;
+    }
+
+    public String getMedicineCategory() {
+        return medicineCategory;
+    }
+
+    public void setMedicineCategory(String medicineCategory) {
+        this.medicineCategory = medicineCategory;
+    }
+
+    public String getMedicineStrength() {
+        return medicineStrength;
+    }
+
+    public void setMedicineStrength(String medicineStrength) {
+        this.medicineStrength = medicineStrength;
+    }
+
+    public String getMedicineDosageForm() {
+        return medicineDosageForm;
+    }
+
+    public void setMedicineDosageForm(String medicineDosageForm) {
+        this.medicineDosageForm = medicineDosageForm;
+    }
+
+    public String getMedicineManufacturer() {
+        return medicineManufacturer;
+    }
+
+    public void setMedicineManufacturer(String medicineManufacturer) {
+        this.medicineManufacturer = medicineManufacturer;
+    }
+
+    // Helper method to get full medicine display
+    public String getMedicineDisplayName() {
+        StringBuilder display = new StringBuilder(medicineName != null ? medicineName : "");
+        if (medicineStrength != null && !medicineStrength.isEmpty()) {
+            display.append(" ").append(medicineStrength);
+        }
+        if (medicineDosageForm != null && !medicineDosageForm.isEmpty()) {
+            display.append(" - ").append(medicineDosageForm);
+        }
+        return display.toString();
+    }
+
+    @Override
+    public String toString() {
+        return "PurchaseOrderItem{" +
+                "poItemId=" + poItemId +
+                ", poId=" + poId +
+                ", medicineCode='" + medicineCode + '\'' +
+                ", medicineName='" + medicineName + '\'' +
+                ", quantity=" + quantity +
+                ", priority='" + priority + '\'' +
+                '}';
     }
 }

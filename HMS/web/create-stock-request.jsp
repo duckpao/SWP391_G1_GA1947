@@ -25,6 +25,39 @@
             margin-bottom: 15px;
             border-radius: 8px;
             background: #f8f9fa;
+            position: relative;
+        }
+        .medicine-option {
+            font-size: 0.95rem;
+        }
+        .medicine-info-display {
+            background: #e3f2fd;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 10px;
+            display: none;
+        }
+        .medicine-info-display.show {
+            display: block;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #1976d2;
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+        }
+        .info-value {
+            color: #424242;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+        .medicine-code-badge {
+            background: #1976d2;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.85rem;
         }
     </style>
 </head>
@@ -87,68 +120,11 @@
                                     <i class="fas fa-pills"></i> Medicine Items <span class="text-danger">*</span>
                                 </label>
                                 <div id="itemContainer">
-                                    <div class="item-row">
-                                        <div class="row">
-                                            <div class="col-md-4 mb-3">
-                                                <label class="form-label">Medicine</label>
-                                                <select class="form-select" name="medicineId" required>
-                                                    <option value="">-- Select Medicine --</option>
-                                                    <c:forEach items="${medicines}" var="medicine">
-                                                        <option value="${medicine.medicineId}">
-                                                            ${medicine.name} (${medicine.category})
-                                                        </option>
-                                                    </c:forEach>
-                                                </select>
-                                            </div>
-                                            <div class="col-md-2 mb-3">
-                                                <label class="form-label">Quantity</label>
-                                                <select class="form-select" name="quantity" required>
-                                                    <option value="">-- Select Quantity --</option>
-                                                    <option value="10">10</option>
-                                                    <option value="50">50</option>
-                                                    <option value="100">100</option>
-                                                    <option value="500">500</option>
-                                                    <option value="1000">1000</option>
-                                                </select>
-                                            </div>
-                                            <div class="col-md-2 mb-3">
-                                                <label class="form-label">Priority</label>
-                                                <select class="form-select" name="priority" required>
-                                                    <option value="">-- Select Priority --</option>
-                                                    <option value="Low">Low</option>
-                                                    <option value="Medium">Medium</option>
-                                                    <option value="High">High</option>
-                                                    <option value="Critical">Critical</option>
-                                                </select>
-                                            </div>
-                                            <div class="col-md-4 mb-3">
-                                                <label class="form-label">Item Notes</label>
-                                                <textarea class="form-control" name="itemNotes" rows="2" placeholder="Additional notes for this item..."></textarea>
-                                            </div>
-                                        </div>
-                                        <button type="button" class="btn btn-danger btn-sm remove-item">
-                                            <i class="fas fa-trash"></i> Remove
-                                        </button>
-                                    </div>
+                                    <!-- Initial item row will be added by JavaScript -->
                                 </div>
                                 <button type="button" class="btn btn-success btn-sm mt-2" id="addItem">
                                     <i class="fas fa-plus"></i> Add Another Medicine
                                 </button>
-                            </div>
-
-                            <!-- General Notes -->
-                            <div class="mb-4">
-                                <label for="notes" class="form-label">
-                                    <i class="fas fa-sticky-note"></i> General Notes
-                                </label>
-                                <textarea class="form-control form-control-lg" 
-                                          id="notes" 
-                                          name="notes" 
-                                          rows="4" 
-                                          placeholder="Additional notes for the entire request..."></textarea>
-                                <div class="form-text">
-                                    Any special requirements or comments for the entire order
-                                </div>
                             </div>
 
                             <!-- Expected Delivery Date -->
@@ -163,6 +139,21 @@
                                        required>
                                 <div class="form-text">
                                     When do you need these medicines delivered?
+                                </div>
+                            </div>
+
+                            <!-- General Notes -->
+                            <div class="mb-4">
+                                <label for="notes" class="form-label">
+                                    <i class="fas fa-sticky-note"></i> General Notes
+                                </label>
+                                <textarea class="form-control form-control-lg" 
+                                          id="notes" 
+                                          name="notes" 
+                                          rows="4" 
+                                          placeholder="Additional notes for the entire request..."></textarea>
+                                <div class="form-text">
+                                    Any special requirements or comments for the entire order
                                 </div>
                             </div>
 
@@ -184,6 +175,25 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Medicines data from server với đầy đủ thông tin
+        const medicinesData = [
+            <c:forEach items="${medicines}" var="medicine" varStatus="status">
+            {
+                code: '${medicine.medicineCode}',
+                name: '${medicine.name}',
+                category: '${medicine.category}',
+                strength: '${medicine.strength}',
+                dosageForm: '${medicine.dosageForm}',
+                manufacturer: '${medicine.manufacturer}',
+                activeIngredient: '${medicine.activeIngredient}',
+                unit: '${medicine.unit}',
+                description: '${medicine.description}'
+            }<c:if test="${!status.last}">,</c:if>
+            </c:forEach>
+        ];
+
+        let itemCounter = 0;
+
         // Set minimum date to today
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('expectedDeliveryDate').min = today;
@@ -191,61 +201,166 @@
         nextWeek.setDate(nextWeek.getDate() + 7);
         document.getElementById('expectedDeliveryDate').value = nextWeek.toISOString().split('T')[0];
 
-        // Add new medicine item
-        document.getElementById('addItem').addEventListener('click', function() {
-            const container = document.getElementById('itemContainer');
+        // Function to create medicine options HTML
+        function createMedicineOptions() {
+            let html = '<option value="">-- Select Medicine --</option>';
+            medicinesData.forEach(med => {
+                let display = med.name;
+                if (med.strength) display += ' ' + med.strength;
+                if (med.dosageForm) display += ' - ' + med.dosageForm;
+                display += ' [' + med.code + ']';
+                html += `<option value="${med.code}" class="medicine-option">${display}</option>`;
+            });
+            return html;
+        }
+
+        // Function to display medicine info
+        function displayMedicineInfo(selectElement) {
+            const selectedCode = selectElement.value;
+            const infoDiv = selectElement.closest('.item-row').querySelector('.medicine-info-display');
+            
+            if (!selectedCode) {
+                infoDiv.classList.remove('show');
+                return;
+            }
+
+            const medicine = medicinesData.find(m => m.code === selectedCode);
+            if (!medicine) {
+                infoDiv.classList.remove('show');
+                return;
+            }
+
+            let infoHtml = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-label">
+                            <i class="fas fa-barcode"></i> Medicine Code
+                        </div>
+                        <div class="info-value">
+                            <span class="medicine-code-badge">${medicine.code}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-label">
+                            <i class="fas fa-tag"></i> Category
+                        </div>
+                        <div class="info-value">${medicine.category || 'N/A'}</div>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-6">
+                        <div class="info-label">
+                            <i class="fas fa-weight"></i> Strength
+                        </div>
+                        <div class="info-value">${medicine.strength || 'N/A'}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-label">
+                            <i class="fas fa-pills"></i> Dosage Form
+                        </div>
+                        <div class="info-value">${medicine.dosageForm || 'N/A'}</div>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-6">
+                        <div class="info-label">
+                            <i class="fas fa-industry"></i> Manufacturer
+                        </div>
+                        <div class="info-value">${medicine.manufacturer || 'N/A'}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-label">
+                            <i class="fas fa-flask"></i> Active Ingredient
+                        </div>
+                        <div class="info-value">${medicine.activeIngredient || 'N/A'}</div>
+                    </div>
+                </div>
+            `;
+
+            if (medicine.description) {
+                infoHtml += `
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <div class="info-label">
+                                <i class="fas fa-info-circle"></i> Description
+                            </div>
+                            <div class="info-value">${medicine.description}</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            infoDiv.innerHTML = infoHtml;
+            infoDiv.classList.add('show');
+        }
+
+        // Function to create new item row
+        function createItemRow() {
+            itemCounter++;
             const newRow = document.createElement('div');
             newRow.className = 'item-row';
+            newRow.setAttribute('data-item-id', itemCounter);
             newRow.innerHTML = `
                 <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Medicine</label>
-                        <select class="form-select" name="medicineId" required>
-                            <option value="">-- Select Medicine --</option>
-                            <c:forEach items="${medicines}" var="medicine">
-                                <option value="${medicine.medicineId}">${medicine.name} (${medicine.category})</option>
-                            </c:forEach>
+                    <div class="col-md-5 mb-3">
+                        <label class="form-label">Medicine <span class="text-danger">*</span></label>
+                        <select class="form-select medicine-select" name="medicineCode" required onchange="displayMedicineInfo(this)">
+                            ${createMedicineOptions()}
                         </select>
+                        <!-- Medicine Info Display -->
+                        <div class="medicine-info-display"></div>
                     </div>
                     <div class="col-md-2 mb-3">
-                        <label class="form-label">Quantity</label>
-                        <select class="form-select" name="quantity" required>
-                            <option value="">-- Select Quantity --</option>
-                            <option value="10">10</option>
-                            <option value="50">50</option>
-                            <option value="100">100</option>
-                            <option value="500">500</option>
-                            <option value="1000">1000</option>
-                        </select>
+                        <label class="form-label">Quantity <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" name="quantity" 
+                               min="1" value="100" required>
                     </div>
                     <div class="col-md-2 mb-3">
-                        <label class="form-label">Priority</label>
+                        <label class="form-label">Priority <span class="text-danger">*</span></label>
                         <select class="form-select" name="priority" required>
-                            <option value="">-- Select Priority --</option>
+                            <option value="">-- Select --</option>
                             <option value="Low">Low</option>
-                            <option value="Medium">Medium</option>
+                            <option value="Medium" selected>Medium</option>
                             <option value="High">High</option>
                             <option value="Critical">Critical</option>
                         </select>
                     </div>
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-3 mb-3">
                         <label class="form-label">Item Notes</label>
-                        <textarea class="form-control" name="itemNotes" rows="2" placeholder="Additional notes for this item..."></textarea>
+                        <textarea class="form-control" name="itemNotes" rows="2" 
+                                  placeholder="Additional notes..."></textarea>
                     </div>
                 </div>
-                <button type="button" class="btn btn-danger btn-sm remove-item">
+                <button type="button" class="btn btn-danger btn-sm remove-item" onclick="removeItem(this)">
                     <i class="fas fa-trash"></i> Remove
                 </button>
             `;
-            container.appendChild(newRow);
+            return newRow;
+        }
+
+        // Add new medicine item
+        document.getElementById('addItem').addEventListener('click', function() {
+            const container = document.getElementById('itemContainer');
+            container.appendChild(createItemRow());
+            updateRemoveButtons();
         });
 
         // Remove medicine item
-        document.addEventListener('click', function(e) {
-            if (e.target.classList.contains('remove-item')) {
-                e.target.closest('.item-row').remove();
-            }
-        });
+        function removeItem(button) {
+            button.closest('.item-row').remove();
+            updateRemoveButtons();
+        }
+
+        // Update remove buttons visibility
+        function updateRemoveButtons() {
+            const items = document.querySelectorAll('.item-row');
+            items.forEach((item, index) => {
+                const removeBtn = item.querySelector('.remove-item');
+                if (removeBtn) {
+                    removeBtn.style.display = items.length > 1 ? 'inline-block' : 'none';
+                }
+            });
+        }
 
         // Form validation
         document.getElementById('stockRequestForm').addEventListener('submit', function(e) {
@@ -268,6 +383,10 @@
                 return false;
             }
         });
+
+        // Initialize with first item
+        document.getElementById('itemContainer').appendChild(createItemRow());
+        updateRemoveButtons();
     </script>
 </body>
 </html>

@@ -52,21 +52,62 @@
             margin: 0;
         }
         .item-list li {
-            padding: 10px;
+            padding: 15px;
             border-bottom: 1px solid #dee2e6;
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
+            background: white;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         .item-list li:last-child {
             border-bottom: none;
         }
+        .medicine-main-info {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+        .medicine-detail-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 8px;
+        }
+        .medicine-detail-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        .medicine-detail-item i {
+            width: 16px;
+            color: #0d6efd;
+        }
         .priority-high { color: #dc3545; font-weight: bold; }
         .priority-medium { color: #ffc107; font-weight: bold; }
         .priority-low { color: #17a2b8; font-weight: bold; }
-        .report-button {
-            display: inline-block;
-            margin: 5px;
+        .priority-critical { 
+            color: #fff; 
+            background: #dc3545; 
+            padding: 3px 8px; 
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .medicine-code-badge {
+            background: #e9ecef;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+        .quantity-badge {
+            font-size: 1.1rem;
+            padding: 8px 16px;
         }
     </style>
 </head>
@@ -310,7 +351,7 @@
                                                             <button class="btn btn-warning btn-sm" 
                                                                     onclick="cancelOrder(${order.poId})" 
                                                                     title="Cancel Request">
-                                                                <i class="fas fa-ban"></i> Cancel
+                                                                <i class="fas fa-times-circle"></i> Cancel
                                                             </button>
                                                         </c:when>
                                                     </c:choose>
@@ -321,7 +362,7 @@
                                                 <td colspan="7">
                                                     <div class="details-content">
                                                         <div class="row">
-                                                            <div class="col-md-6">
+                                                            <div class="col-md-5">
                                                                 <h6><i class="fas fa-info-circle"></i> General Information</h6>
                                                                 <table class="table table-sm table-borderless">
                                                                     <tr>
@@ -359,7 +400,7 @@
                                                                     </div>
                                                                 </c:if>
                                                             </div>
-                                                            <div class="col-md-6">
+                                                            <div class="col-md-7">
                                                                 <h6><i class="fas fa-pills"></i> Order Items</h6>
                                                                 <c:set var="items" value="${poItemsMap[order.poId]}" />
                                                                 <c:choose>
@@ -367,21 +408,56 @@
                                                                         <ul class="item-list">
                                                                             <c:forEach items="${items}" var="item">
                                                                                 <li>
-                                                                                    <div>
-                                                                                        <strong>${item.medicineName}</strong>
-                                                                                        <br>
-                                                                                        <small class="priority-${item.priority == 'High' ? 'high' : item.priority == 'Medium' ? 'medium' : 'low'}">
-                                                                                            <i class="fas fa-flag"></i> Priority: ${item.priority}
-                                                                                        </small>
-                                                                                        <c:if test="${not empty item.notes}">
-                                                                                            <br>
-                                                                                            <small class="text-muted">
-                                                                                                <i class="fas fa-comment"></i> ${item.notes}
+                                                                                    <div style="flex: 1;">
+                                                                                        <!-- Medicine Name & Code -->
+                                                                                        <div class="medicine-main-info">
+                                                                                            ${item.medicineName}
+                                                                                            <c:if test="${not empty item.medicineStrength}">
+                                                                                                <span class="text-primary">${item.medicineStrength}</span>
+                                                                                            </c:if>
+                                                                                            <span class="medicine-code-badge">${item.medicineCode}</span>
+                                                                                        </div>
+                                                                                        
+                                                                                        <!-- Medicine Details -->
+                                                                                        <div class="medicine-detail-row">
+                                                                                            <c:if test="${not empty item.medicineDosageForm}">
+                                                                                                <div class="medicine-detail-item">
+                                                                                                    <i class="fas fa-pills"></i>
+                                                                                                    <span>${item.medicineDosageForm}</span>
+                                                                                                </div>
+                                                                                            </c:if>
+                                                                                            <c:if test="${not empty item.medicineCategory}">
+                                                                                                <div class="medicine-detail-item">
+                                                                                                    <i class="fas fa-tag"></i>
+                                                                                                    <span>${item.medicineCategory}</span>
+                                                                                                </div>
+                                                                                            </c:if>
+                                                                                            <c:if test="${not empty item.medicineManufacturer}">
+                                                                                                <div class="medicine-detail-item">
+                                                                                                    <i class="fas fa-industry"></i>
+                                                                                                    <span>${item.medicineManufacturer}</span>
+                                                                                                </div>
+                                                                                            </c:if>
+                                                                                        </div>
+                                                                                        
+                                                                                        <!-- Priority -->
+                                                                                        <div class="mt-2">
+                                                                                            <small class="priority-${item.priority == 'High' || item.priority == 'Critical' ? 'high' : item.priority == 'Medium' ? 'medium' : 'low'}">
+                                                                                                <i class="fas fa-flag"></i> Priority: ${item.priority}
                                                                                             </small>
+                                                                                        </div>
+                                                                                        
+                                                                                        <!-- Item Notes -->
+                                                                                        <c:if test="${not empty item.notes}">
+                                                                                            <div class="mt-2">
+                                                                                                <small class="text-muted">
+                                                                                                    <i class="fas fa-comment"></i> ${item.notes}
+                                                                                                </small>
+                                                                                            </div>
                                                                                         </c:if>
                                                                                     </div>
-                                                                                    <div class="text-end">
-                                                                                        <span class="badge bg-primary fs-6">${item.quantity} units</span>
+                                                                                    <div class="text-end ms-3">
+                                                                                        <span class="badge bg-primary quantity-badge">${item.quantity} units</span>
                                                                                     </div>
                                                                                 </li>
                                                                             </c:forEach>
@@ -463,7 +539,7 @@
             <div class="modal-content">
                 <div class="modal-header bg-warning text-dark">
                     <h5 class="modal-title">
-                        <i class="fas fa-ban"></i> Cancel Stock Request
+                        <i class="fas fa-times-circle"></i> Cancel Stock Request
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
@@ -485,7 +561,7 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-warning">
-                            <i class="fas fa-ban"></i> Cancel Order
+                            <i class="fas fa-times-circle"></i> Cancel Order
                         </button>
                     </div>
                 </form>

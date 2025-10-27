@@ -1,22 +1,37 @@
 package model;
 
 public class PurchaseOrderItem {
+
     private int poItemId;
     private int poId;
     private String medicineCode;
     private int quantity;
+    private double unitPrice;
     private String priority;
     private String notes;
-    
+
     // Joined fields from Medicine table
     private String medicineName;
+    private String unit;
     private String medicineCategory;
     private String medicineStrength;
     private String medicineDosageForm;
     private String medicineManufacturer;
 
     // Constructors
-    public PurchaseOrderItem() {}
+    public PurchaseOrderItem() {
+    }
+    
+    public PurchaseOrderItem(int poItemId, int poId, String medicineCode, int quantity, 
+                            double unitPrice, String priority, String notes) {
+        this.poItemId = poItemId;
+        this.poId = poId;
+        this.medicineCode = medicineCode;
+        this.quantity = quantity;
+        this.unitPrice = unitPrice;
+        this.priority = priority;
+        this.notes = notes;
+    }
 
     public PurchaseOrderItem(int poId, String medicineCode, int quantity, String priority) {
         this.poId = poId;
@@ -28,6 +43,22 @@ public class PurchaseOrderItem {
     // Getters and Setters
     public int getPoItemId() {
         return poItemId;
+    }
+
+    public double getUnitPrice() {
+        return unitPrice;
+    }
+
+    public void setUnitPrice(double unitPrice) {
+        this.unitPrice = unitPrice;
+    }
+
+    public String getUnit() {
+        return unit;
+    }
+
+    public void setUnit(String unit) {
+        this.unit = unit;
     }
 
     public void setPoItemId(int poItemId) {
@@ -128,13 +159,13 @@ public class PurchaseOrderItem {
 
     @Override
     public String toString() {
-        return "PurchaseOrderItem{" +
-                "poItemId=" + poItemId +
-                ", poId=" + poId +
-                ", medicineCode='" + medicineCode + '\'' +
-                ", medicineName='" + medicineName + '\'' +
-                ", quantity=" + quantity +
-                ", priority='" + priority + '\'' +
-                '}';
+        return "PurchaseOrderItem{"
+                + "poItemId=" + poItemId
+                + ", poId=" + poId
+                + ", medicineCode='" + medicineCode + '\''
+                + ", medicineName='" + medicineName + '\''
+                + ", quantity=" + quantity
+                + ", priority='" + priority + '\''
+                + '}';
     }
 }

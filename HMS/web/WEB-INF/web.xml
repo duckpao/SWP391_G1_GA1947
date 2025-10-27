@@ -44,6 +44,10 @@
         <servlet-name>UserReportServlet</servlet-name>
         <servlet-class>Controller.UserReportServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>PurchaseOrderServlet</servlet-name>
+        <servlet-class>Controller.PurchaseOrderServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>UserServlet</servlet-name>
         <url-pattern>/admin-dashboard</url-pattern>
@@ -314,6 +318,10 @@
     <servlet-mapping>
         <servlet-name>UserReportServlet</servlet-name>
         <url-pattern>/user-reports/generate</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>PurchaseOrderServlet</servlet-name>
+        <url-pattern>/purchase-orders</url-pattern>
     </servlet-mapping>
     <welcome-file-list>
         <welcome-file>home.jsp</welcome-file>

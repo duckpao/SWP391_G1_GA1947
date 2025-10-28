@@ -312,7 +312,7 @@ SELECT 'confirm_delivery','Confirm deliveries and create delivery notes' WHERE N
 -- =========================================
 IF NOT EXISTS (SELECT 1 FROM Users WHERE username = 'admin')
 INSERT INTO Users (username, password_hash, email, phone, role, is_active, failed_attempts, last_login, created_at, updated_at)
-VALUES ('admin', '$2a$12$K9nUjmnWq6sNYy0npqvGEuvghhATiOb2jCck9yA/foqghFG9lYK4u', 'admin@example.com', '12345678901', 'Admin', 1, 0, NULL, GETDATE(), GETDATE());
+VALUES ('admin', '$2a$12$AfoWp3rMoA9hMUNmTSFZOOsW0CQXp56TjuapkN8OwRDkziBqhL4Qi', 'admin@example.com', '12345678901', 'Admin', 1, 0, NULL, GETDATE(), GETDATE());
 GO
 
 -- =========================================
@@ -626,3 +626,4 @@ IF OBJECT_ID('trg_LogUserUpdate', 'TR') IS NOT NULL
 GO
 
 GO
+

@@ -681,16 +681,11 @@ IF NOT EXISTS (SELECT 1 FROM Medicines WHERE medicine_code = 'MED006')
 BEGIN
     INSERT INTO Medicines (medicine_code, name, category, description, active_ingredient, dosage_form, strength, unit, manufacturer, country_of_origin, drug_group, drug_type)
     VALUES
-    ('MED011', N'Metformin 500mg', N'Đái tháo đường', N'Thuốc điều trị đái tháo đường type 2', N'Metformin HCl', N'Viên nén', N'500mg', N'Viên', N'Domesco', N'Việt Nam', N'Nhóm B', N'Đặc trị'),
-    ('MED012', N'Omeprazole 20mg', N'Tiêu hóa', N'Thuốc điều trị loét dạ dày', N'Omeprazole', N'Viên nang', N'20mg', N'Viên', N'Pharbaco', N'Việt Nam', N'Nhóm A', N'Bảo hiểm'),
-    ('MED013', N'Amlodipine 5mg', N'Tim mạch', N'Thuốc điều trị cao huyết áp', N'Amlodipine', N'Viên nén', N'5mg', N'Viên', N'Imexpharm', N'Việt Nam', N'Nhóm B', N'Đặc trị'),
-    ('MED014', N'Aspirin 100mg', N'Tim mạch', N'Thuốc chống đông máu', N'Acetylsalicylic Acid', N'Viên nén', N'100mg', N'Viên', N'Sanofi', N'Pháp', N'Nhóm A', N'Bảo hiểm'),
-    ('MED015', N'Vitamin C 1000mg', N'Vitamin & Khoáng chất', N'Bổ sung vitamin C', N'Ascorbic Acid', N'Viên sủi', N'1000mg', N'Viên', N'DHG Pharma', N'Việt Nam', N'Nhóm C', N'Khác'),
-    ('MED016', N'Amoxicillin 500mg', N'Kháng sinh', N'Kháng sinh phổ rộng', N'Amoxicillin', N'Viên nang', N'500mg', N'Viên', N'Pymepharco', N'Việt Nam', N'Nhóm A', N'Bảo hiểm'),
-    ('MED017', N'Ciprofloxacin 500mg', N'Kháng sinh', N'Kháng sinh điều trị nhiễm khuẩn', N'Ciprofloxacin', N'Viên nén', N'500mg', N'Viên', N'Stellapharm', N'Việt Nam', N'Nhóm B', N'Đặc trị'),
-    ('MED018', N'Dexamethasone 4mg', N'Corticosteroid', N'Thuốc chống viêm steroid', N'Dexamethasone', N'Viên nén', N'4mg', N'Viên', N'Teva', N'Israel', N'Nhóm C', N'Đặc trị'),
-    ('MED019', N'Ranitidine 150mg', N'Tiêu hóa', N'Thuốc điều trị trào ngược dạ dày', N'Ranitidine', N'Viên nén', N'150mg', N'Viên', N'Hasan Pharma', N'Việt Nam', N'Nhóm A', N'Bảo hiểm'),
-    ('MED020', N'Loratadine 10mg', N'Chống dị ứng', N'Thuốc chống dị ứng không gây buồn ngủ', N'Loratadine', N'Viên nén', N'10mg', N'Viên', N'Boston Pharma', N'Việt Nam', N'Nhóm A', N'Khác');
+    ('MED006', N'Ibuprofen 400mg', N'Giảm đau - Hạ sốt', N'Thuốc giảm đau, chống viêm', N'Ibuprofen', N'Viên nén', N'400mg', N'Viên', N'Hasan Pharma', N'Việt Nam', N'Nhóm A', N'Bảo hiểm'),
+    ('MED007', N'Cetirizine 10mg', N'Chống dị ứng', N'Thuốc chống dị ứng', N'Cetirizine HCl', N'Viên nén', N'10mg', N'Viên', N'Traphaco', N'Việt Nam', N'Nhóm A', N'Khác'),
+    ('MED008', N'Atorvastatin 10mg', N'Tim mạch', N'Thuốc điều trị cholesterol cao', N'Atorvastatin', N'Viên nén', N'10mg', N'Viên', N'Boston Pharma', N'Việt Nam', N'Nhóm C', N'Đặc trị'),
+    ('MED009', N'Losartan 50mg', N'Tim mạch', N'Thuốc điều trị tăng huyết áp', N'Losartan', N'Viên nén', N'50mg', N'Viên', N'Medipharco', N'Việt Nam', N'Nhóm B', N'Đặc trị'),
+    ('MED010', N'Clopidogrel 75mg', N'Tim mạch', N'Thuốc chống kết tập tiểu cầu', N'Clopidogrel', N'Viên nén', N'75mg', N'Viên', N'Stada Vietnam', N'Việt Nam', N'Nhóm C', N'Đặc trị');
 END
 GO
 
@@ -707,16 +702,11 @@ BEGIN
 
     INSERT INTO Batches (medicine_code, supplier_id, lot_number, expiry_date, received_date, initial_quantity, current_quantity, status, quarantine_notes)
     VALUES
-    ('MED011', @supp2, 'LOT2025006', DATEADD(YEAR, 2, GETDATE()), GETDATE()-10, 1500, 1450, 'Approved', N'Đạt chuẩn chất lượng'),
-    ('MED012', @supp3, 'LOT2025007', DATEADD(MONTH, 18, GETDATE()), GETDATE()-9, 2000, 2000, 'Quarantined', N'Đang kiểm tra'),
-    ('MED013', @supp4, 'LOT2025008', DATEADD(YEAR, 2, GETDATE()), GETDATE()-7, 1800, 1750, 'Approved', N'Đã phê duyệt'),
-    ('MED014', @supp5, 'LOT2025009', DATEADD(MONTH, 24, GETDATE()), GETDATE()-5, 2500, 2500, 'Received', N'Mới nhập kho'),
-    ('MED015', @supp6, 'LOT2025010', DATEADD(YEAR, 1, GETDATE()), GETDATE()-3, 3000, 3000, 'Quarantined', N'Chờ kiểm định'),
-    ('MED016', @supp2, 'LOT2025011', DATEADD(MONTH, 20, GETDATE()), GETDATE()-12, 1200, 1100, 'Approved', N'Chất lượng tốt'),
-    ('MED017', @supp3, 'LOT2025012', DATEADD(YEAR, 3, GETDATE()), GETDATE()-8, 1000, 980, 'Approved', N'Đạt tiêu chuẩn'),
-    ('MED018', @supp4, 'LOT2025013', DATEADD(MONTH, 22, GETDATE()), GETDATE()-6, 800, 800, 'Quarantined', N'Đang phân tích'),
-    ('MED019', @supp5, 'LOT2025014', DATEADD(YEAR, 2, GETDATE()), GETDATE()-4, 1600, 1550, 'Approved', N'Kiểm tra hoàn tất'),
-    ('MED020', @supp6, 'LOT2025015', DATEADD(MONTH, 19, GETDATE()), GETDATE()-1, 2200, 2200, 'Received', N'Vừa nhập hôm qua');
+    ('MED006', @supp2, 'LOT2025001', DATEADD(YEAR, 2, GETDATE()), GETDATE()-8, 1200, 1150, 'Approved', N'Đã kiểm định đạt chuẩn'),
+    ('MED007', @supp3, 'LOT2025002', DATEADD(MONTH, 20, GETDATE()), GETDATE()-6, 900, 900, 'Quarantined', N'Đang chờ phê duyệt'),
+    ('MED008', @supp4, 'LOT2025003', DATEADD(YEAR, 3, GETDATE()), GETDATE()-4, 700, 680, 'Approved', N'Chất lượng tốt'),
+    ('MED009', @supp5, 'LOT2025004', DATEADD(MONTH, 22, GETDATE()), GETDATE()-2, 850, 850, 'Received', N'Vừa nhập kho'),
+    ('MED010', @supp6, 'LOT2025005', DATEADD(YEAR, 2, GETDATE()), GETDATE(), 1100, 1100, 'Quarantined', N'Đang kiểm tra chất lượng');
 END
 GO
 
@@ -1078,4 +1068,3 @@ GO
 -- =========================================
 EXEC sp_RefreshUserActivitySummary;
 GO
-

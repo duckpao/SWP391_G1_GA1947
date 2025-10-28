@@ -2,7 +2,9 @@ package DAO;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import model.PurchaseOrder;
 import model.PurchaseOrderItem;
 
@@ -189,6 +191,11 @@ public class PurchaseOrderDAO extends DBContext {
      */
     public Object[] getPurchaseOrderStatistics() {
         Object[] stats = new Object[4];
+        stats[0] = 0;
+        stats[1] = 0;
+        stats[2] = 0;
+        stats[3] = 0.0;
+        
         String sql = "SELECT " +
                      "COUNT(*) AS total_orders, " +
                      "SUM(CASE WHEN status = 'Completed' THEN 1 ELSE 0 END) AS completed_orders, " +
@@ -209,5 +216,209 @@ public class PurchaseOrderDAO extends DBContext {
             e.printStackTrace();
         }
         return stats;
+    }
+    
+    // =========================================
+    // NEW METHODS FOR HISTORY & TREND ANALYSIS
+    // =========================================
+    
+    /**
+     * Get historical purchase orders for trend analysis
+     * Only completed and received orders
+     */
+    public List<PurchaseOrder> getHistoricalPurchaseOrders(Integer supplierId, 
+                                                           Date fromDate, Date toDate, 
+                                                           String searchKeyword) {
+        List<PurchaseOrder> list = new ArrayList<>();
+        StringBuilder sql = new StringBuilder(
+            "SELECT po.po_id, po.manager_id, po.supplier_id, po.status, " +
+            "po.order_date, po.expected_delivery_date, po.notes, po.updated_at, " +
+            "s.name AS supplier_name, u.username AS manager_name, " +
+            "ISNULL(SUM(poi.quantity * poi.unit_price), 0) AS total_amount, " +
+            "COUNT(poi.item_id) AS item_count " +
+            "FROM PurchaseOrders po " +
+            "LEFT JOIN Suppliers s ON po.supplier_id = s.supplier_id " +
+            "LEFT JOIN Users u ON po.manager_id = u.user_id " +
+            "LEFT JOIN PurchaseOrderItems poi ON po.po_id = poi.po_id " +
+            "WHERE po.status IN ('Completed', 'Received') "
+        );
+
+        // Add filters
+        if (supplierId != null) {
+            sql.append("AND po.supplier_id = ? ");
+        }
+        if (fromDate != null) {
+            sql.append("AND po.order_date >= ? ");
+        }
+        if (toDate != null) {
+            sql.append("AND po.order_date <= ? ");
+        }
+        if (searchKeyword != null && !searchKeyword.isEmpty()) {
+            sql.append("AND (s.name LIKE ? OR po.notes LIKE ? OR CAST(po.po_id AS NVARCHAR) LIKE ?) ");
+        }
+
+        sql.append("GROUP BY po.po_id, po.manager_id, po.supplier_id, po.status, " +
+                   "po.order_date, po.expected_delivery_date, po.notes, po.updated_at, " +
+                   "s.name, u.username " +
+                   "ORDER BY po.order_date DESC");
+
+        try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
+            int paramIndex = 1;
+
+            if (supplierId != null) {
+                ps.setInt(paramIndex++, supplierId);
+            }
+            if (fromDate != null) {
+                ps.setDate(paramIndex++, fromDate);
+            }
+            if (toDate != null) {
+                ps.setDate(paramIndex++, toDate);
+            }
+            if (searchKeyword != null && !searchKeyword.isEmpty()) {
+                String keyword = "%" + searchKeyword + "%";
+                ps.setString(paramIndex++, keyword);
+                ps.setString(paramIndex++, keyword);
+                ps.setString(paramIndex++, keyword);
+            }
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                PurchaseOrder po = new PurchaseOrder();
+                po.setPoId(rs.getInt("po_id"));
+                po.setManagerId(rs.getInt("manager_id"));
+                po.setSupplierId(rs.getInt("supplier_id"));
+                po.setStatus(rs.getString("status"));
+                po.setOrderDate(rs.getDate("order_date"));
+                po.setExpectedDeliveryDate(rs.getDate("expected_delivery_date"));
+                po.setNotes(rs.getString("notes"));
+                po.setUpdatedAt(rs.getDate("updated_at"));
+                po.setSupplierName(rs.getString("supplier_name"));
+                po.setManagerName(rs.getString("manager_name"));
+                po.setTotalAmount(rs.getDouble("total_amount"));
+                po.setItemCount(rs.getInt("item_count"));
+                list.add(po);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error in getHistoricalPurchaseOrders: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return list;
+    }
+    
+    /**
+     * Get trend analysis data by month
+     * Returns data for charts
+     */
+    public List<Map<String, Object>> getTrendDataByMonth(Integer supplierId, Date fromDate, Date toDate) {
+        List<Map<String, Object>> trendData = new ArrayList<>();
+        StringBuilder sql = new StringBuilder(
+            "SELECT " +
+            "YEAR(po.order_date) AS year, " +
+            "MONTH(po.order_date) AS month, " +
+            "COUNT(po.po_id) AS order_count, " +
+            "ISNULL(SUM(poi.quantity * poi.unit_price), 0) AS total_amount " +
+            "FROM PurchaseOrders po " +
+            "LEFT JOIN PurchaseOrderItems poi ON po.po_id = poi.po_id " +
+            "WHERE po.status IN ('Completed', 'Received') "
+        );
+
+        if (supplierId != null) {
+            sql.append("AND po.supplier_id = ? ");
+        }
+        if (fromDate != null) {
+            sql.append("AND po.order_date >= ? ");
+        }
+        if (toDate != null) {
+            sql.append("AND po.order_date <= ? ");
+        }
+
+        sql.append("GROUP BY YEAR(po.order_date), MONTH(po.order_date) " +
+                   "ORDER BY year, month");
+
+        try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
+            int paramIndex = 1;
+
+            if (supplierId != null) {
+                ps.setInt(paramIndex++, supplierId);
+            }
+            if (fromDate != null) {
+                ps.setDate(paramIndex++, fromDate);
+            }
+            if (toDate != null) {
+                ps.setDate(paramIndex++, toDate);
+            }
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Map<String, Object> data = new HashMap<>();
+                data.put("year", rs.getInt("year"));
+                data.put("month", rs.getInt("month"));
+                data.put("orderCount", rs.getInt("order_count"));
+                data.put("totalAmount", rs.getDouble("total_amount"));
+                trendData.add(data);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error in getTrendDataByMonth: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return trendData;
+    }
+    
+    /**
+     * Get supplier performance comparison
+     */
+    public List<Map<String, Object>> getSupplierPerformance(Date fromDate, Date toDate) {
+        List<Map<String, Object>> performance = new ArrayList<>();
+        StringBuilder sql = new StringBuilder(
+            "SELECT " +
+            "s.supplier_id, " +
+            "s.name AS supplier_name, " +
+            "COUNT(po.po_id) AS total_orders, " +
+            "SUM(CASE WHEN po.status = 'Completed' THEN 1 ELSE 0 END) AS completed_orders, " +
+            "ISNULL(SUM(poi.quantity * poi.unit_price), 0) AS total_amount, " +
+            "AVG(DATEDIFF(day, po.order_date, po.updated_at)) AS avg_delivery_days " +
+            "FROM Suppliers s " +
+            "LEFT JOIN PurchaseOrders po ON s.supplier_id = po.supplier_id " +
+            "LEFT JOIN PurchaseOrderItems poi ON po.po_id = poi.po_id " +
+            "WHERE 1=1 "
+        );
+
+        if (fromDate != null) {
+            sql.append("AND po.order_date >= ? ");
+        }
+        if (toDate != null) {
+            sql.append("AND po.order_date <= ? ");
+        }
+
+        sql.append("GROUP BY s.supplier_id, s.name " +
+                   "HAVING COUNT(po.po_id) > 0 " +
+                   "ORDER BY total_amount DESC");
+
+        try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
+            int paramIndex = 1;
+
+            if (fromDate != null) {
+                ps.setDate(paramIndex++, fromDate);
+            }
+            if (toDate != null) {
+                ps.setDate(paramIndex++, toDate);
+            }
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Map<String, Object> data = new HashMap<>();
+                data.put("supplierId", rs.getInt("supplier_id"));
+                data.put("supplierName", rs.getString("supplier_name"));
+                data.put("totalOrders", rs.getInt("total_orders"));
+                data.put("completedOrders", rs.getInt("completed_orders"));
+                data.put("totalAmount", rs.getDouble("total_amount"));
+                data.put("avgDeliveryDays", rs.getInt("avg_delivery_days"));
+                performance.add(data);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error in getSupplierPerformance: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return performance;
     }
 }

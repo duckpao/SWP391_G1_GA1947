@@ -31,4 +31,15 @@ public class DBContext {
             throw new SQLException("SQL Server Driver not found", ex);
         }
     }
+    
+    public void closeConnection() {
+    try {
+        if (connection != null && !connection.isClosed()) {
+            connection.close();
+        }
+    } catch (SQLException e) {
+        System.err.println("Error closing connection: " + e.getMessage());
+    }
+}
+
 }

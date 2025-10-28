@@ -58,6 +58,9 @@
                     <a class="nav-link" href="${pageContext.request.contextPath}/purchase-orders">
                         <i class="bi bi-receipt"></i> Purchase Orders
                     </a>
+                    <a class="nav-link" href="${pageContext.request.contextPath}/purchase-orders/history">
+                        <i class="bi bi-clock-history"></i> PO History & Trends
+                    </a>
                     <a class="nav-link" href="#">
                         <i class="bi bi-box-seam"></i> Inventory Audit
                     </a>

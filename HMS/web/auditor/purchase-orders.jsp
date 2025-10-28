@@ -34,6 +34,10 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2><i class="bi bi-receipt"></i> Purchase Orders Management</h2>
             <div>
+                <a href="${pageContext.request.contextPath}/purchase-orders/history" 
+                   class="btn btn-info me-2">
+                    <i class="bi bi-clock-history"></i> View History & Trends
+                </a>
                 <span class="badge bg-info">Auditor: ${sessionScope.user}</span>
             </div>
         </div>

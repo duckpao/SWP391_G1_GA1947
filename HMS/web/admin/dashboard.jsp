@@ -16,7 +16,7 @@
 
             body {
                 font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                background: #f9fafb;
                 min-height: 100vh;
                 padding: 20px;
             }
@@ -26,17 +26,18 @@
                 margin: 0 auto;
                 background: #fff;
                 border-radius: 16px;
-                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
                 overflow: hidden;
             }
 
             .header {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
+                background: #ffffff;
+                color: #1f2937;
                 padding: 30px 40px;
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
+                border-bottom: 3px solid #3b82f6;
             }
 
             .header h1 {
@@ -50,7 +51,7 @@
             .header-icon {
                 width: 40px;
                 height: 40px;
-                background: rgba(255, 255, 255, 0.2);
+                background: #eff6ff;
                 border-radius: 10px;
                 display: flex;
                 align-items: center;
@@ -73,13 +74,14 @@
             }
 
             .btn-primary {
-                background: white;
-                color: #667eea;
+                background: #3b82f6;
+                color: white;
             }
 
             .btn-primary:hover {
+                background: #2563eb;
                 transform: translateY(-2px);
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
             }
 
             .btn-edit {
@@ -146,23 +148,25 @@
             }
 
             .stat-card {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
+                background: #ffffff;
+                color: #1f2937;
                 padding: 20px;
                 border-radius: 12px;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                border-left: 4px solid #3b82f6;
             }
 
             .stat-card h3 {
                 font-size: 14px;
                 font-weight: 500;
-                opacity: 0.9;
+                color: #6b7280;
                 margin-bottom: 8px;
             }
 
             .stat-card p {
                 font-size: 32px;
                 font-weight: 700;
+                color: #3b82f6;
             }
 
             .filter-section {
@@ -219,8 +223,8 @@
 
             .form-control:focus {
                 outline: none;
-                border-color: #667eea;
-                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+                border-color: #3b82f6;
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
             }
 
             .filter-actions {
@@ -237,7 +241,7 @@
             }
 
             .filter-tag {
-                background: #667eea;
+                background: #3b82f6;
                 color: white;
                 padding: 6px 12px;
                 border-radius: 20px;
@@ -662,12 +666,7 @@
                                                                 ✏️ Sửa
                                                             </a>
 
-                                                            <!-- Nút chuyển thành Supplier -->
-                                                            <c:if test="${u.role != 'Supplier'}">
-                                                                <a class="btn btn-warning" href="${pageContext.request.contextPath}/admin-dashboard/convert-supplier?userId=${u.userId}">
-                                                                    🚀 Chuyển sang Supplier
-                                                                </a>
-                                                            </c:if>
+                                                            <!-- Removed "Chuyển sang Supplier" button -->
 
                                                             <form class="inline" action="${pageContext.request.contextPath}/admin-dashboard/toggle" method="post">
                                                                 <input type="hidden" name="id" value="${u.userId}" />

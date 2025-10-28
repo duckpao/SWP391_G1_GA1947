@@ -3,22 +3,29 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/src/java/Controller/LogoutServlet.java</file>
-            <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/src/java/model/PurchaseOrderItem.java</file>
-            <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/src/java/DAO/MedicationRequestDAO.java</file>
-            <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/src/java/model/PurchaseOrder.java</file>
-            <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/web/error.jsp</file>
-            <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/src/java/model/Supplier.java</file>
-            <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/web/auditor/purchase-orders.jsp</file>
-            <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/src/java/Controller/LoginServlet.java</file>
-            <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/src/java/DAO/PurchaseOrderDAO.java</file>
-            <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/web/auditor/purchase-order-detail.jsp</file>
-            <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/src/java/DAO/SupplierDAO.java</file>
-            <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/web/auditor/auditor-dashboard.jsp</file>
-            <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/src/java/Controller/PurchaseOrderServlet.java</file>
-            <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/src/java/DAO/ManagerDAO.java</file>
-            <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/src/java/DAO/UserDAO.java</file>
-            <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/web/WEB-INF/web.xml</file>
+            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/web/jsp/manageRequests.jsp</file>
+            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/web/jsp/viewMedicine.jsp</file>
+            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/src/java/Controller/UserReportServlet.java</file>
+            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/src/java/Controller/ToggleUserServlet.java</file>
+            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/web/admin/dashboard.jsp</file>
+            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/src/java/Controller/SystemConfigServlet.java</file>
+            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/web/jsp/updateRequest.jsp</file>
+            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/web/verifyReset.jsp</file>
+            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/web/jsp/createRequest.jsp</file>
+            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/src/java/Controller/DeleteUserServlet.java</file>
+            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/web/auditor/purchase-order-detail.jsp</file>
+            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/web/verify_otp.jsp</file>
+            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/web/auditor/auditor-dashboard.jsp</file>
+            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/src/java/Controller/UserServlet.java</file>
+            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/src/java/Controller/CreateServlet.java</file>
+            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/web/jsp/doctorDashboard.jsp</file>
+            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/src/java/Controller/EditServlet.java</file>
+            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/web/WEB-INF/web.xml</file>
+            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/web/login.jsp</file>
+            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/web/jsp/viewRequestHistory.jsp</file>
+            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/src/java/Controller/LoginServlet.java</file>
+            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/web/auditor/purchase-orders.jsp</file>
+            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/web/jsp/Manage-Batches.jsp</file>
         </group>
     </open-files>
 </project-private>

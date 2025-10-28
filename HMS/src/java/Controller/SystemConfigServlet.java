@@ -27,6 +27,20 @@ public class SystemConfigServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
+        // Check session
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("userId") == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+        
+        String userRole = (String) session.getAttribute("role");
+        if (!"Admin".equals(userRole)) {
+            request.setAttribute("errorMessage", "Access denied. This page is for Admins only.");
+            request.getRequestDispatcher("error.jsp").forward(request, response);
+            return;
+        }
+        
         // Get all configurations
         List<SystemConfig> configs = configDAO.getAllConfigs();
         
@@ -41,10 +55,17 @@ public class SystemConfigServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
-        // Check if user is logged in
+        // Check session
         HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("user") == null) {
+        if (session == null || session.getAttribute("userId") == null) {
             response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+        
+        String userRole = (String) session.getAttribute("role");
+        if (!"Admin".equals(userRole)) {
+            request.setAttribute("errorMessage", "Access denied. This page is for Admins only.");
+            request.getRequestDispatcher("error.jsp").forward(request, response);
             return;
         }
 

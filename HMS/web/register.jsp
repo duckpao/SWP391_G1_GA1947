@@ -15,7 +15,7 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f9fafb;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -28,15 +28,16 @@
             max-width: 500px;
             background: #fff;
             border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
             overflow: hidden;
         }
 
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: #ffffff;
+            color: #1f2937;
             padding: 30px 40px;
             text-align: center;
+            border-bottom: 3px solid #3b82f6;
         }
 
         .header h1 {
@@ -85,9 +86,9 @@
         .form-group input:focus,
         .form-group select:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #3b82f6;
             background: white;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
         .form-group input::placeholder {
@@ -126,14 +127,15 @@
         }
 
         .btn-register {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #3b82f6;
             color: white;
             margin-bottom: 16px;
         }
 
         .btn-register:hover {
+            background: #2563eb;
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
         }
 
         .btn-register:active {
@@ -142,7 +144,7 @@
 
         .btn-home {
             background: #f3f4f6;
-            color: #667eea;
+            color: #3b82f6;
             border: 2px solid #e5e7eb;
         }
 
@@ -197,14 +199,14 @@
         }
 
         .login-link a {
-            color: #667eea;
+            color: #3b82f6;
             text-decoration: none;
             font-weight: 700;
             transition: all 0.2s ease;
         }
 
         .login-link a:hover {
-            color: #764ba2;
+            color: #2563eb;
             text-decoration: underline;
         }
 

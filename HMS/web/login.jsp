@@ -15,7 +15,7 @@
 
             body {
                 font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                background: #f9fafb;
                 min-height: 100vh;
                 display: flex;
                 align-items: center;
@@ -28,7 +28,7 @@
                 max-width: 450px;
                 background: white;
                 border-radius: 20px;
-                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
                 overflow: hidden;
                 animation: slideUp 0.5s ease;
             }
@@ -45,8 +45,9 @@
             }
 
             .login-header {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
+                background: white;
+                border-bottom: 3px solid #3b82f6;
+                color: #1f2937;
                 padding: 40px 30px;
                 text-align: center;
             }
@@ -54,7 +55,7 @@
             .login-icon {
                 width: 80px;
                 height: 80px;
-                background: rgba(255, 255, 255, 0.2);
+                background: #eff6ff;
                 border-radius: 50%;
                 display: flex;
                 align-items: center;
@@ -67,11 +68,12 @@
                 font-size: 28px;
                 font-weight: 700;
                 margin-bottom: 8px;
+                color: #1f2937;
             }
 
             .login-header p {
                 font-size: 14px;
-                opacity: 0.9;
+                color: #6b7280;
             }
 
             .login-body {
@@ -116,15 +118,15 @@
 
             .form-control:focus {
                 outline: none;
-                border-color: #667eea;
+                border-color: #3b82f6;
                 background: white;
-                box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+                box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
             }
 
             .btn-login {
                 width: 100%;
                 padding: 16px;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                background: #3b82f6;
                 color: white;
                 border: none;
                 border-radius: 10px;
@@ -136,8 +138,9 @@
             }
 
             .btn-login:hover {
+                background: #2563eb;
                 transform: translateY(-2px);
-                box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+                box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
             }
 
             .btn-login:active {
@@ -175,7 +178,7 @@
             }
 
             .login-footer a {
-                color: #667eea;
+                color: #3b82f6;
                 text-decoration: none;
                 font-weight: 600;
                 font-size: 14px;
@@ -183,7 +186,7 @@
             }
 
             .login-footer a:hover {
-                color: #764ba2;
+                color: #2563eb;
                 text-decoration: underline;
             }
 
@@ -204,7 +207,7 @@
             }
 
             .password-toggle:hover {
-                color: #667eea;
+                color: #3b82f6;
             }
         </style>
     </head>

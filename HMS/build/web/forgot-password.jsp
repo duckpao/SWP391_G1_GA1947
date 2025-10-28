@@ -15,7 +15,7 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f9fafb;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -31,7 +31,7 @@
         .card {
             background: white;
             border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             animation: slideUp 0.4s ease;
         }
@@ -48,16 +48,17 @@
         }
 
         .card-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: white;
+            color: #1f2937;
             padding: 32px;
             text-align: center;
+            border-bottom: 3px solid #3b82f6;
         }
 
         .card-header-icon {
             width: 64px;
             height: 64px;
-            background: rgba(255, 255, 255, 0.2);
+            background: #eff6ff;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -74,7 +75,7 @@
 
         .card-header p {
             font-size: 14px;
-            opacity: 0.9;
+            color: #6b7280;
             margin: 0;
         }
 
@@ -83,8 +84,8 @@
         }
 
         .info-box {
-            background: #f0f9ff;
-            border: 1px solid #bae6fd;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
             border-radius: 8px;
             padding: 16px;
             margin-bottom: 24px;
@@ -99,7 +100,7 @@
 
         .info-text {
             font-size: 13px;
-            color: #0c4a6e;
+            color: #1e40af;
             line-height: 1.5;
         }
 
@@ -141,8 +142,8 @@
 
         input[type="text"]:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
         input[type="text"]::placeholder {
@@ -166,14 +167,15 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #3b82f6;
             color: white;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
 
         .btn-primary:hover {
+            background: #2563eb;
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
         }
 
         .btn-primary:active {
@@ -223,7 +225,7 @@
         }
 
         .card-footer a {
-            color: #667eea;
+            color: #3b82f6;
             text-decoration: none;
             font-weight: 600;
             font-size: 14px;
@@ -234,7 +236,7 @@
         }
 
         .card-footer a:hover {
-            color: #764ba2;
+            color: #2563eb;
             text-decoration: underline;
         }
 

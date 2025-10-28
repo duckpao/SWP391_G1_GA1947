@@ -6,6 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.sql.SQLException;
 import model.User;
 import util.PasswordUtils;
@@ -21,6 +22,20 @@ public class EditServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) 
             throws ServletException, IOException {
+        
+        // Check session
+        HttpSession session = req.getSession(false);
+        if (session == null || session.getAttribute("userId") == null) {
+            resp.sendRedirect(req.getContextPath() + "/login");
+            return;
+        }
+        
+        String userRole = (String) session.getAttribute("role");
+        if (!"Admin".equals(userRole)) {
+            req.setAttribute("errorMessage", "Access denied. This page is for Admins only.");
+            req.getRequestDispatcher("error.jsp").forward(req, resp);
+            return;
+        }
         
         String idParam = req.getParameter("id");
         
@@ -53,6 +68,20 @@ public class EditServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) 
             throws ServletException, IOException {
+        
+        // Check session
+        HttpSession session = req.getSession(false);
+        if (session == null || session.getAttribute("userId") == null) {
+            resp.sendRedirect(req.getContextPath() + "/login");
+            return;
+        }
+        
+        String userRole = (String) session.getAttribute("role");
+        if (!"Admin".equals(userRole)) {
+            req.setAttribute("errorMessage", "Access denied. This page is for Admins only.");
+            req.getRequestDispatcher("error.jsp").forward(req, resp);
+            return;
+        }
         
         try {
             // Get form parameters

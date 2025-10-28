@@ -15,7 +15,7 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f9fafb;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -48,16 +48,17 @@
         }
 
         .card-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: white;
+            color: #1f2937;
             padding: 32px;
             text-align: center;
+            border-bottom: 3px solid #3b82f6;
         }
 
         .card-header-icon {
             width: 64px;
             height: 64px;
-            background: rgba(255, 255, 255, 0.2);
+            background: #eff6ff;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -74,7 +75,7 @@
 
         .card-header p {
             font-size: 14px;
-            opacity: 0.9;
+            color: #6b7280;
             margin: 0;
         }
 
@@ -111,8 +112,8 @@
 
         input[type="password"]:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
         .password-strength {
@@ -184,14 +185,14 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #3b82f6;
             color: white;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
         }
 
         .btn-primary:active {
@@ -229,7 +230,7 @@
         }
 
         .card-footer a {
-            color: #667eea;
+            color: #3b82f6;
             text-decoration: none;
             font-weight: 600;
             font-size: 14px;
@@ -237,7 +238,7 @@
         }
 
         .card-footer a:hover {
-            color: #764ba2;
+            color: #2563eb;
             text-decoration: underline;
         }
 

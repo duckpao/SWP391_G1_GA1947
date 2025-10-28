@@ -17,7 +17,7 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f9fafb;
             min-height: 100vh;
             padding: 20px;
         }
@@ -32,12 +32,13 @@
         }
 
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: white;
+            color: #1f2937;
             padding: 30px 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-bottom: 3px solid #3b82f6;
         }
 
         .header h1 {
@@ -51,7 +52,7 @@
         .header-icon {
             width: 40px;
             height: 40px;
-            background: rgba(255, 255, 255, 0.2);
+            background: #ede9fe;
             border-radius: 10px;
             display: flex;
             align-items: center;
@@ -68,7 +69,7 @@
         .user-info span {
             font-size: 14px;
             font-weight: 500;
-            opacity: 0.95;
+            color: #1f2937;
         }
 
         .btn {
@@ -86,24 +87,25 @@
         }
 
         .btn-logout {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: #e5e7eb;
+            color: #1f2937;
+            border: 1px solid #d1d5db;
         }
 
         .btn-logout:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: #d1d5db;
             transform: translateY(-2px);
         }
 
         .btn-login {
-            background: white;
-            color: #667eea;
+            background: #3b82f6;
+            color: white;
         }
 
         .btn-login:hover {
+            background: #2563eb;
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
 
         .content {
@@ -118,14 +120,15 @@
         }
 
         .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: white;
+            color: #1f2937;
             padding: 28px;
             border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            border-left: 5px solid #3b82f6;
         }
 
         .stat-card::before {
@@ -135,14 +138,14 @@
             right: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 70%);
             opacity: 0;
             transition: opacity 0.3s ease;
         }
 
         .stat-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
         }
 
         .stat-card:hover::before {
@@ -158,7 +161,7 @@
         .stat-label {
             font-size: 14px;
             font-weight: 500;
-            opacity: 0.9;
+            color: #6b7280;
             margin-bottom: 8px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -168,12 +171,13 @@
             font-size: 42px;
             font-weight: 700;
             line-height: 1;
+            color: #1f2937;
         }
 
         .section-card {
             background: white;
             border-radius: 16px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             margin-bottom: 28px;
             overflow: hidden;
             border: 1px solid #e5e7eb;
@@ -181,8 +185,8 @@
 
         .section-header {
             padding: 24px 28px;
-            background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
-            border-bottom: 2px solid #e5e7eb;
+            background: white;
+            border-bottom: 3px solid #3b82f6;
             display: flex;
             align-items: center;
             gap: 12px;
@@ -465,7 +469,7 @@
                                         <tr>
                                             <td><span class="row-number">${loop.index + 1}</span></td>
                                             <td>
-                                                <strong style="color: #667eea;">PO-${po.poId}</strong>
+                                                <strong style="color: #3b82f6;">PO-${po.poId}</strong>
                                             </td>
                                             <td>${po.supplierName}</td>
                                             <td>

@@ -32,6 +32,20 @@ public class UserReportServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
+        // Check session
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("userId") == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+        
+        String userRole = (String) session.getAttribute("role");
+        if (!"Admin".equals(userRole)) {
+            request.setAttribute("errorMessage", "Access denied. This page is for Admins only.");
+            request.getRequestDispatcher("error.jsp").forward(request, response);
+            return;
+        }
+        
         try {
             // Get parameters
             String reportType = request.getParameter("type");
@@ -56,34 +70,22 @@ public class UserReportServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
-        doGet(request, response);
-    }
-    
-    /**
-     * Check if user is authorized (Admin, Manager, or Auditor)
-     */
-    private boolean isAuthorized(HttpServletRequest request, HttpServletResponse response) 
-            throws IOException {
+        
+        // Check session
         HttpSession session = request.getSession(false);
-        if (session == null) {
+        if (session == null || session.getAttribute("userId") == null) {
             response.sendRedirect(request.getContextPath() + "/login");
-            return false;
+            return;
         }
         
-        User user = (User) session.getAttribute("user");
-        if (user == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return false;
+        String userRole = (String) session.getAttribute("role");
+        if (!"Admin".equals(userRole)) {
+            request.setAttribute("errorMessage", "Access denied. This page is for Admins only.");
+            request.getRequestDispatcher("error.jsp").forward(request, response);
+            return;
         }
         
-        // Allow Admin, Manager, and Auditor to access reports
-        String role = user.getRole();
-        if (!"Admin".equals(role) && !"Manager".equals(role) && !"Auditor".equals(role)) {
-            response.sendRedirect(request.getContextPath() + "/access-denied");
-            return false;
-        }
-        
-        return true;
+        doGet(request, response);
     }
     
     /**

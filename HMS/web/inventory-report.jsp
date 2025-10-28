@@ -7,96 +7,489 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventory Report</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
-        body { background-color: #f8f9fa; }
-        .stats-card {
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            padding: 20px;
-            text-align: center;
-            margin-bottom: 20px;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f9fafb;
+            min-height: 100vh;
+            color: #374151;
+        }
+
+        .container-fluid {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Header styling */
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .header-section h2 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 0;
+        }
+
+        /* Stats cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
             background: white;
+            border-radius: 15px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border-left: 5px solid #3b82f6;
         }
-        .stat-border { border-left: 5px solid #0dcaf0; }
-        .filter-section { 
-            background: #f8f9fa; 
-            padding: 20px; 
-            border-radius: 10px; 
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .stat-info h6 {
+            font-size: 13px;
+            font-weight: 600;
+            color: #9ca3af;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-info h3 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0;
+        }
+
+        .stat-icon {
+            font-size: 32px;
+            opacity: 0.8;
+            color: #3b82f6;
+        }
+
+        /* Tabs styling */
+        .nav-tabs {
+            display: flex;
+            gap: 0;
+            border-bottom: 2px solid #e5e7eb;
+            margin-bottom: 30px;
+            list-style: none;
+        }
+
+        .nav-tabs .nav-link {
+            color: #6b7280;
+            padding: 12px 20px;
+            border: none;
+            background: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-tabs .nav-link:hover {
+            color: #1f2937;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+        }
+
+        .nav-item {
+            list-style: none;
+        }
+
+        /* Filter section */
+        .filter-section {
+            background: white;
+            padding: 24px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-section h5 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1f2937;
             margin-bottom: 20px;
-            border: 1px solid #dee2e6;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        .nav-tabs .nav-link { color: #0dcaf0; }
-        .nav-tabs .nav-link.active { 
-            background-color: #0dcaf0; 
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            align-items: flex-end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 10px 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* Card styling */
+        .card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: white;
+            padding: 24px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-header h5 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-body {
+            padding: 24px;
+        }
+
+        /* Table styling */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        table thead {
+            background: #f9fafb;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        table th {
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        table td {
+            padding: 16px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        table tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        /* Status badges */
+        .status-approved {
+            background: #dcfce7;
+            color: #166534;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .status-quarantined {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .badge-primary {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .badge-success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        /* Button styling */
+        .btn {
+            padding: 10px 16px;
+            border-radius: 8px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
             color: white;
-            border-color: #0dcaf0;
         }
-        table { background: white; }
-        table tbody tr:hover { background-color: #f5f5f5; }
-        .status-approved { background-color: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; }
-        .status-quarantined { background-color: #fff3cd; color: #856404; padding: 4px 8px; border-radius: 4px; }
-        .card { border: none; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        /* Alert styling */
+        .alert {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+
+        /* Button group */
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            justify-content: flex-end;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container-fluid {
+                padding: 20px;
+            }
+
+            .header-section {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+
+            .header-section h2 {
+                font-size: 24px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-tabs {
+                flex-wrap: wrap;
+            }
+
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            table th,
+            table td {
+                padding: 12px 8px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="container-fluid mt-4 mb-5">
+    <div class="container-fluid">
+        <!-- Restored all HTML content from original file -->
         <!-- Header -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="header-section">
             <h2>
-                <i class="fas fa-boxes text-info"></i> ${pageTitle}
+                <i class="bi bi-boxes"></i> ${pageTitle}
             </h2>
             <a href="${pageContext.request.contextPath}/manager-dashboard" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Back to Dashboard
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
             </a>
         </div>
 
         <!-- Statistics Cards (Summary Only) -->
         <c:if test="${reportType == 'summary' && statistics != null}">
-            <div class="row mb-4">
-                <div class="col-md-3">
-                    <div class="stats-card stat-border">
-                        <h6 class="text-muted mb-2">Total Medicines</h6>
-                        <h3 class="mb-0 text-info">${statistics.get('totalMedicines')}</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-content">
+                        <div class="stat-info">
+                            <h6>Total Medicines</h6>
+                            <h3>${statistics.get('totalMedicines')}</h3>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="bi bi-capsule"></i>
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="stats-card stat-border">
-                        <h6 class="text-muted mb-2">Total Batches</h6>
-                        <h3 class="mb-0 text-info">${statistics.get('totalBatches')}</h3>
+                <div class="stat-card">
+                    <div class="stat-content">
+                        <div class="stat-info">
+                            <h6>Total Batches</h6>
+                            <h3>${statistics.get('totalBatches')}</h3>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="bi bi-boxes"></i>
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="stats-card stat-border">
-                        <h6 class="text-muted mb-2">Total Quantity</h6>
-                        <h3 class="mb-0 text-info">${statistics.get('totalQuantity')}</h3>
+                <div class="stat-card">
+                    <div class="stat-content">
+                        <div class="stat-info">
+                            <h6>Total Quantity</h6>
+                            <h3>${statistics.get('totalQuantity')}</h3>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="bi bi-stack"></i>
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="stats-card stat-border">
-                        <h6 class="text-muted mb-2">Approved Quantity</h6>
-                        <h3 class="mb-0 text-success">${statistics.get('approvedQuantity')}</h3>
+                <div class="stat-card">
+                    <div class="stat-content">
+                        <div class="stat-info">
+                            <h6>Approved Quantity</h6>
+                            <h3>${statistics.get('approvedQuantity')}</h3>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
                     </div>
                 </div>
             </div>
         </c:if>
 
         <!-- Report Type Tabs -->
-        <ul class="nav nav-tabs mb-4" role="tablist">
+        <ul class="nav-tabs" role="tablist">
             <li class="nav-item">
                 <a class="nav-link ${reportType == 'summary' ? 'active' : ''}" href="?type=summary">
-                    <i class="fas fa-chart-bar"></i> Summary
+                    <i class="bi bi-chart-bar"></i> Summary
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link ${reportType == 'supplier' ? 'active' : ''}" href="?type=supplier">
-                    <i class="fas fa-building"></i> By Supplier
+                    <i class="bi bi-building"></i> By Supplier
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link ${reportType == 'batch' ? 'active' : ''}" href="?type=batch">
-                    <i class="fas fa-cube"></i> Batch Details
+                    <i class="bi bi-cube"></i> Batch Details
                 </a>
             </li>
         </ul>
@@ -104,23 +497,23 @@
         <!-- Filter Section for Batch Report -->
         <c:if test="${reportType == 'batch'}">
             <div class="filter-section">
-                <h5 class="mb-3"><i class="fas fa-sliders-h"></i> Filters</h5>
-                <form method="get" class="row g-3">
+                <h5><i class="bi bi-sliders"></i> Filters</h5>
+                <form method="get" class="filter-row">
                     <input type="hidden" name="type" value="batch">
                     
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold">Start Date (Received)</label>
-                        <input type="date" name="startDate" class="form-control" value="${startDate}">
+                    <div class="form-group">
+                        <label>Start Date (Received)</label>
+                        <input type="date" name="startDate" value="${startDate}">
                     </div>
 
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold">End Date (Received)</label>
-                        <input type="date" name="endDate" class="form-control" value="${endDate}">
+                    <div class="form-group">
+                        <label>End Date (Received)</label>
+                        <input type="date" name="endDate" value="${endDate}">
                     </div>
 
-                    <div class="col-md-4 d-flex align-items-end">
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="fas fa-search"></i> Filter
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">
+                            <i class="bi bi-search"></i> Filter
                         </button>
                     </div>
                 </form>
@@ -129,24 +522,24 @@
 
         <!-- Results Card -->
         <div class="card">
-            <div class="card-header bg-info text-white">
-                <h5 class="mb-0">
-                    <i class="fas fa-list"></i> Results
-                    <span class="badge bg-light text-dark ms-2">${reports.size()}</span>
+            <div class="card-header">
+                <h5>
+                    <i class="bi bi-list-ul"></i> Results
+                    <span class="badge">${reports.size()}</span>
                 </h5>
             </div>
             <div class="card-body">
                 <c:if test="${empty reports}">
-                    <div class="alert alert-info" role="alert">
-                        <i class="fas fa-info-circle"></i> No data available for this report.
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> No data available for this report.
                     </div>
                 </c:if>
 
                 <!-- Summary Table -->
                 <c:if test="${reportType == 'summary' && not empty reports}">
                     <div class="table-responsive">
-                        <table class="table table-hover table-striped" id="reportTable">
-                            <thead class="table-dark">
+                        <table id="reportTable">
+                            <thead>
                                 <tr>
                                     <th>Medicine ID</th>
                                     <th>Medicine Name</th>
@@ -164,8 +557,8 @@
                                     <tr>
                                         <td><strong>#${report.medicineId}</strong></td>
                                         <td>${report.medicineName}</td>
-                                        <td><span class="badge bg-secondary">${report.category}</span></td>
-                                        <td><span class="badge bg-primary">${report.totalBatches}</span></td>
+                                        <td><span class="badge badge-secondary">${report.category}</span></td>
+                                        <td><span class="badge badge-primary">${report.totalBatches}</span></td>
                                         <td><strong>${report.totalQuantity}</strong></td>
                                         <td><span class="status-approved">${report.approvedQuantity}</span></td>
                                         <td><span class="status-quarantined">${report.quarantinedQuantity}</span></td>
@@ -195,8 +588,8 @@
                 <!-- Supplier Table -->
                 <c:if test="${reportType == 'supplier' && not empty reports}">
                     <div class="table-responsive">
-                        <table class="table table-hover table-striped" id="reportTable">
-                            <thead class="table-dark">
+                        <table id="reportTable">
+                            <thead>
                                 <tr>
                                     <th>Supplier ID</th>
                                     <th>Supplier Name</th>
@@ -210,9 +603,9 @@
                                     <tr>
                                         <td><strong>#${report.supplierId}</strong></td>
                                         <td>${report.supplierName}</td>
-                                        <td><span class="badge bg-primary">${report.totalBatches}</span></td>
+                                        <td><span class="badge badge-primary">${report.totalBatches}</span></td>
                                         <td><strong>${report.totalQuantity}</strong></td>
-                                        <td><span class="badge bg-success">${report.medicineTypes}</span></td>
+                                        <td><span class="badge badge-success">${report.medicineTypes}</span></td>
                                     </tr>
                                 </c:forEach>
                             </tbody>
@@ -223,8 +616,8 @@
                 <!-- Batch Details Table -->
                 <c:if test="${reportType == 'batch' && not empty reports}">
                     <div class="table-responsive">
-                        <table class="table table-hover table-striped" id="reportTable">
-                            <thead class="table-dark">
+                        <table id="reportTable">
+                            <thead>
                                 <tr>
                                     <th>Batch ID</th>
                                     <th>Medicine Name</th>
@@ -245,13 +638,13 @@
                                         <td>
                                             <c:choose>
                                                 <c:when test="${report.status == 'Approved'}">
-                                                    <span class="badge bg-success">${report.status}</span>
+                                                    <span class="badge badge-success">${report.status}</span>
                                                 </c:when>
                                                 <c:when test="${report.status == 'Quarantined'}">
-                                                    <span class="badge bg-warning text-dark">${report.status}</span>
+                                                    <span class="status-quarantined">${report.status}</span>
                                                 </c:when>
                                                 <c:otherwise>
-                                                    <span class="badge bg-info">${report.status}</span>
+                                                    <span class="badge badge-primary">${report.status}</span>
                                                 </c:otherwise>
                                             </c:choose>
                                         </td>
@@ -275,12 +668,12 @@
 
                 <!-- Export Buttons -->
                 <c:if test="${not empty reports}">
-                    <div class="mt-4 text-end">
-                        <button onclick="exportToCSV()" class="btn btn-success me-2">
-                            <i class="fas fa-file-csv"></i> Export CSV
+                    <div class="button-group">
+                        <button onclick="exportToCSV()" class="btn btn-success">
+                            <i class="bi bi-file-earmark-csv"></i> Export CSV
                         </button>
                         <button onclick="printTable()" class="btn btn-primary">
-                            <i class="fas fa-print"></i> Print
+                            <i class="bi bi-printer"></i> Print
                         </button>
                     </div>
                 </c:if>
@@ -288,7 +681,6 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function exportToCSV() {
             const table = document.getElementById('reportTable');
@@ -313,8 +705,8 @@
             const table = document.getElementById('reportTable').outerHTML;
             const printWindow = window.open('', '', 'height=600,width=900');
             printWindow.document.write('<html><head><title>Inventory Report</title>');
-            printWindow.document.write('<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">');
-            printWindow.document.write('<style>body { padding: 20px; }</style>');
+            printWindow.document.write('<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">');
+            printWindow.document.write('<style>body { padding: 20px; font-family: Inter, sans-serif; }</style>');
             printWindow.document.write('</head><body>');
             printWindow.document.write('<h2 class="mb-4">${pageTitle}</h2>');
             printWindow.document.write(table);

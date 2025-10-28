@@ -6,6 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.sql.SQLException;
 import model.User;
 import util.PasswordUtils;
@@ -22,6 +23,20 @@ public class CreateServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
+        // Check session
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("userId") == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+        
+        String userRole = (String) session.getAttribute("role");
+        if (!"Admin".equals(userRole)) {
+            request.setAttribute("errorMessage", "Access denied. This page is for Admins only.");
+            request.getRequestDispatcher("error.jsp").forward(request, response);
+            return;
+        }
+        
         // Log page view
         LoggingUtil.logView(request, "Create User Form");
         
@@ -32,6 +47,20 @@ public class CreateServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
+        
+        // Check session
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("userId") == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+        
+        String userRole = (String) session.getAttribute("role");
+        if (!"Admin".equals(userRole)) {
+            request.setAttribute("errorMessage", "Access denied. This page is for Admins only.");
+            request.getRequestDispatcher("error.jsp").forward(request, response);
+            return;
+        }
         
         // Get form parameters
         String username = request.getParameter("username");

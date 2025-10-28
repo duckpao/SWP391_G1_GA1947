@@ -6,570 +6,790 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manager Dashboard - Hospital System</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
-        .dashboard-card {
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f9fafb;
+            min-height: 100vh;
+            color: #374151;
+        }
+
+        .dashboard-container {
+            display: block;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            display: none;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            background: #f9fafb;
+            min-height: 100vh;
+        }
+
+        .page-header {
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-header h2 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 0;
+        }
+
+        /* Updated stat cards with white theme - changed border colors and styling */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
         .stat-card {
-            text-align: center;
-            padding: 20px;
-            border-radius: 10px;
-            color: white;
-            margin-bottom: 20px;
-            transition: transform 0.3s, box-shadow 0.3s;
+            background: white;
+            border-radius: 15px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border-left: 5px solid #3b82f6;
+            border-top: 1px solid #e5e7eb;
         }
+
         .stat-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
         }
-        .stat-card-blue { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .stat-card-green { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-        .stat-card-orange { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+
+        .stat-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .stat-info h6 {
+            font-size: 13px;
+            font-weight: 600;
+            color: #9ca3af;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-info h3 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0;
+        }
+
+        .stat-icon {
+            font-size: 32px;
+            opacity: 0.8;
+            color: #3b82f6;
+        }
+
+        /* Updated card styling for white theme */
+        .dashboard-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+            overflow: hidden;
+            border-top: 3px solid #3b82f6;
+        }
+
+        .card-header {
+            background: #f9fafb;
+            padding: 24px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-header h5 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-body {
+            padding: 24px;
+        }
+
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        table thead {
+            background: #f9fafb;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        table th {
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        table td {
+            padding: 16px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        table tbody tr:hover {
+            background: #f9fafb;
+        }
+
+
         .status-badge {
-            padding: 5px 10px;
-            border-radius: 5px;
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 6px;
             font-size: 12px;
-            font-weight: bold;
+            font-weight: 600;
         }
-        .status-draft { background-color: #6c757d; color: white; }
-        .status-sent { background-color: #0dcaf0; color: white; }
-        .status-rejected { background-color: #dc3545; color: white; }
-        .status-cancelled { background-color: #6c757d; color: white; }
+
+        .status-draft {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .status-sent {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-rejected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-cancelled {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-info {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: #2563eb;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #d97706;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+
         .details-row {
-            background-color: #f8f9fa;
-            border-left: 3px solid #0d6efd;
+            background: #f9fafb;
         }
+
         .details-content {
-            padding: 15px;
+            padding: 24px;
         }
+
+        .details-content h6 {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .details-table {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .details-table tr {
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .details-table td {
+            padding: 12px 0;
+            font-size: 14px;
+        }
+
+        .details-table td:first-child {
+            font-weight: 600;
+            color: #374151;
+            width: 150px;
+        }
+
         .item-list {
             list-style: none;
             padding: 0;
             margin: 0;
         }
+
         .item-list li {
-            padding: 15px;
-            border-bottom: 1px solid #dee2e6;
+            padding: 16px;
+            border: 1px solid #e5e7eb;
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
             background: white;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
-        .item-list li:last-child {
-            border-bottom: none;
-        }
+
         .medicine-main-info {
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: #2c3e50;
+            font-size: 15px;
+            font-weight: 600;
+            color: #1f2937;
             margin-bottom: 8px;
         }
+
         .medicine-detail-row {
             display: flex;
             flex-wrap: wrap;
-            gap: 15px;
+            gap: 16px;
             margin-top: 8px;
         }
+
         .medicine-detail-item {
             display: flex;
             align-items: center;
-            gap: 5px;
-            font-size: 0.9rem;
-            color: #6c757d;
+            gap: 6px;
+            font-size: 13px;
+            color: #6b7280;
         }
-        .medicine-detail-item i {
-            width: 16px;
-            color: #0d6efd;
-        }
-        .priority-high { color: #dc3545; font-weight: bold; }
-        .priority-medium { color: #ffc107; font-weight: bold; }
-        .priority-low { color: #17a2b8; font-weight: bold; }
-        .priority-critical { 
-            color: #fff; 
-            background: #dc3545; 
-            padding: 3px 8px; 
-            border-radius: 4px;
-            font-weight: bold;
-        }
+
         .medicine-code-badge {
-            background: #e9ecef;
-            padding: 3px 8px;
+            background: #f3f4f6;
+            padding: 4px 8px;
             border-radius: 4px;
             font-family: monospace;
-            font-size: 0.85rem;
+            font-size: 12px;
+            color: #374151;
         }
+
         .quantity-badge {
-            font-size: 1.1rem;
+            background: #3b82f6;
+            color: white;
             padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        .alert {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+
+        .alert-warning {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fcd34d;
+        }
+
+        .alert-success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #86efac;
+        }
+
+        .alert-danger {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-header h5 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .modal-footer {
+            padding: 24px;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #6b7280;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .dashboard-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                padding: 20px;
+            }
+
+            .main-content {
+                padding: 20px;
+            }
+
+            .page-header h2 {
+                font-size: 24px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            table th,
+            table td {
+                padding: 12px 8px;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">
-                <i class="fas fa-hospital"></i> Hospital Manager
-            </a>
-            <div class="ms-auto d-flex align-items-center">
-                <span class="text-white me-3">
-                    <i class="fas fa-user"></i> ${manager.username}
-                </span>
-                <a class="btn btn-outline-light btn-sm" href="logout">
-                    <i class="fas fa-sign-out-alt"></i> Logout
+    <div class="dashboard-container">
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="page-header">
+                <h2><i class="bi bi-speedometer2"></i> Manager Dashboard</h2>
+                <a href="${pageContext.request.contextPath}/logout" class="btn btn-danger">
+                    <i class="bi bi-box-arrow-right"></i> Logout
                 </a>
             </div>
-        </div>
-    </nav>
 
-    <div class="container mt-4">
-        <!-- Message Alert -->
-        <c:if test="${not empty message}">
-            <div class="alert alert-${messageType == 'success' ? 'success' : 'danger'} alert-dismissible fade show">
-                <i class="fas fa-${messageType == 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        </c:if>
-
-        <!-- Dashboard Header -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <h2><i class="fas fa-tachometer-alt"></i> Manager Dashboard</h2>
-                <p class="text-muted">Welcome back, ${manager.username}!</p>
-            </div>
-        </div>
-
-        <!-- Statistics Cards -->
-        <div class="row">
-            <div class="col-md-4">
-                <div class="stat-card stat-card-blue">
-                    <h3><i class="fas fa-warehouse"></i></h3>
-                    <p>Warehouse Status</p>
-                    <h5>${warehouseStatus}</h5>
+            <!-- Message Alert -->
+            <c:if test="${not empty message}">
+                <div class="alert alert-${messageType == 'success' ? 'success' : 'danger'}">
+                    <i class="bi bi-${messageType == 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                    ${message}
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="stat-card stat-card-green">
-                    <h3><i class="fas fa-exclamation-triangle"></i></h3>
-                    <p>Stock Alerts</p>
-                    <h5>${stockAlerts.size()} Items Low</h5>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="stat-card stat-card-orange">
-                    <h3><i class="fas fa-clipboard-list"></i></h3>
-                    <p>Stock Requests</p>
-                    <h5>${pendingRequests.size()} Orders</h5>
-                </div>
-            </div>
-        </div>
+            </c:if>
 
-        <!-- Quick Actions - Reports Section -->
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="card dashboard-card">
-                    <div class="card-header bg-info text-white">
-                        <h5 class="mb-0">
-                            <i class="fas fa-chart-bar"></i> Reports & Actions
-                        </h5>
+            <!-- Statistics Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-content">
+                        <div class="stat-info">
+                            <h6>Warehouse Status</h6>
+                            <h3>${warehouseStatus}</h3>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="bi bi-warehouse"></i>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <!-- Inventory Report -->
-                            <div class="col-md-6">
-                                <div class="card border-info mb-3">
-                                    <div class="card-body">
-                                        <h5 class="card-title">
-                                            <i class="fas fa-boxes text-info"></i> Inventory Report
-                                        </h5>
-                                        <p class="card-text">View detailed inventory information including medicine stock levels, batches, and supplier performance.</p>
-                                        <div class="btn-group w-100" role="group">
-                                            <a href="${pageContext.request.contextPath}/inventory-report?type=summary" 
-                                               class="btn btn-info btn-sm">
-                                                <i class="fas fa-chart-pie"></i> Summary
-                                            </a>
-                                            <a href="${pageContext.request.contextPath}/inventory-report?type=supplier" 
-                                               class="btn btn-info btn-sm">
-                                                <i class="fas fa-building"></i> By Supplier
-                                            </a>
-                                            <a href="${pageContext.request.contextPath}/inventory-report?type=batch" 
-                                               class="btn btn-info btn-sm">
-                                                <i class="fas fa-cube"></i> Batch Details
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-content">
+                        <div class="stat-info">
+                            <h6>Stock Alerts</h6>
+                            <h3>${stockAlerts.size()} Items</h3>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="bi bi-exclamation-triangle"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-content">
+                        <div class="stat-info">
+                            <h6>Stock Requests</h6>
+                            <h3>${pendingRequests.size()} Orders</h3>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="bi bi-clipboard-list"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                            <!-- Expiry Report -->
-                            <div class="col-md-6">
-                                <div class="card border-danger mb-3">
-                                    <div class="card-body">
-                                        <h5 class="card-title">
-                                            <i class="fas fa-calendar-times text-danger"></i> Expiry Report
-                                        </h5>
-                                        <p class="card-text">Monitor medicines expiring soon and manage batch expiry dates to prevent expired stock.</p>
-                                        <div class="btn-group w-100" role="group">
-                                            <a href="${pageContext.request.contextPath}/expiry-report?days=7" 
-                                               class="btn btn-danger btn-sm">
-                                                <i class="fas fa-exclamation-circle"></i> 7 Days
-                                            </a>
-                                            <a href="${pageContext.request.contextPath}/expiry-report?days=30" 
-                                               class="btn btn-danger btn-sm">
-                                                <i class="fas fa-calendar-alt"></i> 30 Days
-                                            </a>
-                                            <a href="${pageContext.request.contextPath}/expiry-report?days=60" 
-                                               class="btn btn-danger btn-sm">
-                                                <i class="fas fa-history"></i> 60 Days
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
+            <!-- Reports & Actions Section -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h5><i class="bi bi-chart-bar"></i> Reports & Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                        <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px;">
+                            <h6 style="font-weight: 600; margin-bottom: 8px;"><i class="bi bi-boxes"></i> Inventory Report</h6>
+                            <p style="font-size: 13px; color: #6b7280; margin-bottom: 12px;">View detailed inventory information</p>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <a href="${pageContext.request.contextPath}/inventory-report?type=summary" class="btn btn-info" style="font-size: 12px; padding: 6px 12px;"><i class="bi bi-pie-chart"></i> Summary</a>
+                                <a href="${pageContext.request.contextPath}/inventory-report?type=supplier" class="btn btn-info" style="font-size: 12px; padding: 6px 12px;"><i class="bi bi-building"></i> Supplier</a>
+                            </div>
+                        </div>
+                        <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px;">
+                            <h6 style="font-weight: 600; margin-bottom: 8px;"><i class="bi bi-calendar-times"></i> Expiry Report</h6>
+                            <p style="font-size: 13px; color: #6b7280; margin-bottom: 12px;">Monitor medicines expiring soon</p>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <a href="${pageContext.request.contextPath}/expiry-report?days=7" class="btn btn-warning" style="font-size: 12px; padding: 6px 12px;"><i class="bi bi-exclamation-circle"></i> 7 Days</a>
+                                <a href="${pageContext.request.contextPath}/expiry-report?days=30" class="btn btn-warning" style="font-size: 12px; padding: 6px 12px;"><i class="bi bi-calendar"></i> 30 Days</a>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Main Content - Stock Requests Section -->
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="card dashboard-card">
-                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">
-                            <i class="fas fa-clipboard-list"></i> Stock Requests
-                        </h5>
-                        <div>
-                            <a href="create-stock" class="btn btn-light btn-sm me-2">
-                                <i class="fas fa-plus"></i> New Request
-                            </a>
-                            <a href="cancelled-tasks" class="btn btn-secondary btn-sm me-2">
-                                <i class="fas fa-ban"></i> View Cancelled Tasks
-                            </a>
-                            <a href="tasks/assign" class="btn btn-info btn-sm">
-                                <i class="fas fa-tasks"></i> Assign Tasks
-                            </a>
-                        </div>
+            <!-- Stock Requests Section -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h5><i class="bi bi-clipboard-list"></i> Stock Requests</h5>
+                    <div style="display: flex; gap: 12px;">
+                        <a href="${pageContext.request.contextPath}/create-stock" class="btn btn-success"><i class="bi bi-plus"></i> New Request</a>
+                        <a href="${pageContext.request.contextPath}/cancelled-tasks" class="btn btn-secondary"><i class="bi bi-ban"></i> Cancelled</a>
                     </div>
-                    <div class="card-body">
-                        <c:if test="${empty pendingRequests}">
-                            <div class="alert alert-info">
-                                <i class="fas fa-info-circle"></i> No stock requests at the moment.
-                            </div>
-                        </c:if>
+                </div>
+                <div class="card-body">
+                    <c:if test="${empty pendingRequests}">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> No stock requests at the moment.
+                        </div>
+                    </c:if>
 
-                        <c:if test="${not empty pendingRequests}">
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
+                    <c:if test="${not empty pendingRequests}">
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>PO #</th>
+                                        <th>Status</th>
+                                        <th>Supplier</th>
+                                        <th>Order Date</th>
+                                        <th>Expected Delivery</th>
+                                        <th>Manager</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <c:forEach items="${pendingRequests}" var="order">
                                         <tr>
-                                            <th width="80">PO #</th>
-                                            <th width="100">Status</th>
-                                            <th>Supplier</th>
-                                            <th>Order Date</th>
-                                            <th>Expected Delivery</th>
-                                            <th>Manager</th>
-                                            <th width="300">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <c:forEach items="${pendingRequests}" var="order">
-                                            <tr>
-                                                <td><strong>#${order.poId}</strong></td>
-                                                <td>
-                                                    <c:choose>
-                                                        <c:when test="${order.status == 'Draft'}">
-                                                            <span class="status-badge status-draft">Draft</span>
-                                                        </c:when>
-                                                        <c:when test="${order.status == 'Sent'}">
-                                                            <span class="status-badge status-sent">Sent</span>
-                                                        </c:when>
-                                                        <c:when test="${order.status == 'Cancelled'}">
-                                                            <span class="status-badge status-cancelled">Cancelled</span>
-                                                        </c:when>
-                                                        <c:otherwise>
-                                                            <span class="status-badge status-rejected">Rejected</span>
-                                                        </c:otherwise>
-                                                    </c:choose>
-                                                </td>
-                                                <td>
-                                                    <c:choose>
-                                                        <c:when test="${not empty order.supplierName}">
-                                                            ${order.supplierName}
-                                                        </c:when>
-                                                        <c:otherwise>
-                                                            <span class="text-muted">Not assigned</span>
-                                                        </c:otherwise>
-                                                    </c:choose>
-                                                </td>
-                                                <td>${order.orderDate}</td>
-                                                <td>
-                                                    <c:choose>
-                                                        <c:when test="${not empty order.expectedDeliveryDate}">
-                                                            ${order.expectedDeliveryDate}
-                                                        </c:when>
-                                                        <c:otherwise>
-                                                            <span class="text-muted">N/A</span>
-                                                        </c:otherwise>
-                                                    </c:choose>
-                                                </td>
-                                                <td>${order.managerName}</td>
-                                                <td>
-                                                    <button class="btn btn-info btn-sm" 
-                                                            onclick="toggleDetails(${order.poId})" 
-                                                            title="View Details">
-                                                        <i class="fas fa-eye"></i> Details
+                                            <td><strong>#${order.poId}</strong></td>
+                                            <td>
+                                                <span class="status-badge status-${order.status == 'Draft' ? 'draft' : order.status == 'Sent' ? 'sent' : order.status == 'Cancelled' ? 'cancelled' : 'rejected'}">
+                                                    ${order.status}
+                                                </span>
+                                            </td>
+                                            <td>${not empty order.supplierName ? order.supplierName : '<span style="color: #9ca3af;">Not assigned</span>'}</td>
+                                            <td>${order.orderDate}</td>
+                                            <td>${not empty order.expectedDeliveryDate ? order.expectedDeliveryDate : '<span style="color: #9ca3af;">N/A</span>'}</td>
+                                            <td>${order.managerName}</td>
+                                            <td>
+                                                <button class="btn btn-info" onclick="toggleDetails(${order.poId})">
+                                                    <i class="bi bi-eye"></i> Details
+                                                </button>
+                                                <c:if test="${order.status == 'Draft'}">
+                                                    <button class="btn btn-success" onclick="approveOrder(${order.poId})">
+                                                        <i class="bi bi-send"></i> Send
                                                     </button>
-                                                    <c:choose>
-                                                        <c:when test="${order.status == 'Draft'}">
-                                                            <button class="btn btn-success btn-sm" 
-                                                                    onclick="approveOrder(${order.poId})" 
-                                                                    title="Send to Supplier">
-                                                                <i class="fas fa-paper-plane"></i> Send
-                                                            </button>
-                                                            <a href="edit-stock?poId=${order.poId}" 
-                                                               class="btn btn-warning btn-sm" 
-                                                               title="Edit">
-                                                                <i class="fas fa-edit"></i>
-                                                            </a>
-                                                            <button class="btn btn-danger btn-sm" 
-                                                                    onclick="deleteOrder(${order.poId})" 
-                                                                    title="Delete">
-                                                                <i class="fas fa-trash"></i>
-                                                            </button>
-                                                        </c:when>
-                                                        <c:when test="${order.status == 'Sent'}">
-                                                            <button class="btn btn-warning btn-sm" 
-                                                                    onclick="cancelOrder(${order.poId})" 
-                                                                    title="Cancel Request">
-                                                                <i class="fas fa-times-circle"></i> Cancel
-                                                            </button>
-                                                        </c:when>
-                                                    </c:choose>
-                                                </td>
-                                            </tr>
-                                            <!-- Details Row (Hidden by default) -->
-                                            <tr id="details-${order.poId}" class="details-row" style="display: none;">
-                                                <td colspan="7">
-                                                    <div class="details-content">
-                                                        <div class="row">
-                                                            <div class="col-md-5">
-                                                                <h6><i class="fas fa-info-circle"></i> General Information</h6>
-                                                                <table class="table table-sm table-borderless">
-                                                                    <tr>
-                                                                        <td width="150"><strong>PO ID:</strong></td>
-                                                                        <td>#${order.poId}</td>
-                                                                    </tr>
-                                                                    <tr>
-                                                                        <td><strong>Status:</strong></td>
-                                                                        <td>${order.status}</td>
-                                                                    </tr>
-                                                                    <tr>
-                                                                        <td><strong>Manager:</strong></td>
-                                                                        <td>${order.managerName}</td>
-                                                                    </tr>
-                                                                    <tr>
-                                                                        <td><strong>Order Date:</strong></td>
-                                                                        <td>${order.orderDate}</td>
-                                                                    </tr>
-                                                                    <tr>
-                                                                        <td><strong>Expected Delivery:</strong></td>
-                                                                        <td>
-                                                                            <c:choose>
-                                                                                <c:when test="${not empty order.expectedDeliveryDate}">
-                                                                                    ${order.expectedDeliveryDate}
-                                                                                </c:when>
-                                                                                <c:otherwise>N/A</c:otherwise>
-                                                                            </c:choose>
-                                                                        </td>
-                                                                    </tr>
-                                                                </table>
-                                                                <c:if test="${not empty order.notes}">
-                                                                    <h6 class="mt-3"><i class="fas fa-sticky-note"></i> Notes</h6>
-                                                                    <div class="alert alert-secondary">
-                                                                        <small style="white-space: pre-wrap;">${order.notes}</small>
-                                                                    </div>
-                                                                </c:if>
-                                                            </div>
-                                                            <div class="col-md-7">
-                                                                <h6><i class="fas fa-pills"></i> Order Items</h6>
-                                                                <c:set var="items" value="${poItemsMap[order.poId]}" />
-                                                                <c:choose>
-                                                                    <c:when test="${not empty items}">
-                                                                        <ul class="item-list">
-                                                                            <c:forEach items="${items}" var="item">
-                                                                                <li>
-                                                                                    <div style="flex: 1;">
-                                                                                        <!-- Medicine Name & Code -->
-                                                                                        <div class="medicine-main-info">
-                                                                                            ${item.medicineName}
-                                                                                            <c:if test="${not empty item.medicineStrength}">
-                                                                                                <span class="text-primary">${item.medicineStrength}</span>
-                                                                                            </c:if>
-                                                                                            <span class="medicine-code-badge">${item.medicineCode}</span>
-                                                                                        </div>
-                                                                                        
-                                                                                        <!-- Medicine Details -->
-                                                                                        <div class="medicine-detail-row">
-                                                                                            <c:if test="${not empty item.medicineDosageForm}">
-                                                                                                <div class="medicine-detail-item">
-                                                                                                    <i class="fas fa-pills"></i>
-                                                                                                    <span>${item.medicineDosageForm}</span>
-                                                                                                </div>
-                                                                                            </c:if>
-                                                                                            <c:if test="${not empty item.medicineCategory}">
-                                                                                                <div class="medicine-detail-item">
-                                                                                                    <i class="fas fa-tag"></i>
-                                                                                                    <span>${item.medicineCategory}</span>
-                                                                                                </div>
-                                                                                            </c:if>
-                                                                                            <c:if test="${not empty item.medicineManufacturer}">
-                                                                                                <div class="medicine-detail-item">
-                                                                                                    <i class="fas fa-industry"></i>
-                                                                                                    <span>${item.medicineManufacturer}</span>
-                                                                                                </div>
-                                                                                            </c:if>
-                                                                                        </div>
-                                                                                        
-                                                                                        <!-- Priority -->
-                                                                                        <div class="mt-2">
-                                                                                            <small class="priority-${item.priority == 'High' || item.priority == 'Critical' ? 'high' : item.priority == 'Medium' ? 'medium' : 'low'}">
-                                                                                                <i class="fas fa-flag"></i> Priority: ${item.priority}
-                                                                                            </small>
-                                                                                        </div>
-                                                                                        
-                                                                                        <!-- Item Notes -->
-                                                                                        <c:if test="${not empty item.notes}">
-                                                                                            <div class="mt-2">
-                                                                                                <small class="text-muted">
-                                                                                                    <i class="fas fa-comment"></i> ${item.notes}
-                                                                                                </small>
+                                                    <a href="${pageContext.request.contextPath}/edit-stock?poId=${order.poId}" class="btn btn-warning">
+                                                        <i class="bi bi-pencil"></i> Edit
+                                                    </a>
+                                                    <button class="btn btn-danger" onclick="deleteOrder(${order.poId})">
+                                                        <i class="bi bi-trash"></i> Delete
+                                                    </button>
+                                                </c:if>
+                                                <c:if test="${order.status == 'Sent'}">
+                                                    <button class="btn btn-warning" onclick="cancelOrder(${order.poId})">
+                                                        <i class="bi bi-x-circle"></i> Cancel
+                                                    </button>
+                                                </c:if>
+                                            </td>
+                                        </tr>
+                                        <!-- Details Row -->
+                                        <tr id="details-${order.poId}" class="details-row" style="display: none;">
+                                            <td colspan="7">
+                                                <div class="details-content">
+                                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                                                        <div>
+                                                            <h6><i class="bi bi-info-circle"></i> General Information</h6>
+                                                            <table class="details-table">
+                                                                <tr>
+                                                                    <td>PO ID:</td>
+                                                                    <td>#${order.poId}</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>Status:</td>
+                                                                    <td>${order.status}</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>Manager:</td>
+                                                                    <td>${order.managerName}</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>Order Date:</td>
+                                                                    <td>${order.orderDate}</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>Expected Delivery:</td>
+                                                                    <td>${not empty order.expectedDeliveryDate ? order.expectedDeliveryDate : 'N/A'}</td>
+                                                                </tr>
+                                                            </table>
+                                                            <c:if test="${not empty order.notes}">
+                                                                <h6 style="margin-top: 16px;"><i class="bi bi-sticky"></i> Notes</h6>
+                                                                <div class="alert alert-info" style="margin: 0;">
+                                                                    <small style="white-space: pre-wrap;">${order.notes}</small>
+                                                                </div>
+                                                            </c:if>
+                                                        </div>
+                                                        <div>
+                                                            <h6><i class="bi bi-capsule"></i> Order Items</h6>
+                                                            <c:set var="items" value="${poItemsMap[order.poId]}" />
+                                                            <c:choose>
+                                                                <c:when test="${not empty items}">
+                                                                    <ul class="item-list">
+                                                                        <c:forEach items="${items}" var="item">
+                                                                            <li>
+                                                                                <div style="flex: 1;">
+                                                                                    <div class="medicine-main-info">
+                                                                                        ${item.medicineName}
+                                                                                        <c:if test="${not empty item.medicineStrength}">
+                                                                                            <span style="color: #3b82f6;">${item.medicineStrength}</span>
+                                                                                        </c:if>
+                                                                                        <span class="medicine-code-badge">${item.medicineCode}</span>
+                                                                                    </div>
+                                                                                    <div class="medicine-detail-row">
+                                                                                        <c:if test="${not empty item.medicineDosageForm}">
+                                                                                            <div class="medicine-detail-item">
+                                                                                                <i class="bi bi-capsule"></i> ${item.medicineDosageForm}
+                                                                                            </div>
+                                                                                        </c:if>
+                                                                                        <c:if test="${not empty item.medicineCategory}">
+                                                                                            <div class="medicine-detail-item">
+                                                                                                <i class="bi bi-tag"></i> ${item.medicineCategory}
                                                                                             </div>
                                                                                         </c:if>
                                                                                     </div>
-                                                                                    <div class="text-end ms-3">
-                                                                                        <span class="badge bg-primary quantity-badge">${item.quantity} units</span>
-                                                                                    </div>
-                                                                                </li>
-                                                                            </c:forEach>
-                                                                        </ul>
-                                                                        <div class="mt-2 text-end">
-                                                                            <strong>Total Items: ${items.size()}</strong>
-                                                                        </div>
-                                                                    </c:when>
-                                                                    <c:otherwise>
-                                                                        <div class="alert alert-warning">
-                                                                            <i class="fas fa-exclamation-triangle"></i> No items found
-                                                                        </div>
-                                                                    </c:otherwise>
-                                                                </c:choose>
-                                                            </div>
+                                                                                </div>
+                                                                                <span class="quantity-badge">${item.quantity} units</span>
+                                                                            </li>
+                                                                        </c:forEach>
+                                                                    </ul>
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    <div class="alert alert-warning">
+                                                                        <i class="bi bi-exclamation-triangle"></i> No items found
+                                                                    </div>
+                                                                </c:otherwise>
+                                                            </c:choose>
                                                         </div>
                                                     </div>
-                                                </td>
-                                            </tr>
-                                        </c:forEach>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </c:if>
-                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </c:forEach>
+                                </tbody>
+                            </table>
+                        </div>
+                    </c:if>
                 </div>
             </div>
-        </div>
 
-        <!-- Stock Alerts Card -->
-        <div class="row mt-4">
-            <div class="col-md-12">
-                <div class="card dashboard-card">
-                    <div class="card-body">
-                        <h6 class="card-subtitle mb-2 text-muted">
-                            <i class="fas fa-exclamation-triangle"></i> Stock Alerts
-                        </h6>
-                        <h2 class="card-title">${stockAlerts.size()}</h2>
-                        <p class="card-text">Currently have ${stockAlerts.size()} medicines below stock threshold</p>
-                        <a href="${pageContext.request.contextPath}/stock-alerts" class="btn btn-warning">
-                            <i class="fas fa-eye"></i> View All Alerts
-                        </a>
-                    </div>
+            <!-- Stock Alerts Card -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h5><i class="bi bi-exclamation-triangle"></i> Stock Alerts</h5>
+                </div>
+                <div class="card-body">
+                    <p style="font-size: 28px; font-weight: 700; color: #1f2937; margin: 0;">${stockAlerts.size()}</p>
+                    <p style="font-size: 14px; color: #6b7280; margin: 8px 0 16px 0;">Medicines below stock threshold</p>
+                    <a href="${pageContext.request.contextPath}/stock-alerts" class="btn btn-warning"><i class="bi bi-eye"></i> View All Alerts</a>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Delete Confirmation Modal -->
-    <div class="modal fade" id="deleteModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title">
-                        <i class="fas fa-trash"></i> Delete Stock Request
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <form action="manage-stock" method="post">
-                    <div class="modal-body">
-                        <input type="hidden" name="action" value="delete">
-                        <input type="hidden" name="poId" id="deletePoId">
-                        <p>Are you sure you want to delete this stock request? This action cannot be undone.</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-danger">
-                            <i class="fas fa-trash"></i> Delete
-                        </button>
-                    </div>
-                </form>
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header" style="background: #fee2e2; border-bottom: 1px solid #fca5a5;">
+                <h5 style="color: #991b1b;"><i class="bi bi-trash"></i> Delete Stock Request</h5>
+                <button class="close-btn" onclick="closeModal('deleteModal')">&times;</button>
             </div>
+            <form action="${pageContext.request.contextPath}/manage-stock" method="post">
+                <div class="modal-body">
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="poId" id="deletePoId">
+                    <p>Are you sure you want to delete this stock request? This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('deleteModal')">Cancel</button>
+                    <button type="submit" class="btn btn-danger"><i class="bi bi-trash"></i> Delete</button>
+                </div>
+            </form>
         </div>
     </div>
 
     <!-- Cancel Order Modal -->
-    <div class="modal fade" id="cancelModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-warning text-dark">
-                    <h5 class="modal-title">
-                        <i class="fas fa-times-circle"></i> Cancel Stock Request
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <form action="approve-stock" method="post">
-                    <div class="modal-body">
-                        <input type="hidden" name="action" value="cancel">
-                        <input type="hidden" name="poId" id="cancelPoId">
-                        <div class="alert alert-warning">
-                            <i class="fas fa-exclamation-triangle"></i> 
-                            <strong>Warning:</strong> This will cancel the purchase order that has been sent to the supplier.
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Cancellation Reason <span class="text-danger">*</span></label>
-                            <textarea class="form-control" name="reason" rows="3" 
-                                      placeholder="Enter reason for cancellation (minimum 10 characters)..." 
-                                      required minlength="10"></textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-warning">
-                            <i class="fas fa-times-circle"></i> Cancel Order
-                        </button>
-                    </div>
-                </form>
+    <div id="cancelModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header" style="background: #fef3c7; border-bottom: 1px solid #fcd34d;">
+                <h5 style="color: #92400e;"><i class="bi bi-x-circle"></i> Cancel Stock Request</h5>
+                <button class="close-btn" onclick="closeModal('cancelModal')">&times;</button>
             </div>
+            <form action="${pageContext.request.contextPath}/approve-stock" method="post">
+                <div class="modal-body">
+                    <input type="hidden" name="action" value="cancel">
+                    <input type="hidden" name="poId" id="cancelPoId">
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i> 
+                        <strong>Warning:</strong> This will cancel the purchase order sent to the supplier.
+                    </div>
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; font-weight: 600; margin-bottom: 8px;">Cancellation Reason <span style="color: #ef4444;">*</span></label>
+                        <textarea name="reason" rows="3" style="width: 100%; padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px;" 
+                                  placeholder="Enter reason for cancellation (minimum 10 characters)..." 
+                                  required minlength="10"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('cancelModal')">Close</button>
+                    <button type="submit" class="btn btn-warning"><i class="bi bi-x-circle"></i> Cancel Order</button>
+                </div>
+            </form>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function toggleDetails(poId) {
             const detailsRow = document.getElementById('details-' + poId);
@@ -584,7 +804,7 @@
             if (confirm('Send this purchase order to supplier?')) {
                 const form = document.createElement('form');
                 form.method = 'POST';
-                form.action = 'approve-stock';
+                form.action = '${pageContext.request.contextPath}/approve-stock';
                 
                 const actionInput = document.createElement('input');
                 actionInput.type = 'hidden';
@@ -605,24 +825,29 @@
 
         function deleteOrder(poId) {
             document.getElementById('deletePoId').value = poId;
-            const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
-            modal.show();
+            document.getElementById('deleteModal').classList.add('show');
         }
 
         function cancelOrder(poId) {
             document.getElementById('cancelPoId').value = poId;
-            const modal = new bootstrap.Modal(document.getElementById('cancelModal'));
-            modal.show();
+            document.getElementById('cancelModal').classList.add('show');
         }
 
-        // Auto-dismiss alerts after 5 seconds
-        setTimeout(function() {
-            const alerts = document.querySelectorAll('.alert-dismissible');
-            alerts.forEach(function(alert) {
-                const bsAlert = new bootstrap.Alert(alert);
-                bsAlert.close();
-            });
-        }, 5000);
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const deleteModal = document.getElementById('deleteModal');
+            const cancelModal = document.getElementById('cancelModal');
+            if (event.target === deleteModal) {
+                deleteModal.classList.remove('show');
+            }
+            if (event.target === cancelModal) {
+                cancelModal.classList.remove('show');
+            }
+        }
     </script>
 </body>
 </html>

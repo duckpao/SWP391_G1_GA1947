@@ -7,6 +7,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.sql.SQLException;
 import java.util.List;
 import model.User;
@@ -25,6 +26,21 @@ public class UserServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
+        
+        // Check session
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("userId") == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+        
+        String userRole = (String) session.getAttribute("role");
+        if (!"Admin".equals(userRole)) {
+            request.setAttribute("errorMessage", "Access denied. This page is for Admins only.");
+            request.getRequestDispatcher("error.jsp").forward(request, response);
+            return;
+        }
+        
         try {
             // Get filter parameters
             String keyword = request.getParameter("keyword");
@@ -101,6 +117,20 @@ public class UserServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
+        
+        // Check session
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("userId") == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+        
+        String userRole = (String) session.getAttribute("role");
+        if (!"Admin".equals(userRole)) {
+            request.setAttribute("errorMessage", "Access denied. This page is for Admins only.");
+            request.getRequestDispatcher("error.jsp").forward(request, response);
+            return;
+        }
         
         String action = request.getServletPath();
         

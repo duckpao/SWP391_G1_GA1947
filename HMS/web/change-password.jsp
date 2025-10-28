@@ -303,7 +303,7 @@
 
             <div class="divider">━━━━━━━━━━━━━━━━</div>
 
-            <button onclick="window.location.href='home.jsp'" class="btn btn-home">
+            <button onclick="window.location.href='${pageContext.request.contextPath}/home'" class="btn btn-home">
                 🏠 Quay lại Trang chủ
             </button>
         </div>

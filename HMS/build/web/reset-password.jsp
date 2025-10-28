@@ -345,7 +345,7 @@
             </div>
 
             <div class="card-footer">
-                <a href="login.jsp">← Quay lại Đăng nhập</a>
+                <a href="${pageContext.request.contextPath}/login">← Quay lại Đăng nhập</a>
             </div>
         </div>
     </div>

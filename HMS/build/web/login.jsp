@@ -270,9 +270,9 @@
             </div>
 
             <div class="login-footer">
-                <a href="register.jsp">📝 Đăng ký tài khoản</a>
+                <a href="${pageContext.request.contextPath}/register">📝 Đăng ký tài khoản</a>
                 <span class="divider">|</span>
-                <a href="forgot-password.jsp">🔑 Quên mật khẩu?</a>
+                <a href="${pageContext.request.contextPath}/forgot-password">🔑 Quên mật khẩu?</a>
             </div>
         </div>
 

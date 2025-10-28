@@ -343,10 +343,10 @@
                         </a>
                     </c:when>
                     <c:otherwise>
-                        <a href="login.jsp" class="btn btn-login">
+                        <a href="${pageContext.request.contextPath}/login" class="btn btn-login">
                             🔐 Đăng nhập
                         </a>
-                        <a href="register.jsp" class="btn btn-login">
+                        <a href="${pageContext.request.contextPath}/register" class="btn btn-login">
                             📝 Đăng ký
                         </a>
                     </c:otherwise>

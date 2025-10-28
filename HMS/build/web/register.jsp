@@ -334,7 +334,7 @@
             </button>
 
             <div class="login-link" style="margin-top: 20px;">
-                Đã có tài khoản? <a href="login.jsp">Đăng nhập ngay</a>
+                Đã có tài khoản? <a href="${pageContext.request.contextPath}/login">Đăng nhập ngay</a>
             </div>
         </div>
     </div>

@@ -96,11 +96,11 @@ public class RegisterServlet extends HttpServlet {
         int otp = (int) (Math.random() * 900000) + 100000; // 6 chữ số
 
         try {
-            // Gửi email OTP
+            // Send OTP email
             util.EmailSender.sendEmail(
                     email,
-                    "Mã xác nhận đăng ký tài khoản",
-                    "Xin chào " + username + ",\n\nMã OTP xác nhận của bạn là: " + otp + "\n\nVui lòng nhập mã này để hoàn tất đăng ký."
+                    "Account Registration Verification Code",
+                    "Hello " + username + ",\n\nYour verification OTP code is: " + otp + "\n\nPlease enter this code to complete your registration."
             );
 
             // Lưu thông tin tạm vào session

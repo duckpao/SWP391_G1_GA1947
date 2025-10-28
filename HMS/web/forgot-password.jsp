@@ -303,7 +303,7 @@
             </div>
 
             <div class="card-footer">
-                <a href="login.jsp">
+                <a href="${pageContext.request.contextPath}/login">
                     <span>←</span>
                     <span>Quay lại Đăng nhập</span>
                 </a>

@@ -59,7 +59,8 @@ public class ForgotPasswordServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        request.getRequestDispatcher("forgot-password.jsp").forward(request, response);
+
     }
 
     /**
@@ -87,17 +88,17 @@ public class ForgotPasswordServlet extends HttpServlet {
         String otp = String.format("%06d", new Random().nextInt(999999));
 
         try {
-            // Gửi OTP qua email
-            String subject = "Mã xác nhận đặt lại mật khẩu - Hệ thống quản lý kho bệnh viện";
+            // Send OTP via email
+            String subject = "Password Reset Verification Code - Hospital Inventory Management System";
             String htmlMessage = "<div style='font-family: Arial, sans-serif;'>"
-                                + "<h2 style='color:#4f46e5;'>🔐 Mã xác nhận của bạn</h2>"
-                                + "<p>Xin chào,</p>"
-                                + "<p>Bạn vừa yêu cầu đặt lại mật khẩu. Mã OTP để xác nhận là:</p>"
-                                + "<h3 style='font-size: 22px; color:#2563eb;'>" + otp + "</h3>"
-                                + "<p>Mã này chỉ có hiệu lực trong 5 phút. Nếu bạn không yêu cầu, vui lòng bỏ qua email này.</p>"
-                                + "<hr>"
-                                + "<p style='font-size:13px; color:#6b7280;'>© 2025 Hệ thống quản lý kho bệnh viện</p>"
-                                + "</div>";
+                    + "<h2 style='color:#4f46e5;'>🔐 Your Verification Code</h2>"
+                    + "<p>Hello,</p>"
+                    + "<p>You have requested to reset your password. Your OTP code is:</p>"
+                    + "<h3 style='font-size: 22px; color:#2563eb;'>" + otp + "</h3>"
+                    + "<p>This code is valid for only 5 minutes. If you did not request this, please ignore this email.</p>"
+                    + "<hr>"
+                    + "<p style='font-size:13px; color:#6b7280;'>© 2025 Hospital Inventory Management System</p>"
+                    + "</div>";
 
             // Gửi OTP qua email
             EmailSender.sendEmail(emailOrPhone, subject, htmlMessage);

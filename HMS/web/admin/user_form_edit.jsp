@@ -16,7 +16,7 @@
 
             body {
                 font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                background: #f9fafb;
                 min-height: 100vh;
                 padding: 20px;
                 display: flex;
@@ -29,13 +29,14 @@
                 width: 100%;
                 background: white;
                 border-radius: 16px;
-                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
                 overflow: hidden;
             }
 
             .header {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
+                background: white;
+                border-bottom: 4px solid #3b82f6;
+                color: #1f2937;
                 padding: 30px 40px;
                 text-align: center;
             }
@@ -58,7 +59,7 @@
             }
 
             .user-info {
-                background: #f9fafb;
+                background: #f3f4f6;
                 border-radius: 8px;
                 padding: 16px;
                 margin-bottom: 24px;
@@ -70,7 +71,7 @@
             .user-avatar {
                 width: 50px;
                 height: 50px;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
                 border-radius: 50%;
                 display: flex;
                 align-items: center;
@@ -124,8 +125,8 @@
 
             input:focus, select:focus {
                 outline: none;
-                border-color: #667eea;
-                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+                border-color: #3b82f6;
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
             }
 
             input[readonly] {
@@ -162,13 +163,14 @@
             }
 
             .btn-primary {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                background: #3b82f6;
                 color: white;
             }
 
             .btn-primary:hover {
+                background: #2563eb;
                 transform: translateY(-2px);
-                box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+                box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
             }
 
             .btn-secondary {
@@ -191,8 +193,8 @@
             }
 
             .password-section {
-                background: #f0f9ff;
-                border: 2px solid #bae6fd;
+                background: #eff6ff;
+                border: 2px solid #bfdbfe;
                 border-radius: 8px;
                 padding: 20px;
                 margin-bottom: 24px;
@@ -200,7 +202,7 @@
 
             .password-section h3 {
                 font-size: 16px;
-                color: #075985;
+                color: #1e40af;
                 margin-bottom: 16px;
                 display: flex;
                 align-items: center;

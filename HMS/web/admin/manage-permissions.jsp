@@ -16,7 +16,7 @@
     
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #f3f4f6;
       min-height: 100vh;
       padding: 20px;
     }
@@ -31,12 +31,13 @@
     }
     
     .header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
+      background: #ffffff;
+      color: #1f2937;
       padding: 30px 40px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      border-bottom: 2px solid #e5e7eb;
     }
     
     .header h1 {
@@ -50,7 +51,7 @@
     .header-icon {
       width: 40px;
       height: 40px;
-      background: rgba(255, 255, 255, 0.2);
+      background: #f0f4ff;
       border-radius: 10px;
       display: flex;
       align-items: center;
@@ -73,22 +74,23 @@
     }
     
     .btn-back {
-      background: white;
-      color: #667eea;
+      background: #f3f4f6;
+      color: #3b82f6;
     }
     
     .btn-back:hover {
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      background: #e5e7eb;
     }
     
     .btn-primary {
-      background: #667eea;
+      background: #3b82f6;
       color: white;
     }
     
     .btn-primary:hover {
-      background: #5568d3;
+      background: #2563eb;
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
@@ -161,8 +163,8 @@
     
     .form-control:focus {
       outline: none;
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
 
     /* Search Box Styles */
@@ -293,12 +295,12 @@
     }
     
     .permission-card:hover {
-      border-color: #667eea;
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+      border-color: #3b82f6;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
     }
     
     .permission-card.selected {
-      border-color: #667eea;
+      border-color: #3b82f6;
       background: #f0f4ff;
     }
     
@@ -313,7 +315,7 @@
       height: 20px;
       cursor: pointer;
       margin-top: 2px;
-      accent-color: #667eea;
+      accent-color: #3b82f6;
     }
     
     .permission-info {
@@ -335,7 +337,7 @@
     
     .user-info-card {
       background: white;
-      border: 2px solid #667eea;
+      border: 2px solid #3b82f6;
       border-radius: 12px;
       padding: 20px;
       margin-bottom: 24px;
@@ -351,7 +353,7 @@
     .user-avatar {
       width: 48px;
       height: 48px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -450,7 +452,7 @@
     .stat-value {
       font-size: 16px;
       font-weight: 700;
-      color: #667eea;
+      color: #3b82f6;
     }
     
     .select-all-section {
@@ -465,7 +467,7 @@
     
     .select-all-section label {
       font-weight: 600;
-      color: #667eea;
+      color: #3b82f6;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -477,7 +479,70 @@
       width: 20px;
       height: 20px;
       cursor: pointer;
-      accent-color: #667eea;
+      accent-color: #3b82f6;
+    }
+    
+    .user-list-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+
+    .user-list-table thead {
+      background: #f3f4f6;
+      border-bottom: 2px solid #e5e7eb;
+    }
+
+    .user-list-table th {
+      padding: 12px 14px;
+      text-align: left;
+      font-weight: 600;
+      color: #374151;
+      font-size: 13px;
+    }
+
+    .user-list-table tbody tr {
+      border-bottom: 1px solid #e5e7eb;
+      transition: background 0.2s;
+      cursor: pointer;
+    }
+
+    .user-list-table tbody tr:hover {
+      background: #f9fafb;
+    }
+
+    .user-list-table td {
+      padding: 12px 14px;
+      font-size: 14px;
+      color: #374151;
+    }
+
+    .user-list-table .user-name {
+      font-weight: 600;
+      color: #1f2937;
+    }
+
+    .user-list-table .user-email {
+      color: #6b7280;
+      font-size: 13px;
+    }
+
+    .user-list-table .user-phone {
+      color: #6b7280;
+      font-size: 13px;
+    }
+
+    .user-list-empty {
+      text-align: center;
+      padding: 40px 20px;
+      color: #6b7280;
+    }
+
+    .user-list-count {
+      font-size: 13px;
+      color: #6b7280;
+      margin-top: 12px;
+      padding: 8px 0;
     }
   </style>
 </head>
@@ -536,7 +601,7 @@
         </div>
         
         <div class="form-group">
-          <label for="userSearch">Tìm kiếm và chọn người dùng:</label>
+          <label for="userSearch">Tìm kiếm người dùng:</label>
           
           <div class="search-wrapper select-wrapper">
             <span class="search-icon">🔍</span>
@@ -548,33 +613,48 @@
               autocomplete="off"
               value="${not empty selectedUser ? selectedUser.username : ''}">
             <button type="button" class="clear-search" id="clearSearch" onclick="clearSearch()">✕</button>
-            
-            <div class="user-dropdown" id="userDropdown">
-              <c:forEach var="user" items="${users}">
-                <div class="user-option" 
-                     data-user-id="${user.userId}"
-                     data-username="${user.username}"
-                     data-role="${user.role}"
-                     data-email="${user.email}"
-                     data-phone="${user.phone}"
-                     onclick="selectUser(this)">
-                  <div class="user-option-name">${user.username}</div>
-                  <div class="user-option-meta">
-                    <span class="role-badge role-${user.role.toLowerCase()}">${user.role}</span>
-                    <span>📧 ${user.email != null ? user.email : '-'}</span>
-                  </div>
-                </div>
-              </c:forEach>
-              
-              <div class="no-results" id="noResults" style="display: none;">
-                Không tìm thấy người dùng nào
-              </div>
-            </div>
           </div>
           
-          <div class="search-info">
-            💡 Gợi ý: Bắt đầu nhập để tìm kiếm người dùng
+          <div class="user-list-count">
+            Tổng số người dùng: <strong id="totalUserCount">${users.size()}</strong> | Hiển thị: <strong id="visibleUserCount">${users.size()}</strong>
           </div>
+          
+          <c:choose>
+            <c:when test="${not empty users}">
+              <table class="user-list-table">
+                <thead>
+                  <tr>
+                    <th>Tên người dùng</th>
+                    <th>Email</th>
+                    <th>Số điện thoại</th>
+                    <th>Vai trò</th>
+                  </tr>
+                </thead>
+                <tbody id="userListBody">
+                  <c:forEach var="user" items="${users}">
+                    <tr class="user-row" 
+                        data-user-id="${user.userId}"
+                        data-username="${user.username}"
+                        data-role="${user.role}"
+                        data-email="${user.email}"
+                        data-phone="${user.phone}"
+                        onclick="selectUserFromTable(this)">
+                      <td class="user-name">${user.username}</td>
+                      <td class="user-email">${user.email != null ? user.email : '-'}</td>
+                      <td class="user-phone">${user.phone != null ? user.phone : '-'}</td>
+                      <td><span class="role-badge role-${user.role.toLowerCase()}">${user.role}</span></td>
+                    </tr>
+                  </c:forEach>
+                </tbody>
+              </table>
+            </c:when>
+            <c:otherwise>
+              <div class="user-list-empty">
+                <div class="empty-state-icon">👥</div>
+                <p>Không có người dùng nào trong hệ thống</p>
+              </div>
+            </c:otherwise>
+          </c:choose>
           
           <form method="get" action="${pageContext.request.contextPath}/admin/permissions" id="userSelectForm" style="display: none;">
             <input type="hidden" name="userId" id="selectedUserId" value="${param.userId}">
@@ -682,7 +762,7 @@
           <div class="empty-state">
             <div class="empty-state-icon">👆</div>
             <h3>Chọn người dùng để bắt đầu</h3>
-            <p>Vui lòng tìm và chọn một người dùng từ ô tìm kiếm trên để phân quyền</p>
+            <p>Vui lòng chọn một người dùng từ danh sách trên để phân quyền</p>
           </div>
         </c:otherwise>
       </c:choose>
@@ -691,12 +771,12 @@
   
   <script>
     const searchInput = document.getElementById('userSearch');
-    const userDropdown = document.getElementById('userDropdown');
     const clearBtn = document.getElementById('clearSearch');
-    const noResults = document.getElementById('noResults');
-    const userOptions = document.querySelectorAll('.user-option');
+    const userRows = document.querySelectorAll('.user-row');
+    const userListBody = document.getElementById('userListBody');
+    const visibleUserCount = document.getElementById('visibleUserCount');
+    const totalUserCount = document.getElementById('totalUserCount');
 
-    // Show/hide dropdown and filter users
     searchInput.addEventListener('input', function() {
       const searchTerm = this.value.toLowerCase().trim();
       
@@ -707,70 +787,49 @@
         clearBtn.classList.remove('visible');
       }
       
-      // Filter users
-      let hasResults = false;
-      userOptions.forEach(option => {
-        const username = option.dataset.username.toLowerCase();
-        const email = (option.dataset.email || '').toLowerCase();
-        const phone = (option.dataset.phone || '').toLowerCase();
-        const role = option.dataset.role.toLowerCase();
+      // Filter user rows
+      let visibleCount = 0;
+      userRows.forEach(row => {
+        const username = row.dataset.username.toLowerCase();
+        const email = (row.dataset.email || '').toLowerCase();
+        const phone = (row.dataset.phone || '').toLowerCase();
+        const role = row.dataset.role.toLowerCase();
         
         if (username.includes(searchTerm) || 
             email.includes(searchTerm) || 
             phone.includes(searchTerm) ||
             role.includes(searchTerm)) {
-          option.style.display = 'block';
-          hasResults = true;
+          row.style.display = 'table-row';
+          visibleCount++;
         } else {
-          option.style.display = 'none';
+          row.style.display = 'none';
         }
       });
       
-      // Show dropdown if there's input
-      if (searchTerm) {
-        userDropdown.classList.add('active');
-        noResults.style.display = hasResults ? 'none' : 'block';
-      } else {
-        userDropdown.classList.remove('active');
-      }
+      // Update visible count
+      visibleUserCount.textContent = visibleCount;
     });
-
-    // Show dropdown on focus
-    searchInput.addEventListener('focus', function() {
-      if (this.value.trim()) {
-        userDropdown.classList.add('active');
-      }
-    });
-
-    // Hide dropdown when clicking outside
-    document.addEventListener('click', function(e) {
-      if (!e.target.closest('.select-wrapper')) {
-        userDropdown.classList.remove('active');
-      }
-    });
-
-    // Select user
-    function selectUser(option) {
-      const userId = option.dataset.userId;
-      const username = option.dataset.username;
-      
-      searchInput.value = username;
-      userDropdown.classList.remove('active');
-      
-      // Submit form to load user permissions
-      document.getElementById('selectedUserId').value = userId;
-      document.getElementById('userSelectForm').submit();
-    }
 
     // Clear search
     function clearSearch() {
       searchInput.value = '';
       clearBtn.classList.remove('visible');
-      userDropdown.classList.remove('active');
-      userOptions.forEach(option => {
-        option.style.display = 'block';
+      userRows.forEach(row => {
+        row.style.display = 'table-row';
       });
+      visibleUserCount.textContent = totalUserCount.textContent;
       searchInput.focus();
+    }
+
+    function selectUserFromTable(row) {
+      const userId = row.dataset.userId;
+      const username = row.dataset.username;
+      
+      searchInput.value = username;
+      
+      // Submit form to load user permissions
+      document.getElementById('selectedUserId').value = userId;
+      document.getElementById('userSelectForm').submit();
     }
 
     // Permission management functions

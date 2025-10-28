@@ -301,14 +301,6 @@
         <servlet-name>SupplierDashboard</servlet-name>
         <url-pattern>/supplier-dashboard</url-pattern>
     </servlet-mapping>
-    <servlet>
-        <servlet-name>ASNServlet</servlet-name>
-        <servlet-class>Controller.ASNServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>ASNServlet</servlet-name>
-        <url-pattern>/ASNServlet</url-pattern>
-    </servlet-mapping>
     <!-- Convert normal user to Supplier -->
     <servlet>
         <servlet-name>ConvertToSupplier</servlet-name>

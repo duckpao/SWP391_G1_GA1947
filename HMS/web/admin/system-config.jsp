@@ -17,7 +17,7 @@
 
             body {
                 font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                background: #f3f4f6;
                 min-height: 100vh;
                 padding: 20px;
             }
@@ -27,17 +27,18 @@
                 margin: 0 auto;
                 background: #fff;
                 border-radius: 16px;
-                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
                 overflow: hidden;
             }
 
             .header {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
+                background: #ffffff;
+                color: #1f2937;
                 padding: 30px 40px;
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
+                border-bottom: 2px solid #e5e7eb;
             }
 
             .header h1 {
@@ -51,7 +52,7 @@
             .header-icon {
                 width: 40px;
                 height: 40px;
-                background: rgba(255, 255, 255, 0.2);
+                background: #f0f9ff;
                 border-radius: 10px;
                 display: flex;
                 align-items: center;
@@ -74,13 +75,14 @@
             }
 
             .btn-primary {
-                background: white;
-                color: #667eea;
+                background: #3b82f6;
+                color: white;
             }
 
             .btn-primary:hover {
+                background: #2563eb;
                 transform: translateY(-2px);
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
             }
 
             .btn-success {
@@ -104,12 +106,12 @@
             }
 
             .btn-add {
-                background: #8b5cf6;
+                background: #3b82f6;
                 color: white;
             }
 
             .btn-add:hover {
-                background: #7c3aed;
+                background: #2563eb;
             }
 
             .content {
@@ -238,8 +240,8 @@
 
             .form-control:focus {
                 outline: none;
-                border-color: #667eea;
-                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+                border-color: #3b82f6;
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
             }
 
             .config-actions {
@@ -340,7 +342,7 @@
             }
 
             .save-all-section {
-                background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                background: #10b981;
                 color: white;
                 padding: 20px;
                 border-radius: 12px;

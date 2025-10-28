@@ -66,7 +66,7 @@ CREATE TABLE Users (
 
 CREATE TABLE Suppliers (
     supplier_id INT IDENTITY(1,1) PRIMARY KEY,
-    user_id INT UNIQUE FOREIGN KEY REFERENCES Users(user_id),
+    user_id INT FOREIGN KEY REFERENCES Users(user_id),
     name NVARCHAR(100) NOT NULL,
     contact_email NVARCHAR(255),
     contact_phone NVARCHAR(50),
@@ -485,34 +485,23 @@ BEGIN
 END;
 GO
 
-
--- =========================================
--- SAMPLE DATA FOR USER ACTIVITY
--- =========================================
-INSERT INTO Users (username, password_hash, email, phone, role)
-VALUES 
-('doctor1', 'hash1', 'doctor1@hospital.com', '0900000001', 'Doctor'),
-('pharma1', 'hash2', 'pharma1@hospital.com', '0900000002', 'Pharmacist'),
-('auditor1', 'hash3', 'audit@hospital.com', '0900000003', 'Auditor');
-GO
-
-INSERT INTO SystemLogs (user_id, action, table_name, details, log_date)
-VALUES
-(2, 'Login', 'Users', 'Doctor logged in', GETDATE()-1),
-(2, 'View', 'Medicines', 'Doctor viewed drug list', GETDATE()),
-(3, 'Login', 'Users', 'Pharmacist logged in', GETDATE()-2),
-(3, 'Add', 'Batches', 'Added new medicine batch', GETDATE()-1),
-(3, 'Update', 'Batches', 'Updated stock quantity', GETDATE()),
-(4, 'Login', 'Users', 'Auditor logged in', GETDATE());
-GO
-
 -- =========================================
 -- EXECUTE REFRESH AND GENERATE REPORT
+-- (Move to end of script after all inserts)
 -- =========================================
-EXEC sp_RefreshUserActivitySummary;
-GO
+-- This section should be at the END of the script after all users are inserted
+DECLARE @auditor2_id INT = (SELECT user_id FROM Users WHERE username = 'auditor2');
+IF @auditor2_id IS NULL SET @auditor2_id = (SELECT TOP 1 user_id FROM Users WHERE role = 'Auditor');
 
-EXEC sp_GenerateUserActivityReport @auditor_id = 4, @export_format = 'Excel';
+IF @auditor2_id IS NOT NULL
+BEGIN
+    EXEC sp_RefreshUserActivitySummary;
+    EXEC sp_GenerateUserActivityReport @auditor_id = @auditor2_id, @export_format = 'Excel';
+END
+ELSE
+BEGIN
+    PRINT 'Warning: No auditor found to generate report';
+END
 GO
 
 -- =========================================
@@ -625,5 +614,458 @@ IF OBJECT_ID('trg_LogUserUpdate', 'TR') IS NOT NULL
     DROP TRIGGER trg_LogUserUpdate;
 GO
 
+GO
+
+-- =========================================
+-- INSERT 5 RECORDS PER TABLE (Only if not exists)
+-- (Excluding SystemConfig and Permissions)
+-- =========================================
+-- =========================================
+-- 1. USERS (5 additional records if needed)
+-- =========================================
+IF NOT EXISTS (SELECT 1 FROM Users WHERE username = 'doctor2')
+BEGIN
+    INSERT INTO Users (username, password_hash, email, phone, role, is_active)
+    VALUES 
+    ('doctor2', '$2a$12$AfoWp3rMoA9hMUNmTSFZOOsW0CQXp56TjuapkN8OwRDkziBqhL4Qi', 'doctor2@hospital.com', '0901111112', 'Doctor', 1),
+    ('pharma2', '$2a$12$AfoWp3rMoA9hMUNmTSFZOOsW0CQXp56TjuapkN8OwRDkziBqhL4Qi', 'pharma2@hospital.com', '0902222223', 'Pharmacist', 1),
+    ('manager2', '$2a$12$AfoWp3rMoA9hMUNmTSFZOOsW0CQXp56TjuapkN8OwRDkziBqhL4Qi', 'manager2@hospital.com', '0903333334', 'Manager', 1),
+    ('auditor2', '$2a$12$AfoWp3rMoA9hMUNmTSFZOOsW0CQXp56TjuapkN8OwRDkziBqhL4Qi', 'auditor2@hospital.com', '0904444445', 'Auditor', 1),
+    ('supplier2', '$2a$12$AfoWp3rMoA9hMUNmTSFZOOsW0CQXp56TjuapkN8OwRDkziBqhL4Qi', 'supplier2@example.com', '0905555556', 'Supplier', 1);
+END
+GO
+
+-- =========================================
+-- 2. SUPPLIERS (4 additional records)
+-- =========================================
+IF NOT EXISTS (SELECT 1 FROM Suppliers WHERE name = N'Công ty Dược B')
+BEGIN
+    DECLARE @supplier2UserId INT = (SELECT user_id FROM Users WHERE username = 'supplier2');
+    
+    IF @supplier2UserId IS NOT NULL
+    BEGIN
+        INSERT INTO Suppliers (user_id, name, contact_email, contact_phone, address, performance_rating)
+        VALUES (@supplier2UserId, N'Công ty Dược B', 'contact@duocb.vn', '0905555556', N'123 Đường B, Quận 1, TP.HCM', 4.3);
+    END
+END
+
+IF NOT EXISTS (SELECT 1 FROM Suppliers WHERE name = N'Công ty Dược C')
+BEGIN
+    INSERT INTO Suppliers (name, contact_email, contact_phone, address, performance_rating)
+    VALUES (N'Công ty Dược C', 'contact@duocc.vn', '0907777777', N'789 Đường GHI, Quận 3, TP.HCM', 4.8);
+END
+
+IF NOT EXISTS (SELECT 1 FROM Suppliers WHERE name = N'Công ty Dược D')
+BEGIN
+    INSERT INTO Suppliers (name, contact_email, contact_phone, address, performance_rating)
+    VALUES (N'Công ty Dược D', 'contact@duocd.vn', '0908888888', N'321 Đường JKL, Quận 4, TP.HCM', 4.0);
+END
+
+IF NOT EXISTS (SELECT 1 FROM Suppliers WHERE name = N'Công ty Dược E')
+BEGIN
+    INSERT INTO Suppliers (name, contact_email, contact_phone, address, performance_rating)
+    VALUES (N'Công ty Dược E', 'contact@duoce.vn', '0909999999', N'654 Đường MNO, Quận 5, TP.HCM', 4.6);
+END
+
+IF NOT EXISTS (SELECT 1 FROM Suppliers WHERE name = N'Công ty Dược F')
+BEGIN
+    INSERT INTO Suppliers (name, contact_email, contact_phone, address, performance_rating)
+    VALUES (N'Công ty Dược F', 'contact@duocf.vn', '0900000000', N'987 Đường PQR, Quận 6, TP.HCM', 4.1);
+END
+GO
+
+-- =========================================
+-- 3. MEDICINES (5 additional records)
+-- =========================================
+IF NOT EXISTS (SELECT 1 FROM Medicines WHERE medicine_code = 'MED006')
+BEGIN
+    INSERT INTO Medicines (medicine_code, name, category, description, active_ingredient, dosage_form, strength, unit, manufacturer, country_of_origin, drug_group, drug_type)
+    VALUES
+    ('MED006', N'Ibuprofen 400mg', N'Giảm đau - Hạ sốt', N'Thuốc giảm đau, chống viêm', N'Ibuprofen', N'Viên nén', N'400mg', N'Viên', N'Hasan Pharma', N'Việt Nam', N'Nhóm A', N'Bảo hiểm'),
+    ('MED007', N'Cetirizine 10mg', N'Chống dị ứng', N'Thuốc chống dị ứng', N'Cetirizine HCl', N'Viên nén', N'10mg', N'Viên', N'Traphaco', N'Việt Nam', N'Nhóm A', N'Khác'),
+    ('MED008', N'Atorvastatin 10mg', N'Tim mạch', N'Thuốc điều trị cholesterol cao', N'Atorvastatin', N'Viên nén', N'10mg', N'Viên', N'Boston Pharma', N'Việt Nam', N'Nhóm C', N'Đặc trị'),
+    ('MED009', N'Losartan 50mg', N'Tim mạch', N'Thuốc điều trị tăng huyết áp', N'Losartan', N'Viên nén', N'50mg', N'Viên', N'Medipharco', N'Việt Nam', N'Nhóm B', N'Đặc trị'),
+    ('MED010', N'Clopidogrel 75mg', N'Tim mạch', N'Thuốc chống kết tập tiểu cầu', N'Clopidogrel', N'Viên nén', N'75mg', N'Viên', N'Stada Vietnam', N'Việt Nam', N'Nhóm C', N'Đặc trị');
+END
+GO
+
+-- =========================================
+-- 4. BATCHES (5 additional records)
+-- =========================================
+IF NOT EXISTS (SELECT 1 FROM Batches WHERE lot_number = 'LOT2025001')
+BEGIN
+    DECLARE @supp2 INT = (SELECT TOP 1 supplier_id FROM Suppliers WHERE name = N'Công ty Dược B');
+    DECLARE @supp3 INT = (SELECT TOP 1 supplier_id FROM Suppliers WHERE name = N'Công ty Dược C');
+    DECLARE @supp4 INT = (SELECT TOP 1 supplier_id FROM Suppliers WHERE name = N'Công ty Dược D');
+    DECLARE @supp5 INT = (SELECT TOP 1 supplier_id FROM Suppliers WHERE name = N'Công ty Dược E');
+    DECLARE @supp6 INT = (SELECT TOP 1 supplier_id FROM Suppliers WHERE name = N'Công ty Dược F');
+
+    INSERT INTO Batches (medicine_code, supplier_id, lot_number, expiry_date, received_date, initial_quantity, current_quantity, status, quarantine_notes)
+    VALUES
+    ('MED006', @supp2, 'LOT2025001', DATEADD(YEAR, 2, GETDATE()), GETDATE()-8, 1200, 1150, 'Approved', N'Đã kiểm định đạt chuẩn'),
+    ('MED007', @supp3, 'LOT2025002', DATEADD(MONTH, 20, GETDATE()), GETDATE()-6, 900, 900, 'Quarantined', N'Đang chờ phê duyệt'),
+    ('MED008', @supp4, 'LOT2025003', DATEADD(YEAR, 3, GETDATE()), GETDATE()-4, 700, 680, 'Approved', N'Chất lượng tốt'),
+    ('MED009', @supp5, 'LOT2025004', DATEADD(MONTH, 22, GETDATE()), GETDATE()-2, 850, 850, 'Received', N'Vừa nhập kho'),
+    ('MED010', @supp6, 'LOT2025005', DATEADD(YEAR, 2, GETDATE()), GETDATE(), 1100, 1100, 'Quarantined', N'Đang kiểm tra chất lượng');
+END
+GO
+
+-- =========================================
+-- 5. MEDICATION REQUESTS (5 additional records)
+-- =========================================
+IF NOT EXISTS (SELECT 1 FROM MedicationRequests WHERE notes LIKE N'%Khoa Nhi%')
+BEGIN
+    DECLARE @doc2 INT = (SELECT user_id FROM Users WHERE username = 'doctor2');
+    IF @doc2 IS NULL SET @doc2 = (SELECT TOP 1 user_id FROM Users WHERE role = 'Doctor');
+
+    INSERT INTO MedicationRequests (doctor_id, status, request_date, notes)
+    VALUES
+    (@doc2, 'Pending', GETDATE(), N'Yêu cầu thuốc cho Khoa Nhi'),
+    (@doc2, 'Approved', GETDATE()-1, N'Thuốc điều trị khẩn cấp'),
+    (@doc2, 'Fulfilled', GETDATE()-4, N'Thuốc cho bệnh nhân nội trú'),
+    (@doc2, 'Pending', GETDATE()-2, N'Bổ sung kho thuốc khoa Phụ sản'),
+    (@doc2, 'Canceled', GETDATE()-3, N'Yêu cầu đã hủy');
+END
+GO
+
+-- =========================================
+-- 6. MEDICATION REQUEST ITEMS (5 additional records)
+-- =========================================
+IF NOT EXISTS (SELECT 1 FROM MedicationRequestItems mri 
+    INNER JOIN MedicationRequests mr ON mri.request_id = mr.request_id 
+    WHERE mr.notes LIKE N'%Khoa Nhi%')
+BEGIN
+    DECLARE @req1 INT = (SELECT TOP 1 request_id FROM MedicationRequests WHERE notes LIKE N'%Khoa Nhi%' ORDER BY request_id DESC);
+    DECLARE @req2 INT = (SELECT TOP 1 request_id FROM MedicationRequests WHERE notes LIKE N'%khẩn cấp%' ORDER BY request_id DESC);
+    DECLARE @req3 INT = (SELECT TOP 1 request_id FROM MedicationRequests WHERE notes LIKE N'%nội trú%' ORDER BY request_id DESC);
+
+    IF @req1 IS NOT NULL AND @req2 IS NOT NULL AND @req3 IS NOT NULL
+    BEGIN
+        INSERT INTO MedicationRequestItems (request_id, medicine_code, quantity)
+        VALUES
+        (@req1, 'MED006', 120),
+        (@req1, 'MED007', 80),
+        (@req2, 'MED008', 150),
+        (@req3, 'MED009', 90),
+        (@req3, 'MED010', 100);
+    END
+END
+GO
+
+-- =========================================
+-- 7. PURCHASE ORDERS (5 additional records)
+-- =========================================
+IF NOT EXISTS (SELECT 1 FROM PurchaseOrders WHERE notes LIKE N'%Đơn hàng tháng 11%')
+BEGIN
+    DECLARE @mgr2 INT = (SELECT user_id FROM Users WHERE username = 'manager2');
+    IF @mgr2 IS NULL SET @mgr2 = (SELECT TOP 1 user_id FROM Users WHERE role = 'Manager');
+    
+    DECLARE @supp2 INT = (SELECT TOP 1 supplier_id FROM Suppliers WHERE name = N'Công ty Dược B');
+    DECLARE @supp3 INT = (SELECT TOP 1 supplier_id FROM Suppliers WHERE name = N'Công ty Dược C');
+    DECLARE @supp4 INT = (SELECT TOP 1 supplier_id FROM Suppliers WHERE name = N'Công ty Dược D');
+    DECLARE @supp5 INT = (SELECT TOP 1 supplier_id FROM Suppliers WHERE name = N'Công ty Dược E');
+    DECLARE @supp6 INT = (SELECT TOP 1 supplier_id FROM Suppliers WHERE name = N'Công ty Dược F');
+
+    INSERT INTO PurchaseOrders (manager_id, supplier_id, status, order_date, expected_delivery_date, notes)
+    VALUES
+    (@mgr2, @supp2, 'Draft', GETDATE(), DATEADD(DAY, 8, GETDATE()), N'Đơn hàng tháng 11/2025'),
+    (@mgr2, @supp3, 'Sent', GETDATE()-2, DATEADD(DAY, 6, GETDATE()), N'Đặt hàng bổ sung khẩn'),
+    (@mgr2, @supp4, 'Approved', GETDATE()-4, DATEADD(DAY, 4, GETDATE()), N'Đơn hàng định kỳ'),
+    (@mgr2, @supp5, 'Received', GETDATE()-12, GETDATE()-3, N'Đã nhận hàng hoàn tất'),
+    (@mgr2, @supp6, 'Completed', GETDATE()-20, GETDATE()-10, N'Đơn đã thanh toán xong');
+END
+GO
+
+-- =========================================
+-- 8. PURCHASE ORDER ITEMS (5 additional records)
+-- =========================================
+IF NOT EXISTS (SELECT 1 FROM PurchaseOrderItems poi 
+    INNER JOIN PurchaseOrders po ON poi.po_id = po.po_id 
+    WHERE po.notes LIKE N'%tháng 11%')
+BEGIN
+    DECLARE @po1 INT = (SELECT TOP 1 po_id FROM PurchaseOrders WHERE notes LIKE N'%tháng 11%' ORDER BY po_id DESC);
+    DECLARE @po2 INT = (SELECT TOP 1 po_id FROM PurchaseOrders WHERE notes LIKE N'%bổ sung khẩn%' ORDER BY po_id DESC);
+    DECLARE @po3 INT = (SELECT TOP 1 po_id FROM PurchaseOrders WHERE notes LIKE N'%định kỳ%' ORDER BY po_id DESC);
+
+    IF @po1 IS NOT NULL AND @po2 IS NOT NULL AND @po3 IS NOT NULL
+    BEGIN
+        INSERT INTO PurchaseOrderItems (po_id, medicine_code, quantity, unit_price, priority, notes)
+        VALUES
+        (@po1, 'MED006', 600, 6000, 'High', N'Mức ưu tiên cao'),
+        (@po1, 'MED007', 400, 4500, 'Medium', N''),
+        (@po2, 'MED008', 350, 18000, 'Critical', N'Rất cần gấp'),
+        (@po3, 'MED009', 300, 14000, 'Low', N''),
+        (@po3, 'MED010', 450, 22000, 'Medium', N'');
+    END
+END
+GO
+
+-- =========================================
+-- 9. ADVANCED SHIPPING NOTICES (5 additional records)
+-- =========================================
+IF NOT EXISTS (SELECT 1 FROM AdvancedShippingNotices WHERE tracking_number = 'VN2025001')
+BEGIN
+    DECLARE @po1 INT = (SELECT TOP 1 po_id FROM PurchaseOrders WHERE notes LIKE N'%tháng 11%' ORDER BY po_id DESC);
+    DECLARE @po2 INT = (SELECT TOP 1 po_id FROM PurchaseOrders WHERE notes LIKE N'%bổ sung khẩn%' ORDER BY po_id DESC);
+    DECLARE @po3 INT = (SELECT TOP 1 po_id FROM PurchaseOrders WHERE notes LIKE N'%định kỳ%' ORDER BY po_id DESC);
+    DECLARE @po4 INT = (SELECT TOP 1 po_id FROM PurchaseOrders WHERE notes LIKE N'%hoàn tất%' ORDER BY po_id DESC);
+    DECLARE @po5 INT = (SELECT TOP 1 po_id FROM PurchaseOrders WHERE notes LIKE N'%thanh toán xong%' ORDER BY po_id DESC);
+    DECLARE @supp2 INT = (SELECT TOP 1 supplier_id FROM Suppliers WHERE name = N'Công ty Dược B');
+    DECLARE @supp3 INT = (SELECT TOP 1 supplier_id FROM Suppliers WHERE name = N'Công ty Dược C');
+    DECLARE @supp4 INT = (SELECT TOP 1 supplier_id FROM Suppliers WHERE name = N'Công ty Dược D');
+    DECLARE @supp5 INT = (SELECT TOP 1 supplier_id FROM Suppliers WHERE name = N'Công ty Dược E');
+    DECLARE @supp6 INT = (SELECT TOP 1 supplier_id FROM Suppliers WHERE name = N'Công ty Dược F');
+
+    IF @po1 IS NOT NULL
+    BEGIN
+        INSERT INTO AdvancedShippingNotices (po_id, supplier_id, shipment_date, carrier, tracking_number, status, submitted_by, submitted_at)
+        VALUES
+        (@po1, @supp2, GETDATE(), N'Vietnam Post', 'VN2025001', 'Sent', 'supplier2', GETDATE()),
+        (@po2, @supp3, GETDATE()-1, N'Grab Express', 'GE2025001', 'InTransit', 'supplier_c', GETDATE()-1),
+        (@po3, @supp4, GETDATE()-3, N'Shopee Express', 'SE2025001', 'Delivered', 'supplier_d', GETDATE()-3),
+        (@po4, @supp5, GETDATE()-11, N'Kerry Express', 'KE2025001', 'Delivered', 'supplier_e', GETDATE()-11),
+        (@po5, @supp6, GETDATE()-19, N'Vietnam Post', 'VN2025002', 'Delivered', 'supplier_f', GETDATE()-19);
+    END
+END
+GO
+
+-- =========================================
+-- 10. ASN ITEMS (5 additional records)
+-- =========================================
+IF NOT EXISTS (SELECT 1 FROM ASNItems ai 
+    INNER JOIN AdvancedShippingNotices asn ON ai.asn_id = asn.asn_id 
+    WHERE asn.tracking_number = 'VN2025001')
+BEGIN
+    DECLARE @asn1 INT = (SELECT TOP 1 asn_id FROM AdvancedShippingNotices WHERE tracking_number = 'VN2025001' ORDER BY asn_id DESC);
+    DECLARE @asn2 INT = (SELECT TOP 1 asn_id FROM AdvancedShippingNotices WHERE tracking_number = 'GE2025001' ORDER BY asn_id DESC);
+    DECLARE @asn3 INT = (SELECT TOP 1 asn_id FROM AdvancedShippingNotices WHERE tracking_number = 'SE2025001' ORDER BY asn_id DESC);
+    DECLARE @asn4 INT = (SELECT TOP 1 asn_id FROM AdvancedShippingNotices WHERE tracking_number = 'KE2025001' ORDER BY asn_id DESC);
+    DECLARE @asn5 INT = (SELECT TOP 1 asn_id FROM AdvancedShippingNotices WHERE tracking_number = 'VN2025002' ORDER BY asn_id DESC);
+
+    IF @asn1 IS NOT NULL
+    BEGIN
+        INSERT INTO ASNItems (asn_id, medicine_code, quantity, lot_number)
+        VALUES
+        (@asn1, 'MED006', 600, 'LOT2025001'),
+        (@asn2, 'MED007', 400, 'LOT2025002'),
+        (@asn3, 'MED008', 350, 'LOT2025003'),
+        (@asn4, 'MED009', 300, 'LOT2025004'),
+        (@asn5, 'MED010', 450, 'LOT2025005');
+    END
+END
+GO
+
+-- =========================================
+-- 11. DELIVERY NOTES (5 additional records)
+-- =========================================
+IF NOT EXISTS (SELECT 1 FROM DeliveryNotes WHERE notes LIKE N'%Nhận hàng một phần%')
+BEGIN
+    DECLARE @asn1 INT = (SELECT TOP 1 asn_id FROM AdvancedShippingNotices WHERE tracking_number = 'VN2025001' ORDER BY asn_id DESC);
+    DECLARE @asn2 INT = (SELECT TOP 1 asn_id FROM AdvancedShippingNotices WHERE tracking_number = 'GE2025001' ORDER BY asn_id DESC);
+    DECLARE @asn3 INT = (SELECT TOP 1 asn_id FROM AdvancedShippingNotices WHERE tracking_number = 'SE2025001' ORDER BY asn_id DESC);
+    DECLARE @asn4 INT = (SELECT TOP 1 asn_id FROM AdvancedShippingNotices WHERE tracking_number = 'KE2025001' ORDER BY asn_id DESC);
+    DECLARE @asn5 INT = (SELECT TOP 1 asn_id FROM AdvancedShippingNotices WHERE tracking_number = 'VN2025002' ORDER BY asn_id DESC);
+    DECLARE @po1 INT = (SELECT TOP 1 po_id FROM PurchaseOrders WHERE notes LIKE N'%tháng 11%' ORDER BY po_id DESC);
+    DECLARE @po2 INT = (SELECT TOP 1 po_id FROM PurchaseOrders WHERE notes LIKE N'%bổ sung khẩn%' ORDER BY po_id DESC);
+    DECLARE @po3 INT = (SELECT TOP 1 po_id FROM PurchaseOrders WHERE notes LIKE N'%định kỳ%' ORDER BY po_id DESC);
+    DECLARE @po4 INT = (SELECT TOP 1 po_id FROM PurchaseOrders WHERE notes LIKE N'%hoàn tất%' ORDER BY po_id DESC);
+    DECLARE @po5 INT = (SELECT TOP 1 po_id FROM PurchaseOrders WHERE notes LIKE N'%thanh toán xong%' ORDER BY po_id DESC);
+    DECLARE @phar2 INT = (SELECT user_id FROM Users WHERE username = 'pharma2');
+    IF @phar2 IS NULL SET @phar2 = (SELECT TOP 1 user_id FROM Users WHERE role = 'Pharmacist');
+
+    IF @asn1 IS NOT NULL
+    BEGIN
+        INSERT INTO DeliveryNotes (asn_id, po_id, delivery_date, received_by, status, notes)
+        VALUES
+        (@asn1, @po1, GETDATE(), @phar2, 'Partial', N'Nhận hàng một phần'),
+        (@asn2, @po2, GETDATE()-1, @phar2, 'Complete', N'Nhận đủ số lượng'),
+        (@asn3, @po3, GETDATE()-2, @phar2, 'Complete', N'Hàng tốt, đã nhập kho'),
+        (@asn4, @po4, GETDATE()-10, @phar2, 'Complete', N'Đã kiểm tra và lưu kho'),
+        (@asn5, @po5, GETDATE()-18, @phar2, 'Discrepant', N'Thiếu hàng so với đơn');
+    END
+END
+GO
+
+-- =========================================
+-- 12. INVOICES (5 additional records)
+-- =========================================
+IF NOT EXISTS (SELECT 1 FROM Invoices WHERE invoice_number = 'INV2025001')
+BEGIN
+    DECLARE @asn1 INT = (SELECT TOP 1 asn_id FROM AdvancedShippingNotices WHERE tracking_number = 'VN2025001' ORDER BY asn_id DESC);
+    DECLARE @asn2 INT = (SELECT TOP 1 asn_id FROM AdvancedShippingNotices WHERE tracking_number = 'GE2025001' ORDER BY asn_id DESC);
+    DECLARE @asn3 INT = (SELECT TOP 1 asn_id FROM AdvancedShippingNotices WHERE tracking_number = 'SE2025001' ORDER BY asn_id DESC);
+    DECLARE @asn4 INT = (SELECT TOP 1 asn_id FROM AdvancedShippingNotices WHERE tracking_number = 'KE2025001' ORDER BY asn_id DESC);
+    DECLARE @asn5 INT = (SELECT TOP 1 asn_id FROM AdvancedShippingNotices WHERE tracking_number = 'VN2025002' ORDER BY asn_id DESC);
+    DECLARE @po1 INT = (SELECT TOP 1 po_id FROM PurchaseOrders WHERE notes LIKE N'%tháng 11%' ORDER BY po_id DESC);
+    DECLARE @po2 INT = (SELECT TOP 1 po_id FROM PurchaseOrders WHERE notes LIKE N'%bổ sung khẩn%' ORDER BY po_id DESC);
+    DECLARE @po3 INT = (SELECT TOP 1 po_id FROM PurchaseOrders WHERE notes LIKE N'%định kỳ%' ORDER BY po_id DESC);
+    DECLARE @po4 INT = (SELECT TOP 1 po_id FROM PurchaseOrders WHERE notes LIKE N'%hoàn tất%' ORDER BY po_id DESC);
+    DECLARE @po5 INT = (SELECT TOP 1 po_id FROM PurchaseOrders WHERE notes LIKE N'%thanh toán xong%' ORDER BY po_id DESC);
+    DECLARE @supp2 INT = (SELECT TOP 1 supplier_id FROM Suppliers WHERE name = N'Công ty Dược B');
+    DECLARE @supp3 INT = (SELECT TOP 1 supplier_id FROM Suppliers WHERE name = N'Công ty Dược C');
+    DECLARE @supp4 INT = (SELECT TOP 1 supplier_id FROM Suppliers WHERE name = N'Công ty Dược D');
+    DECLARE @supp5 INT = (SELECT TOP 1 supplier_id FROM Suppliers WHERE name = N'Công ty Dược E');
+    DECLARE @supp6 INT = (SELECT TOP 1 supplier_id FROM Suppliers WHERE name = N'Công ty Dược F');
+
+    IF @po1 IS NOT NULL
+    BEGIN
+        INSERT INTO Invoices (po_id, asn_id, supplier_id, invoice_number, invoice_date, amount, status, notes)
+        VALUES
+        (@po1, @asn1, @supp2, 'INV2025001', GETDATE(), 3600000, 'Pending', N'Chờ thanh toán'),
+        (@po2, @asn2, @supp3, 'INV2025002', GETDATE()-1, 1800000, 'Pending', N'Đang xử lý'),
+        (@po3, @asn3, @supp4, 'INV2025003', GETDATE()-2, 6300000, 'Paid', N'Đã thanh toán'),
+        (@po4, @asn4, @supp5, 'INV2025004', GETDATE()-10, 4200000, 'Paid', N'Hoàn thành'),
+        (@po5, @asn5, @supp6, 'INV2025005', GETDATE()-18, 9900000, 'Disputed', N'Đang tranh chấp về giá');
+    END
+END
+GO
+
+-- =========================================
+-- 13. TRANSACTIONS (5 additional records)
+-- =========================================
+IF NOT EXISTS (SELECT 1 FROM Transactions WHERE notes LIKE N'%Nhập kho lô 2025%')
+BEGIN
+    DECLARE @batch6 INT = (SELECT TOP 1 batch_id FROM Batches WHERE lot_number = 'LOT2025001');
+    DECLARE @batch7 INT = (SELECT TOP 1 batch_id FROM Batches WHERE lot_number = 'LOT2025002');
+    DECLARE @batch8 INT = (SELECT TOP 1 batch_id FROM Batches WHERE lot_number = 'LOT2025003');
+    DECLARE @dn1 INT = (SELECT TOP 1 dn_id FROM DeliveryNotes WHERE notes LIKE N'%Nhận hàng một phần%' ORDER BY dn_id DESC);
+    DECLARE @dn2 INT = (SELECT TOP 1 dn_id FROM DeliveryNotes WHERE notes LIKE N'%Nhận đủ%' ORDER BY dn_id DESC);
+    DECLARE @phar2 INT = (SELECT user_id FROM Users WHERE username = 'pharma2');
+    IF @phar2 IS NULL SET @phar2 = (SELECT TOP 1 user_id FROM Users WHERE role = 'Pharmacist');
+
+    IF @batch6 IS NOT NULL
+    BEGIN
+        INSERT INTO Transactions (batch_id, user_id, dn_id, type, quantity, transaction_date, notes)
+        VALUES
+        (@batch6, @phar2, @dn1, 'In', 600, GETDATE()-8, N'Nhập kho lô 2025-001'),
+        (@batch8, @phar2, @dn2, 'In', 350, GETDATE()-4, N'Nhập kho lô 2025-003'),
+        (@batch6, @phar2, NULL, 'Out', 50, GETDATE()-2, N'Xuất cho khoa Tim mạch'),
+        (@batch8, @phar2, NULL, 'Out', 70, GETDATE()-1, N'Xuất điều trị'),
+        (@batch7, @phar2, NULL, 'QuarantineRelease', 900, GETDATE(), N'Phê duyệt xuất kho');
+    END
+END
+GO
+
+-- =========================================
+-- 14. TASKS (5 additional records)
+-- =========================================
+IF NOT EXISTS (SELECT 1 FROM Tasks WHERE task_type = 'Review New PO')
+BEGIN
+    DECLARE @po1 INT = (SELECT TOP 1 po_id FROM PurchaseOrders WHERE notes LIKE N'%tháng 11%' ORDER BY po_id DESC);
+    DECLARE @po2 INT = (SELECT TOP 1 po_id FROM PurchaseOrders WHERE notes LIKE N'%bổ sung khẩn%' ORDER BY po_id DESC);
+    DECLARE @po3 INT = (SELECT TOP 1 po_id FROM PurchaseOrders WHERE notes LIKE N'%định kỳ%' ORDER BY po_id DESC);
+    DECLARE @mgr2 INT = (SELECT user_id FROM Users WHERE username = 'manager2');
+    IF @mgr2 IS NULL SET @mgr2 = (SELECT TOP 1 user_id FROM Users WHERE role = 'Manager');
+    DECLARE @phar2 INT = (SELECT user_id FROM Users WHERE username = 'pharma2');
+    IF @phar2 IS NULL SET @phar2 = (SELECT TOP 1 user_id FROM Users WHERE role = 'Pharmacist');
+
+    IF @po1 IS NOT NULL
+    BEGIN
+        INSERT INTO Tasks (po_id, staff_id, task_type, deadline, status)
+        VALUES
+        (@po1, @mgr2, 'Review New PO', DATEADD(DAY, 1, GETDATE()), 'Pending'),
+        (@po2, @mgr2, 'Expedite Order', GETDATE(), 'In Progress'),
+        (@po3, @phar2, 'Stock Verification', DATEADD(DAY, 2, GETDATE()), 'Completed'),
+        (@po1, @phar2, 'Incoming Inspection', DATEADD(DAY, 4, GETDATE()), 'Pending'),
+        (@po2, @mgr2, 'Payment Processing', DATEADD(DAY, 7, GETDATE()), 'Pending');
+    END
+END
+GO
+
+-- =========================================
+-- 15. SYSTEM LOGS (5 additional records)
+-- =========================================
+IF NOT EXISTS (SELECT 1 FROM SystemLogs WHERE details LIKE N'%Manager2%')
+BEGIN
+    DECLARE @mgr2 INT = (SELECT user_id FROM Users WHERE username = 'manager2');
+    IF @mgr2 IS NULL SET @mgr2 = (SELECT TOP 1 user_id FROM Users WHERE role = 'Manager' ORDER BY user_id DESC);
+    DECLARE @doc2 INT = (SELECT user_id FROM Users WHERE username = 'doctor2');
+    IF @doc2 IS NULL SET @doc2 = (SELECT TOP 1 user_id FROM Users WHERE role = 'Doctor' ORDER BY user_id DESC);
+    DECLARE @phar2 INT = (SELECT user_id FROM Users WHERE username = 'pharma2');
+    IF @phar2 IS NULL SET @phar2 = (SELECT TOP 1 user_id FROM Users WHERE role = 'Pharmacist' ORDER BY user_id DESC);
+    DECLARE @aud2 INT = (SELECT user_id FROM Users WHERE username = 'auditor2');
+    IF @aud2 IS NULL SET @aud2 = (SELECT TOP 1 user_id FROM Users WHERE role = 'Auditor' ORDER BY user_id DESC);
+
+    INSERT INTO SystemLogs (user_id, action, table_name, record_id, details, ip_address, log_date)
+    VALUES
+    (@mgr2, 'LOGIN', 'Users', @mgr2, N'Manager2 đăng nhập', '192.168.1.105', GETDATE()-6),
+    (@doc2, 'CREATE', 'MedicationRequests', NULL, N'Tạo yêu cầu thuốc mới', '192.168.1.106', GETDATE()-4),
+    (@phar2, 'UPDATE', 'Batches', NULL, N'Cập nhật trạng thái lô hàng', '192.168.1.107', GETDATE()-2),
+    (@mgr2, 'APPROVE', 'PurchaseOrders', NULL, N'Phê duyệt đơn đặt hàng', '192.168.1.105', GETDATE()-1),
+    (@aud2, 'GENERATE', 'AuditReports', NULL, N'Tạo báo cáo kiểm toán', '192.168.1.108', GETDATE());
+END
+GO
+
+-- =========================================
+-- 16. AUDIT REPORTS (5 additional records)
+-- =========================================
+IF NOT EXISTS (SELECT 1 FROM AuditReports WHERE notes LIKE N'%Đánh giá tháng 10%')
+BEGIN
+    DECLARE @aud2 INT = (SELECT user_id FROM Users WHERE username = 'auditor2');
+    IF @aud2 IS NULL SET @aud2 = (SELECT TOP 1 user_id FROM Users WHERE role = 'Auditor' ORDER BY user_id DESC);
+
+    INSERT INTO AuditReports (auditor_id, report_type, generated_date, data, exported_format, notes)
+    VALUES
+    (@aud2, 'SupplierPerformance', GETDATE()-8, '{"suppliers":[{"name":"Công ty Dược C","rating":4.8}]}', 'Excel', N'Đánh giá tháng 10/2025'),
+    (@aud2, 'PurchaseHistory', GETDATE()-6, '{"total_orders":25,"total_amount":75000000}', 'PDF', N'Lịch sử mua hàng quý 4/2024'),
+    (@aud2, 'InventoryAudit', GETDATE()-4, '{"total_medicines":200,"total_value":350000000}', 'Excel', N'Kiểm kê tồn kho tháng 10'),
+    (@aud2, 'UserActivity', GETDATE()-2, '{"active_users":30,"total_actions":650}', 'Excel', N'Hoạt động người dùng 2 tuần qua'),
+    (@aud2, 'SupplierPerformance', GETDATE(), '{"suppliers":[{"name":"Công ty Dược D","rating":4.0}]}', 'PDF', N'Báo cáo nhà cung cấp mới nhất');
+END
+GO
+
+-- =========================================
+-- 17. USER PERMISSIONS (Assign to new users)
+-- =========================================
+DECLARE @doc2 INT = (SELECT user_id FROM Users WHERE username = 'doctor2');
+DECLARE @phar2 INT = (SELECT user_id FROM Users WHERE username = 'pharma2');
+DECLARE @mgr2 INT = (SELECT user_id FROM Users WHERE username = 'manager2');
+DECLARE @aud2 INT = (SELECT user_id FROM Users WHERE username = 'auditor2');
+DECLARE @supp2 INT = (SELECT user_id FROM Users WHERE username = 'supplier2');
+
+-- Doctor2: view inventory
+IF @doc2 IS NOT NULL AND NOT EXISTS (SELECT 1 FROM UserPermissions WHERE user_id = @doc2)
+BEGIN
+    INSERT INTO UserPermissions (user_id, permission_id)
+    SELECT @doc2, permission_id FROM Permissions WHERE permission_name = 'view_inventory';
+END
+
+-- Pharmacist2: view, manage stock, manage quarantine, confirm delivery
+IF @phar2 IS NOT NULL AND NOT EXISTS (SELECT 1 FROM UserPermissions WHERE user_id = @phar2)
+BEGIN
+    INSERT INTO UserPermissions (user_id, permission_id)
+    SELECT @phar2, permission_id FROM Permissions 
+    WHERE permission_name IN ('view_inventory', 'manage_stock', 'manage_quarantine', 'confirm_delivery');
+END
+
+-- Manager2: view, manage stock, approve PO, manage quarantine, confirm delivery
+IF @mgr2 IS NOT NULL AND NOT EXISTS (SELECT 1 FROM UserPermissions WHERE user_id = @mgr2)
+BEGIN
+    INSERT INTO UserPermissions (user_id, permission_id)
+    SELECT @mgr2, permission_id FROM Permissions 
+    WHERE permission_name IN ('view_inventory', 'manage_stock', 'approve_po', 'manage_quarantine', 'confirm_delivery');
+END
+
+-- Auditor2: view inventory, audit logs
+IF @aud2 IS NOT NULL AND NOT EXISTS (SELECT 1 FROM UserPermissions WHERE user_id = @aud2)
+BEGIN
+    INSERT INTO UserPermissions (user_id, permission_id)
+    SELECT @aud2, permission_id FROM Permissions 
+    WHERE permission_name IN ('view_inventory', 'audit_logs');
+END
+
+-- Supplier2: create ASN
+IF @supp2 IS NOT NULL AND NOT EXISTS (SELECT 1 FROM UserPermissions WHERE user_id = @supp2)
+BEGIN
+    INSERT INTO UserPermissions (user_id, permission_id)
+    SELECT @supp2, permission_id FROM Permissions 
+    WHERE permission_name = 'create_asn';
+END
+GO
+
+-- =========================================
+-- 18. USER ACTIVITY SUMMARY (Refresh)
+-- =========================================
+EXEC sp_RefreshUserActivitySummary;
 GO
 

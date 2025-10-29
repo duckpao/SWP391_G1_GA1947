@@ -45,12 +45,24 @@
         <servlet-class>Controller.UserReportServlet</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>PurchaseOrderServlet</servlet-name>
-        <servlet-class>Controller.PurchaseOrderServlet</servlet-class>
+        <servlet-name>SupplierDashboardServlet</servlet-name>
+        <servlet-class>Controller.SupplierDashboardServlet</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>PurchaseOrderHistoryServlet</servlet-name>
-        <servlet-class>Controller.PurchaseOrderHistoryServlet</servlet-class>
+        <servlet-name>SupplierConfirmOrderServlet</servlet-name>
+        <servlet-class>Controller.SupplierConfirmOrderServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>CreateASNServlet</servlet-name>
+        <servlet-class>Controller.CreateASNServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ViewASNServlet</servlet-name>
+        <servlet-class>Controller.ViewASNServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>UpdateTrackingServlet</servlet-name>
+        <servlet-class>Controller.UpdateTrackingServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>UserServlet</servlet-name>
@@ -114,7 +126,7 @@
         <servlet-name>pharmacistdashboard</servlet-name>
         <servlet-class>Controller.pharmacistdashboard</servlet-class>
     </servlet>
-      <servlet>
+    <servlet>
         <servlet-name>ManageBatches</servlet-name>
         <servlet-class>Controller.ManageBatches</servlet-class>
     </servlet>
@@ -324,12 +336,24 @@
         <url-pattern>/user-reports/generate</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>PurchaseOrderServlet</servlet-name>
-        <url-pattern>/purchase-orders</url-pattern>
+        <servlet-name>SupplierDashboardServlet</servlet-name>
+        <url-pattern>/supplierDashboard</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>PurchaseOrderHistoryServlet</servlet-name>
-        <url-pattern>/purchase-orders/history</url-pattern>
+        <servlet-name>SupplierConfirmOrderServlet</servlet-name>
+        <url-pattern>/supplier-confirm-order</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CreateASNServlet</servlet-name>
+        <url-pattern>/create-asn</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ViewASNServlet</servlet-name>
+        <url-pattern>/view-asn</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>UpdateTrackingServlet</servlet-name>
+        <url-pattern>/update-tracking</url-pattern>
     </servlet-mapping>
     <welcome-file-list>
         <welcome-file>login.jsp</welcome-file>

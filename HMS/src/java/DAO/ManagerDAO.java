@@ -473,7 +473,7 @@ public class ManagerDAO extends DBContext {
                 po.setManagerId(rs.getInt("manager_id"));
                 po.setSupplierId(rs.getInt("supplier_id"));
                 po.setStatus(rs.getString("status"));
-                po.setOrderDate(rs.getDate("order_date"));
+                po.setOrderDate(rs.getTimestamp("order_date"));
                 po.setExpectedDeliveryDate(rs.getDate("expected_delivery_date"));
                 po.setNotes(rs.getString("notes"));
                 po.setSupplierName(rs.getString("supplier_name"));
@@ -504,7 +504,7 @@ public class ManagerDAO extends DBContext {
                 po.setManagerId(rs.getInt("manager_id"));
                 po.setSupplierId(rs.getInt("supplier_id"));
                 po.setStatus(rs.getString("status"));
-                po.setOrderDate(rs.getDate("order_date"));
+                po.setOrderDate(rs.getTimestamp("order_date"));
                 po.setExpectedDeliveryDate(rs.getDate("expected_delivery_date"));
                 po.setNotes(rs.getString("notes"));
                 po.setSupplierName(rs.getString("supplier_name"));
@@ -597,7 +597,7 @@ public class ManagerDAO extends DBContext {
                 po.setManagerId(rs.getInt("manager_id"));
                 po.setSupplierId(rs.getInt("supplier_id"));
                 po.setStatus(rs.getString("status"));
-                po.setOrderDate(rs.getDate("order_date"));
+                po.setOrderDate(rs.getTimestamp("order_date"));
                 po.setExpectedDeliveryDate(rs.getDate("expected_delivery_date"));
                 po.setNotes(rs.getString("notes"));
                 po.setSupplierName(rs.getString("supplier_name"));

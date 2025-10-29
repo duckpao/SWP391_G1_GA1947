@@ -3,21 +3,21 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/DAO/ManagerDAO.java</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/Controller/CreateStockServlet.java</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/model/Medicine.java</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/Controller/ManageStockServlet.java</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/web/create-stock-request.jsp</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/Controller/LoginServlet.java</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/web/cancelled-tasks.jsp</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/DAO/MedicineDAO.java</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/model/PurchaseOrderItem.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/DAO/SupplierDAO.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/model/PurchaseOrder.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/web/updateTracking.jsp</file>
+            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/DAO/ASNDAO.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/Controller/ViewASNServlet.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/web/createASN.jsp</file>
+            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/web/viewASN.jsp</file>
+            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/Controller/SupplierDashboardServlet.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/Controller/SupplierConfirmOrderServlet.java</file>
             <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/web/manager-dashboard.jsp</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/DAO/MedicationRequestDAO.java</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/web/edit-stock-request.jsp</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/Controller/CancelledTasksServlet.java</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/DAO/PurchaseOrderDAO.java</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/Controller/ManagerDashboardServlet.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/model/ASNItem.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/Controller/CreateASNServlet.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/Controller/UpdateTrackingServlet.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/web/supplierDashboard.jsp</file>
+            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/model/AdvancedShippingNotice.java</file>
         </group>
     </open-files>
 </project-private>

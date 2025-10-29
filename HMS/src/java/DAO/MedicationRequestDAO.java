@@ -36,12 +36,13 @@ public class MedicationRequestDAO extends DBContext {
         return -1;
     }
 
+    // ✅ SỬA: medicine_id → medicine_code
     public void addRequestItems(int requestId, List<MedicationRequestItem> items) {
-        String sql = "INSERT INTO MedicationRequestItems (request_id, medicine_id, quantity) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO MedicationRequestItems (request_id, medicine_code, quantity) VALUES (?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             for (MedicationRequestItem item : items) {
                 ps.setInt(1, requestId);
-                ps.setInt(2, item.getMedicineId());
+                ps.setString(2, item.getMedicineCode());  // ✅ ĐỔI: setString
                 ps.setInt(3, item.getQuantity());
                 ps.addBatch();
             }
@@ -52,20 +53,37 @@ public class MedicationRequestDAO extends DBContext {
         }
     }
 
+    // ✅ SỬA: Đổi SQL query để lấy đầy đủ thông tin
     public List<Medicine> getAllMedicines() {
         List<Medicine> medicines = new ArrayList<>();
-        String sql = "SELECT DISTINCT m.medicine_id, m.name, m.category, m.description " +
+        String sql = "SELECT DISTINCT m.medicine_code, m.name, m.category, m.description, " +
+                     "m.active_ingredient, m.dosage_form, m.strength, m.unit, " +
+                     "m.manufacturer, m.country_of_origin, m.drug_group, m.drug_type, " +
+                     "m.created_at, m.updated_at " +
                      "FROM Medicines m " +
-                     "INNER JOIN Batches b ON m.medicine_id = b.medicine_id " +
-                     "WHERE b.status = 'Approved' AND b.expiry_date > GETDATE()";
+                     "INNER JOIN Batches b ON m.medicine_code = b.medicine_code " +
+                     "WHERE b.status = 'Approved' AND b.expiry_date > GETDATE() " +
+                     "ORDER BY m.name";
+        
         try (PreparedStatement ps = connection.prepareStatement(sql); 
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                Medicine med = new Medicine();
-                med.setMedicineCode(rs.getString("medicine_code"));
-                med.setName(rs.getString("name"));
-                med.setCategory(rs.getString("category"));
-                med.setDescription(rs.getString("description"));
+                Medicine med = new Medicine(
+                    rs.getString("medicine_code"),
+                    rs.getString("name"),
+                    rs.getString("category"),
+                    rs.getString("description"),
+                    rs.getString("active_ingredient"),
+                    rs.getString("dosage_form"),
+                    rs.getString("strength"),
+                    rs.getString("unit"),
+                    rs.getString("manufacturer"),
+                    rs.getString("country_of_origin"),
+                    rs.getString("drug_group"),
+                    rs.getString("drug_type"),
+                    rs.getTimestamp("created_at"),
+                    rs.getTimestamp("updated_at")
+                );
                 medicines.add(med);
             }
         } catch (SQLException e) {
@@ -97,19 +115,21 @@ public class MedicationRequestDAO extends DBContext {
         return null;
     }
 
+    // ✅ SỬA: medicine_id → medicine_code
     public List<MedicationRequestItem> getRequestItems(int requestId) {
         List<MedicationRequestItem> items = new ArrayList<>();
-        String sql = "SELECT mri.request_id, mri.medicine_id, mri.quantity, m.name AS medicine_name " +
+        String sql = "SELECT mri.item_id, mri.request_id, mri.medicine_code, mri.quantity, m.name AS medicine_name " +
                      "FROM MedicationRequestItems mri " +
-                     "INNER JOIN Medicines m ON mri.medicine_id = m.medicine_id " +
+                     "INNER JOIN Medicines m ON mri.medicine_code = m.medicine_code " +
                      "WHERE mri.request_id = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, requestId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     MedicationRequestItem item = new MedicationRequestItem();
+                    item.setItemId(rs.getInt("item_id"));
                     item.setRequestId(rs.getInt("request_id"));
-                    item.setMedicineId(rs.getInt("medicine_id"));
+                    item.setMedicineCode(rs.getString("medicine_code"));  // ✅ ĐỔI
                     item.setQuantity(rs.getInt("quantity"));
                     item.setMedicineName(rs.getString("medicine_name"));
                     items.add(item);
@@ -174,11 +194,12 @@ public class MedicationRequestDAO extends DBContext {
         return false;
     }
 
+    // ✅ SỬA: Cancelled → Canceled (theo DB constraint)
     public boolean cancelRequest(int requestId) {
-        System.out.println("=== CANCEL REQUEST (SIMPLE) ===");
+        System.out.println("=== CANCEL REQUEST ===");
         System.out.println("Request ID: " + requestId);
         
-        String sql = "UPDATE MedicationRequests SET status = 'Cancelled' WHERE request_id = ?";
+        String sql = "UPDATE MedicationRequests SET status = 'Canceled' WHERE request_id = ?";  // ✅ ĐỔI
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, requestId);
             int rowsAffected = ps.executeUpdate();
@@ -209,5 +230,4 @@ public class MedicationRequestDAO extends DBContext {
             e.printStackTrace();
         }
     }
-    
 }

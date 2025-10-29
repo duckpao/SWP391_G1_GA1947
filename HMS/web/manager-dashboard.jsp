@@ -672,17 +672,15 @@
                                                                 </div>
                                                             </c:if>
                                                         </div>
-<!-- Order Items Section - FIXED VERSION -->
+<!-- Order Items Section - COMPLETE VERSION WITH ALL MEDICINE DETAILS -->
 <div>
     <h6><i class="bi bi-capsule"></i> Order Items</h6>
     <c:set var="items" value="${poItemsMap[order.poId]}" />
     
-    <!-- Debug: Show what we have -->
     <c:if test="${empty items}">
         <div class="alert alert-warning">
             <i class="bi bi-exclamation-triangle"></i> 
             No items found for PO #${order.poId}
-            <br><small>Debug: poItemsMap size = ${poItemsMap.size()}</small>
         </div>
     </c:if>
     
@@ -691,16 +689,16 @@
             <c:forEach items="${items}" var="item">
                 <li>
                     <div style="flex: 1;">
-                        <!-- Medicine Name & Code -->
+                        <!-- Medicine Name, Strength & Code -->
                         <div class="medicine-main-info">
                             ${not empty item.medicineName ? item.medicineName : 'Unknown Medicine'}
                             <c:if test="${not empty item.medicineStrength}">
-                                <span style="color: #3b82f6;">${item.medicineStrength}</span>
+                                <span style="color: #3b82f6; font-weight: 600;">${item.medicineStrength}</span>
                             </c:if>
                             <span class="medicine-code-badge">${item.medicineCode}</span>
                         </div>
                         
-                        <!-- Medicine Details Row -->
+                        <!-- Medicine Details Grid - ROW 1 -->
                         <div class="medicine-detail-row">
                             <c:if test="${not empty item.medicineDosageForm}">
                                 <div class="medicine-detail-item">
@@ -719,28 +717,171 @@
                             </c:if>
                         </div>
                         
-                        <!-- Priority & Notes -->
-                        <c:if test="${not empty item.priority}">
-                            <div style="margin-top: 8px;">
-                                <span class="status-badge" style="font-size: 11px;">
-                                    Priority: ${item.priority}
-                                </span>
+                        <!-- Medicine Details Grid - ROW 2: Additional Info -->
+                        <div class="medicine-detail-row" style="margin-top: 6px;">
+                            <c:if test="${not empty item.activeIngredient}">
+                                <div class="medicine-detail-item" style="color: #059669;">
+                                    <i class="bi bi-droplet"></i> <strong>Active:</strong> ${item.activeIngredient}
+                                </div>
+                            </c:if>
+                            <c:if test="${not empty item.unit}">
+                                <div class="medicine-detail-item">
+                                    <i class="bi bi-box"></i> <strong>Unit:</strong> ${item.unit}
+                                </div>
+                            </c:if>
+                        </div>
+                        
+                        <!-- Get additional details from medicineMap if available -->
+                        <c:set var="medicine" value="${medicineMap[item.medicineCode]}" />
+                        <c:if test="${not empty medicine}">
+                            <div class="medicine-detail-row" style="margin-top: 6px;">
+                                <c:if test="${not empty medicine.countryOfOrigin}">
+                                    <div class="medicine-detail-item">
+                                        <i class="bi bi-globe"></i> ${medicine.countryOfOrigin}
+                                    </div>
+                                </c:if>
+                                <c:if test="${not empty medicine.drugGroup}">
+                                    <div class="medicine-detail-item">
+                                        <i class="bi bi-collection"></i> ${medicine.drugGroup}
+                                    </div>
+                                </c:if>
+                                <c:if test="${not empty medicine.drugType}">
+                                    <div class="medicine-detail-item">
+                                        <span style="padding: 2px 8px; background: #dbeafe; color: #1e40af; border-radius: 4px; font-size: 11px;">
+                                            ${medicine.drugType}
+                                        </span>
+                                    </div>
+                                </c:if>
                             </div>
+                            
+                            <!-- Description if available -->
+                            <c:if test="${not empty medicine.description}">
+                                <div style="margin-top: 8px; padding: 8px; background: #f9fafb; border-radius: 6px; border-left: 3px solid #3b82f6;">
+                                    <div style="font-size: 11px; font-weight: 600; color: #6b7280; margin-bottom: 4px;">
+                                        <i class="bi bi-info-circle"></i> DESCRIPTION
+                                    </div>
+                                    <div style="font-size: 12px; color: #374151; line-height: 1.4;">
+                                        ${medicine.description}
+                                    </div>
+                                </div>
+                            </c:if>
                         </c:if>
+                        
+                        <!-- Priority Badge -->
+                        <div style="margin-top: 10px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                            <c:if test="${not empty item.priority}">
+                                <span class="status-badge" style="font-size: 11px; 
+                                      background: ${item.priority == 'Critical' ? '#fee2e2' : 
+                                                   item.priority == 'High' ? '#fef3c7' : 
+                                                   item.priority == 'Medium' ? '#dbeafe' : '#f3f4f6'};
+                                      color: ${item.priority == 'Critical' ? '#991b1b' : 
+                                              item.priority == 'High' ? '#92400e' : 
+                                              item.priority == 'Medium' ? '#1e40af' : '#374151'};">
+                                    <i class="bi bi-flag-fill"></i> Priority: ${item.priority}
+                                </span>
+                            </c:if>
+                            
+                            <!-- Unit Price if available -->
+                            <c:if test="${not empty item.unitPrice && item.unitPrice > 0}">
+                                <span style="font-size: 11px; padding: 4px 8px; background: #dcfce7; color: #166534; border-radius: 4px; font-weight: 600;">
+                                    <i class="bi bi-currency-dollar"></i> ${item.unitPrice} VNĐ/unit
+                                </span>
+                            </c:if>
+                        </div>
+                        
+                        <!-- Item Notes -->
                         <c:if test="${not empty item.notes}">
-                            <div style="margin-top: 6px; font-size: 12px; color: #6b7280;">
-                                <i class="bi bi-sticky"></i> ${item.notes}
+                            <div style="margin-top: 8px; padding: 8px; background: #fffbeb; border-left: 3px solid #f59e0b; border-radius: 4px;">
+                                <div style="font-size: 11px; font-weight: 600; color: #92400e; margin-bottom: 4px;">
+                                    <i class="bi bi-sticky"></i> NOTES
+                                </div>
+                                <div style="font-size: 12px; color: #78350f;">
+                                    ${item.notes}
+                                </div>
                             </div>
                         </c:if>
                     </div>
                     
-                    <!-- Quantity Badge -->
-                    <span class="quantity-badge">${item.quantity} units</span>
+                    <!-- Quantity Badge - Right Side -->
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                        <span class="quantity-badge" style="font-size: 16px; padding: 10px 18px;">
+                            ${item.quantity} units
+                        </span>
+                        
+                        <!-- Total Price if available -->
+                        <c:if test="${not empty item.unitPrice && item.unitPrice > 0}">
+                            <span style="font-size: 13px; font-weight: 600; color: #059669;">
+                                Total: ${item.quantity * item.unitPrice} VNĐ
+                            </span>
+                        </c:if>
+                    </div>
                 </li>
             </c:forEach>
         </ul>
+        
+        <!-- Order Summary -->
+        <div style="margin-top: 16px; padding: 12px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-weight: 600; color: #374151;">
+                    <i class="bi bi-box-seam"></i> Total Items: ${items.size()}
+                </span>
+                <c:set var="totalQuantity" value="0" />
+                <c:forEach items="${items}" var="item">
+                    <c:set var="totalQuantity" value="${totalQuantity + item.quantity}" />
+                </c:forEach>
+                <span style="font-weight: 600; color: #3b82f6;">
+                    <i class="bi bi-boxes"></i> Total Quantity: ${totalQuantity} units
+                </span>
+            </div>
+        </div>
     </c:if>
 </div>
+
+<!-- CSS Styles for better display -->
+<style>
+.medicine-detail-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.medicine-detail-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.medicine-detail-item i {
+    font-size: 13px;
+}
+
+.item-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.item-list li {
+    padding: 20px;
+    border: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    background: white;
+    margin-bottom: 16px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.item-list li:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: #3b82f6;
+}
+</style>
                                                     </div>
                                                 </div>
                                             </td>

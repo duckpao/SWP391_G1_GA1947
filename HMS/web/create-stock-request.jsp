@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Stock Request</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     
     <style>
         * {
@@ -21,57 +22,31 @@
             color: #1f2937;
             min-height: 100vh;
             padding: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
         .container {
-            width: 100%;
-            max-width: 800px;
+            max-width: 1200px;
+            margin: 0 auto;
             background: white;
             border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             overflow: hidden;
-            animation: slideUp 0.5s ease;
         }
 
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Updated header to white theme with border */
         .header {
             background: white;
             color: #1f2937;
-            padding: 40px 30px;
-            text-align: center;
+            padding: 30px 40px;
             border-bottom: 2px solid #e5e7eb;
-        }
-
-        .header-icon {
-            width: 80px;
-            height: 80px;
-            background: #f3f4f6;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-            font-size: 40px;
         }
 
         .header h2 {
             font-size: 28px;
             font-weight: 700;
             margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         .header p {
@@ -79,24 +54,24 @@
             color: #6b7280;
         }
 
-        /* Improved form content styling */
         .form-content {
-            padding: 40px 30px;
-            max-height: 70vh;
-            overflow-y: auto;
+            padding: 40px;
         }
 
         .form-section {
-            margin-bottom: 30px;
+            margin-bottom: 35px;
         }
 
-        .form-section h3 {
-            color: #374151;
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
+        .section-header {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
             border-bottom: 2px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .form-group {
@@ -111,7 +86,10 @@
             font-size: 14px;
         }
 
-        /* Added input wrapper for icons */
+        label .required {
+            color: #ef4444;
+        }
+
         .input-wrapper {
             position: relative;
         }
@@ -132,25 +110,21 @@
         select,
         textarea {
             width: 100%;
-            padding: 14px 16px;
+            padding: 12px 16px;
             border: 2px solid #e5e7eb;
             border-radius: 10px;
-            font-size: 15px;
+            font-size: 14px;
             font-family: inherit;
             transition: all 0.3s ease;
             background: #f9fafb;
         }
 
-        .input-wrapper input[type="text"],
-        .input-wrapper input[type="number"],
-        .input-wrapper input[type="date"],
+        .input-wrapper input,
         .input-wrapper select {
             padding-left: 48px;
         }
 
-        input[type="text"]:focus,
-        input[type="number"]:focus,
-        input[type="date"]:focus,
+        input:focus,
         select:focus,
         textarea:focus {
             outline: none;
@@ -161,95 +135,202 @@
 
         textarea {
             resize: vertical;
-            min-height: 80px;
-            padding: 14px 16px;
+            min-height: 100px;
         }
 
-        /* Improved medicine item styling */
+        /* Medicine Item Card */
         .medicine-item {
             background: #f9fafb;
             border: 2px solid #e5e7eb;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 15px;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
             transition: all 0.3s ease;
         }
 
         .medicine-item:hover {
-            border-color: #d1d5db;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border-color: #3b82f6;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
         }
 
         .medicine-item-header {
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 15px;
-            font-size: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .medicine-item-title {
+            font-weight: 700;
+            color: #1f2937;
+            font-size: 16px;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        .medicine-item-header::before {
-            content: "💊";
-            font-size: 18px;
+        .btn-remove-medicine {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 8px 16px;
+            border: 1px solid #fca5a5;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-remove-medicine:hover {
+            background: #fecaca;
+            transform: translateY(-2px);
+        }
+
+        /* Medicine Details Display */
+        .medicine-details {
+            background: white;
+            border: 2px solid #dbeafe;
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 12px;
+            display: none;
+        }
+
+        .medicine-details.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .medicine-info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .medicine-info-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .medicine-info-label {
+            font-weight: 600;
+            color: #6b7280;
+            min-width: 100px;
+        }
+
+        .medicine-info-value {
+            color: #1f2937;
+            flex: 1;
+        }
+
+        .medicine-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background: #dbeafe;
+            color: #1e40af;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
         }
 
         .form-row {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
         }
 
-        .form-row.full {
-            grid-template-columns: 1fr;
+        .form-row.two {
+            grid-template-columns: repeat(2, 1fr);
         }
 
-        .form-row.three {
-            grid-template-columns: 1fr 1fr 1fr;
-        }
-
-        /* Improved button group styling */
-        .button-group {
-            display: flex;
-            gap: 12px;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 2px solid #e5e7eb;
-        }
-
-        button,
-        .btn-cancel {
-            padding: 14px 24px;
+        .btn-add-medicine {
+            background: #3b82f6;
+            color: white;
+            padding: 14px 20px;
             border: none;
             border-radius: 10px;
             font-size: 15px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-            text-align: center;
-            flex: 1;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
-        button[type="submit"] {
-            background: #3b82f6;
-            color: white;
-        }
-
-        button[type="submit"]:hover {
+        .btn-add-medicine:hover {
+            background: #2563eb;
             transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
         }
 
-        button[type="submit"]:active {
-            transform: translateY(0);
+        .button-group {
+            display: flex;
+            gap: 16px;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #e5e7eb;
+        }
+
+        .btn-submit {
+            background: #10b981;
+            color: white;
+            padding: 16px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-submit:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
         }
 
         .btn-cancel {
             background: #e5e7eb;
             color: #374151;
+            padding: 16px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
         .btn-cancel:hover {
@@ -257,115 +338,41 @@
             transform: translateY(-2px);
         }
 
-        /* Added alert styling */
         .alert {
-            padding: 14px 16px;
+            padding: 16px;
             border-radius: 10px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            font-weight: 500;
+            margin-bottom: 24px;
             display: flex;
             align-items: center;
-            gap: 10px;
-            animation: slideUp 0.3s ease;
-        }
-
-        .alert-danger {
-            background: #fee2e2;
-            border: 1px solid #fca5a5;
-            color: #991b1b;
+            gap: 12px;
+            font-size: 14px;
+            font-weight: 500;
         }
 
         .alert-success {
-            background: #d1fae5;
-            border: 1px solid #6ee7b7;
-            color: #065f46;
+            background: #dcfce7;
+            border: 1px solid #86efac;
+            color: #166534;
         }
 
-        /* Added footer styling */
-        .footer {
-            padding: 24px 30px;
-            background: #f9fafb;
-            border-top: 1px solid #e5e7eb;
-            text-align: center;
-            font-size: 13px;
-            color: #6b7280;
-        }
-
-        .btn-add-medicine {
-            background: #3b82f6;
-            color: white;
-            padding: 10px 16px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 15px;
-            width: 100%;
-        }
-
-        .btn-add-medicine:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
-        }
-
-        .btn-remove-medicine {
+        .alert-error {
             background: #fee2e2;
-            color: #991b1b;
-            padding: 8px 12px;
             border: 1px solid #fca5a5;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 10px;
-        }
-
-        .btn-remove-medicine:hover {
-            background: #fecaca;
-            transform: translateY(-1px);
-        }
-
-        .medicine-item-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid #e5e7eb;
+            color: #991b1b;
         }
 
         @media (max-width: 768px) {
+            .form-content {
+                padding: 20px;
+            }
+
             .form-row,
-            .form-row.three {
+            .medicine-info-grid {
                 grid-template-columns: 1fr;
             }
 
             .button-group {
                 flex-direction: column;
-            }
-
-            button,
-            .btn-cancel {
-                width: 100%;
-            }
-
-            .header {
-                padding: 30px 20px;
-            }
-
-            .header h2 {
-                font-size: 24px;
-            }
-
-            .form-content {
-                padding: 30px 20px;
-            }
-
-            .container {
-                max-width: 100%;
             }
         }
     </style>
@@ -373,44 +380,37 @@
 <body>
 
 <div class="container">
-    <!-- Updated header with icon -->
     <div class="header">
-        <div class="header-icon">📦</div>
-        <h2>Create Stock Request</h2>
-        <p>Manage your medicine inventory</p>
+        <h2><i class="bi bi-plus-circle"></i> Create Stock Request</h2>
+        <p>Create a new purchase order for medicine inventory</p>
     </div>
 
     <div class="form-content">
-        <!-- Added alert messages -->
-        <% if (request.getAttribute("error") != null) { %>
-        <div class="alert alert-danger">
-            <span>⚠️</span>
-            <span>${error}</span>
-        </div>
-        <% } %>
+        <c:if test="${not empty message}">
+            <div class="alert alert-${messageType == 'success' ? 'success' : 'error'}">
+                <i class="bi bi-${messageType == 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                ${message}
+            </div>
+        </c:if>
 
-        <% if (request.getAttribute("message") != null) { %>
-        <div class="alert alert-success">
-            <span>✅</span>
-            <span>${message}</span>
-        </div>
-        <% } %>
-
-        <form action="create-stock" method="post">
+        <form action="${pageContext.request.contextPath}/create-stock" method="post" id="createStockForm">
 
             <!-- Supplier Section -->
             <div class="form-section">
+                <div class="section-header">
+                    <i class="bi bi-building"></i> Supplier Information
+                </div>
+                
                 <div class="form-group">
-                    <label for="supplier">Supplier</label>
+                    <label for="supplier">Select Supplier (Optional)</label>
                     <div class="input-wrapper">
-                        <span class="input-icon">🏢</span>
+                        <i class="bi bi-shop input-icon"></i>
                         <select id="supplier" name="supplierId">
-                            <option value="">-- Choose a supplier (optional) --</option>
+                            <option value="">-- Choose a supplier --</option>
                             <c:forEach items="${suppliers}" var="supplier">
                                 <option value="${supplier.supplierId}">
                                     ${supplier.name}
-                                    <c:if test="${not empty supplier.contactPhone}"> - ${supplier.contactPhone}</c:if>
-                                    <c:if test="${not empty supplier.performanceRating}">(Rating: ${supplier.performanceRating}/5.0)</c:if>
+                                    <c:if test="${not empty supplier.performanceRating}"> - Rating: ${supplier.performanceRating}/5.0</c:if>
                                 </option>
                             </c:forEach>
                         </select>
@@ -420,186 +420,317 @@
 
             <!-- Medicine Items Section -->
             <div class="form-section">
-                <h3>Medicine Items</h3>
+                <div class="section-header">
+                    <i class="bi bi-capsule"></i> Medicine Items
+                </div>
+                
                 <div id="medicineItemsContainer">
-                    <div class="medicine-item" data-item-index="0">
-                        <div class="medicine-item-header">Medicine 1</div>
-                        
-                        <div class="form-group">
-                            <label for="medicine_0">Select Medicine</label>
-                            <div class="input-wrapper">
-                                <span class="input-icon">💊</span>
-                                <select id="medicine_0" name="medicineCode_0" required>
-                                    <option value="">-- Select Medicine --</option>
-                                    <c:forEach items="${medicines}" var="m">
-                                        <option value="${m.medicineCode}">${m.name} [${m.medicineCode}]</option>
-                                    </c:forEach>
-                                </select>
-                            </div>
-                        </div>
+                    <!-- First item will be added by JavaScript -->
+                </div>
 
-                        <div class="form-row three">
-                            <div class="form-group">
-                                <label for="quantity_0">Quantity</label>
-                                <div class="input-wrapper">
-                                    <span class="input-icon">📊</span>
-                                    <input type="number" id="quantity_0" name="quantity_0" min="1" value="1" required>
-                                </div>
-                            </div>
+                <button type="button" class="btn-add-medicine" onclick="addMedicineItem()">
+                    <i class="bi bi-plus-lg"></i> Add Medicine Item
+                </button>
+            </div>
 
-                            <div class="form-group">
-                                <label for="priority_0">Priority</label>
-                                <div class="input-wrapper">
-                                    <span class="input-icon">⚡</span>
-                                    <select id="priority_0" name="priority_0" required>
-                                        <option value="Low">Low</option>
-                                        <option value="Medium" selected>Medium</option>
-                                        <option value="High">High</option>
-                                        <option value="Critical">Critical</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="notes_0">Notes</label>
-                                <div class="input-wrapper">
-                                    <span class="input-icon">📝</span>
-                                    <input type="text" id="notes_0" name="itemNotes_0" placeholder="Item notes...">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="medicine-item-actions">
-                            <button type="button" class="btn-remove-medicine" onclick="removeMedicineItem(this)" style="display: none;">❌ Remove</button>
+            <!-- Delivery & Notes Section -->
+            <div class="form-section">
+                <div class="section-header">
+                    <i class="bi bi-calendar-check"></i> Delivery & Notes
+                </div>
+                
+                <div class="form-row two">
+                    <div class="form-group">
+                        <label for="deliveryDate">
+                            Expected Delivery Date <span class="required">*</span>
+                        </label>
+                        <div class="input-wrapper">
+                            <i class="bi bi-calendar3 input-icon"></i>
+                            <input type="date" id="deliveryDate" name="expectedDeliveryDate" required>
                         </div>
                     </div>
                 </div>
 
-                <button type="button" class="btn-add-medicine" onclick="addMedicineItem()">+ Add More Medicine</button>
-            </div>
-
-            <!-- Expected Delivery Date Section -->
-            <div class="form-section">
-                <div class="form-group">
-                    <label for="deliveryDate">Expected Delivery Date</label>
-                    <div class="input-wrapper">
-                        <span class="input-icon">📅</span>
-                        <input type="date" id="deliveryDate" name="expectedDeliveryDate" required>
-                    </div>
-                </div>
-            </div>
-
-            <!-- General Notes Section -->
-            <div class="form-section">
                 <div class="form-group">
                     <label for="generalNotes">General Notes</label>
-                    <textarea id="generalNotes" name="notes" placeholder="Additional notes..."></textarea>
+                    <textarea id="generalNotes" name="notes" placeholder="Enter any additional notes or special instructions..."></textarea>
                 </div>
             </div>
 
-            <!-- Buttons -->
+            <!-- Action Buttons -->
             <div class="button-group">
-                <button type="submit">🚀 Create Stock Request</button>
-                <a href="manager-dashboard" class="btn-cancel">Cancel</a>
+                <button type="submit" class="btn-submit">
+                    <i class="bi bi-check-circle"></i> Create Stock Request
+                </button>
+                <a href="${pageContext.request.contextPath}/manager-dashboard" class="btn-cancel">
+                    <i class="bi bi-x-circle"></i> Cancel
+                </a>
             </div>
 
         </form>
     </div>
-
-    <!-- Added footer -->
-    <div class="footer">
-        <p>© 2025 Pharmacy Warehouse Management System. All rights reserved.</p>
-    </div>
 </div>
 
 <script>
-    let medicineItemCount = 1;
+    // Medicine data from server
+    var medicines = [
+        <c:forEach items="${medicines}" var="m" varStatus="status">
+        {
+            code: '<c:out value="${m.medicineCode}"/>',
+            name: '<c:out value="${m.name}"/>',
+            category: '<c:out value="${m.category}"/>',
+            strength: '<c:out value="${m.strength}"/>',
+            dosageForm: '<c:out value="${m.dosageForm}"/>',
+            manufacturer: '<c:out value="${m.manufacturer}"/>',
+            activeIngredient: '<c:out value="${m.activeIngredient}"/>',
+            unit: '<c:out value="${m.unit}"/>',
+            countryOfOrigin: '<c:out value="${m.countryOfOrigin}"/>',
+            drugGroup: '<c:out value="${m.drugGroup}"/>',
+            drugType: '<c:out value="${m.drugType}"/>',
+            description: '<c:out value="${m.description}"/>'
+        }<c:if test="${!status.last}">,</c:if>
+        </c:forEach>
+    ];
+
+    var medicineItemCount = 0;
 
     function addMedicineItem() {
-        const container = document.getElementById('medicineItemsContainer');
-        const newIndex = medicineItemCount;
+        var container = document.getElementById('medicineItemsContainer');
+        var index = medicineItemCount;
         
-        const newItem = document.createElement('div');
+        var newItem = document.createElement('div');
         newItem.className = 'medicine-item';
-        newItem.setAttribute('data-item-index', newIndex);
-        newItem.innerHTML = `
-            <div class="medicine-item-header">Medicine ${newIndex + 1}</div>
-            
-            <div class="form-group">
-                <label for="medicine_${newIndex}">Select Medicine</label>
-                <div class="input-wrapper">
-                    <span class="input-icon">💊</span>
-                    <select id="medicine_${newIndex}" name="medicineCode_${newIndex}" required>
-                        <option value="">-- Select Medicine --</option>
-                        <c:forEach items="${medicines}" var="m">
-                            <option value="${m.medicineCode}">${m.name} [${m.medicineCode}]</option>
-                        </c:forEach>
-                    </select>
-                </div>
-            </div>
-
-            <div class="form-row three">
-                <div class="form-group">
-                    <label for="quantity_${newIndex}">Quantity</label>
-                    <div class="input-wrapper">
-                        <span class="input-icon">📊</span>
-                        <input type="number" id="quantity_${newIndex}" name="quantity_${newIndex}" min="1" value="1" required>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="priority_${newIndex}">Priority</label>
-                    <div class="input-wrapper">
-                        <span class="input-icon">⚡</span>
-                        <select id="priority_${newIndex}" name="priority_${newIndex}" required>
-                            <option value="Low">Low</option>
-                            <option value="Medium" selected>Medium</option>
-                            <option value="High">High</option>
-                            <option value="Critical">Critical</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="notes_${newIndex}">Notes</label>
-                    <div class="input-wrapper">
-                        <span class="input-icon">📝</span>
-                        <input type="text" id="notes_${newIndex}" name="itemNotes_${newIndex}" placeholder="Item notes...">
-                    </div>
-                </div>
-            </div>
-
-            <div class="medicine-item-actions">
-                <button type="button" class="btn-remove-medicine" onclick="removeMedicineItem(this)">❌ Remove</button>
-            </div>
-        `;
+        newItem.setAttribute('data-index', index);
         
+        // Build medicine options
+        var medicineOptions = '<option value="">-- Select a medicine --</option>';
+        for (var i = 0; i < medicines.length; i++) {
+            medicineOptions += '<option value="' + medicines[i].code + '">' + 
+                               medicines[i].name + ' [' + medicines[i].code + ']</option>';
+        }
+        
+        var itemHTML = '<div class="medicine-item-header">' +
+                '<div class="medicine-item-title">' +
+                    '<i class="bi bi-capsule-pill"></i> Medicine Item #' + (index + 1) +
+                '</div>' +
+                '<button type="button" class="btn-remove-medicine" onclick="removeMedicineItem(' + index + ')" ' + 
+                (index === 0 ? 'style="display:none;"' : '') + '>' +
+                    '<i class="bi bi-trash"></i> Remove' +
+                '</button>' +
+            '</div>' +
+
+            '<div class="form-group">' +
+                '<label for="medicine_' + index + '">' +
+                    'Select Medicine <span class="required">*</span>' +
+                '</label>' +
+                '<div class="input-wrapper">' +
+                    '<i class="bi bi-search input-icon"></i>' +
+                    '<select id="medicine_' + index + '" name="medicineCode" required onchange="showMedicineDetails(' + index + ', this.value)">' +
+                        medicineOptions +
+                    '</select>' +
+                '</div>' +
+            '</div>' +
+
+            '<div id="medicineDetails_' + index + '" class="medicine-details">' +
+            '</div>' +
+
+            '<div class="form-row">' +
+                '<div class="form-group">' +
+                    '<label for="quantity_' + index + '">' +
+                        'Quantity <span class="required">*</span>' +
+                    '</label>' +
+                    '<div class="input-wrapper">' +
+                        '<i class="bi bi-box-seam input-icon"></i>' +
+                        '<input type="number" id="quantity_' + index + '" name="quantity" min="1" value="1" required>' +
+                    '</div>' +
+                '</div>' +
+
+                '<div class="form-group">' +
+                    '<label for="priority_' + index + '">' +
+                        'Priority <span class="required">*</span>' +
+                    '</label>' +
+                    '<div class="input-wrapper">' +
+                        '<i class="bi bi-flag input-icon"></i>' +
+                        '<select id="priority_' + index + '" name="priority" required>' +
+                            '<option value="Low">Low</option>' +
+                            '<option value="Medium" selected>Medium</option>' +
+                            '<option value="High">High</option>' +
+                            '<option value="Critical">Critical</option>' +
+                        '</select>' +
+                    '</div>' +
+                '</div>' +
+
+                '<div class="form-group">' +
+                    '<label for="notes_' + index + '">Item Notes</label>' +
+                    '<div class="input-wrapper">' +
+                        '<i class="bi bi-sticky input-icon"></i>' +
+                        '<input type="text" id="notes_' + index + '" name="itemNotes" placeholder="Optional notes...">' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+        
+        newItem.innerHTML = itemHTML;
         container.appendChild(newItem);
         medicineItemCount++;
-        
-        // Show remove buttons if more than 1 item
         updateRemoveButtons();
     }
 
-    function removeMedicineItem(button) {
-        const item = button.closest('.medicine-item');
-        item.remove();
-        updateRemoveButtons();
+    function showMedicineDetails(index, medicineCode) {
+        var detailsDiv = document.getElementById('medicineDetails_' + index);
+        
+        if (!medicineCode) {
+            detailsDiv.classList.remove('show');
+            return;
+        }
+
+        var medicine = null;
+        for (var i = 0; i < medicines.length; i++) {
+            if (medicines[i].code === medicineCode) {
+                medicine = medicines[i];
+                break;
+            }
+        }
+        
+        if (!medicine) return;
+
+        var detailsHTML = '<div style="margin-bottom: 12px;">' +
+                '<strong style="color: #1f2937; font-size: 15px;">' + escapeHtml(medicine.name) + '</strong> ' +
+                '<span class="medicine-badge">' + escapeHtml(medicine.code) + '</span>' +
+            '</div>' +
+            '<div class="medicine-info-grid">';
+        
+        if (medicine.category) {
+            detailsHTML += '<div class="medicine-info-item">' +
+                    '<i class="bi bi-tag" style="color: #3b82f6;"></i>' +
+                    '<div>' +
+                        '<div class="medicine-info-label">Category:</div>' +
+                        '<div class="medicine-info-value">' + escapeHtml(medicine.category) + '</div>' +
+                    '</div>' +
+                '</div>';
+        }
+        
+        if (medicine.strength) {
+            detailsHTML += '<div class="medicine-info-item">' +
+                    '<i class="bi bi-speedometer2" style="color: #10b981;"></i>' +
+                    '<div>' +
+                        '<div class="medicine-info-label">Strength:</div>' +
+                        '<div class="medicine-info-value">' + escapeHtml(medicine.strength) + '</div>' +
+                    '</div>' +
+                '</div>';
+        }
+        
+        if (medicine.dosageForm) {
+            detailsHTML += '<div class="medicine-info-item">' +
+                    '<i class="bi bi-capsule" style="color: #8b5cf6;"></i>' +
+                    '<div>' +
+                        '<div class="medicine-info-label">Dosage Form:</div>' +
+                        '<div class="medicine-info-value">' + escapeHtml(medicine.dosageForm) + '</div>' +
+                    '</div>' +
+                '</div>';
+        }
+        
+        if (medicine.manufacturer) {
+            detailsHTML += '<div class="medicine-info-item">' +
+                    '<i class="bi bi-building" style="color: #f59e0b;"></i>' +
+                    '<div>' +
+                        '<div class="medicine-info-label">Manufacturer:</div>' +
+                        '<div class="medicine-info-value">' + escapeHtml(medicine.manufacturer) + '</div>' +
+                    '</div>' +
+                '</div>';
+        }
+        
+        if (medicine.activeIngredient) {
+            detailsHTML += '<div class="medicine-info-item">' +
+                    '<i class="bi bi-droplet" style="color: #06b6d4;"></i>' +
+                    '<div>' +
+                        '<div class="medicine-info-label">Active Ingredient:</div>' +
+                        '<div class="medicine-info-value">' + escapeHtml(medicine.activeIngredient) + '</div>' +
+                    '</div>' +
+                '</div>';
+        }
+        
+        if (medicine.unit) {
+            detailsHTML += '<div class="medicine-info-item">' +
+                    '<i class="bi bi-box" style="color: #64748b;"></i>' +
+                    '<div>' +
+                        '<div class="medicine-info-label">Unit:</div>' +
+                        '<div class="medicine-info-value">' + escapeHtml(medicine.unit) + '</div>' +
+                    '</div>' +
+                '</div>';
+        }
+        
+        if (medicine.countryOfOrigin) {
+            detailsHTML += '<div class="medicine-info-item">' +
+                    '<i class="bi bi-globe" style="color: #14b8a6;"></i>' +
+                    '<div>' +
+                        '<div class="medicine-info-label">Origin:</div>' +
+                        '<div class="medicine-info-value">' + escapeHtml(medicine.countryOfOrigin) + '</div>' +
+                    '</div>' +
+                '</div>';
+        }
+        
+        if (medicine.drugType) {
+            detailsHTML += '<div class="medicine-info-item">' +
+                    '<i class="bi bi-shield-check" style="color: #ec4899;"></i>' +
+                    '<div>' +
+                        '<div class="medicine-info-label">Drug Type:</div>' +
+                        '<div class="medicine-info-value">' + escapeHtml(medicine.drugType) + '</div>' +
+                    '</div>' +
+                '</div>';
+        }
+        
+        detailsHTML += '</div>';
+        
+        if (medicine.description) {
+            detailsHTML += '<div style="margin-top: 12px; padding: 12px; background: #f0f9ff; border-left: 3px solid #3b82f6; border-radius: 6px;">' +
+                    '<div style="font-size: 12px; font-weight: 600; color: #1e40af; margin-bottom: 4px;">' +
+                        '<i class="bi bi-info-circle"></i> DESCRIPTION' +
+                    '</div>' +
+                    '<div style="font-size: 13px; color: #374151;">' + escapeHtml(medicine.description) + '</div>' +
+                '</div>';
+        }
+        
+        detailsDiv.innerHTML = detailsHTML;
+        detailsDiv.classList.add('show');
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        var map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return text.toString().replace(/[&<>"']/g, function(m) { return map[m]; });
+    }
+
+    function removeMedicineItem(index) {
+        var item = document.querySelector('.medicine-item[data-index="' + index + '"]');
+        if (item) {
+            item.remove();
+            updateRemoveButtons();
+        }
     }
 
     function updateRemoveButtons() {
-        const items = document.querySelectorAll('.medicine-item');
-        const removeButtons = document.querySelectorAll('.btn-remove-medicine');
-        
-        // Show remove button only if there's more than 1 item
-        removeButtons.forEach((btn, index) => {
-            btn.style.display = items.length > 1 ? 'block' : 'none';
-        });
+        var items = document.querySelectorAll('.medicine-item');
+        for (var i = 0; i < items.length; i++) {
+            var removeBtn = items[i].querySelector('.btn-remove-medicine');
+            if (removeBtn) {
+                removeBtn.style.display = items.length > 1 ? 'flex' : 'none';
+            }
+        }
     }
 
-    // Initialize on page load
+    // Initialize with one item
     document.addEventListener('DOMContentLoaded', function() {
-        updateRemoveButtons();
+        addMedicineItem();
+        
+        // Set minimum date to today
+        var today = new Date().toISOString().split('T')[0];
+        document.getElementById('deliveryDate').setAttribute('min', today);
     });
 </script>
 

@@ -25,11 +25,13 @@ public class CreateMedicationRequestServlet extends HttpServlet {
 
         MedicationRequestDAO dao = new MedicationRequestDAO();
         List<Medicine> medicines = dao.getAllMedicines();
-        if (medicines == null) {
+        if (medicines == null || medicines.isEmpty()) {
             request.setAttribute("error", "Không thể tải danh sách thuốc!");
         } else {
             request.setAttribute("medicines", medicines);
         }
+        
+        // ✅ QUAN TRỌNG: Không set success ở đây
         request.getRequestDispatcher("/jsp/createRequest.jsp").forward(request, response);
     }
 
@@ -52,13 +54,13 @@ public class CreateMedicationRequestServlet extends HttpServlet {
         req.setNotes(notes != null ? notes : "");
 
         List<MedicationRequestItem> items = new ArrayList<>();
-        String[] medicineIds = request.getParameterValues("medicine_id");
+        String[] medicineCodes = request.getParameterValues("medicine_code");  // ĐỔI sang medicine_code
         String[] quantities = request.getParameterValues("quantity");
 
-        System.out.println("Medicine IDs: " + (medicineIds != null ? String.join(",", medicineIds) : "NULL"));
+        System.out.println("Medicine Codes: " + (medicineCodes != null ? String.join(",", medicineCodes) : "NULL"));
         System.out.println("Quantities: " + (quantities != null ? String.join(",", quantities) : "NULL"));
 
-        if (medicineIds == null || quantities == null || medicineIds.length != quantities.length) {
+        if (medicineCodes == null || quantities == null || medicineCodes.length != quantities.length) {
             System.out.println("ERROR: Invalid medicine data");
             request.setAttribute("error", "Dữ liệu thuốc không hợp lệ!");
             doGet(request, response);
@@ -66,10 +68,10 @@ public class CreateMedicationRequestServlet extends HttpServlet {
         }
 
         try {
-            for (int i = 0; i < medicineIds.length; i++) {
-                int medicineId = Integer.parseInt(medicineIds[i]);
+            for (int i = 0; i < medicineCodes.length; i++) {
+                String medicineCode = medicineCodes[i];  // ĐỔI sang String
                 int quantity = Integer.parseInt(quantities[i]);
-                System.out.println("Item " + i + ": Medicine ID=" + medicineId + ", Quantity=" + quantity);
+                System.out.println("Item " + i + ": Medicine Code=" + medicineCode + ", Quantity=" + quantity);
 
                 if (quantity <= 0) {
                     System.out.println("ERROR: Quantity <= 0");
@@ -78,7 +80,7 @@ public class CreateMedicationRequestServlet extends HttpServlet {
                     return;
                 }
                 MedicationRequestItem item = new MedicationRequestItem();
-                item.setMedicineId(medicineId);
+                item.setMedicineCode(medicineCode);  // ĐỔI
                 item.setQuantity(quantity);
                 items.add(item);
             }
@@ -104,7 +106,7 @@ public class CreateMedicationRequestServlet extends HttpServlet {
                 dao.addRequestItems(requestId, items);
                 System.out.println("Items added successfully!");
 
-                // ✅ Forward về lại createRequest.jsp và set success
+                // ✅ Reload danh sách thuốc và set success
                 List<Medicine> medicines = dao.getAllMedicines();
                 request.setAttribute("medicines", medicines);
                 request.setAttribute("success", "Đặt thuốc thành công!");

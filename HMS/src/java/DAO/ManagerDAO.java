@@ -773,15 +773,19 @@ public class ManagerDAO extends DBContext {
     // === DEBUG VERSION: Thêm vào ManagerDAO.java ===
 public List<PurchaseOrderItem> getPurchaseOrderItems(int poId) {
     List<PurchaseOrderItem> items = new ArrayList<>();
+    
+    // Get ALL medicine fields from the database
     String sql = "SELECT poi.item_id, poi.po_id, poi.medicine_code, " +
                  "poi.quantity, poi.unit_price, poi.priority, poi.notes, " +
-                 "m.name, m.category, m.strength, m.dosage_form, m.manufacturer " +
+                 "m.name, m.category, m.strength, m.dosage_form, " +
+                 "m.manufacturer, m.unit, m.active_ingredient, " +
+                 "m.country_of_origin, m.drug_group, m.drug_type, m.description " +
                  "FROM PurchaseOrderItems poi " +
                  "LEFT JOIN Medicines m ON poi.medicine_code = m.medicine_code " +
                  "WHERE poi.po_id = ?";
     
     System.out.println("====================================");
-    System.out.println("DEBUG: Getting items for PO #" + poId);
+    System.out.println("DEBUG ManagerDAO: Getting items for PO #" + poId);
     System.out.println("====================================");
     
     try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -793,36 +797,41 @@ public List<PurchaseOrderItem> getPurchaseOrderItems(int poId) {
             count++;
             PurchaseOrderItem item = new PurchaseOrderItem();
             
-            // Basic info
-            item.setItemId(rs.getInt("item_id"));
+            // Basic PO Item info
+            item.setPoItemId(rs.getInt("item_id"));
             item.setPoId(rs.getInt("po_id"));
             item.setMedicineCode(rs.getString("medicine_code"));
             item.setQuantity(rs.getInt("quantity"));
             
-
-            // Medicine details
-            String medicineName = rs.getString("name");
-            String category = rs.getString("category");
-            String strength = rs.getString("strength");
-            String dosageForm = rs.getString("dosage_form");
-            String manufacturer = rs.getString("manufacturer");
+            // Price and priority
+            double unitPrice = rs.getDouble("unit_price");
+            if (!rs.wasNull()) {
+                item.setUnitPrice(unitPrice);
+            }
+            item.setPriority(rs.getString("priority"));
+            item.setNotes(rs.getString("notes"));
             
-            item.setMedicineName(medicineName);
-            item.setMedicineCategory(category);
-            item.setMedicineStrength(strength);
-            item.setMedicineDosageForm(dosageForm);
-            item.setMedicineManufacturer(manufacturer);
+            // === ALL Medicine details ===
+            item.setMedicineName(rs.getString("name"));
+            item.setMedicineCategory(rs.getString("category"));
+            item.setMedicineStrength(rs.getString("strength"));
+            item.setMedicineDosageForm(rs.getString("dosage_form"));
+            item.setMedicineManufacturer(rs.getString("manufacturer"));
+            item.setUnit(rs.getString("unit"));
+            item.setActiveIngredient(rs.getString("active_ingredient"));
             
             // Debug log
             System.out.println("Item #" + count + ":");
-            System.out.println("  - Item ID: " + item.getItemId());
             System.out.println("  - Medicine Code: " + item.getMedicineCode());
-            System.out.println("  - Medicine Name: " + medicineName);
-            System.out.println("  - Category: " + category);
-            System.out.println("  - Strength: " + strength);
-            System.out.println("  - Dosage Form: " + dosageForm);
-            System.out.println("  - Manufacturer: " + manufacturer);
+            System.out.println("  - Medicine Name: " + item.getMedicineName());
+            System.out.println("  - Category: " + item.getMedicineCategory());
+            System.out.println("  - Strength: " + item.getMedicineStrength());
+            System.out.println("  - Dosage Form: " + item.getMedicineDosageForm());
+            System.out.println("  - Manufacturer: " + item.getMedicineManufacturer());
+            System.out.println("  - Active Ingredient: " + item.getActiveIngredient());
+            System.out.println("  - Unit: " + item.getUnit());
             System.out.println("  - Quantity: " + item.getQuantity());
+            System.out.println("  - Unit Price: " + unitPrice);
             System.out.println("  - Priority: " + item.getPriority());
             
             items.add(item);

@@ -17,13 +17,99 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f3f4f6;
+            background: #f9fafb;
             min-height: 100vh;
+            display: flex;
+        }
+
+        /* Added sidebar styling from admin-dashboard */
+        .sidebar {
+            width: 260px;
+            background: #ffffff;
+            border-right: 1px solid #e5e7eb;
+            padding: 30px 0;
+            min-height: 100vh;
+            box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
+            position: fixed;
+            left: 0;
+            top: 0;
+            overflow-y: auto;
+        }
+
+        .sidebar-brand {
+            padding: 0 20px 30px;
+            border-bottom: 1px solid #e5e7eb;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .sidebar-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 0 12px;
+        }
+
+        .sidebar-item {
+            padding: 12px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .sidebar-item:hover {
+            background: #f3f4f6;
+            color: #1f2937;
+        }
+
+        .sidebar-item-primary {
+            background: #eff6ff;
+            color: #3b82f6;
+            font-weight: 600;
+        }
+
+        .sidebar-item-primary:hover {
+            background: #dbeafe;
+        }
+
+        .sidebar-item-logout {
+            background: #fee2e2;
+            color: #dc2626;
+            font-weight: 600;
+            margin-top: 20px;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 20px;
+        }
+
+        .sidebar-item-logout:hover {
+            background: #fecaca;
+        }
+
+        /* Added main-content wrapper for sidebar layout */
+        .main-content {
+            margin-left: 260px;
+            flex: 1;
             padding: 20px;
         }
 
         .container {
-            max-width: 1600px;
+            max-width: 1400px;
             margin: 0 auto;
             background: #ffffff;
             border-radius: 16px;
@@ -38,7 +124,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid #e5e7eb;
+            border-bottom: 3px solid #3b82f6;
         }
 
         .header h1 {
@@ -52,19 +138,12 @@
         .header-icon {
             width: 40px;
             height: 40px;
-            background: #f0f9ff;
+            background: #eff6ff;
             border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 20px;
-        }
-
-        .header p {
-            margin-top: 8px;
-            opacity: 0.7;
-            font-size: 14px;
-            color: #6b7280;
         }
 
         .btn {
@@ -331,237 +410,298 @@
             margin-bottom: 16px;
         }
 
-        .page-header-info {
-            display: flex;
-            flex-direction: column;
+        /* Added responsive design for sidebar */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                min-height: auto;
+                position: relative;
+                border-right: none;
+                border-bottom: 1px solid #e5e7eb;
+                padding: 15px 0;
+            }
+
+            .sidebar-brand {
+                padding: 0 15px 15px;
+                margin-bottom: 10px;
+            }
+
+            .sidebar-menu {
+                padding: 0 8px;
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+
+            .sidebar-item {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 15px;
+            }
+
+            .container {
+                border-radius: 8px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="page-header-info">
-                <h1>
-                    <span class="header-icon">📊</span>
-                    Báo cáo hoạt động người dùng
-                </h1>
-                <p>Phân tích hoạt động người dùng, tạo báo cáo và xuất dữ liệu</p>
-            </div>
-            <a class="btn btn-primary" href="${pageContext.request.contextPath}/admin-dashboard">
+    <!-- Added sidebar navigation from admin-dashboard -->
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <span>🏥</span>
+            Hệ thống
+        </div>
+        <div class="sidebar-menu">
+            <a class="sidebar-item sidebar-item-primary" href="${pageContext.request.contextPath}/admin-dashboard">
                 ← Quay lại Dashboard
             </a>
+            <a class="sidebar-item sidebar-item-primary" href="${pageContext.request.contextPath}/user-reports/generate">
+                📊 Báo cáo
+            </a>
+            <a class="sidebar-item sidebar-item-primary" href="${pageContext.request.contextPath}/admin-dashboard/config">
+                ⚙️ Cấu hình
+            </a>
+            <a class="sidebar-item sidebar-item-primary" href="${pageContext.request.contextPath}/admin/permissions">
+                🔐 Phân quyền
+            </a>
+            <a class="sidebar-item sidebar-item-primary" href="${pageContext.request.contextPath}/admin-dashboard/create">
+                ➕ Tạo tài khoản
+            </a>
+            <a class="sidebar-item sidebar-item-logout" href="${pageContext.request.contextPath}/logout">
+                🚪 Logout
+            </a>
         </div>
+    </div>
 
-        <div class="content">
-            <!-- Error/Success Messages -->
-            <c:if test="${not empty error}">
-                <div class="alert alert-error">
-                    <strong>⚠️ Lỗi:</strong> ${error}
+    <!-- Wrapped main content in main-content div for sidebar layout -->
+    <div class="main-content">
+        <div class="container">
+            <div class="header">
+                <div>
+                    <h1>
+                        <span class="header-icon">📊</span>
+                        Báo cáo hoạt động người dùng
+                    </h1>
                 </div>
-            </c:if>
-            
-            <c:if test="${not empty success}">
-                <div class="alert alert-success">
-                    <strong>✅ Thành công:</strong> ${success}
-                </div>
-            </c:if>
-            
-            <!-- Filter Section -->
-            <div class="filter-section">
-                <h2>🔍 Bộ lọc báo cáo</h2>
-                
-                <form action="${pageContext.request.contextPath}/user-reports/generate" method="GET">
-                    <div class="filter-form">
-                        <!-- Report Type -->
-                        <div class="form-group">
-                            <label for="reportType">Loại báo cáo:</label>
-                            <select name="type" id="reportType" required onchange="toggleFilters()">
-                                <option value="">-- Chọn loại báo cáo --</option>
-                                <option value="summary" ${reportType == 'summary' ? 'selected' : ''}>Báo cáo tổng hợp</option>
-                                <option value="detailed" ${reportType == 'detailed' ? 'selected' : ''}>Nhật ký chi tiết</option>
-                            </select>
-                        </div>
-                        
-                        <!-- Start Date -->
-                        <div class="form-group">
-                            <label for="startDate">Từ ngày:</label>
-                            <input type="date" name="startDate" id="startDate" class="form-control"
-                                   value="${not empty startDate ? startDate : defaultStartDate}" required>
-                        </div>
-                        
-                        <!-- End Date -->
-                        <div class="form-group">
-                            <label for="endDate">Đến ngày:</label>
-                            <input type="date" name="endDate" id="endDate" class="form-control"
-                                   value="${not empty endDate ? endDate : defaultEndDate}" required>
-                        </div>
-                        
-                        <!-- Role Filter -->
-                        <div class="form-group">
-                            <label for="role">Lọc theo vai trò:</label>
-                            <select name="role" id="role">
-                                <option value="">Tất cả vai trò</option>
-                                <c:forEach var="r" items="${roles}">
-                                    <option value="${r}" ${selectedRole == r ? 'selected' : ''}>${r}</option>
-                                </c:forEach>
-                            </select>
-                        </div>
-                        
-                        <!-- Username Filter (for detailed report) -->
-                        <div class="form-group" id="usernameFilter" style="display: none;">
-                            <label for="username">Tên đăng nhập:</label>
-                            <input type="text" name="username" id="username" class="form-control"
-                                   placeholder="Tìm theo username" value="${username}">
-                        </div>
-                        
-                        <!-- Action Filter (for detailed report) -->
-                        <div class="form-group" id="actionFilterGroup" style="display: none;">
-                            <label for="actionFilterSelect">Loại hành động:</label>
-                            <select name="actionFilter" id="actionFilterSelect">
-                                <option value="">Tất cả hành động</option>
-                                <option value="LOGIN" ${selectedAction == 'LOGIN' ? 'selected' : ''}>LOGIN</option>
-                                <option value="LOGOUT" ${selectedAction == 'LOGOUT' ? 'selected' : ''}>LOGOUT</option>
-                                <option value="CREATE_USER" ${selectedAction == 'CREATE_USER' ? 'selected' : ''}>CREATE_USER</option>
-                                <option value="UPDATE_USER" ${selectedAction == 'UPDATE_USER' ? 'selected' : ''}>UPDATE_USER</option>
-                                <option value="DELETE_USER" ${selectedAction == 'DELETE_USER' ? 'selected' : ''}>DELETE_USER</option>
-                                <option value="VIEW_DASHBOARD" ${selectedAction == 'VIEW_DASHBOARD' ? 'selected' : ''}>VIEW_DASHBOARD</option>
-                                <option value="GENERATE_REPORT" ${selectedAction == 'GENERATE_REPORT' ? 'selected' : ''}>GENERATE_REPORT</option>
-                                <option value="EXPORT_REPORT" ${selectedAction == 'EXPORT_REPORT' ? 'selected' : ''}>EXPORT_REPORT</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="button-group">
-                        <button type="reset" class="btn btn-secondary">🔄 Xóa bộ lọc</button>
-                        <button type="submit" class="btn btn-primary">🔍 Tạo báo cáo</button>
-                    </div>
-                </form>
             </div>
-            
-            <!-- Report Results -->
-            <c:if test="${not empty reportType}">
-                <div class="report-section">
-                    <!-- Summary Report -->
-                    <c:if test="${reportType == 'summary'}">
-                        <div class="report-header">
-                            <h3>📈 Báo cáo tổng hợp hoạt động người dùng</h3>
-                        </div>
-                        
-                        <c:choose>
-                            <c:when test="${not empty summaryReports}">
-                                <!-- Statistics Summary -->
-                                <div class="stats-summary">
-                                    <p>Tổng người dùng <strong>${totalUsers}</strong></p>
-                                    <p>Tổng hành động <strong>${totalActions}</strong></p>
-                                    <p>Tổng đăng nhập <strong>${totalLogins}</strong></p>
-                                </div>
-                                
-                                <div class="table-container">
-                                    <table>
-                                        <thead>
-                                            <tr>
-                                                <th>User ID</th>
-                                                <th>Username</th>
-                                                <th>Email</th>
-                                                <th>Vai trò</th>
-                                                <th>Tổng hành động</th>
-                                                <th>Ngày hoạt động</th>
-                                                <th>Số lần đăng nhập</th>
-                                                <th>TB hành động/ngày</th>
-                                                <th>Hành động phổ biến</th>
-                                                <th>Hoạt động đầu</th>
-                                                <th>Hoạt động cuối</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <c:forEach var="report" items="${summaryReports}">
-                                                <tr>
-                                                    <td><strong>#${report.userId}</strong></td>
-                                                    <td>${report.username}</td>
-                                                    <td>${report.email}</td>
-                                                    <td><span class="badge badge-${report.role}">${report.role}</span></td>
-                                                    <td>${report.totalActions}</td>
-                                                    <td>${report.activeDays}</td>
-                                                    <td>${report.loginCount}</td>
-                                                    <td><fmt:formatNumber value="${report.averageActionsPerDay}" pattern="#0.00"/></td>
-                                                    <td>${report.mostCommonAction}</td>
-                                                    <td><fmt:formatDate value="${report.firstActivity}" pattern="dd/MM/yyyy HH:mm"/></td>
-                                                    <td><fmt:formatDate value="${report.lastActivity}" pattern="dd/MM/yyyy HH:mm"/></td>
-                                                </tr>
-                                            </c:forEach>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </c:when>
-                            <c:otherwise>
-                                <div class="no-data">
-                                    <div class="no-data-icon">📭</div>
-                                    <h3>Không tìm thấy dữ liệu</h3>
-                                    <p>Không có dữ liệu cho các bộ lọc đã chọn</p>
-                                </div>
-                            </c:otherwise>
-                        </c:choose>
-                    </c:if>
+
+            <div class="content">
+                <c:if test="${not empty error}">
+                    <div class="alert alert-error">
+                        <strong>⚠️ Lỗi:</strong> ${error}
+                    </div>
+                </c:if>
+                
+                <c:if test="${not empty success}">
+                    <div class="alert alert-success">
+                        <strong>✅ Thành công:</strong> ${success}
+                    </div>
+                </c:if>
+                
+                <!-- Filter Section -->
+                <div class="filter-section">
+                    <h2>🔍 Bộ lọc báo cáo</h2>
                     
-                    <!-- Detailed Report -->
-                    <c:if test="${reportType == 'detailed'}">
-                        <div class="report-header">
-                            <h3>📋 Nhật ký hoạt động chi tiết</h3>
+                    <form action="${pageContext.request.contextPath}/user-reports/generate" method="GET">
+                        <div class="filter-form">
+                            <div class="form-group">
+                                <label for="reportType">Loại báo cáo:</label>
+                                <select name="type" id="reportType" required onchange="toggleFilters()">
+                                    <option value="">-- Chọn loại báo cáo --</option>
+                                    <option value="summary" ${reportType == 'summary' ? 'selected' : ''}>Báo cáo tổng hợp</option>
+                                    <option value="detailed" ${reportType == 'detailed' ? 'selected' : ''}>Nhật ký chi tiết</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="startDate">Từ ngày:</label>
+                                <input type="date" name="startDate" id="startDate" class="form-control"
+                                       value="${not empty startDate ? startDate : defaultStartDate}" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="endDate">Đến ngày:</label>
+                                <input type="date" name="endDate" id="endDate" class="form-control"
+                                       value="${not empty endDate ? endDate : defaultEndDate}" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="role">Lọc theo vai trò:</label>
+                                <select name="role" id="role">
+                                    <option value="">Tất cả vai trò</option>
+                                    <c:forEach var="r" items="${roles}">
+                                        <option value="${r}" ${selectedRole == r ? 'selected' : ''}>${r}</option>
+                                    </c:forEach>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group" id="usernameFilter" style="display: none;">
+                                <label for="username">Tên đăng nhập:</label>
+                                <input type="text" name="username" id="username" class="form-control"
+                                       placeholder="Tìm theo username" value="${username}">
+                            </div>
+                            
+                            <div class="form-group" id="actionFilterGroup" style="display: none;">
+                                <label for="actionFilterSelect">Loại hành động:</label>
+                                <select name="actionFilter" id="actionFilterSelect">
+                                    <option value="">Tất cả hành động</option>
+                                    <option value="LOGIN" ${selectedAction == 'LOGIN' ? 'selected' : ''}>LOGIN</option>
+                                    <option value="LOGOUT" ${selectedAction == 'LOGOUT' ? 'selected' : ''}>LOGOUT</option>
+                                    <option value="CREATE_USER" ${selectedAction == 'CREATE_USER' ? 'selected' : ''}>CREATE_USER</option>
+                                    <option value="UPDATE_USER" ${selectedAction == 'UPDATE_USER' ? 'selected' : ''}>UPDATE_USER</option>
+                                    <option value="DELETE_USER" ${selectedAction == 'DELETE_USER' ? 'selected' : ''}>DELETE_USER</option>
+                                    <option value="VIEW_DASHBOARD" ${selectedAction == 'VIEW_DASHBOARD' ? 'selected' : ''}>VIEW_DASHBOARD</option>
+                                    <option value="GENERATE_REPORT" ${selectedAction == 'GENERATE_REPORT' ? 'selected' : ''}>GENERATE_REPORT</option>
+                                    <option value="EXPORT_REPORT" ${selectedAction == 'EXPORT_REPORT' ? 'selected' : ''}>EXPORT_REPORT</option>
+                                </select>
+                            </div>
                         </div>
                         
-                        <c:choose>
-                            <c:when test="${not empty detailedLogs}">
-                                <div class="result-count">
-                                    📊 Tìm thấy <strong>${detailedLogs.size()}</strong> nhật ký
-                                </div>
-                                
-                                <div class="table-container">
-                                    <table>
-                                        <thead>
-                                            <tr>
-                                                <th>Log ID</th>
-                                                <th>User ID</th>
-                                                <th>Username</th>
-                                                <th>Vai trò</th>
-                                                <th>Hành động</th>
-                                                <th>Chi tiết</th>
-                                                <th>IP Address</th>
-                                                <th>Thời gian</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <c:forEach var="log" items="${detailedLogs}">
-                                                <tr>
-                                                    <td><strong>#${log.logId}</strong></td>
-                                                    <td>${log.userId}</td>
-                                                    <td>${log.username}</td>
-                                                    <td><span class="badge badge-${log.role}">${log.role}</span></td>
-                                                    <td><strong>${log.action}</strong></td>
-                                                    <td>${log.details}</td>
-                                                    <td>${log.ipAddress}</td>
-                                                    <td><fmt:formatDate value="${log.logDate}" pattern="dd/MM/yyyy HH:mm:ss"/></td>
-                                                </tr>
-                                            </c:forEach>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </c:when>
-                            <c:otherwise>
-                                <div class="no-data">
-                                    <div class="no-data-icon">📭</div>
-                                    <h3>Không tìm thấy nhật ký</h3>
-                                    <p>Không có nhật ký nào cho các bộ lọc đã chọn</p>
-                                </div>
-                            </c:otherwise>
-                        </c:choose>
-                    </c:if>
+                        <div class="button-group">
+                            <button type="reset" class="btn btn-secondary">🔄 Xóa bộ lọc</button>
+                            <button type="submit" class="btn btn-primary">🔍 Tạo báo cáo</button>
+                        </div>
+                    </form>
                 </div>
-            </c:if>
+                
+                <!-- Report Results -->
+                <c:if test="${not empty reportType}">
+                    <div class="report-section">
+                        <c:if test="${reportType == 'summary'}">
+                            <div class="report-header">
+                                <h3>📈 Báo cáo tổng hợp hoạt động người dùng</h3>
+                            </div>
+                            
+                            <c:choose>
+                                <c:when test="${not empty summaryReports}">
+                                    <div class="stats-summary">
+                                        <p>Tổng người dùng <strong>${totalUsers}</strong></p>
+                                        <p>Tổng hành động <strong>${totalActions}</strong></p>
+                                        <p>Tổng đăng nhập <strong>${totalLogins}</strong></p>
+                                    </div>
+                                    
+                                    <div class="table-container">
+                                        <table>
+                                            <thead>
+                                                <tr>
+                                                    <th>User ID</th>
+                                                    <th>Username</th>
+                                                    <th>Email</th>
+                                                    <th>Vai trò</th>
+                                                    <th>Tổng hành động</th>
+                                                    <th>Ngày hoạt động</th>
+                                                    <th>Số lần đăng nhập</th>
+                                                    <th>TB hành động/ngày</th>
+                                                    <th>Hành động phổ biến</th>
+                                                    <th>Hoạt động đầu</th>
+                                                    <th>Hoạt động cuối</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <c:forEach var="report" items="${summaryReports}">
+                                                    <tr>
+                                                        <td><strong>#${report.userId}</strong></td>
+                                                        <td>${report.username}</td>
+                                                        <td>${report.email}</td>
+                                                        <td><span class="badge badge-${report.role}">${report.role}</span></td>
+                                                        <td>${report.totalActions}</td>
+                                                        <td>${report.activeDays}</td>
+                                                        <td>${report.loginCount}</td>
+                                                        <td><fmt:formatNumber value="${report.averageActionsPerDay}" pattern="#0.00"/></td>
+                                                        <td>${report.mostCommonAction}</td>
+                                                        <td><fmt:formatDate value="${report.firstActivity}" pattern="dd/MM/yyyy HH:mm"/></td>
+                                                        <td><fmt:formatDate value="${report.lastActivity}" pattern="dd/MM/yyyy HH:mm"/></td>
+                                                    </tr>
+                                                </c:forEach>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </c:when>
+                                <c:otherwise>
+                                    <div class="no-data">
+                                        <div class="no-data-icon">📭</div>
+                                        <h3>Không tìm thấy dữ liệu</h3>
+                                        <p>Không có dữ liệu cho các bộ lọc đã chọn</p>
+                                    </div>
+                                </c:otherwise>
+                            </c:choose>
+                        </c:if>
+                        
+                        <c:if test="${reportType == 'detailed'}">
+                            <div class="report-header">
+                                <h3>📋 Nhật ký hoạt động chi tiết</h3>
+                            </div>
+                            
+                            <c:choose>
+                                <c:when test="${not empty detailedLogs}">
+                                    <div class="result-count">
+                                        📊 Tìm thấy <strong>${detailedLogs.size()}</strong> nhật ký
+                                    </div>
+                                    
+                                    <div class="table-container">
+                                        <table>
+                                            <thead>
+                                                <tr>
+                                                    <th>Log ID</th>
+                                                    <th>User ID</th>
+                                                    <th>Username</th>
+                                                    <th>Vai trò</th>
+                                                    <th>Hành động</th>
+                                                    <th>Chi tiết</th>
+                                                    <th>IP Address</th>
+                                                    <th>Thời gian</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <c:forEach var="log" items="${detailedLogs}">
+                                                    <tr>
+                                                        <td><strong>#${log.logId}</strong></td>
+                                                        <td>${log.userId}</td>
+                                                        <td>${log.username}</td>
+                                                        <td><span class="badge badge-${log.role}">${log.role}</span></td>
+                                                        <td><strong>${log.action}</strong></td>
+                                                        <td>${log.details}</td>
+                                                        <td>${log.ipAddress}</td>
+                                                        <td><fmt:formatDate value="${log.logDate}" pattern="dd/MM/yyyy HH:mm:ss"/></td>
+                                                    </tr>
+                                                </c:forEach>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </c:when>
+                                <c:otherwise>
+                                    <div class="no-data">
+                                        <div class="no-data-icon">📭</div>
+                                        <h3>Không tìm thấy nhật ký</h3>
+                                        <p>Không có nhật ký nào cho các bộ lọc đã chọn</p>
+                                    </div>
+                                </c:otherwise>
+                            </c:choose>
+                        </c:if>
+                    </div>
+                </c:if>
+            </div>
         </div>
     </div>
     
     <script>
-        // Toggle additional filters based on report type
         function toggleFilters() {
             const reportType = document.getElementById('reportType').value;
             const usernameFilter = document.getElementById('usernameFilter');
@@ -576,7 +716,6 @@
             }
         }
         
-        // Initialize on page load
         window.onload = function() {
             toggleFilters();
         };

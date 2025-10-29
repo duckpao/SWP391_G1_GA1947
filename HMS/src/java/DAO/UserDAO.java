@@ -461,4 +461,29 @@ public class UserDAO extends DBContext {
             return affected > 0;
         }
     }
+
+    // Add to UserDAO.java
+    public static List<User> getAllUsers() {
+        List<User> users = new ArrayList<>();
+        String sql = "SELECT user_id, username, email, phone, role, is_active, last_login "
+                + "FROM Users WHERE is_active = 1 ORDER BY username";
+
+        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                User user = new User();
+                user.setUserId(rs.getInt("user_id"));
+                user.setUsername(rs.getString("username"));
+                user.setEmail(rs.getString("email"));
+                user.setPhone(rs.getString("phone"));
+                user.setRole(rs.getString("role"));
+                user.setIsActive(rs.getBoolean("is_active"));
+                user.setLastLogin(rs.getTimestamp("last_login"));
+                users.add(user);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return users;
+    }
 }

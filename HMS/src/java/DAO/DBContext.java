@@ -20,7 +20,7 @@ public class DBContext {
     }
     
     // Thêm method này để tạo connection mới mỗi lần gọi
-    public Connection getConnection() throws SQLException {
+    public static Connection getConnection() throws SQLException {
         try {
             String url = "jdbc:sqlserver://localhost:1433;databaseName=SWP391";
             String username = "sa";

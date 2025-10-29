@@ -18,6 +18,154 @@
                 font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
                 background: #f9fafb;
                 min-height: 100vh;
+                display: flex;
+            }
+
+            /* New navbar styling - horizontal navigation bar at top */
+            .navbar {
+                background: #ffffff;
+                border-bottom: 3px solid #3b82f6;
+                padding: 0 40px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                height: 70px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            }
+
+            .navbar-brand {
+                font-size: 20px;
+                font-weight: 700;
+                color: #1f2937;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .navbar-menu {
+                display: flex;
+                gap: 12px;
+                align-items: center;
+            }
+
+            .navbar-btn {
+                padding: 10px 16px;
+                border: none;
+                border-radius: 6px;
+                font-size: 13px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                text-decoration: none;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                white-space: nowrap;
+            }
+
+            .navbar-btn-primary {
+                background: #3b82f6;
+                color: white;
+            }
+
+            .navbar-btn-primary:hover {
+                background: #2563eb;
+                transform: translateY(-1px);
+                box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+            }
+
+            .navbar-btn-logout {
+                background: #ef4444;
+                color: white;
+            }
+
+            .navbar-btn-logout:hover {
+                background: #dc2626;
+            }
+
+            /* Added left sidebar styling */
+            .sidebar {
+                width: 260px;
+                background: #ffffff;
+                border-right: 1px solid #e5e7eb;
+                padding: 30px 0;
+                min-height: 100vh;
+                box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
+                position: fixed;
+                left: 0;
+                top: 0;
+                overflow-y: auto;
+            }
+
+            .sidebar-brand {
+                padding: 0 20px 30px;
+                border-bottom: 1px solid #e5e7eb;
+                margin-bottom: 20px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                font-size: 18px;
+                font-weight: 700;
+                color: #1f2937;
+            }
+
+            .sidebar-menu {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                padding: 0 12px;
+            }
+
+            .sidebar-item {
+                padding: 12px 16px;
+                border-radius: 8px;
+                text-decoration: none;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                font-size: 14px;
+                font-weight: 500;
+                color: #374151;
+                transition: all 0.3s ease;
+                border: none;
+                cursor: pointer;
+                background: none;
+                width: 100%;
+                text-align: left;
+            }
+
+            .sidebar-item:hover {
+                background: #f3f4f6;
+                color: #1f2937;
+            }
+
+            .sidebar-item-primary {
+                background: #eff6ff;
+                color: #3b82f6;
+                font-weight: 600;
+            }
+
+            .sidebar-item-primary:hover {
+                background: #dbeafe;
+            }
+
+            .sidebar-item-logout {
+                background: #fee2e2;
+                color: #dc2626;
+                font-weight: 600;
+                margin-top: 20px;
+                border-top: 1px solid #e5e7eb;
+                padding-top: 20px;
+            }
+
+            .sidebar-item-logout:hover {
+                background: #fecaca;
+            }
+
+            /* Updated main content layout to accommodate sidebar */
+            .main-content {
+                margin-left: 260px;
+                flex: 1;
                 padding: 20px;
             }
 
@@ -444,251 +592,335 @@
                 font-weight: 500;
                 margin-bottom: 16px;
             }
+
+            /* Responsive navbar for mobile */
+            @media (max-width: 768px) {
+                .navbar {
+                    padding: 0 20px;
+                    flex-wrap: wrap;
+                    height: auto;
+                    min-height: 70px;
+                }
+
+                .navbar-menu {
+                    width: 100%;
+                    flex-wrap: wrap;
+                    gap: 8px;
+                    padding: 10px 0;
+                }
+
+                .navbar-btn {
+                    padding: 8px 12px;
+                    font-size: 12px;
+                }
+            }
+
+            /* Responsive sidebar for mobile */
+            @media (max-width: 768px) {
+                body {
+                    flex-direction: column;
+                }
+
+                .sidebar {
+                    width: 100%;
+                    min-height: auto;
+                    position: relative;
+                    border-right: none;
+                    border-bottom: 1px solid #e5e7eb;
+                    padding: 15px 0;
+                }
+
+                .sidebar-brand {
+                    padding: 0 15px 15px;
+                    margin-bottom: 10px;
+                }
+
+                .sidebar-menu {
+                    padding: 0 8px;
+                    flex-direction: row;
+                    flex-wrap: wrap;
+                    gap: 6px;
+                }
+
+                .sidebar-item {
+                    padding: 8px 12px;
+                    font-size: 12px;
+                }
+
+                .main-content {
+                    margin-left: 0;
+                    padding: 15px;
+                }
+
+                .container {
+                    border-radius: 8px;
+                }
+
+                .header {
+                    padding: 20px;
+                }
+
+                .header h1 {
+                    font-size: 20px;
+                }
+            }
         </style>
     </head>
     <body>
-        <div class="container">
-            <div class="header">
-                <h1>
-                    <span class="header-icon">👥</span>
-                    Quản lý người dùng
-                </h1>
-                <div style="display: flex; gap: 12px;">
-                    <a class="btn btn-primary" href="${pageContext.request.contextPath}/user-reports/generate">
-                        ⚙️ Báo cáo
-                    </a>
-                    <a class="btn btn-primary" href="${pageContext.request.contextPath}/admin-dashboard/config">
-                        ⚙️ Cấu hình
-                    </a>
-                    <a class="btn btn-primary" href="${pageContext.request.contextPath}/admin/permissions">
-                        🔐 Phân quyền
-                    </a>
-                    <a class="btn btn-primary" href="${pageContext.request.contextPath}/admin-dashboard/create">
-                        ➕ Tạo tài khoản mới
-                    </a>
-                    <a class="btn btn-primary" href="${pageContext.request.contextPath}/logout">
-                        Logout 
-                    </a>
-                </div>
+        <!-- Added left sidebar with navigation menu -->
+        <div class="sidebar">
+            <div class="sidebar-brand">
+                <span>🏥</span>
+                Hệ thống
             </div>
+            <div class="sidebar-menu">
+                <!-- Added back to dashboard button at top -->
+                <a class="sidebar-item sidebar-item-primary" href="${pageContext.request.contextPath}/admin-dashboard">
+                    Dashboard
+                </a>
+                <a class="sidebar-item sidebar-item-primary" href="${pageContext.request.contextPath}/user-reports/generate">
+                    📊 Báo cáo
+                </a>
+                <a class="sidebar-item sidebar-item-primary" href="${pageContext.request.contextPath}/admin-dashboard/config">
+                    ⚙️ Cấu hình
+                </a>
+                <a class="sidebar-item sidebar-item-primary" href="${pageContext.request.contextPath}/admin/permissions">
+                    🔐 Phân quyền
+                </a>
+                <a class="sidebar-item sidebar-item-primary" href="${pageContext.request.contextPath}/admin-dashboard/create">
+                    ➕ Tạo tài khoản
+                </a>
+                <a class="sidebar-item sidebar-item-logout" href="${pageContext.request.contextPath}/logout">
+                    🚪 Logout
+                </a>
+            </div>
+        </div>
 
-            <div class="content">
-                <!-- Error/Success Messages -->
-                <c:if test="${not empty param.error}">
-                    <div style="padding: 16px; margin-bottom: 20px; background: #fee2e2; border: 1px solid #fca5a5; border-radius: 8px; color: #991b1b;">
-                        <strong>⚠️ Lỗi:</strong>
-                        <c:choose>
-                            <c:when test="${param.error == 'cannot_modify_admin'}">
-                                Không thể khóa/mở khóa tài khoản Admin!
-                            </c:when>
-                            <c:when test="${param.error == 'cannot_delete_admin'}">
-                                Không thể xóa tài khoản Admin!
-                            </c:when>
-                            <c:when test="${param.error == 'delete_failed'}">
-                                Xóa người dùng thất bại!
-                            </c:when>
-                            <c:otherwise>
-                                ${param.error}
-                            </c:otherwise>
-                        </c:choose>
-                    </div>
-                </c:if>
-
-                <c:if test="${not empty param.success}">
-                    <div style="padding: 16px; margin-bottom: 20px; background: #d1fae5; border: 1px solid #6ee7b7; border-radius: 8px; color: #065f46;">
-                        <strong>✅ Thành công:</strong>
-                        <c:choose>
-                            <c:when test="${param.success == 'deleted'}">
-                                Đã xóa người dùng thành công!
-                            </c:when>
-                            <c:otherwise>
-                                ${param.success}
-                            </c:otherwise>
-                        </c:choose>
-                    </div>
-                </c:if>
-
-                <div class="stats-bar">
-                    <div class="stat-card">
-                        <h3>Tổng người dùng</h3>
-                        <p>${totalUsers}</p>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Đang hoạt động</h3>
-                        <p>${activeUsers}</p>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Bị khóa</h3>
-                        <p>${lockedUsers}</p>
-                    </div>
+        <!-- Wrapped main content in main-content div -->
+        <div class="main-content">
+            <div class="container">
+                <div class="header">
+                    <h1>
+                        <span class="header-icon">👥</span>
+                        Quản lý người dùng
+                    </h1>
                 </div>
 
-                <!-- Filter Section -->
-                <div class="filter-section">
-                    <div class="filter-header">
-                        <h2>🔍 Tìm kiếm & Lọc</h2>
+                <div class="content">
+                    <c:if test="${not empty param.error}">
+                        <div style="padding: 16px; margin-bottom: 20px; background: #fee2e2; border: 1px solid #fca5a5; border-radius: 8px; color: #991b1b;">
+                            <strong>⚠️ Lỗi:</strong>
+                            <c:choose>
+                                <c:when test="${param.error == 'cannot_modify_admin'}">
+                                    Không thể khóa/mở khóa tài khoản Admin!
+                                </c:when>
+                                <c:when test="${param.error == 'cannot_delete_admin'}">
+                                    Không thể xóa tài khoản Admin!
+                                </c:when>
+                                <c:when test="${param.error == 'delete_failed'}">
+                                    Xóa người dùng thất bại!
+                                </c:when>
+                                <c:otherwise>
+                                    ${param.error}
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
+                    </c:if>
+
+                    <c:if test="${not empty param.success}">
+                        <div style="padding: 16px; margin-bottom: 20px; background: #d1fae5; border: 1px solid #6ee7b7; border-radius: 8px; color: #065f46;">
+                            <strong>✅ Thành công:</strong>
+                            <c:choose>
+                                <c:when test="${param.success == 'deleted'}">
+                                    Đã xóa người dùng thành công!
+                                </c:when>
+                                <c:otherwise>
+                                    ${param.success}
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
+                    </c:if>
+
+                    <div class="stats-bar">
+                        <div class="stat-card">
+                            <h3>Tổng người dùng</h3>
+                            <p>${totalUsers}</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Đang hoạt động</h3>
+                            <p>${activeUsers}</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Bị khóa</h3>
+                            <p>${lockedUsers}</p>
+                        </div>
                     </div>
 
-                    <form method="get" action="${pageContext.request.contextPath}/admin-dashboard">
-                        <div class="filter-grid">
-                            <div class="form-group">
-                                <label for="keyword">Từ khóa</label>
-                                <input 
-                                    type="text" 
-                                    id="keyword" 
-                                    name="keyword" 
-                                    class="form-control" 
-                                    placeholder="Tìm theo tên, email, số điện thoại..."
-                                    value="${param.keyword}">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="role">Vai trò</label>
-                                <select id="role" name="role" class="form-control">
-                                    <option value="">-- Tất cả vai trò --</option>
-                                    <option value="Admin" ${param.role == 'Admin' ? 'selected' : ''}>Admin</option>
-                                    <option value="Doctor" ${param.role == 'Doctor' ? 'selected' : ''}>Doctor</option>
-                                    <option value="Pharmacist" ${param.role == 'Pharmacist' ? 'selected' : ''}>Pharmacist</option>
-                                    <option value="Manager" ${param.role == 'Manager' ? 'selected' : ''}>Manager</option>
-                                    <option value="Auditor" ${param.role == 'Auditor' ? 'selected' : ''}>Auditor</option>
-                                    <option value="ProcurementOfficer" ${param.role == 'ProcurementOfficer' ? 'selected' : ''}>Procurement Officer</option>
-                                    <option value="Supplier" ${param.role == 'Supplier' ? 'selected' : ''}>Supplier</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="status">Trạng thái</label>
-                                <select id="status" name="status" class="form-control">
-                                    <option value="">-- Tất cả trạng thái --</option>
-                                    <option value="active" ${param.status == 'active' ? 'selected' : ''}>Đang hoạt động</option>
-                                    <option value="locked" ${param.status == 'locked' ? 'selected' : ''}>Bị khóa</option>
-                                </select>
-                            </div>
+                    <!-- Filter Section -->
+                    <div class="filter-section">
+                        <div class="filter-header">
+                            <h2>🔍 Tìm kiếm & Lọc</h2>
                         </div>
 
-                        <div class="filter-actions">
-                            <a href="${pageContext.request.contextPath}/admin-dashboard" class="btn btn-reset">
-                                🔄 Xóa bộ lọc
-                            </a>
-                            <button type="submit" class="btn btn-primary">
-                                🔍 Tìm kiếm
-                            </button>
-                        </div>
+                        <form method="get" action="${pageContext.request.contextPath}/admin-dashboard">
+                            <div class="filter-grid">
+                                <div class="form-group">
+                                    <label for="keyword">Từ khóa</label>
+                                    <input 
+                                        type="text" 
+                                        id="keyword" 
+                                        name="keyword" 
+                                        class="form-control" 
+                                        placeholder="Tìm theo tên, email, số điện thoại..."
+                                        value="${param.keyword}">
+                                </div>
 
-                        <!-- Active Filters Display -->
-                        <c:if test="${not empty param.keyword || not empty param.role || not empty param.status}">
-                            <div class="active-filters">
-                                <c:if test="${not empty param.keyword}">
-                                    <span class="filter-tag">
-                                        Từ khóa: "${param.keyword}"
-                                        <a href="${pageContext.request.contextPath}/admin-dashboard?role=${param.role}&status=${param.status}">
-                                            <button type="button">×</button>
-                                        </a>
-                                    </span>
-                                </c:if>
-                                <c:if test="${not empty param.role}">
-                                    <span class="filter-tag">
-                                        Vai trò: ${param.role}
-                                        <a href="${pageContext.request.contextPath}/admin-dashboard?keyword=${param.keyword}&status=${param.status}">
-                                            <button type="button">×</button>
-                                        </a>
-                                    </span>
-                                </c:if>
-                                <c:if test="${not empty param.status}">
-                                    <span class="filter-tag">
-                                        Trạng thái: ${param.status == 'active' ? 'Đang hoạt động' : 'Bị khóa'}
-                                        <a href="${pageContext.request.contextPath}/admin-dashboard?keyword=${param.keyword}&role=${param.role}">
-                                            <button type="button">×</button>
-                                        </a>
-                                    </span>
-                                </c:if>
+                                <div class="form-group">
+                                    <label for="role">Vai trò</label>
+                                    <select id="role" name="role" class="form-control">
+                                        <option value="">-- Tất cả vai trò --</option>
+                                        <option value="Admin" ${param.role == 'Admin' ? 'selected' : ''}>Admin</option>
+                                        <option value="Doctor" ${param.role == 'Doctor' ? 'selected' : ''}>Doctor</option>
+                                        <option value="Pharmacist" ${param.role == 'Pharmacist' ? 'selected' : ''}>Pharmacist</option>
+                                        <option value="Manager" ${param.role == 'Manager' ? 'selected' : ''}>Manager</option>
+                                        <option value="Auditor" ${param.role == 'Auditor' ? 'selected' : ''}>Auditor</option>
+                                        <option value="ProcurementOfficer" ${param.role == 'ProcurementOfficer' ? 'selected' : ''}>Procurement Officer</option>
+                                        <option value="Supplier" ${param.role == 'Supplier' ? 'selected' : ''}>Supplier</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="status">Trạng thái</label>
+                                    <select id="status" name="status" class="form-control">
+                                        <option value="">-- Tất cả trạng thái --</option>
+                                        <option value="active" ${param.status == 'active' ? 'selected' : ''}>Đang hoạt động</option>
+                                        <option value="locked" ${param.status == 'locked' ? 'selected' : ''}>Bị khóa</option>
+                                    </select>
+                                </div>
                             </div>
-                        </c:if>
-                    </form>
-                </div>
 
-                <!-- Result Count -->
-                <c:if test="${not empty users}">
-                    <div class="result-count">
-                        📊 Tìm thấy <strong>${users.size()}</strong> người dùng
+                            <div class="filter-actions">
+                                <a href="${pageContext.request.contextPath}/admin-dashboard" class="btn btn-reset">
+                                    🔄 Xóa bộ lọc
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    🔍 Tìm kiếm
+                                </button>
+                            </div>
+
+                            <!-- Active Filters Display -->
+                            <c:if test="${not empty param.keyword || not empty param.role || not empty param.status}">
+                                <div class="active-filters">
+                                    <c:if test="${not empty param.keyword}">
+                                        <span class="filter-tag">
+                                            Từ khóa: "${param.keyword}"
+                                            <a href="${pageContext.request.contextPath}/admin-dashboard?role=${param.role}&status=${param.status}">
+                                                <button type="button">×</button>
+                                            </a>
+                                        </span>
+                                    </c:if>
+                                    <c:if test="${not empty param.role}">
+                                        <span class="filter-tag">
+                                            Vai trò: ${param.role}
+                                            <a href="${pageContext.request.contextPath}/admin-dashboard?keyword=${param.keyword}&status=${param.status}">
+                                                <button type="button">×</button>
+                                            </a>
+                                        </span>
+                                    </c:if>
+                                    <c:if test="${not empty param.status}">
+                                        <span class="filter-tag">
+                                            Trạng thái: ${param.status == 'active' ? 'Đang hoạt động' : 'Bị khóa'}
+                                            <a href="${pageContext.request.contextPath}/admin-dashboard?keyword=${param.keyword}&role=${param.role}">
+                                                <button type="button">×</button>
+                                            </a>
+                                        </span>
+                                    </c:if>
+                                </div>
+                            </c:if>
+                        </form>
                     </div>
-                </c:if>
 
-                <div class="table-container">
-                    <c:choose>
-                        <c:when test="${empty users}">
-                            <div class="empty-state">
-                                <div class="empty-state-icon">📭</div>
-                                <h3>Không tìm thấy người dùng nào</h3>
-                                <p>Thử thay đổi bộ lọc hoặc tạo tài khoản mới</p>
-                            </div>
-                        </c:when>
-                        <c:otherwise>
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Tên đăng nhập</th>
-                                        <th>Email</th>
-                                        <th>Số điện thoại</th>
-                                        <th>Vai trò</th>
-                                        <th>Trạng thái</th>
-                                        <th>Thao tác</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <c:forEach var="u" items="${users}">
+                    <!-- Result Count -->
+                    <c:if test="${not empty users}">
+                        <div class="result-count">
+                            📊 Tìm thấy <strong>${users.size()}</strong> người dùng
+                        </div>
+                    </c:if>
+
+                    <div class="table-container">
+                        <c:choose>
+                            <c:when test="${empty users}">
+                                <div class="empty-state">
+                                    <div class="empty-state-icon">📭</div>
+                                    <h3>Không tìm thấy người dùng nào</h3>
+                                    <p>Thử thay đổi bộ lọc hoặc tạo tài khoản mới</p>
+                                </div>
+                            </c:when>
+                            <c:otherwise>
+                                <table>
+                                    <thead>
                                         <tr>
-                                            <td><strong>#${u.userId}</strong></td>
-                                            <td>${u.username}</td>
-                                            <td>${u.email != null ? u.email : '-'}</td>
-                                            <td>${u.phone != null ? u.phone : '-'}</td>
-                                            <td>
-                                                <span class="role-badge role-${u.role.toLowerCase()}">
-                                                    ${u.role}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span class="badge ${u.isActive ? 'badge-active' : 'badge-locked'}">
-                                                    ${u.isActive ? '✓ Active' : '🔒 Locked'}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <div class="action-buttons">
-                                                    <c:choose>
-                                                        <c:when test="${u.role == 'Admin'}">
-                                                            <span class="badge" style="background: #fef3c7; color: #92400e;">
-                                                                🛡️ Tài khoản được bảo vệ
-                                                            </span>
-                                                        </c:when>
-                                                        <c:otherwise>
-                                                            <a class="btn btn-edit" href="${pageContext.request.contextPath}/admin-dashboard/edit?id=${u.userId}">
-                                                                ✏️ Sửa
-                                                            </a>
-
-                                                            <!-- Removed "Chuyển sang Supplier" button -->
-
-                                                            <form class="inline" action="${pageContext.request.contextPath}/admin-dashboard/toggle" method="post">
-                                                                <input type="hidden" name="id" value="${u.userId}" />
-                                                                <input type="hidden" name="active" value="${!u.isActive}" />
-                                                                <button class="btn ${u.isActive ? 'btn-toggle' : 'btn-unlock'}" type="submit">
-                                                                    ${u.isActive ? '🔒 Khóa' : '🔓 Mở'}
-                                                                </button>
-                                                            </form>
-
-                                                            <button class="btn btn-delete" onclick="confirmDelete(${u.userId}, '${u.username}')">
-                                                                🗑️ Xóa
-                                                            </button>
-                                                        </c:otherwise>
-                                                    </c:choose>
-                                                </div>
-                                            </td>
+                                            <th>ID</th>
+                                            <th>Tên đăng nhập</th>
+                                            <th>Email</th>
+                                            <th>Số điện thoại</th>
+                                            <th>Vai trò</th>
+                                            <th>Trạng thái</th>
+                                            <th>Thao tác</th>
                                         </tr>
-                                    </c:forEach>
-                                </tbody>
-                            </table>
-                        </c:otherwise>
-                    </c:choose>
+                                    </thead>
+                                    <tbody>
+                                        <c:forEach var="u" items="${users}">
+                                            <tr>
+                                                <td><strong>#${u.userId}</strong></td>
+                                                <td>${u.username}</td>
+                                                <td>${u.email != null ? u.email : '-'}</td>
+                                                <td>${u.phone != null ? u.phone : '-'}</td>
+                                                <td>
+                                                    <span class="role-badge role-${u.role.toLowerCase()}">
+                                                        ${u.role}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge ${u.isActive ? 'badge-active' : 'badge-locked'}">
+                                                        ${u.isActive ? '✓ Active' : '🔒 Locked'}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <div class="action-buttons">
+                                                        <c:choose>
+                                                            <c:when test="${u.role == 'Admin'}">
+                                                                <span class="badge" style="background: #fef3c7; color: #92400e;">
+                                                                    🛡️ Tài khoản được bảo vệ
+                                                                </span>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <a class="btn btn-edit" href="${pageContext.request.contextPath}/admin-dashboard/edit?id=${u.userId}">
+                                                                    ✏️ Sửa
+                                                                </a>
+
+                                                                <form class="inline" action="${pageContext.request.contextPath}/admin-dashboard/toggle" method="post">
+                                                                    <input type="hidden" name="id" value="${u.userId}" />
+                                                                    <input type="hidden" name="active" value="${!u.isActive}" />
+                                                                    <button class="btn ${u.isActive ? 'btn-toggle' : 'btn-unlock'}" type="submit">
+                                                                        ${u.isActive ? '🔒 Khóa' : '🔓 Mở'}
+                                                                    </button>
+                                                                </form>
+
+                                                                <button class="btn btn-delete" onclick="confirmDelete(${u.userId}, '${u.username}')">
+                                                                    🗑️ Xóa
+                                                                </button>
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </c:forEach>
+                                    </tbody>
+                                </table>
+                            </c:otherwise>
+                        </c:choose>
+                    </div>
                 </div>
             </div>
         </div>

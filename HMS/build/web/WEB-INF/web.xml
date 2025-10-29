@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app version="6.0" xmlns="https://jakarta.ee/xml/ns/jakartaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd">
+    
+    <!-- ============================================ -->
+    <!-- EXISTING SERVLETS -->
+    <!-- ============================================ -->
+    
     <!-- User Management Servlets -->
     <servlet>
         <servlet-name>UserServlet</servlet-name>
@@ -25,11 +30,13 @@
         <servlet-name>ManagePermissionsServlet</servlet-name>
         <servlet-class>Controller.ManagePermissionsServlet</servlet-class>
     </servlet>
+    
     <!-- System Configuration Servlet -->
     <servlet>
         <servlet-name>SystemConfigServlet</servlet-name>
         <servlet-class>Controller.SystemConfigServlet</servlet-class>
     </servlet>
+    
     <!-- OTP and Reset Verification Servlets -->
     <servlet>
         <servlet-name>VerifyOTPServlet</servlet-name>
@@ -39,7 +46,8 @@
         <servlet-name>VerifyResetServlet</servlet-name>
         <servlet-class>Controller.VerifyResetServlet</servlet-class>
     </servlet>
-    <!-- User Management Servlet Mappings -->
+    
+    <!-- User Report and Supplier Servlets -->
     <servlet>
         <servlet-name>UserReportServlet</servlet-name>
         <servlet-class>Controller.UserReportServlet</servlet-class>
@@ -72,42 +80,7 @@
         <servlet-name>PurchaseOrderHistoryServlet</servlet-name>
         <servlet-class>Controller.PurchaseOrderHistoryServlet</servlet-class>
     </servlet>
-    <servlet-mapping>
-        <servlet-name>UserServlet</servlet-name>
-        <url-pattern>/admin-dashboard</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>ToggleUserServlet</servlet-name>
-        <url-pattern>/admin-dashboard/toggle</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>EditServlet</servlet-name>
-        <url-pattern>/admin-dashboard/edit</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>CreateServlet</servlet-name>
-        <url-pattern>/admin-dashboard/create</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>DeleteUserServlet</servlet-name>
-        <url-pattern>/admin-dashboard/delete</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>ManagePermissionsServlet</servlet-name>
-        <url-pattern>/admin/permissions</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>SystemConfigServlet</servlet-name>
-        <url-pattern>/admin-dashboard/config</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>VerifyOTPServlet</servlet-name>
-        <url-pattern>/VerifyOTPServlet</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>VerifyResetServlet</servlet-name>
-        <url-pattern>/VerifyResetServlet</url-pattern>
-    </servlet-mapping>
+    
     <!-- Medication Request Servlets -->
     <servlet>
         <servlet-name>ManageRequestsServlet</servlet-name>
@@ -129,6 +102,7 @@
         <servlet-name>ViewMedicineServlet</servlet-name>
         <servlet-class>Controller.ViewMedicineServlet</servlet-class>
     </servlet>
+    
     <!-- Pharmacist Dashboard Servlet -->
     <servlet>
         <servlet-name>pharmacistdashboard</servlet-name>
@@ -146,18 +120,7 @@
         <servlet-name>CrudMedicine</servlet-name>
         <servlet-class>Controller.CrudMedicine</servlet-class>
     </servlet>
-    <servlet-mapping>
-        <servlet-name>ManageBatches</servlet-name>
-        <url-pattern>/pharmacist/manage-batch</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>RecordExpiredDamagedServlet</servlet-name>
-        <url-pattern>/pharmacist/recordExpiredDamaged</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>CrudMedicine</servlet-name>
-        <url-pattern>/Medicine/*</url-pattern>
-    </servlet-mapping>
+    
     <!-- Manager Dashboard and Stock Management Servlets -->
     <servlet>
         <servlet-name>ManagerDashboardServlet</servlet-name>
@@ -195,6 +158,7 @@
         <servlet-name>InventoryReportServlet</servlet-name>
         <servlet-class>Controller.InventoryReportServlet</servlet-class>
     </servlet>
+    
     <!-- Authentication Servlets -->
     <servlet>
         <servlet-name>RegisterServlet</servlet-name>
@@ -232,6 +196,58 @@
         <servlet-name>CreateMedicationRequestServlet</servlet-name>
         <servlet-class>Controller.CreateMedicationRequestServlet</servlet-class>
     </servlet>
+    
+    <!-- ============================================ -->
+    <!-- CHAT CONTROLLER SERVLET (NEW) -->
+    <!-- ============================================ -->
+    <servlet>
+        <servlet-name>ChatControllerServlet</servlet-name>
+        <servlet-class>Controller.ChatControllerServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    
+    <!-- ============================================ -->
+    <!-- SERVLET MAPPINGS -->
+    <!-- ============================================ -->
+    
+    <!-- User Management Servlet Mappings -->
+    <servlet-mapping>
+        <servlet-name>UserServlet</servlet-name>
+        <url-pattern>/admin-dashboard</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ToggleUserServlet</servlet-name>
+        <url-pattern>/admin-dashboard/toggle</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>EditServlet</servlet-name>
+        <url-pattern>/admin-dashboard/edit</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CreateServlet</servlet-name>
+        <url-pattern>/admin-dashboard/create</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>DeleteUserServlet</servlet-name>
+        <url-pattern>/admin-dashboard/delete</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ManagePermissionsServlet</servlet-name>
+        <url-pattern>/admin/permissions</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>SystemConfigServlet</servlet-name>
+        <url-pattern>/admin-dashboard/config</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>VerifyOTPServlet</servlet-name>
+        <url-pattern>/VerifyOTPServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>VerifyResetServlet</servlet-name>
+        <url-pattern>/VerifyResetServlet</url-pattern>
+    </servlet-mapping>
+    
     <!-- Medication Request Servlet Mappings -->
     <servlet-mapping>
         <servlet-name>DoctorDashboardServlet</servlet-name>
@@ -261,11 +277,25 @@
         <servlet-name>ViewMedicineServlet</servlet-name>
         <url-pattern>/view-medicine</url-pattern>
     </servlet-mapping>
+    
     <!-- Pharmacist Dashboard Mapping -->
     <servlet-mapping>
         <servlet-name>pharmacistdashboard</servlet-name>
         <url-pattern>/pharmacist-dashboard</url-pattern>
     </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ManageBatches</servlet-name>
+        <url-pattern>/pharmacist/manage-batch</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>RecordExpiredDamagedServlet</servlet-name>
+        <url-pattern>/pharmacist/recordExpiredDamaged</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CrudMedicine</servlet-name>
+        <url-pattern>/Medicine/*</url-pattern>
+    </servlet-mapping>
+    
     <!-- Manager Dashboard and Stock Management Mappings -->
     <servlet-mapping>
         <servlet-name>ManagerDashboardServlet</servlet-name>
@@ -307,6 +337,7 @@
         <servlet-name>InventoryReportServlet</servlet-name>
         <url-pattern>/inventory-report</url-pattern>
     </servlet-mapping>
+    
     <!-- Authentication Servlet Mappings -->
     <servlet-mapping>
         <servlet-name>RegisterServlet</servlet-name>
@@ -336,9 +367,8 @@
         <servlet-name>HomeServlet</servlet-name>
         <url-pattern>/home</url-pattern>
     </servlet-mapping>
-    <!-- supplier-->
-    <!-- Convert normal user to Supplier -->
-    <!-- Welcome File -->
+    
+    <!-- Supplier Servlet Mappings -->
     <servlet-mapping>
         <servlet-name>UserReportServlet</servlet-name>
         <url-pattern>/user-reports/generate</url-pattern>
@@ -371,7 +401,22 @@
         <servlet-name>PurchaseOrderHistoryServlet</servlet-name>
         <url-pattern>/purchase-orders/history</url-pattern>
     </servlet-mapping>
+    
+    <!-- ============================================ -->
+    <!-- CHAT CONTROLLER SERVLET MAPPINGS (NEW) -->
+    <!-- ============================================ -->
+    <servlet-mapping>
+        <servlet-name>ChatControllerServlet</servlet-name>
+        <url-pattern>/chat</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ChatControllerServlet</servlet-name>
+        <url-pattern>/chat/*</url-pattern>
+    </servlet-mapping>
+    
+    <!-- Welcome File -->
     <welcome-file-list>
         <welcome-file>login.jsp</welcome-file>
     </welcome-file-list>
+    
 </web-app>

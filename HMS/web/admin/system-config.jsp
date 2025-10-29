@@ -17,17 +17,103 @@
 
             body {
                 font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-                background: #f3f4f6;
+                background: #f9fafb;
                 min-height: 100vh;
+                display: flex;
+            }
+
+            /* Updated sidebar styling to match admin-dashboard */
+            .sidebar {
+                width: 260px;
+                background: #ffffff;
+                border-right: 1px solid #e5e7eb;
+                padding: 30px 0;
+                min-height: 100vh;
+                box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
+                position: fixed;
+                left: 0;
+                top: 0;
+                overflow-y: auto;
+            }
+
+            .sidebar-brand {
+                padding: 0 20px 30px;
+                border-bottom: 1px solid #e5e7eb;
+                margin-bottom: 20px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                font-size: 18px;
+                font-weight: 700;
+                color: #1f2937;
+            }
+
+            .sidebar-menu {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                padding: 0 12px;
+            }
+
+            .sidebar-item {
+                padding: 12px 16px;
+                border-radius: 8px;
+                text-decoration: none;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                font-size: 14px;
+                font-weight: 500;
+                color: #374151;
+                transition: all 0.3s ease;
+                border: none;
+                cursor: pointer;
+                background: none;
+                width: 100%;
+                text-align: left;
+            }
+
+            .sidebar-item:hover {
+                background: #f3f4f6;
+                color: #1f2937;
+            }
+
+            .sidebar-item-primary {
+                background: #eff6ff;
+                color: #3b82f6;
+                font-weight: 600;
+            }
+
+            .sidebar-item-primary:hover {
+                background: #dbeafe;
+            }
+
+            .sidebar-item-logout {
+                background: #fee2e2;
+                color: #dc2626;
+                font-weight: 600;
+                margin-top: 20px;
+                border-top: 1px solid #e5e7eb;
+                padding-top: 20px;
+            }
+
+            .sidebar-item-logout:hover {
+                background: #fecaca;
+            }
+
+            /* Updated main content layout to match admin-dashboard */
+            .main-content {
+                margin-left: 260px;
+                flex: 1;
                 padding: 20px;
             }
 
             .container {
-                max-width: 1200px;
+                max-width: 1400px;
                 margin: 0 auto;
                 background: #fff;
                 border-radius: 16px;
-                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
                 overflow: hidden;
             }
 
@@ -38,7 +124,7 @@
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                border-bottom: 2px solid #e5e7eb;
+                border-bottom: 3px solid #3b82f6;
             }
 
             .header h1 {
@@ -52,7 +138,7 @@
             .header-icon {
                 width: 40px;
                 height: 40px;
-                background: #f0f9ff;
+                background: #eff6ff;
                 border-radius: 10px;
                 display: flex;
                 align-items: center;
@@ -97,7 +183,7 @@
             .btn-danger {
                 background: #ef4444;
                 color: white;
-                padding: 6px 12px;
+                padding: 8px 16px;
                 font-size: 13px;
             }
 
@@ -112,6 +198,15 @@
 
             .btn-add:hover {
                 background: #2563eb;
+            }
+
+            .btn-cancel {
+                background: #e5e7eb;
+                color: #374151;
+            }
+
+            .btn-cancel:hover {
+                background: #d1d5db;
             }
 
             .content {
@@ -332,15 +427,6 @@
                 justify-content: flex-end;
             }
 
-            .btn-cancel {
-                background: #e5e7eb;
-                color: #374151;
-            }
-
-            .btn-cancel:hover {
-                background: #d1d5db;
-            }
-
             .save-all-section {
                 background: #10b981;
                 color: white;
@@ -357,6 +443,53 @@
             }
 
             @media (max-width: 768px) {
+                body {
+                    flex-direction: column;
+                }
+
+                .sidebar {
+                    width: 100%;
+                    min-height: auto;
+                    position: relative;
+                    border-right: none;
+                    border-bottom: 1px solid #e5e7eb;
+                    padding: 15px 0;
+                }
+
+                .sidebar-brand {
+                    padding: 0 15px 15px;
+                    margin-bottom: 10px;
+                }
+
+                .sidebar-menu {
+                    padding: 0 8px;
+                    flex-direction: row;
+                    flex-wrap: wrap;
+                    gap: 6px;
+                }
+
+                .sidebar-item {
+                    padding: 8px 12px;
+                    font-size: 12px;
+                }
+
+                .main-content {
+                    margin-left: 0;
+                    padding: 15px;
+                }
+
+                .container {
+                    border-radius: 8px;
+                }
+
+                .header {
+                    padding: 20px;
+                }
+
+                .header h1 {
+                    font-size: 20px;
+                }
+
                 .config-item,
                 .form-row {
                     grid-template-columns: 1fr;
@@ -365,138 +498,166 @@
         </style>
     </head>
     <body>
-        <div class="container">
-            <div class="header">
-                <h1>
-                    <span class="header-icon">⚙️</span>
-                    Cấu hình hệ thống
-                </h1>
-                <a class="btn btn-primary" href="${pageContext.request.contextPath}/admin-dashboard">
+        <!-- Updated sidebar to match admin-dashboard structure -->
+        <div class="sidebar">
+            <div class="sidebar-brand">
+                <span>🏥</span>
+                Hệ thống
+            </div>
+            <div class="sidebar-menu">
+                <a class="sidebar-item sidebar-item-primary" href="${pageContext.request.contextPath}/admin-dashboard">
                     ← Quay lại Dashboard
                 </a>
+                <a class="sidebar-item sidebar-item-primary" href="${pageContext.request.contextPath}/user-reports/generate">
+                    📊 Báo cáo
+                </a>
+                <a class="sidebar-item sidebar-item-primary" href="${pageContext.request.contextPath}/admin-dashboard/config">
+                    ⚙️ Cấu hình
+                </a>
+                <a class="sidebar-item sidebar-item-primary" href="${pageContext.request.contextPath}/admin/permissions">
+                    🔐 Phân quyền
+                </a>
+                <a class="sidebar-item sidebar-item-primary" href="${pageContext.request.contextPath}/admin-dashboard/create">
+                    ➕ Tạo tài khoản
+                </a>
+                <a class="sidebar-item sidebar-item-logout" href="${pageContext.request.contextPath}/logout">
+                    🚪 Logout
+                </a>
             </div>
+        </div>
 
-            <div class="content">
-                <c:if test="${not empty param.success}">
-                    <div class="alert alert-success">
-                        <strong>✓</strong>
-                        <c:choose>
-                            <c:when test="${param.success == 'updated'}">Cập nhật cấu hình thành công!</c:when>
-                            <c:when test="${param.success == 'added'}">Thêm cấu hình mới thành công!</c:when>
-                            <c:when test="${param.success == 'deleted'}">Xóa cấu hình thành công!</c:when>
-                            <c:otherwise>${param.success}</c:otherwise>
-                        </c:choose>
-                    </div>
-                </c:if>
-
-                <c:if test="${not empty param.error}">
-                    <div class="alert alert-error">
-                        <strong>⚠</strong>
-                        <c:choose>
-                            <c:when test="${param.error == 'update_failed'}">Cập nhật cấu hình thất bại!</c:when>
-                            <c:when test="${param.error == 'add_failed'}">Thêm cấu hình thất bại!</c:when>
-                            <c:when test="${param.error == 'delete_failed'}">Xóa cấu hình thất bại!</c:when>
-                            <c:when test="${param.error == 'key_exists'}">Key cấu hình đã tồn tại!</c:when>
-                            <c:when test="${param.error == 'empty_key'}">Key cấu hình không được để trống!</c:when>
-                            <c:when test="${param.error == 'cannot_delete_critical'}">Không thể xóa cấu hình quan trọng!</c:when>
-                            <c:otherwise>${param.error}</c:otherwise>
-                        </c:choose>
-                    </div>
-                </c:if>
-
-                <div class="info-box">
-                    <h3>📋 Thông tin quan trọng</h3>
-                    <p>
-                        Trang này cho phép bạn cấu hình các tham số hệ thống như ngưỡng tồn kho thấp, 
-                        số lần đăng nhập sai tối đa, thời gian cách ly, v.v. 
-                        <strong>Vui lòng cẩn thận khi thay đổi các cấu hình này.</strong>
-                    </p>
+        <!-- Updated main content wrapper -->
+        <div class="main-content">
+            <div class="container">
+                <div class="header">
+                    <h1>
+                        <span class="header-icon">⚙️</span>
+                        Cấu hình hệ thống
+                    </h1>
                 </div>
 
-                <form method="post" action="${pageContext.request.contextPath}/admin-dashboard/config">
-                    <input type="hidden" name="action" value="update" />
-
-                    <div class="config-section">
-                        <div class="section-header">
-                            <h2>🔧 Cấu hình hiện tại</h2>
-                            <button type="button" class="btn btn-add" onclick="toggleAddForm()">
-                                ➕ Thêm cấu hình mới
-                            </button>
+                <div class="content">
+                    <c:if test="${not empty param.success}">
+                        <div class="alert alert-success">
+                            <strong>✓</strong>
+                            <c:choose>
+                                <c:when test="${param.success == 'updated'}">Cập nhật cấu hình thành công!</c:when>
+                                <c:when test="${param.success == 'added'}">Thêm cấu hình mới thành công!</c:when>
+                                <c:when test="${param.success == 'deleted'}">Xóa cấu hình thành công!</c:when>
+                                <c:otherwise>${param.success}</c:otherwise>
+                            </c:choose>
                         </div>
+                    </c:if>
 
-                        <div class="config-grid">
-                            <c:forEach var="config" items="${configs}">
-                                <div class="config-item">
-                                    <div class="config-key">
-                                        <div>${config.configKey}</div>
-                                        <c:if test="${config.configKey == 'low_stock_threshold' || 
-                                                      config.configKey == 'max_failed_attempts' || 
-                                                      config.configKey == 'quarantine_period_days'}">
-                                            <span class="critical-badge">🛡️ Quan trọng</span>
-                                        </c:if>
-                                        <div class="timestamp">
-                                            <fmt:formatDate value="${config.updatedAt}" pattern="dd/MM/yyyy HH:mm" />
+                    <c:if test="${not empty param.error}">
+                        <div class="alert alert-error">
+                            <strong>⚠</strong>
+                            <c:choose>
+                                <c:when test="${param.error == 'update_failed'}">Cập nhật cấu hình thất bại!</c:when>
+                                <c:when test="${param.error == 'add_failed'}">Thêm cấu hình thất bại!</c:when>
+                                <c:when test="${param.error == 'delete_failed'}">Xóa cấu hình thất bại!</c:when>
+                                <c:when test="${param.error == 'key_exists'}">Key cấu hình đã tồn tại!</c:when>
+                                <c:when test="${param.error == 'empty_key'}">Key cấu hình không được để trống!</c:when>
+                                <c:when test="${param.error == 'cannot_delete_critical'}">Không thể xóa cấu hình quan trọng!</c:when>
+                                <c:otherwise>${param.error}</c:otherwise>
+                            </c:choose>
+                        </div>
+                    </c:if>
+
+                    <div class="info-box">
+                        <h3>📋 Thông tin quan trọng</h3>
+                        <p>
+                            Trang này cho phép bạn cấu hình các tham số hệ thống như ngưỡng tồn kho thấp, 
+                            số lần đăng nhập sai tối đa, thời gian cách ly, v.v. 
+                            <strong>Vui lòng cẩn thận khi thay đổi các cấu hình này.</strong>
+                        </p>
+                    </div>
+
+                    <form method="post" action="${pageContext.request.contextPath}/admin-dashboard/config">
+                        <input type="hidden" name="action" value="update" />
+
+                        <div class="config-section">
+                            <div class="section-header">
+                                <h2>🔧 Cấu hình hiện tại</h2>
+                                <button type="button" class="btn btn-add" onclick="toggleAddForm()">
+                                    ➕ Thêm cấu hình mới
+                                </button>
+                            </div>
+
+                            <div class="config-grid">
+                                <c:forEach var="config" items="${configs}">
+                                    <div class="config-item">
+                                        <div class="config-key">
+                                            <div>${config.configKey}</div>
+                                            <c:if test="${config.configKey == 'low_stock_threshold' || 
+                                                          config.configKey == 'max_failed_attempts' || 
+                                                          config.configKey == 'quarantine_period_days'}">
+                                                <span class="critical-badge">🛡️ Quan trọng</span>
+                                            </c:if>
+                                            <div class="timestamp">
+                                                <fmt:formatDate value="${config.updatedAt}" pattern="dd/MM/yyyy HH:mm" />
+                                            </div>
+                                        </div>
+
+                                        <div class="config-value">
+                                            <input type="hidden" name="config_key" value="${config.configKey}" />
+                                            <input type="text" name="config_value" class="form-control" 
+                                                   value="${config.configValue}" />
+                                        </div>
+
+                                        <div class="config-actions">
+                                            <c:if test="${config.configKey != 'low_stock_threshold' && 
+                                                          config.configKey != 'max_failed_attempts' && 
+                                                          config.configKey != 'quarantine_period_days'}">
+                                                <button type="button" class="btn btn-danger" 
+                                                        onclick="confirmDelete('${config.configKey}')">
+                                                    🗑️ Xóa
+                                                </button>
+                                            </c:if>
                                         </div>
                                     </div>
+                                </c:forEach>
+                            </div>
 
-                                    <div class="config-value">
-                                        <input type="hidden" name="config_key" value="${config.configKey}" />
-                                        <input type="text" name="config_value" class="form-control" 
-                                               value="${config.configValue}" />
+                            <div id="addConfigForm" class="add-config-form">
+                                <h3 style="margin-bottom: 16px; color: #1f2937;">➕ Thêm cấu hình mới</h3>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="new_key">Config Key</label>
+                                        <input type="text" id="new_key" name="new_key" class="form-control" 
+                                               placeholder="vd: session_timeout" />
                                     </div>
 
-                                    <div class="config-actions">
-                                        <c:if test="${config.configKey != 'low_stock_threshold' && 
-                                                      config.configKey != 'max_failed_attempts' && 
-                                                      config.configKey != 'quarantine_period_days'}">
-                                            <button type="button" class="btn btn-danger" 
-                                                    onclick="confirmDelete('${config.configKey}')">
-                                                🗑️ Xóa
-                                            </button>
-                                        </c:if>
+                                    <div class="form-group">
+                                        <label for="new_value">Config Value</label>
+                                        <input type="text" id="new_value" name="new_value" class="form-control" 
+                                               placeholder="vd: 30" />
+                                    </div>
+
+                                    <div>
+                                        <button type="button" class="btn btn-cancel" onclick="toggleAddForm()">
+                                            Hủy
+                                        </button>
                                     </div>
                                 </div>
-                            </c:forEach>
-                        </div>
-
-                        <div id="addConfigForm" class="add-config-form">
-                            <h3 style="margin-bottom: 16px; color: #1f2937;">➕ Thêm cấu hình mới</h3>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="new_key">Config Key</label>
-                                    <input type="text" id="new_key" name="new_key" class="form-control" 
-                                           placeholder="vd: session_timeout" />
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="new_value">Config Value</label>
-                                    <input type="text" id="new_value" name="new_value" class="form-control" 
-                                           placeholder="vd: 30" />
-                                </div>
-
-                                <div>
-                                    <button type="button" class="btn btn-cancel" onclick="toggleAddForm()">
-                                        Hủy
+                                <div style="margin-top: 16px; text-align: right;">
+                                    <button type="submit" class="btn btn-success" 
+                                            onclick="this.form.action='${pageContext.request.contextPath}/admin-dashboard/config'; 
+                                                     this.form.querySelector('[name=action]').value='add';">
+                                        ✓ Thêm cấu hình
                                     </button>
                                 </div>
                             </div>
-                            <div style="margin-top: 16px; text-align: right;">
-                                <button type="submit" class="btn btn-success" 
-                                        onclick="this.form.action='${pageContext.request.contextPath}/admin-dashboard/config'; 
-                                                 this.form.querySelector('[name=action]').value='add';">
-                                    ✓ Thêm cấu hình
-                                </button>
-                            </div>
                         </div>
-                    </div>
 
-                    <div class="save-all-section">
-                        <p>💾 Lưu tất cả các thay đổi cấu hình</p>
-                        <button type="submit" class="btn btn-success" style="font-size: 16px; padding: 14px 32px;">
-                            💾 Lưu tất cả
-                        </button>
-                    </div>
-                </form>
+                        <div class="save-all-section">
+                            <p>💾 Lưu tất cả các thay đổi cấu hình</p>
+                            <button type="submit" class="btn btn-success" style="font-size: 16px; padding: 14px 32px;">
+                                💾 Lưu tất cả
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
 

@@ -3,21 +3,16 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/DAO/SupplierDAO.java</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/model/PurchaseOrder.java</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/web/updateTracking.jsp</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/DAO/ASNDAO.java</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/Controller/ViewASNServlet.java</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/web/createASN.jsp</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/web/viewASN.jsp</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/Controller/SupplierDashboardServlet.java</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/Controller/SupplierConfirmOrderServlet.java</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/web/manager-dashboard.jsp</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/model/ASNItem.java</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/Controller/CreateASNServlet.java</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/Controller/UpdateTrackingServlet.java</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/web/supplierDashboard.jsp</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/model/AdvancedShippingNotice.java</file>
+            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/src/java/websocket/ChatWebSocket.java</file>
+            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/src/java/DAO/DBContext.java</file>
+            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/src/java/model/Message.java</file>
+            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/src/java/model/User.java</file>
+            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/src/java/DAO/MessageDAO.java</file>
+            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/src/java/Controller/UserServlet.java</file>
+            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/web/WEB-INF/web.xml</file>
+            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/src/java/Controller/ChatControllerServlet.java</file>
+            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/src/java/DAO/UserDAO.java</file>
+            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/web/chat.jsp</file>
         </group>
     </open-files>
 </project-private>

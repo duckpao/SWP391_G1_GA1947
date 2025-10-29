@@ -1,33 +1,34 @@
 package model;
 
 import java.sql.Timestamp;
-import java.sql.Date;
+import java.util.Date;
+import java.util.List;
 
 public class PurchaseOrder {
-
     private int poId;
     private int managerId;
     private int supplierId;
     private String status;
-    private Date orderDate;
+    private Timestamp orderDate;  // Changed from Date to Timestamp
     private Date expectedDeliveryDate;
     private String notes;
-    private Date updatedAt;
-
+    private Timestamp updatedAt;  // Changed from Date to Timestamp
+    
     // Additional fields for display
     private String supplierName;
     private String managerName;
     private double totalAmount;
     private int itemCount;
-
+    
+    // IMPORTANT: Add list of items
+    private List<PurchaseOrderItem> items;
+    
     public PurchaseOrder() {
     }
-
-    
     
     public PurchaseOrder(int poId, Integer managerId, int supplierId, String status, 
-                        Date orderDate, Date expectedDeliveryDate, String notes, 
-                        Date updatedAt) {
+                        Timestamp orderDate, Date expectedDeliveryDate, String notes, 
+                        Timestamp updatedAt) {
         this.poId = poId;
         this.managerId = managerId;
         this.supplierId = supplierId;
@@ -37,105 +38,113 @@ public class PurchaseOrder {
         this.notes = notes;
         this.updatedAt = updatedAt;
     }
-
+    
     // Getters and Setters
     public int getPoId() {
         return poId;
     }
-
+    
     public void setPoId(int poId) {
         this.poId = poId;
     }
-
+    
     public int getManagerId() {
         return managerId;
     }
-
+    
     public void setManagerId(int managerId) {
         this.managerId = managerId;
     }
-
+    
     public int getSupplierId() {
         return supplierId;
     }
-
+    
     public void setSupplierId(int supplierId) {
         this.supplierId = supplierId;
     }
-
+    
     public String getStatus() {
         return status;
     }
-
+    
     public void setStatus(String status) {
         this.status = status;
     }
-
-    public Date getOrderDate() {
+    
+    public Timestamp getOrderDate() {
         return orderDate;
     }
-
-    public void setOrderDate(Date orderDate) {
+    
+    public void setOrderDate(Timestamp orderDate) {
         this.orderDate = orderDate;
     }
-
+    
     public Date getExpectedDeliveryDate() {
         return expectedDeliveryDate;
     }
-
+    
     public void setExpectedDeliveryDate(Date expectedDeliveryDate) {
         this.expectedDeliveryDate = expectedDeliveryDate;
     }
-
+    
     public String getNotes() {
         return notes;
     }
-
+    
     public void setNotes(String notes) {
         this.notes = notes;
     }
-
+    
     public String getSupplierName() {
         return supplierName;
     }
-
+    
     public void setSupplierName(String supplierName) {
         this.supplierName = supplierName;
     }
-
+    
     public String getManagerName() {
         return managerName;
     }
-
+    
     public void setManagerName(String managerName) {
         this.managerName = managerName;
     }
-
-    public Date getUpdatedAt() {
+    
+    public Timestamp getUpdatedAt() {
         return updatedAt;
     }
-
-    public void setUpdatedAt(Date updatedAt) {
+    
+    public void setUpdatedAt(Timestamp updatedAt) {
         this.updatedAt = updatedAt;
     }
-
+    
     public double getTotalAmount() {
         return totalAmount;
     }
-
+    
     public void setTotalAmount(double totalAmount) {
         this.totalAmount = totalAmount;
     }
-
+    
     public int getItemCount() {
         return itemCount;
     }
-
+    
     public void setItemCount(int itemCount) {
         this.itemCount = itemCount;
     }
-
     
+    // NEW: Getter/Setter for items list
+    public List<PurchaseOrderItem> getItems() {
+        return items;
+    }
+    
+    public void setItems(List<PurchaseOrderItem> items) {
+        this.items = items;
+        this.itemCount = items != null ? items.size() : 0;
+    }
     
     public String getStatusBadgeClass() {
         switch (status) {
@@ -145,9 +154,11 @@ public class PurchaseOrder {
                 return "badge bg-warning";
             case "Approved":
                 return "badge bg-success";
-            case "Cancelled":
+            case "Rejected":
                 return "badge bg-danger";
-            case "Delivered":
+            case "Received":
+                return "badge bg-info";
+            case "Completed":
                 return "badge bg-primary";
             default:
                 return "badge bg-secondary";

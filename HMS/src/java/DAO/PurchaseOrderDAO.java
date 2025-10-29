@@ -80,10 +80,10 @@ public class PurchaseOrderDAO extends DBContext {
                 po.setManagerId(rs.getInt("manager_id"));
                 po.setSupplierId(rs.getInt("supplier_id"));
                 po.setStatus(rs.getString("status"));
-                po.setOrderDate(rs.getDate("order_date"));
+                po.setOrderDate(rs.getTimestamp("order_date"));
                 po.setExpectedDeliveryDate(rs.getDate("expected_delivery_date"));
                 po.setNotes(rs.getString("notes"));
-                po.setUpdatedAt(rs.getDate("updated_at"));
+                po.setUpdatedAt(rs.getTimestamp("updated_at"));
                 po.setSupplierName(rs.getString("supplier_name"));
                 po.setManagerName(rs.getString("manager_name"));
                 po.setTotalAmount(rs.getDouble("total_amount"));
@@ -118,10 +118,10 @@ public class PurchaseOrderDAO extends DBContext {
                 po.setManagerId(rs.getInt("manager_id"));
                 po.setSupplierId(rs.getInt("supplier_id"));
                 po.setStatus(rs.getString("status"));
-                po.setOrderDate(rs.getDate("order_date"));
+                po.setOrderDate(rs.getTimestamp("order_date"));
                 po.setExpectedDeliveryDate(rs.getDate("expected_delivery_date"));
                 po.setNotes(rs.getString("notes"));
-                po.setUpdatedAt(rs.getDate("updated_at"));
+                po.setUpdatedAt(rs.getTimestamp("updated_at"));
                 po.setSupplierName(rs.getString("supplier_name"));
                 po.setManagerName(rs.getString("manager_name"));
                 return po;
@@ -337,10 +337,10 @@ public class PurchaseOrderDAO extends DBContext {
                 po.setManagerId(rs.getInt("manager_id"));
                 po.setSupplierId(rs.getInt("supplier_id"));
                 po.setStatus(rs.getString("status"));
-                po.setOrderDate(rs.getDate("order_date"));
+                po.setOrderDate(rs.getTimestamp("order_date"));
                 po.setExpectedDeliveryDate(rs.getDate("expected_delivery_date"));
                 po.setNotes(rs.getString("notes"));
-                po.setUpdatedAt(rs.getDate("updated_at"));
+                po.setUpdatedAt(rs.getTimestamp("updated_at"));
                 po.setSupplierName(rs.getString("supplier_name"));
                 po.setManagerName(rs.getString("manager_name"));
                 po.setTotalAmount(rs.getDouble("total_amount"));

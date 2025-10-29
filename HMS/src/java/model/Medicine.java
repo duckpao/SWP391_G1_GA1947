@@ -1,12 +1,10 @@
 package model;
 
-import java.sql.Timestamp;
+import java.sql.Date;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class Medicine {
-    private int medicineId;
     private String medicineCode;
     private String name;
     private String category;
@@ -19,79 +17,33 @@ public class Medicine {
     private String countryOfOrigin;
     private String drugGroup;
     private String drugType;
-    private Timestamp createdAt;
-    private Timestamp updatedAt;
+    private Date createdAt;
+    private Date updatedAt;
+    private List<Batches> batches = new ArrayList<>();
 
-    // Danh sách các lô thuốc (batch)
-    private List<BatchDetail> batches = new ArrayList<>();
-
-    // Inner class for batch details
-    public static class BatchDetail {
-        private int batchId;
-        private String lotNumber;
-        private Date expiryDate;
-        private int currentQuantity;
-        private String status;
-        private Date receivedDate;
-
-        // Constructors
-        public BatchDetail() {}
-
-        public BatchDetail(String lotNumber, Date expiryDate, int currentQuantity, String status, Date receivedDate) {
-            this.lotNumber = lotNumber;
-            this.expiryDate = expiryDate;
-            this.currentQuantity = currentQuantity;
-            this.status = status;
-            this.receivedDate = receivedDate;
-        }
-
-        // Getters and Setters
-        public int getBatchId() { return batchId; }
-        public void setBatchId(int batchId) { this.batchId = batchId; }
-        public String getLotNumber() { return lotNumber; }
-        public void setLotNumber(String lotNumber) { this.lotNumber = lotNumber; }
-        public Date getExpiryDate() { return expiryDate; }
-        public void setExpiryDate(Date expiryDate) { this.expiryDate = expiryDate; }
-        public int getCurrentQuantity() { return currentQuantity; }
-        public void setCurrentQuantity(int currentQuantity) { this.currentQuantity = currentQuantity; }
-        public String getStatus() { return status; }
-        public void setStatus(String status) { this.status = status; }
-        public Date getReceivedDate() { return receivedDate; }
-        public void setReceivedDate(Date receivedDate) { this.receivedDate = receivedDate; }
-
-        @Override
-        public String toString() {
-            return "BatchDetail{" +
-                    "batchId=" + batchId +
-                    ", lotNumber='" + lotNumber + '\'' +
-                    ", expiryDate=" + expiryDate +
-                    ", currentQuantity=" + currentQuantity +
-                    ", status='" + status + '\'' +
-                    ", receivedDate=" + receivedDate +
-                    '}';
-        }
-    }
-
-    // Constructors
     public Medicine() {}
 
-    public Medicine(String medicineCode, String name, String category) {
+    public Medicine(String medicineCode, String name, String category, String description,
+                    String activeIngredient, String dosageForm, String strength, String unit,
+                    String manufacturer, String countryOfOrigin, String drugGroup, String drugType,
+                    Date createdAt, Date updatedAt) {
         this.medicineCode = medicineCode;
         this.name = name;
         this.category = category;
+        this.description = description;
+        this.activeIngredient = activeIngredient;
+        this.dosageForm = dosageForm;
+        this.strength = strength;
+        this.unit = unit;
+        this.manufacturer = manufacturer;
+        this.countryOfOrigin = countryOfOrigin;
+        this.drugGroup = drugGroup;
+        this.drugType = drugType;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
-    public Medicine(int medicineId, String medicineCode, String name, String category) {
-        this.medicineId = medicineId;
-        this.medicineCode = medicineCode;
-        this.name = name;
-        this.category = category;
-    }
-
-    // Getters and Setters
-    public int getMedicineId() { return medicineId; }
-    public void setMedicineId(int medicineId) { this.medicineId = medicineId; }
-
+    // Getters và setters
     public String getMedicineCode() { return medicineCode; }
     public void setMedicineCode(String medicineCode) { this.medicineCode = medicineCode; }
 
@@ -128,49 +80,12 @@ public class Medicine {
     public String getDrugType() { return drugType; }
     public void setDrugType(String drugType) { this.drugType = drugType; }
 
-    public Timestamp getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
+    public Date getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
 
-    public Timestamp getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(Timestamp updatedAt) { this.updatedAt = updatedAt; }
+    public Date getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(Date updatedAt) { this.updatedAt = updatedAt; }
 
-    public List<BatchDetail> getBatches() { return batches; }
-    public void setBatches(List<BatchDetail> batches) { this.batches = batches; }
-
-    // Thêm một batch
-    public void addBatch(BatchDetail batch) {
-        if (this.batches == null) {
-            this.batches = new ArrayList<>();
-        }
-        this.batches.add(batch);
-    }
-
-    // Helper method to display medicine name with strength and form
-    public String getDisplayName() {
-        StringBuilder display = new StringBuilder(name);
-        if (strength != null && !strength.isEmpty()) {
-            display.append(" ").append(strength);
-        }
-        if (unit != null && !unit.isEmpty()) {
-            display.append(" ").append(unit);
-        }
-        if (dosageForm != null && !dosageForm.isEmpty()) {
-            display.append(" - ").append(dosageForm);
-        }
-        return display.toString();
-    }
-
-    @Override
-    public String toString() {
-        return "Medicine{" +
-                "medicineId=" + medicineId +
-                ", medicineCode='" + medicineCode + '\'' +
-                ", name='" + name + '\'' +
-                ", category='" + category + '\'' +
-                ", strength='" + strength + '\'' +
-                ", dosageForm='" + dosageForm + '\'' +
-                ", manufacturer='" + manufacturer + '\'' +
-                ", batchesCount=" + (batches != null ? batches.size() : 0) +
-                '}';
-    }
+    public List<Batches> getBatches() { return batches; }
+    public void setBatches(List<Batches> batches) { this.batches = batches; }
 }

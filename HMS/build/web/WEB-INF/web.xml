@@ -64,6 +64,14 @@
         <servlet-name>UpdateTrackingServlet</servlet-name>
         <servlet-class>Controller.UpdateTrackingServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>PurchaseOrderServlet</servlet-name>
+        <servlet-class>Controller.PurchaseOrderServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>PurchaseOrderHistoryServlet</servlet-name>
+        <servlet-class>Controller.PurchaseOrderHistoryServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>UserServlet</servlet-name>
         <url-pattern>/admin-dashboard</url-pattern>
@@ -354,6 +362,14 @@
     <servlet-mapping>
         <servlet-name>UpdateTrackingServlet</servlet-name>
         <url-pattern>/update-tracking</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>PurchaseOrderServlet</servlet-name>
+        <url-pattern>/purchase-orders</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>PurchaseOrderHistoryServlet</servlet-name>
+        <url-pattern>/purchase-orders/history</url-pattern>
     </servlet-mapping>
     <welcome-file-list>
         <welcome-file>login.jsp</welcome-file>

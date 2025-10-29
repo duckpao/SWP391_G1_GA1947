@@ -427,4 +427,49 @@ public PurchaseOrder getPurchaseOrderById(int poId, int supplierId) {
         }
         return orders;
     }
+    // LẤY TẤT CẢ SUPPLIERS
+public List<Supplier> getAllSuppliers() {
+    List<Supplier> suppliers = new ArrayList<>();
+    String sql = "SELECT s.supplier_id, s.user_id, s.name, s.contact_email, " +
+                 "s.contact_phone, s.address, s.performance_rating, " +
+                 "s.created_at, s.updated_at, u.username " +
+                 "FROM Suppliers s " +
+                 "LEFT JOIN Users u ON s.user_id = u.user_id " +
+                 "ORDER BY s.name ASC";
+
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        ResultSet rs = ps.executeQuery();
+
+        while (rs.next()) {
+            Supplier supplier = new Supplier();
+            supplier.setSupplierId(rs.getInt("supplier_id"));
+            supplier.setUserId(rs.getInt("user_id"));
+            supplier.setName(rs.getString("name"));
+            supplier.setContactEmail(rs.getString("contact_email"));
+            supplier.setContactPhone(rs.getString("contact_phone"));
+            supplier.setAddress(rs.getString("address"));
+            
+            // Handle NULL performance_rating
+            Double rating = rs.getDouble("performance_rating");
+            supplier.setPerformanceRating(rs.wasNull() ? null : rating);
+            
+            // Handle timestamps
+            Timestamp createdAt = rs.getTimestamp("created_at");
+            if (createdAt != null) {
+                supplier.setCreatedAt(createdAt.toLocalDateTime());
+            }
+            
+            Timestamp updatedAt = rs.getTimestamp("updated_at");
+            if (updatedAt != null) {
+                supplier.setUpdatedAt(updatedAt.toLocalDateTime());
+            }
+
+            suppliers.add(supplier);
+        }
+    } catch (SQLException e) {
+        System.err.println("Error in getAllSuppliers: " + e.getMessage());
+        e.printStackTrace();
+    }
+    return suppliers;
+}
 }

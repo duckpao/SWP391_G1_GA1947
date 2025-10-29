@@ -17,36 +17,39 @@ public class ViewMedicineServlet extends HttpServlet {
         medicineDAO = new MedicineDAO();
     }
     
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        
-        // Lấy parameters từ search form
-        String keyword = request.getParameter("keyword");
-        String category = request.getParameter("category");
-        String status = request.getParameter("status");
-        
-        List<Medicine> medicines;
-        
-        // Nếu có search parameters thì search, không thì lấy tất cả
-        if ((keyword != null && !keyword.trim().isEmpty()) || 
-            (category != null && !category.equals("All")) || 
-            (status != null && !status.isEmpty())) {
-            medicines = medicineDAO.searchMedicines(keyword, category, status);
-        } else {
-            medicines = medicineDAO.getMedicineDetails();
-        }
-        
-        // Lấy danh sách categories cho dropdown
-        List<String> categories = medicineDAO.getAllCategories();
-        
-        // Set attributes
-        request.setAttribute("medicines", medicines);
-        request.setAttribute("categories", categories);
-        request.setAttribute("keyword", keyword != null ? keyword : "");
-        request.setAttribute("selectedCategory", category != null ? category : "All");
-        request.setAttribute("selectedStatus", status != null ? status : "");
-        
-        request.getRequestDispatcher("/jsp/viewMedicine.jsp").forward(request, response);
+@Override
+protected void doGet(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
+
+    String keyword = request.getParameter("keyword");
+    String category = request.getParameter("category");
+    String status = request.getParameter("status");
+
+    // Nếu chưa có DAO thì khởi tạo
+    if (medicineDAO == null) {
+        medicineDAO = new MedicineDAO();
     }
+
+    List<Medicine> medicines;
+    boolean hasFilter = (keyword != null && !keyword.trim().isEmpty())
+            || (category != null && !"All".equals(category))
+            || (status != null && !status.isEmpty());
+
+    if (hasFilter) {
+        medicines = medicineDAO.searchMedicines(keyword, category, status);
+    } else {
+        medicines = medicineDAO.getAllMedicines();
+    }
+
+    List<String> categories = medicineDAO.getAllCategories();
+
+    request.setAttribute("medicines", medicines);
+    request.setAttribute("categories", categories);
+    request.setAttribute("keyword", keyword != null ? keyword : "");
+    request.setAttribute("selectedCategory", category != null ? category : "All");
+    request.setAttribute("selectedStatus", status != null ? status : "");
+
+    request.getRequestDispatcher("/jsp/viewMedicine.jsp").forward(request, response);
+}
+
 }

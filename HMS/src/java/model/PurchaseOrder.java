@@ -20,6 +20,13 @@ public class PurchaseOrder {
     private double totalAmount;
     private int itemCount;
     
+    // ASN information
+    private int asnId;
+    private String trackingNumber;
+    private String carrier;
+    private String asnStatus;
+    private boolean hasAsn;
+    
     // IMPORTANT: Add list of items
     private List<PurchaseOrderItem> items;
     
@@ -164,4 +171,76 @@ public class PurchaseOrder {
                 return "badge bg-secondary";
         }
     }
+    // ASN Getters and Setters
+public int getAsnId() {
+    return asnId;
+}
+
+public void setAsnId(int asnId) {
+    this.asnId = asnId;
+}
+
+public String getTrackingNumber() {
+    return trackingNumber;
+}
+
+public void setTrackingNumber(String trackingNumber) {
+    this.trackingNumber = trackingNumber;
+}
+
+public String getCarrier() {
+    return carrier;
+}
+
+public void setCarrier(String carrier) {
+    this.carrier = carrier;
+}
+
+public String getAsnStatus() {
+    return asnStatus;
+}
+
+public void setAsnStatus(String asnStatus) {
+    this.asnStatus = asnStatus;
+}
+
+public boolean isHasAsn() {
+    return hasAsn;
+}
+
+public void setHasAsn(boolean hasAsn) {
+    this.hasAsn = hasAsn;
+}
+
+// Helper methods for JSP display
+public String getAsnStatusDisplay() {
+    if (asnStatus == null) return "N/A";
+    switch (asnStatus) {
+        case "Sent":
+            return "Shipped";
+        case "In Transit":
+            return "In Transit";
+        case "Delivered":
+            return "Delivered";
+        case "Received":
+            return "Received";
+        default:
+            return asnStatus;
+    }
+}
+
+public String getAsnStatusBadgeClass() {
+    if (asnStatus == null) return "status-badge";
+    switch (asnStatus) {
+        case "Sent":
+            return "sent";
+        case "In Transit":
+            return "approved";
+        case "Delivered":
+        case "Received":
+            return "completed";
+        default:
+            return "sent";
+    }
+}
 }

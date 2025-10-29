@@ -56,6 +56,14 @@
         <servlet-name>CreateASNServlet</servlet-name>
         <servlet-class>Controller.CreateASNServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>ViewASNServlet</servlet-name>
+        <servlet-class>Controller.ViewASNServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>UpdateTrackingServlet</servlet-name>
+        <servlet-class>Controller.UpdateTrackingServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>UserServlet</servlet-name>
         <url-pattern>/admin-dashboard</url-pattern>
@@ -338,6 +346,14 @@
     <servlet-mapping>
         <servlet-name>CreateASNServlet</servlet-name>
         <url-pattern>/create-asn</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ViewASNServlet</servlet-name>
+        <url-pattern>/view-asn</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>UpdateTrackingServlet</servlet-name>
+        <url-pattern>/update-tracking</url-pattern>
     </servlet-mapping>
     <welcome-file-list>
         <welcome-file>login.jsp</welcome-file>

@@ -39,14 +39,16 @@ public class SupplierDAO extends DBContext {
         return null;
     }
 
-    // LẤY PURCHASE ORDERS THEO SUPPLIER VÀ STATUS
+    // LẤY PURCHASE ORDERS THEO SUPPLIER VÀ STATUS (WITH ASN INFO)
     public List<PurchaseOrder> getPurchaseOrdersBySupplier(int supplierId, String status) {
         List<PurchaseOrder> orders = new ArrayList<>();
         String sql = "SELECT po.po_id, po.manager_id, po.supplier_id, po.status, " +
                      "po.order_date, po.expected_delivery_date, po.notes, po.updated_at, " +
-                     "u.username AS manager_name " +
+                     "u.username AS manager_name, " +
+                     "asn.asn_id, asn.tracking_number, asn.carrier, asn.status AS asn_status " +
                      "FROM PurchaseOrders po " +
                      "LEFT JOIN Users u ON po.manager_id = u.user_id " +
+                     "LEFT JOIN AdvancedShippingNotices asn ON po.po_id = asn.po_id " +
                      "WHERE po.supplier_id = ? AND po.status = ? " +
                      "ORDER BY po.order_date DESC";
 
@@ -66,6 +68,16 @@ public class SupplierDAO extends DBContext {
                 po.setNotes(rs.getString("notes"));
                 po.setUpdatedAt(rs.getTimestamp("updated_at"));
                 po.setManagerName(rs.getString("manager_name"));
+                
+                // ASN info
+                int asnId = rs.getInt("asn_id");
+                if (asnId > 0) {
+                    po.setAsnId(asnId);
+                    po.setTrackingNumber(rs.getString("tracking_number"));
+                    po.setCarrier(rs.getString("carrier"));
+                    po.setAsnStatus(rs.getString("asn_status"));
+                    po.setHasAsn(true);
+                }
 
                 // Lấy items và set vào PO
                 List<PurchaseOrderItem> items = getPurchaseOrderItems(po.getPoId());
@@ -218,52 +230,64 @@ public class SupplierDAO extends DBContext {
         return false;
     }
 
-    // LẤY CHI TIẾT MỘT PO (for detail page & ASN creation)
-    public PurchaseOrder getPurchaseOrderById(int poId, int supplierId) {
-        String sql = "SELECT po.po_id, po.manager_id, po.supplier_id, po.status, " +
-                     "po.order_date, po.expected_delivery_date, po.notes, po.updated_at, " +
-                     "u.username AS manager_name, s.name AS supplier_name " +
-                     "FROM PurchaseOrders po " +
-                     "LEFT JOIN Users u ON po.manager_id = u.user_id " +
-                     "LEFT JOIN Suppliers s ON po.supplier_id = s.supplier_id " +
-                     "WHERE po.po_id = ? AND po.supplier_id = ?";
+// LẤY CHI TIẾT MỘT PO (for detail page & ASN creation) - FIXED TO INCLUDE ASN INFO
+public PurchaseOrder getPurchaseOrderById(int poId, int supplierId) {
+    String sql = "SELECT po.po_id, po.manager_id, po.supplier_id, po.status, " +
+                 "po.order_date, po.expected_delivery_date, po.notes, po.updated_at, " +
+                 "u.username AS manager_name, s.name AS supplier_name, " +
+                 "asn.asn_id, asn.tracking_number, asn.carrier, asn.status AS asn_status " +
+                 "FROM PurchaseOrders po " +
+                 "LEFT JOIN Users u ON po.manager_id = u.user_id " +
+                 "LEFT JOIN Suppliers s ON po.supplier_id = s.supplier_id " +
+                 "LEFT JOIN AdvancedShippingNotices asn ON po.po_id = asn.po_id " +
+                 "WHERE po.po_id = ? AND po.supplier_id = ?";
 
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setInt(1, poId);
-            ps.setInt(2, supplierId);
-            ResultSet rs = ps.executeQuery();
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        ps.setInt(1, poId);
+        ps.setInt(2, supplierId);
+        ResultSet rs = ps.executeQuery();
 
-            if (rs.next()) {
-                PurchaseOrder po = new PurchaseOrder();
-                po.setPoId(rs.getInt("po_id"));
-                po.setManagerId(rs.getInt("manager_id"));
-                po.setSupplierId(rs.getInt("supplier_id"));
-                po.setStatus(rs.getString("status"));
-                po.setOrderDate(rs.getTimestamp("order_date"));
-                po.setExpectedDeliveryDate(rs.getDate("expected_delivery_date"));
-                po.setNotes(rs.getString("notes"));
-                po.setUpdatedAt(rs.getTimestamp("updated_at"));
-                po.setManagerName(rs.getString("manager_name"));
-                po.setSupplierName(rs.getString("supplier_name"));
+        if (rs.next()) {
+            PurchaseOrder po = new PurchaseOrder();
+            po.setPoId(rs.getInt("po_id"));
+            po.setManagerId(rs.getInt("manager_id"));
+            po.setSupplierId(rs.getInt("supplier_id"));
+            po.setStatus(rs.getString("status"));
+            po.setOrderDate(rs.getTimestamp("order_date"));
+            po.setExpectedDeliveryDate(rs.getDate("expected_delivery_date"));
+            po.setNotes(rs.getString("notes"));
+            po.setUpdatedAt(rs.getTimestamp("updated_at"));
+            po.setManagerName(rs.getString("manager_name"));
+            po.setSupplierName(rs.getString("supplier_name"));
 
-                // Get items
-                List<PurchaseOrderItem> items = getPurchaseOrderItems(po.getPoId());
-                po.setItems(items);
-                
-                // Calculate total
-                double total = items.stream()
-                    .mapToDouble(item -> item.getQuantity() * item.getUnitPrice())
-                    .sum();
-                po.setTotalAmount(total);
-
-                return po;
+            // ASN INFO - SAME AS getPurchaseOrdersBySupplier()
+            int asnId = rs.getInt("asn_id");
+            if (asnId > 0) {
+                po.setAsnId(asnId);
+                po.setTrackingNumber(rs.getString("tracking_number"));
+                po.setCarrier(rs.getString("carrier"));
+                po.setAsnStatus(rs.getString("asn_status"));
+                po.setHasAsn(true);
             }
-        } catch (SQLException e) {
-            System.err.println("Error in getPurchaseOrderById: " + e.getMessage());
-            e.printStackTrace();
+
+            // Get items
+            List<PurchaseOrderItem> items = getPurchaseOrderItems(po.getPoId());
+            po.setItems(items);
+            
+            // Calculate total
+            double total = items.stream()
+                .mapToDouble(item -> item.getQuantity() * item.getUnitPrice())
+                .sum();
+            po.setTotalAmount(total);
+
+            return po;
         }
-        return null;
+    } catch (SQLException e) {
+        System.err.println("Error in getPurchaseOrderById: " + e.getMessage());
+        e.printStackTrace();
     }
+    return null;
+}
 
     // CHECK IF ASN EXISTS FOR PO
     public boolean hasASNForPO(int poId) {

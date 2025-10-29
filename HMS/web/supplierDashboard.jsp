@@ -636,6 +636,72 @@
             line-height: 1.6;
         }
 
+        /* ASN Info Box Styles */
+        .asn-info-box {
+            background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%);
+            border-left: 4px solid #3b82f6;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+        
+        .asn-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 16px;
+            color: #1e40af;
+            margin-bottom: 16px;
+        }
+        
+        .asn-header i {
+            font-size: 24px;
+        }
+        
+        .asn-details {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+        
+        .asn-detail-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            color: #1f2937;
+        }
+        
+        .asn-detail-item i {
+            font-size: 18px;
+            color: #3b82f6;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(107, 115, 128, 0.4);
+        }
+
         /* Logout Button */
         .logout-btn {
             background: #ef4444;

@@ -62,7 +62,7 @@ public class MedicationRequestDAO extends DBContext {
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 Medicine med = new Medicine();
-                med.setMedicineId(rs.getInt("medicine_id"));
+                med.setMedicineCode(rs.getString("medicine_code"));
                 med.setName(rs.getString("name"));
                 med.setCategory(rs.getString("category"));
                 med.setDescription(rs.getString("description"));

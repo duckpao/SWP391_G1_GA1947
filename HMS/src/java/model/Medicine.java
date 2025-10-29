@@ -1,6 +1,6 @@
 package model;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,8 +17,8 @@ public class Medicine {
     private String countryOfOrigin;
     private String drugGroup;
     private String drugType;
-    private Date createdAt;
-    private Date updatedAt;
+    private Timestamp createdAt;
+    private Timestamp updatedAt;
     private List<Batches> batches = new ArrayList<>();
 
     public Medicine() {}
@@ -26,7 +26,7 @@ public class Medicine {
     public Medicine(String medicineCode, String name, String category, String description,
                     String activeIngredient, String dosageForm, String strength, String unit,
                     String manufacturer, String countryOfOrigin, String drugGroup, String drugType,
-                    Date createdAt, Date updatedAt) {
+                    Timestamp createdAt, Timestamp updatedAt) {
         this.medicineCode = medicineCode;
         this.name = name;
         this.category = category;
@@ -80,12 +80,26 @@ public class Medicine {
     public String getDrugType() { return drugType; }
     public void setDrugType(String drugType) { this.drugType = drugType; }
 
-    public Date getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
+    public Timestamp getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
 
-    public Date getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(Date updatedAt) { this.updatedAt = updatedAt; }
+    public Timestamp getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(Timestamp updatedAt) { this.updatedAt = updatedAt; }
 
     public List<Batches> getBatches() { return batches; }
     public void setBatches(List<Batches> batches) { this.batches = batches; }
+      public String getDisplayName() {
+        StringBuilder display = new StringBuilder(name);
+        
+        if (strength != null && !strength.trim().isEmpty()) {
+            display.append(" - ").append(strength);
+        }
+        
+        if (dosageForm != null && !dosageForm.trim().isEmpty()) {
+            display.append(" (").append(dosageForm).append(")");
+        }
+        
+        return display.toString();
+    }
+    
 }

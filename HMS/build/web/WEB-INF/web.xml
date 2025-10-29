@@ -114,6 +114,30 @@
         <servlet-name>pharmacistdashboard</servlet-name>
         <servlet-class>Controller.pharmacistdashboard</servlet-class>
     </servlet>
+      <servlet>
+        <servlet-name>ManageBatches</servlet-name>
+        <servlet-class>Controller.ManageBatches</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>RecordExpiredDamagedServlet</servlet-name>
+        <servlet-class>Controller.RecordExpiredDamagedServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>CrudMedicine</servlet-name>
+        <servlet-class>Controller.CrudMedicine</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ManageBatches</servlet-name>
+        <url-pattern>/pharmacist/manage-batch</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>RecordExpiredDamagedServlet</servlet-name>
+        <url-pattern>/pharmacist/recordExpiredDamaged</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CrudMedicine</servlet-name>
+        <url-pattern>/Medicine/*</url-pattern>
+    </servlet-mapping>
     <!-- Manager Dashboard and Stock Management Servlets -->
     <servlet>
         <servlet-name>ManagerDashboardServlet</servlet-name>

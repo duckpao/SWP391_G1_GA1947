@@ -82,8 +82,8 @@ public class MedicineDAO {
                         rs.getString("country_of_origin"),
                         rs.getString("drug_group"),
                         rs.getString("drug_type"),
-                        rs.getDate("created_at"),
-                        rs.getDate("updated_at")
+                        rs.getTimestamp("created_at"),
+                        rs.getTimestamp("updated_at")
                 );
 
                 Batches summary = new Batches();
@@ -165,8 +165,8 @@ public class MedicineDAO {
                         rs.getString("country_of_origin"),
                         rs.getString("drug_group"),
                         rs.getString("drug_type"),
-                        rs.getDate("created_at"),
-                        rs.getDate("updated_at")
+                        rs.getTimestamp("created_at"),
+                        rs.getTimestamp("updated_at")
                 );
 
                 Batches batch = new Batches();
@@ -394,7 +394,7 @@ public class MedicineDAO {
                     medicines.add(currentMedicine);
                 }
                 currentMedicine = new Medicine();
-                currentMedicine.setMedicineCode(medicineId);
+                currentMedicine.setMedicineCode(rs.getString("medicine_code"));
                 currentMedicine.setName(rs.getString("name"));
                 currentMedicine.setCategory(rs.getString("category"));
                 currentMedicine.setDescription(rs.getString("description"));
@@ -402,14 +402,14 @@ public class MedicineDAO {
             }
 
             // Thêm thông tin batch
-            Medicine.BatchDetail batch = new Medicine.BatchDetail();
-            batch.setBatchId(rs.getInt("batch_id"));
-            batch.setLotNumber(rs.getString("lot_number"));
-            batch.setExpiryDate(rs.getDate("expiry_date"));
-            batch.setCurrentQuantity(rs.getInt("current_quantity"));
-            batch.setStatus(rs.getString("status"));
-            batch.setReceivedDate(rs.getDate("received_date"));
-            currentMedicine.getBatches().add(batch);
+            Batches batch = new Batches();
+batch.setBatchId(rs.getInt("batch_id"));
+batch.setLotNumber(rs.getString("lot_number"));
+batch.setExpiryDate(rs.getDate("expiry_date"));
+batch.setCurrentQuantity(rs.getInt("current_quantity"));
+batch.setStatus(rs.getString("status"));
+batch.setReceivedDate(rs.getDate("received_date"));
+currentMedicine.getBatches().add(batch);
         }
 
         if (currentMedicine != null) {

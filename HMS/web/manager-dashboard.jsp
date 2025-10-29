@@ -672,47 +672,75 @@
                                                                 </div>
                                                             </c:if>
                                                         </div>
-                                                        <div>
-                                                            <h6><i class="bi bi-capsule"></i> Order Items</h6>
-                                                            <c:set var="items" value="${poItemsMap[order.poId]}" />
-                                                            <c:choose>
-                                                                <c:when test="${not empty items}">
-                                                                    <ul class="item-list">
-                                                                        <c:forEach items="${items}" var="item">
-                                                                            <li>
-                                                                                <div style="flex: 1;">
-                                                                                    <div class="medicine-main-info">
-                                                                                        ${item.medicineName}
-                                                                                        <c:if test="${not empty item.medicineStrength}">
-                                                                                            <span style="color: #3b82f6;">${item.medicineStrength}</span>
-                                                                                        </c:if>
-                                                                                        <span class="medicine-code-badge">${item.medicineCode}</span>
-                                                                                    </div>
-                                                                                    <div class="medicine-detail-row">
-                                                                                        <c:if test="${not empty item.medicineDosageForm}">
-                                                                                            <div class="medicine-detail-item">
-                                                                                                <i class="bi bi-capsule"></i> ${item.medicineDosageForm}
-                                                                                            </div>
-                                                                                        </c:if>
-                                                                                        <c:if test="${not empty item.medicineCategory}">
-                                                                                            <div class="medicine-detail-item">
-                                                                                                <i class="bi bi-tag"></i> ${item.medicineCategory}
-                                                                                            </div>
-                                                                                        </c:if>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <span class="quantity-badge">${item.quantity} units</span>
-                                                                            </li>
-                                                                        </c:forEach>
-                                                                    </ul>
-                                                                </c:when>
-                                                                <c:otherwise>
-                                                                    <div class="alert alert-warning">
-                                                                        <i class="bi bi-exclamation-triangle"></i> No items found
-                                                                    </div>
-                                                                </c:otherwise>
-                                                            </c:choose>
-                                                        </div>
+<!-- Order Items Section - FIXED VERSION -->
+<div>
+    <h6><i class="bi bi-capsule"></i> Order Items</h6>
+    <c:set var="items" value="${poItemsMap[order.poId]}" />
+    
+    <!-- Debug: Show what we have -->
+    <c:if test="${empty items}">
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle"></i> 
+            No items found for PO #${order.poId}
+            <br><small>Debug: poItemsMap size = ${poItemsMap.size()}</small>
+        </div>
+    </c:if>
+    
+    <c:if test="${not empty items}">
+        <ul class="item-list">
+            <c:forEach items="${items}" var="item">
+                <li>
+                    <div style="flex: 1;">
+                        <!-- Medicine Name & Code -->
+                        <div class="medicine-main-info">
+                            ${not empty item.medicineName ? item.medicineName : 'Unknown Medicine'}
+                            <c:if test="${not empty item.medicineStrength}">
+                                <span style="color: #3b82f6;">${item.medicineStrength}</span>
+                            </c:if>
+                            <span class="medicine-code-badge">${item.medicineCode}</span>
+                        </div>
+                        
+                        <!-- Medicine Details Row -->
+                        <div class="medicine-detail-row">
+                            <c:if test="${not empty item.medicineDosageForm}">
+                                <div class="medicine-detail-item">
+                                    <i class="bi bi-capsule"></i> ${item.medicineDosageForm}
+                                </div>
+                            </c:if>
+                            <c:if test="${not empty item.medicineCategory}">
+                                <div class="medicine-detail-item">
+                                    <i class="bi bi-tag"></i> ${item.medicineCategory}
+                                </div>
+                            </c:if>
+                            <c:if test="${not empty item.medicineManufacturer}">
+                                <div class="medicine-detail-item">
+                                    <i class="bi bi-building"></i> ${item.medicineManufacturer}
+                                </div>
+                            </c:if>
+                        </div>
+                        
+                        <!-- Priority & Notes -->
+                        <c:if test="${not empty item.priority}">
+                            <div style="margin-top: 8px;">
+                                <span class="status-badge" style="font-size: 11px;">
+                                    Priority: ${item.priority}
+                                </span>
+                            </div>
+                        </c:if>
+                        <c:if test="${not empty item.notes}">
+                            <div style="margin-top: 6px; font-size: 12px; color: #6b7280;">
+                                <i class="bi bi-sticky"></i> ${item.notes}
+                            </div>
+                        </c:if>
+                    </div>
+                    
+                    <!-- Quantity Badge -->
+                    <span class="quantity-badge">${item.quantity} units</span>
+                </li>
+            </c:forEach>
+        </ul>
+    </c:if>
+</div>
                                                     </div>
                                                 </div>
                                             </td>

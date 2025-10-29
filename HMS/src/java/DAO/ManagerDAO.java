@@ -178,44 +178,7 @@ public class ManagerDAO extends DBContext {
     }
 
     // === CẬP NHẬT: Lấy PO Items với thông tin thuốc đầy đủ ===
-    public List<PurchaseOrderItem> getPurchaseOrderItems(int poId) {
-        List<PurchaseOrderItem> items = new ArrayList<>();
-        String sql = "SELECT poi.po_item_id, poi.po_id, poi.medicine_code, " +
-                     "poi.quantity, poi.priority, poi.notes, " +
-                     "m.name, m.category, m.strength, m.dosage_form, m.manufacturer " +
-                     "FROM PurchaseOrderItems poi " +
-                     "LEFT JOIN Medicines m ON poi.medicine_code = m.medicine_code " +
-                     "WHERE poi.po_id = ?";
-        
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setInt(1, poId);
-            ResultSet rs = ps.executeQuery();
-            
-            while (rs.next()) {
-                PurchaseOrderItem item = new PurchaseOrderItem();
-                item.setPoItemId(rs.getInt("po_item_id"));
-                item.setPoId(rs.getInt("po_id"));
-                item.setMedicineCode(rs.getString("medicine_code"));
-                item.setQuantity(rs.getInt("quantity"));
-                item.setPriority(rs.getString("priority"));
-                item.setNotes(rs.getString("notes"));
-                
-                // Set thông tin thuốc
-                item.setMedicineName(rs.getString("name"));
-                item.setMedicineCategory(rs.getString("category"));
-                item.setMedicineStrength(rs.getString("strength"));
-                item.setMedicineDosageForm(rs.getString("dosage_form"));
-                item.setMedicineManufacturer(rs.getString("manufacturer"));
-                
-                items.add(item);
-            }
-            System.out.println("Loaded " + items.size() + " items for PO #" + poId);
-        } catch (SQLException e) {
-            System.err.println("Error getting purchase order items: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return items;
-    }
+ 
 
     // === CẬP NHẬT: Tạo PO mới dùng medicine_code ===
     public int createPurchaseOrder(int managerId, Integer supplierId, Date expectedDeliveryDate, 
@@ -807,4 +770,71 @@ public class ManagerDAO extends DBContext {
             return false;
         }
     }
+    // === DEBUG VERSION: Thêm vào ManagerDAO.java ===
+public List<PurchaseOrderItem> getPurchaseOrderItems(int poId) {
+    List<PurchaseOrderItem> items = new ArrayList<>();
+    String sql = "SELECT poi.item_id, poi.po_id, poi.medicine_code, " +
+                 "poi.quantity, poi.unit_price, poi.priority, poi.notes, " +
+                 "m.name, m.category, m.strength, m.dosage_form, m.manufacturer " +
+                 "FROM PurchaseOrderItems poi " +
+                 "LEFT JOIN Medicines m ON poi.medicine_code = m.medicine_code " +
+                 "WHERE poi.po_id = ?";
+    
+    System.out.println("====================================");
+    System.out.println("DEBUG: Getting items for PO #" + poId);
+    System.out.println("====================================");
+    
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        ps.setInt(1, poId);
+        ResultSet rs = ps.executeQuery();
+        
+        int count = 0;
+        while (rs.next()) {
+            count++;
+            PurchaseOrderItem item = new PurchaseOrderItem();
+            
+            // Basic info
+            item.setItemId(rs.getInt("item_id"));
+            item.setPoId(rs.getInt("po_id"));
+            item.setMedicineCode(rs.getString("medicine_code"));
+            item.setQuantity(rs.getInt("quantity"));
+            
+
+            // Medicine details
+            String medicineName = rs.getString("name");
+            String category = rs.getString("category");
+            String strength = rs.getString("strength");
+            String dosageForm = rs.getString("dosage_form");
+            String manufacturer = rs.getString("manufacturer");
+            
+            item.setMedicineName(medicineName);
+            item.setMedicineCategory(category);
+            item.setMedicineStrength(strength);
+            item.setMedicineDosageForm(dosageForm);
+            item.setMedicineManufacturer(manufacturer);
+            
+            // Debug log
+            System.out.println("Item #" + count + ":");
+            System.out.println("  - Item ID: " + item.getItemId());
+            System.out.println("  - Medicine Code: " + item.getMedicineCode());
+            System.out.println("  - Medicine Name: " + medicineName);
+            System.out.println("  - Category: " + category);
+            System.out.println("  - Strength: " + strength);
+            System.out.println("  - Dosage Form: " + dosageForm);
+            System.out.println("  - Manufacturer: " + manufacturer);
+            System.out.println("  - Quantity: " + item.getQuantity());
+            System.out.println("  - Priority: " + item.getPriority());
+            
+            items.add(item);
+        }
+        
+        System.out.println("Total items loaded: " + items.size());
+        System.out.println("====================================");
+        
+    } catch (SQLException e) {
+        System.err.println("ERROR getting purchase order items: " + e.getMessage());
+        e.printStackTrace();
+    }
+    return items;
+}
 }

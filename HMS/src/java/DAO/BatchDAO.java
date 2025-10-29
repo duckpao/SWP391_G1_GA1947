@@ -10,11 +10,11 @@ public class BatchDAO {
     public List<Map<String, Object>> getAllBatches() {
         List<Map<String, Object>> list = new ArrayList<>();
         String sql = """
-            SELECT b.batch_id, b.medicine_id, b.supplier_id, b.lot_number,
+            SELECT b.batch_id, b.medicine_code, b.supplier_id, b.lot_number,
                    b.expiry_date, b.initial_quantity, b.current_quantity, b.status,
                    m.name AS medicine_name, s.name AS supplier_name
             FROM Batches b
-            LEFT JOIN Medicines m ON b.medicine_id = m.medicine_id
+            LEFT JOIN Medicines m ON b.medicine_code = m.medicine_code
             LEFT JOIN Suppliers s ON b.supplier_id = s.supplier_id
             ORDER BY b.created_at DESC
         """;
@@ -52,7 +52,7 @@ public class BatchDAO {
                 if (rs.next()) {
                     Batches b = new Batches();
                     b.setBatchId(rs.getInt("batch_id"));
-                    b.setMedicineId(rs.getInt("medicine_id"));
+                    b.setMedicineCode(rs.getString("medicine_code"));
                     b.setSupplierId(rs.getInt("supplier_id"));
                     b.setLotNumber(rs.getString("lot_number"));
                     b.setExpiryDate(rs.getDate("expiry_date"));

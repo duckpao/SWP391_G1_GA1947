@@ -163,4 +163,8 @@ public class PurchaseOrderItem {
                 ", priority='" + priority + '\'' +
                 '}';
     }
+    
+    public double getSubTotal() {
+        return getQuantity() * getUnitPrice();
+    }
 }

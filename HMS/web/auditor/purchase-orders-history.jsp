@@ -569,19 +569,6 @@
                     <a class="nav-link active" href="${pageContext.request.contextPath}/purchase-orders/history">
                         <i class="bi bi-clock-history"></i> PO History & Trends
                     </a>
-                    <a class="nav-link" href="#">
-                        <i class="bi bi-box-seam"></i> Inventory Audit
-                    </a>
-                    <a class="nav-link" href="#">
-                        <i class="bi bi-graph-up"></i> Reports
-                    </a>
-                    <a class="nav-link" href="#">
-                        <i class="bi bi-journal-text"></i> System Logs
-                    </a>
-                    <hr class="nav-divider">
-                    <a class="nav-link" href="${pageContext.request.contextPath}/logout">
-                        <i class="bi bi-box-arrow-right"></i> Đăng xuất
-                    </a>
                 </nav>
             </div>
 
@@ -716,13 +703,6 @@
                             </button>
                             <button type="button" class="btn btn-secondary" onclick="clearFilters()">
                                 <i class="bi bi-x-circle"></i> Clear
-                            </button>
-                            <button type="button" class="btn btn-success" onclick="exportToExcel()">
-                                <i class="bi bi-file-earmark-excel"></i> Export Excel
-                            </button>
-                            <button type="button" class="btn btn-danger" onclick="exportToPDF()">
-                                <i class="bi bi-file-earmark-pdf"></i> Export PDF
-                            </button>
                         </div>
                     </form>
                 </div>

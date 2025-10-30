@@ -446,19 +446,7 @@
                     <a class="nav-link" href="${pageContext.request.contextPath}/purchase-orders/history">
                         <i class="bi bi-clock-history"></i> PO History & Trends
                     </a>
-                    <a class="nav-link" href="#">
-                        <i class="bi bi-box-seam"></i> Inventory Audit
-                    </a>
-                    <a class="nav-link" href="#">
-                        <i class="bi bi-graph-up"></i> Reports
-                    </a>
-                    <a class="nav-link" href="#">
-                        <i class="bi bi-journal-text"></i> System Logs
-                    </a>
-                    <hr class="nav-divider">
-                    <a class="nav-link" href="${pageContext.request.contextPath}/logout">
-                        <i class="bi bi-box-arrow-right"></i> Đăng xuất
-                    </a>
+
                 </nav>
             </div>
 

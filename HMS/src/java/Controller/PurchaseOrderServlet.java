@@ -18,6 +18,7 @@ import java.util.List;
 import model.PurchaseOrder;
 import model.PurchaseOrderItem;
 import model.Supplier;
+
 /**
  *
  * @author ADMIN
@@ -59,10 +60,9 @@ public class PurchaseOrderServlet extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
-    
     private PurchaseOrderDAO poDAO = new PurchaseOrderDAO();
     private SupplierDAO supplierDAO = new SupplierDAO();
-    
+
     // Fallback initialization method
     private void ensureDAOsInitialized() {
         if (poDAO == null) {
@@ -74,7 +74,7 @@ public class PurchaseOrderServlet extends HttpServlet {
             supplierDAO = new SupplierDAO();
         }
     }
-    
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -109,76 +109,93 @@ public class PurchaseOrderServlet extends HttpServlet {
     private void handleListPurchaseOrders(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // Ensure DAOs are initialized
-        ensureDAOsInitialized();
+        // Tạo DAO mới mỗi lần gọi để tránh lỗi null
+        PurchaseOrderDAO poDAO = new PurchaseOrderDAO();
+        SupplierDAO supplierDAO = new SupplierDAO();
 
-        // Get filter parameters
-        String statusFilter = request.getParameter("status");
-        String supplierIdParam = request.getParameter("supplierId");
-        String fromDateParam = request.getParameter("fromDate");
-        String toDateParam = request.getParameter("toDate");
-        String searchKeyword = request.getParameter("search");
+        try {
+            // Get filter parameters
+            String statusFilter = request.getParameter("status");
+            String supplierIdParam = request.getParameter("supplierId");
+            String fromDateParam = request.getParameter("fromDate");
+            String toDateParam = request.getParameter("toDate");
+            String searchKeyword = request.getParameter("search");
 
-        // Parse parameters
-        Integer supplierId = null;
-        if (supplierIdParam != null && !supplierIdParam.isEmpty()) {
-            try {
-                supplierId = Integer.parseInt(supplierIdParam);
-            } catch (NumberFormatException e) {
-                // Ignore invalid supplier ID
+            // Parse parameters
+            Integer supplierId = null;
+            if (supplierIdParam != null && !supplierIdParam.isEmpty()) {
+                try {
+                    supplierId = Integer.parseInt(supplierIdParam);
+                } catch (NumberFormatException e) {
+                    System.err.println("Invalid supplier ID: " + supplierIdParam);
+                }
+            }
+
+            Date fromDate = null;
+            if (fromDateParam != null && !fromDateParam.isEmpty()) {
+                try {
+                    fromDate = Date.valueOf(fromDateParam);
+                } catch (IllegalArgumentException e) {
+                    System.err.println("Invalid from date: " + fromDateParam);
+                }
+            }
+
+            Date toDate = null;
+            if (toDateParam != null && !toDateParam.isEmpty()) {
+                try {
+                    toDate = Date.valueOf(toDateParam);
+                } catch (IllegalArgumentException e) {
+                    System.err.println("Invalid to date: " + toDateParam);
+                }
+            }
+
+            // Get filtered purchase orders
+            List<PurchaseOrder> purchaseOrders = poDAO.getAllPurchaseOrders(
+                    statusFilter, supplierId, fromDate, toDate, searchKeyword
+            );
+
+            // Get all suppliers for filter dropdown
+            List<Supplier> suppliers = supplierDAO.getAllSuppliers();
+
+            // Get all statuses for filter dropdown
+            List<String> statuses = poDAO.getAllStatuses();
+
+            // Get statistics
+            Object[] stats = poDAO.getPurchaseOrderStatistics();
+
+            // Set attributes for JSP
+            request.setAttribute("purchaseOrders", purchaseOrders);
+            request.setAttribute("suppliers", suppliers);
+            request.setAttribute("statuses", statuses);
+            request.setAttribute("totalOrders", stats[0]);
+            request.setAttribute("completedOrders", stats[1]);
+            request.setAttribute("pendingOrders", stats[2]);
+            request.setAttribute("totalAmount", stats[3]);
+
+            // Keep filter values
+            request.setAttribute("selectedStatus", statusFilter);
+            request.setAttribute("selectedSupplierId", supplierIdParam);
+            request.setAttribute("fromDate", fromDateParam);
+            request.setAttribute("toDate", toDateParam);
+            request.setAttribute("searchKeyword", searchKeyword);
+
+            // Forward to JSP
+            request.getRequestDispatcher("auditor/purchase-orders.jsp").forward(request, response);
+
+        } catch (Exception e) {
+            System.err.println("Error in handleListPurchaseOrders: " + e.getMessage());
+            e.printStackTrace();
+            request.setAttribute("errorMessage", "Error loading purchase orders: " + e.getMessage());
+            request.getRequestDispatcher("error.jsp").forward(request, response);
+        } finally {
+            // Close connections
+            if (poDAO != null) {
+                poDAO.closeConnection();
+            }
+            if (supplierDAO != null) {
+                supplierDAO.closeConnection();
             }
         }
-
-        Date fromDate = null;
-        if (fromDateParam != null && !fromDateParam.isEmpty()) {
-            try {
-                fromDate = Date.valueOf(fromDateParam);
-            } catch (IllegalArgumentException e) {
-                // Ignore invalid date
-            }
-        }
-
-        Date toDate = null;
-        if (toDateParam != null && !toDateParam.isEmpty()) {
-            try {
-                toDate = Date.valueOf(toDateParam);
-            } catch (IllegalArgumentException e) {
-                // Ignore invalid date
-            }
-        }
-
-        // Get filtered purchase orders
-        List<PurchaseOrder> purchaseOrders = poDAO.getAllPurchaseOrders(
-                statusFilter, supplierId, fromDate, toDate, searchKeyword
-        );
-
-        // Get all suppliers for filter dropdown
-        List<Supplier> suppliers = supplierDAO.getAllSuppliers();
-
-        // Get all statuses for filter dropdown
-        List<String> statuses = poDAO.getAllStatuses();
-
-        // Get statistics
-        Object[] stats = poDAO.getPurchaseOrderStatistics();
-
-        // Set attributes for JSP
-        request.setAttribute("purchaseOrders", purchaseOrders);
-        request.setAttribute("suppliers", suppliers);
-        request.setAttribute("statuses", statuses);
-        request.setAttribute("totalOrders", stats[0]);
-        request.setAttribute("completedOrders", stats[1]);
-        request.setAttribute("pendingOrders", stats[2]);
-        request.setAttribute("totalAmount", stats[3]);
-
-        // Keep filter values
-        request.setAttribute("selectedStatus", statusFilter);
-        request.setAttribute("selectedSupplierId", supplierIdParam);
-        request.setAttribute("fromDate", fromDateParam);
-        request.setAttribute("toDate", toDateParam);
-        request.setAttribute("searchKeyword", searchKeyword);
-
-        // Forward to JSP
-        request.getRequestDispatcher("auditor/purchase-orders.jsp").forward(request, response);
     }
 
     /**
@@ -187,17 +204,17 @@ public class PurchaseOrderServlet extends HttpServlet {
     private void handleViewPurchaseOrder(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // Ensure DAOs are initialized
-        ensureDAOsInitialized();
-
-        String poIdParam = request.getParameter("id");
-
-        if (poIdParam == null || poIdParam.isEmpty()) {
-            response.sendRedirect("purchase-orders");
-            return;
-        }
+        // Tạo DAO mới mỗi lần gọi
+        PurchaseOrderDAO poDAO = new PurchaseOrderDAO();
 
         try {
+            String poIdParam = request.getParameter("id");
+
+            if (poIdParam == null || poIdParam.isEmpty()) {
+                response.sendRedirect("purchase-orders");
+                return;
+            }
+
             int poId = Integer.parseInt(poIdParam);
 
             // Get purchase order details
@@ -220,13 +237,23 @@ public class PurchaseOrderServlet extends HttpServlet {
             request.getRequestDispatcher("auditor/purchase-order-detail.jsp").forward(request, response);
 
         } catch (NumberFormatException e) {
+            System.err.println("Invalid PO ID format: " + e.getMessage());
             response.sendRedirect("purchase-orders");
+        } catch (Exception e) {
+            System.err.println("Error in handleViewPurchaseOrder: " + e.getMessage());
+            e.printStackTrace();
+            request.setAttribute("errorMessage", "Error loading purchase order details: " + e.getMessage());
+            request.getRequestDispatcher("error.jsp").forward(request, response);
+        } finally {
+            // Close connection
+            if (poDAO != null) {
+                poDAO.closeConnection();
+            }
         }
     }
 
     /**
-     * Handles the HTTP <code>POST</code> 
-     * method.
+     * Handles the HTTP <code>POST</code> method.
      *
      * @param request servlet request
      * @param response servlet response

@@ -81,15 +81,17 @@ public class CreateStockServlet extends HttpServlet {
             System.out.println("Expected Date: " + expectedDateStr);
             System.out.println("Notes: " + notes);
 
-            // === NEW: Get arrays using proper naming convention ===
+            // Get arrays
             String[] medicineCodes = request.getParameterValues("medicineCode");
             String[] quantities = request.getParameterValues("quantity");
+            String[] unitPrices = request.getParameterValues("unitPrice");
             String[] priorities = request.getParameterValues("priority");
             String[] itemNotes = request.getParameterValues("itemNotes");
 
             System.out.println("\n=== FORM DATA ===");
             System.out.println("Medicine codes array: " + (medicineCodes != null ? medicineCodes.length : 0));
             System.out.println("Quantities array: " + (quantities != null ? quantities.length : 0));
+            System.out.println("Unit prices array: " + (unitPrices != null ? unitPrices.length : 0));
             System.out.println("Priorities array: " + (priorities != null ? priorities.length : 0));
 
             // Validate required fields
@@ -101,7 +103,8 @@ public class CreateStockServlet extends HttpServlet {
                 return;
             }
 
-            if (medicineCodes == null || quantities == null || priorities == null || medicineCodes.length == 0) {
+            if (medicineCodes == null || quantities == null || unitPrices == null || 
+                priorities == null || medicineCodes.length == 0) {
                 System.out.println("ERROR: At least one medicine item is required!");
                 session.setAttribute("message", "At least one medicine item is required!");
                 session.setAttribute("messageType", "error");
@@ -124,12 +127,14 @@ public class CreateStockServlet extends HttpServlet {
                 PurchaseOrderItem item = new PurchaseOrderItem();
                 item.setMedicineCode(medicineCodes[i]);
                 item.setQuantity(Integer.parseInt(quantities[i]));
+                item.setUnitPrice(Double.parseDouble(unitPrices[i]));
                 item.setPriority(priorities[i]);
                 item.setNotes(itemNotes != null && i < itemNotes.length ? itemNotes[i] : "");
                 
                 System.out.println("Item " + (i+1) + ":");
                 System.out.println("  - Medicine Code: " + item.getMedicineCode());
                 System.out.println("  - Quantity: " + item.getQuantity());
+                System.out.println("  - Unit Price: " + item.getUnitPrice());
                 System.out.println("  - Priority: " + item.getPriority());
                 System.out.println("  - Notes: " + item.getNotes());
                 

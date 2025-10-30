@@ -31,7 +31,66 @@
                 display: flex;
                 flex: 1;
             }
+            
+            /* ---- Modal chuyển dashboard ---- */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.45);
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.25s ease;
+}
 
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    animation: slideDown 0.25s ease;
+}
+
+.modal-header {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.modal-body p {
+    font-size: 15px;
+    color: #495057;
+    margin-bottom: 12px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideDown {
+    from { transform: translateY(-15px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+            
             /* Left sidebar styling */
             .sidebar {
                 width: 260px;
@@ -105,6 +164,29 @@
 
             .sidebar-item-logout:hover {
                 background: #c82333;
+            }
+
+            .sidebar-item[type="button"] {
+                font-family: inherit;
+                font-weight: 500;
+                font-size: 14px;
+                color: #495057;
+                text-align: left;
+                border: none;
+                background: none;
+                width: 100%;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 12px 16px;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .sidebar-item[type="button"]:hover {
+                background: #e9ecef;
+                color: #2c3e50;
             }
 
             /* Main content layout */
@@ -499,50 +581,7 @@
                 opacity: 0.3;
             }
 
-            .modal {
-                display: none;
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.5);
-                z-index: 1000;
-                align-items: center;
-                justify-content: center;
-            }
-
-            .modal.active {
-                display: flex;
-            }
-
-            .modal-content {
-                background: white;
-                padding: 30px;
-                border-radius: 12px;
-                max-width: 400px;
-                width: 90%;
-                border: 1px solid #dee2e6;
-            }
-
-            .modal-header {
-                font-size: 20px;
-                font-weight: 700;
-                margin-bottom: 16px;
-                color: #2c3e50;
-            }
-
-            .modal-body {
-                color: #6c757d;
-                margin-bottom: 24px;
-                line-height: 1.6;
-            }
-
-            .modal-actions {
-                display: flex;
-                gap: 12px;
-                justify-content: flex-end;
-            }
+            
 
             .btn-cancel {
                 background: #e9ecef;
@@ -630,6 +669,8 @@
                 .header h1 {
                     font-size: 20px;
                 }
+                
+                
             }
         </style>
     </head>
@@ -660,6 +701,9 @@
                     <a class="sidebar-item" href="${pageContext.request.contextPath}/admin-dashboard/create">
                         ➕ Tạo tài khoản
                     </a>
+                    <button class="sidebar-item" type="button" onclick="openSwitchDashboardModal()">
+                        🔁 Chuyển Dashboard
+                    </button>
                 </div>
             </div>
 
@@ -917,6 +961,23 @@
                 </div>
             </div>
         </div>
+        <div id="switchDashboardModal" class="modal">
+  <div class="modal-content" style="max-width:600px;">
+    <div class="modal-header">🔁 Chuyển Dashboard</div>
+    <div class="modal-body">
+      <p>Chọn dashboard bạn muốn truy cập:</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:16px;">
+        <a href="doctor-dashboard" style="background:#495057;color:#ffffff;padding:12px;border-radius:8px;text-align:center;text-decoration:none;font-weight:600;">Doctor</a>
+        <a href="pharmacist-dashboard" style="background:#495057;color:#ffffff;padding:12px;border-radius:8px;text-align:center;text-decoration:none;font-weight:600;">Pharmacist</a>
+        <a href="manager-dashboard" style="background:#495057;color:#ffffff;padding:12px;border-radius:8px;text-align:center;text-decoration:none;font-weight:600;">Manager</a>
+        <a href="auditor-dashboard" style="background:#495057;color:#ffffff;padding:12px;border-radius:8px;text-align:center;text-decoration:none;font-weight:600;">Auditor</a>
+      </div>
+    </div>
+    <div class="modal-actions" style="justify-content:center;margin-top:20px;">
+      <button onclick="closeSwitchDashboardModal()" style="background:#f1f3f5;color:#212529;padding:10px 20px;border:none;border-radius:6px;font-weight:600;cursor:pointer;">Đóng</button>
+    </div>
+  </div>
+</div>           
 
         <script>
             function confirmDelete(userId, username) {
@@ -933,6 +994,16 @@
                 if (e.target === this) {
                     closeDeleteModal();
                 }
+            });
+            function openSwitchDashboardModal() {
+                document.getElementById("switchDashboardModal").classList.add("active");
+            }
+            function closeSwitchDashboardModal() {
+                document.getElementById("switchDashboardModal").classList.remove("active");
+            }
+            document.getElementById("switchDashboardModal").addEventListener("click", function (e) {
+                if (e.target === this)
+                    closeSwitchDashboardModal();
             });
         </script>
     </body>

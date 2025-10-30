@@ -268,158 +268,174 @@
         </style>
     </head>
     <body>
-        <!-- Include header.jsp -->
-        <%@ include file="header.jsp" %>
+    <!-- Include header.jsp -->
+    <%@ include file="header.jsp" %>
 
-        <div class="page-wrapper">
-            <div class="main-content">
-                <div class="container">
-                    <div class="header">
-                        <h1>
-                            <span class="header-icon">✏️</span>
-                            Chỉnh sửa tài khoản
-                        </h1>
+    <div class="page-wrapper">
+        <div class="main-content">
+            <div class="container">
+                <div class="header">
+                    <h1>
+                        <span class="header-icon">✏️</span>
+                        Chỉnh sửa tài khoản
+                    </h1>
+                </div>
+
+                <div class="form-container">
+                    <div class="user-info">
+                        <div class="user-avatar">
+                            ${user.username.substring(0,1).toUpperCase()}
+                        </div>
+                        <div class="user-details">
+                            <strong>${user.username}</strong>
+                            <span>ID: #${user.userId} | ${user.role}</span>
+                        </div>
                     </div>
 
-                    <div class="form-container">
-                        <div class="user-info">
-                            <div class="user-avatar">
-                                ${user.username.substring(0,1).toUpperCase()}
+                    <%-- Hiển thị lỗi nếu có --%>
+                    <c:if test="${not empty error}">
+                        <div class="error-message">
+                            ⚠️ ${error}
+                        </div>
+                    </c:if>
+
+                    <%-- Hiển thị thông báo thành công nếu có --%>
+                    <c:if test="${not empty success}">
+                        <div style="
+                            background:#dcfce7;
+                            color:#166534;
+                            padding:12px 16px;
+                            border-radius:8px;
+                            border:1px solid #bbf7d0;
+                            margin-bottom:20px;
+                            font-size:14px;
+                            font-weight:500;">
+                            ✅ ${success}
+                        </div>
+                    </c:if>
+
+                    <div class="info-note">
+                        ℹ️ Không thể thay đổi tên đăng nhập. Mật khẩu là tùy chọn - chỉ điền nếu muốn thay đổi.
+                    </div>
+
+                    <form action="${pageContext.request.contextPath}/admin-dashboard/edit" method="post">
+                        <input type="hidden" name="userId" value="${user.userId}">
+                        <input type="hidden" name="username" value="${user.username}">
+
+                        <div class="form-group">
+                            <label>Tên đăng nhập</label>
+                            <input type="text" value="${user.username}" readonly>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" name="email" value="${user.email}" placeholder="example@hospital.com">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Số điện thoại</label>
+                            <input type="tel" name="phone" value="${user.phone}" placeholder="0123456789">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Vai trò <span>*</span></label>
+                            <select name="role" required>
+                                <c:set var="r" value="${user.role}" />
+                                <option value="Admin" ${r=='Admin'?'selected':''}>👑 Admin - Quản trị viên</option>
+                                <option value="Doctor" ${r=='Doctor'?'selected':''}>👨‍⚕️ Doctor - Bác sĩ</option>
+                                <option value="Pharmacist" ${r=='Pharmacist'?'selected':''}>💊 Pharmacist - Dược sĩ</option>
+                                <option value="Manager" ${r=='Manager'?'selected':''}>📊 Manager - Quản lý</option>
+                                <option value="Auditor" ${r=='Auditor'?'selected':''}>🔍 Auditor - Kiểm toán</option>
+                                <option value="ProcurementOfficer" ${r=='ProcurementOfficer'?'selected':''}>📦 Procurement Officer</option>
+                                <option value="Supplier" ${r=='Supplier'?'selected':''}>🚚 Supplier - Nhà cung cấp</option>
+                            </select>
+                        </div>
+
+                        <!-- Password Section -->
+                        <div class="password-section">
+                            <h3>🔐 Đổi mật khẩu</h3>
+                            
+                            <div class="password-toggle">
+                                <input type="checkbox" id="changePassword" onchange="togglePasswordFields()">
+                                <label for="changePassword">Tôi muốn đổi mật khẩu</label>
                             </div>
-                            <div class="user-details">
-                                <strong>${user.username}</strong>
-                                <span>ID: #${user.userId} | ${user.role}</span>
+
+                            <div class="password-fields" id="passwordFields">
+                                <div class="form-group">
+                                    <label>Mật khẩu mới</label>
+                                    <input type="password" name="newPassword" id="newPassword" 
+                                           placeholder="Nhập mật khẩu mới (tối thiểu 6 ký tự)">
+                                    <div class="password-hint">
+                                        💡 Mật khẩu nên có ít nhất 6 ký tự, bao gồm chữ và số
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Xác nhận mật khẩu mới</label>
+                                    <input type="password" name="confirmPassword" id="confirmPassword" 
+                                           placeholder="Nhập lại mật khẩu mới">
+                                </div>
                             </div>
                         </div>
 
-                        <c:if test="${not empty param.error}">
-                            <div class="error-message">
-                                ⚠️ ${param.error}
-                            </div>
-                        </c:if>
-
-                        <div class="info-note">
-                            ℹ️ Không thể thay đổi tên đăng nhập. Mật khẩu là tùy chọn - chỉ điền nếu muốn thay đổi.
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                ✓ Cập nhật
+                            </button>
+                            <a href="${pageContext.request.contextPath}/admin-dashboard" class="btn btn-secondary">
+                                ← Quay lại
+                            </a>
                         </div>
-
-                        <form action="${pageContext.request.contextPath}/admin-dashboard/edit" method="post">
-                            <input type="hidden" name="userId" value="${user.userId}">
-                            <input type="hidden" name="username" value="${user.username}">
-
-                            <div class="form-group">
-                                <label>Tên đăng nhập</label>
-                                <input type="text" value="${user.username}" readonly>
-                            </div>
-
-                            <div class="form-group">
-                                <label>Email</label>
-                                <input type="email" name="email" value="${user.email}" placeholder="example@hospital.com">
-                            </div>
-
-                            <div class="form-group">
-                                <label>Số điện thoại</label>
-                                <input type="tel" name="phone" value="${user.phone}" placeholder="0123456789">
-                            </div>
-
-                            <div class="form-group">
-                                <label>Vai trò <span>*</span></label>
-                                <select name="role" required>
-                                    <c:set var="r" value="${user.role}" />
-                                    <option value="Admin" ${r=='Admin'?'selected':''}>👑 Admin - Quản trị viên</option>
-                                    <option value="Doctor" ${r=='Doctor'?'selected':''}>👨‍⚕️ Doctor - Bác sĩ</option>
-                                    <option value="Pharmacist" ${r=='Pharmacist'?'selected':''}>💊 Pharmacist - Dược sĩ</option>
-                                    <option value="Manager" ${r=='Manager'?'selected':''}>📊 Manager - Quản lý</option>
-                                    <option value="Auditor" ${r=='Auditor'?'selected':''}>🔍 Auditor - Kiểm toán</option>
-                                    <option value="ProcurementOfficer" ${r=='ProcurementOfficer'?'selected':''}>📦 Procurement Officer</option>
-                                    <option value="Supplier" ${r=='Supplier'?'selected':''}>🚚 Supplier - Nhà cung cấp</option>
-                                </select>
-                            </div>
-
-                            <!-- Password Section -->
-                            <div class="password-section">
-                                <h3>🔐 Đổi mật khẩu</h3>
-                                
-                                <div class="password-toggle">
-                                    <input type="checkbox" id="changePassword" onchange="togglePasswordFields()">
-                                    <label for="changePassword">Tôi muốn đổi mật khẩu</label>
-                                </div>
-
-                                <div class="password-fields" id="passwordFields">
-                                    <div class="form-group">
-                                        <label>Mật khẩu mới</label>
-                                        <input type="password" name="newPassword" id="newPassword" 
-                                               placeholder="Nhập mật khẩu mới (tối thiểu 6 ký tự)">
-                                        <div class="password-hint">
-                                            💡 Mật khẩu nên có ít nhất 6 ký tự, bao gồm chữ và số
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label>Xác nhận mật khẩu mới</label>
-                                        <input type="password" name="confirmPassword" id="confirmPassword" 
-                                               placeholder="Nhập lại mật khẩu mới">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="form-actions">
-                                <button type="submit" class="btn btn-primary">
-                                    ✓ Cập nhật
-                                </button>
-                                <a href="${pageContext.request.contextPath}/admin-dashboard" class="btn btn-secondary">
-                                    ← Quay lại
-                                </a>
-                            </div>
-                        </form>
-                    </div>
+                    </form>
                 </div>
             </div>
-
-            <!-- Include footer.jsp -->
-            <%@ include file="footer.jsp" %>
         </div>
 
-        <script>
-            function togglePasswordFields() {
-                const checkbox = document.getElementById('changePassword');
-                const fields = document.getElementById('passwordFields');
-                const newPassword = document.getElementById('newPassword');
-                const confirmPassword = document.getElementById('confirmPassword');
+        <!-- Include footer.jsp -->
+        <%@ include file="footer.jsp" %>
+    </div>
+
+    <script>
+        function togglePasswordFields() {
+            const checkbox = document.getElementById('changePassword');
+            const fields = document.getElementById('passwordFields');
+            const newPassword = document.getElementById('newPassword');
+            const confirmPassword = document.getElementById('confirmPassword');
+            
+            if (checkbox.checked) {
+                fields.classList.add('active');
+                newPassword.required = true;
+                confirmPassword.required = true;
+            } else {
+                fields.classList.remove('active');
+                newPassword.required = false;
+                confirmPassword.required = false;
+                newPassword.value = '';
+                confirmPassword.value = '';
+            }
+        }
+
+        // Validate password match before submit
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const changePassword = document.getElementById('changePassword');
+            
+            if (changePassword.checked) {
+                const newPassword = document.getElementById('newPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
                 
-                if (checkbox.checked) {
-                    fields.classList.add('active');
-                    newPassword.required = true;
-                    confirmPassword.required = true;
-                } else {
-                    fields.classList.remove('active');
-                    newPassword.required = false;
-                    confirmPassword.required = false;
-                    newPassword.value = '';
-                    confirmPassword.value = '';
+                if (newPassword !== confirmPassword) {
+                    e.preventDefault();
+                    alert('⚠️ Mật khẩu xác nhận không khớp!');
+                    return false;
+                }
+                
+                if (newPassword.length < 6) {
+                    e.preventDefault();
+                    alert('⚠️ Mật khẩu phải có ít nhất 6 ký tự!');
+                    return false;
                 }
             }
-
-            // Validate password match before submit
-            document.querySelector('form').addEventListener('submit', function(e) {
-                const changePassword = document.getElementById('changePassword');
-                
-                if (changePassword.checked) {
-                    const newPassword = document.getElementById('newPassword').value;
-                    const confirmPassword = document.getElementById('confirmPassword').value;
-                    
-                    if (newPassword !== confirmPassword) {
-                        e.preventDefault();
-                        alert('⚠️ Mật khẩu xác nhận không khớp!');
-                        return false;
-                    }
-                    
-                    if (newPassword.length < 6) {
-                        e.preventDefault();
-                        alert('⚠️ Mật khẩu phải có ít nhất 6 ký tự!');
-                        return false;
-                    }
-                }
-            });
-        </script>
-    </body>
+        });
+    </script>
+</body>
 </html>

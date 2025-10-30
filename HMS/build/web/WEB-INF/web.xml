@@ -214,6 +214,8 @@
     <servlet>
         <servlet-name>EditProfileServlet</servlet-name>
         <servlet-class>Controller.EditProfileServlet</servlet-class>
+        <servlet-name>GetChatHistoryServlet</servlet-name>
+        <servlet-class>Controller.GetChatHistoryServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>UserServlet</servlet-name>
@@ -427,6 +429,8 @@
     <servlet-mapping>
         <servlet-name>EditProfileServlet</servlet-name>
         <url-pattern>/edit-profile</url-pattern>
+        <servlet-name>GetChatHistoryServlet</servlet-name>
+        <url-pattern>/getChatHistory</url-pattern>
     </servlet-mapping>
     <welcome-file-list>
         <welcome-file>login.jsp</welcome-file>

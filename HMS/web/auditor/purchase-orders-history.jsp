@@ -611,7 +611,7 @@
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item">
-                            <a href="${pageContext.request.contextPath}/auditor/auditor-dashboard.jsp">Dashboard</a>
+                            <a href="${pageContext.request.contextPath}/auditor-dashboard">Dashboard</a>
                         </li>
                         <li class="breadcrumb-item">
                             <a href="${pageContext.request.contextPath}/purchase-orders">Purchase Orders</a>

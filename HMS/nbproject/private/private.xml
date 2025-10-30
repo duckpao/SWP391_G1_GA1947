@@ -3,16 +3,26 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/src/java/websocket/ChatWebSocket.java</file>
-            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/src/java/DAO/DBContext.java</file>
-            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/src/java/model/Message.java</file>
-            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/src/java/model/User.java</file>
-            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/src/java/DAO/MessageDAO.java</file>
-            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/src/java/Controller/UserServlet.java</file>
-            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/web/WEB-INF/web.xml</file>
-            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/src/java/Controller/ChatControllerServlet.java</file>
-            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/src/java/DAO/UserDAO.java</file>
-            <file>file:/C:/App/SWP/dev/SWP391_G1_GA1947/HMS/web/chat.jsp</file>
+            <file>file:/C:/Users/ADMIN/java/backup/SWP391_G1_GA1947/HMS/web/jsp/doctorDashboard.jsp</file>
+            <file>file:/C:/Users/ADMIN/java/backup/SWP391_G1_GA1947/HMS/src/java/Controller/GetUserListServlet.java</file>
+            <file>file:/C:/Users/ADMIN/java/backup/SWP391_G1_GA1947/HMS/web/jsp/manageRequests.jsp</file>
+            <file>file:/C:/Users/ADMIN/java/backup/SWP391_G1_GA1947/HMS/src/java/Controller/AuditorDashboard.java</file>
+            <file>file:/C:/Users/ADMIN/java/backup/SWP391_G1_GA1947/HMS/web/admin/dashboard.jsp</file>
+            <file>file:/C:/Users/ADMIN/java/backup/SWP391_G1_GA1947/HMS/web/pharmacist/pharmacist-dashboard.jsp</file>
+            <file>file:/C:/Users/ADMIN/java/backup/SWP391_G1_GA1947/HMS/src/java/Controller/SupplierDashboardServlet.java</file>
+            <file>file:/C:/Users/ADMIN/java/backup/SWP391_G1_GA1947/HMS/web/auditor/purchase-orders-history.jsp</file>
+            <file>file:/C:/Users/ADMIN/java/backup/SWP391_G1_GA1947/HMS/src/java/Controller/DoctorDashboardServlet.java</file>
+            <file>file:/C:/Users/ADMIN/java/backup/SWP391_G1_GA1947/HMS/web/auditor/auditor-dashboard.jsp</file>
+            <file>file:/C:/Users/ADMIN/java/backup/SWP391_G1_GA1947/HMS/src/java/Controller/ChatControllerServlet.java</file>
+            <file>file:/C:/Users/ADMIN/java/backup/SWP391_G1_GA1947/HMS/web/auditor/purchase-orders.jsp</file>
+            <file>file:/C:/Users/ADMIN/java/backup/SWP391_G1_GA1947/HMS/web/auditor/purchase-order-detail.jsp</file>
+            <file>file:/C:/Users/ADMIN/java/backup/SWP391_G1_GA1947/HMS/src/java/DAO/UserDAO.java</file>
+            <file>file:/C:/Users/ADMIN/java/backup/SWP391_G1_GA1947/HMS/web/chat.jsp</file>
+            <file>file:/C:/Users/ADMIN/java/backup/SWP391_G1_GA1947/HMS/src/java/websocket/ChatWebSocket.java</file>
+            <file>file:/C:/Users/ADMIN/java/backup/SWP391_G1_GA1947/HMS/src/java/Controller/LoginServlet.java</file>
+            <file>file:/C:/Users/ADMIN/java/backup/SWP391_G1_GA1947/HMS/web/login.jsp</file>
+            <file>file:/C:/Users/ADMIN/java/backup/SWP391_G1_GA1947/HMS/src/java/model/User.java</file>
+            <file>file:/C:/Users/ADMIN/java/backup/SWP391_G1_GA1947/HMS/src/java/Controller/pharmacistdashboard.java</file>
         </group>
     </open-files>
 </project-private>

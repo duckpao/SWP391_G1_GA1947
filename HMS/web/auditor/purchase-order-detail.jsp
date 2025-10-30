@@ -426,7 +426,7 @@
             </div>
 
             <nav>
-                <a class="nav-link" href="${pageContext.request.contextPath}/auditor/auditor-dashboard.jsp">
+                <a class="nav-link" href="${pageContext.request.contextPath}/auditor-dashboard">
                     <i class="bi bi-speedometer2"></i> Dashboard
                 </a>
                 <a class="nav-link" href="${pageContext.request.contextPath}/purchase-orders">

@@ -32,7 +32,8 @@ public class LoginServlet extends HttpServlet {
 
             if (user != null && PasswordUtils.verify(password, user.getPasswordHash())) {
                 // ✅ LOGIN THÀNH CÔNG
-
+                UserDAO.updateLastLogin(user.getUserId());
+                
                 HttpSession session = request.getSession();
                 session.setAttribute("userId", user.getUserId());
                 session.setAttribute("role", user.getRole());
@@ -61,7 +62,7 @@ public class LoginServlet extends HttpServlet {
                         response.sendRedirect(request.getContextPath() + "/supplierDashboard");
                         break;
                     case "Auditor":
-                        response.sendRedirect(request.getContextPath() + "/auditor/auditor-dashboard.jsp");
+                        response.sendRedirect(request.getContextPath() + "/auditor-dashboard");
                         break;
                     default:
                         response.sendRedirect(request.getContextPath() + "/home.jsp");

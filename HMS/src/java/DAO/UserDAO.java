@@ -486,4 +486,16 @@ public class UserDAO extends DBContext {
         }
         return users;
     }
+
+    // Thêm vào UserDAO.java
+    public static boolean updateLastLogin(int userId) {
+        String sql = "UPDATE Users SET last_login = GETDATE() WHERE user_id = ?";
+        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

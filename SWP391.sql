@@ -1068,3 +1068,47 @@ GO
 -- =========================================
 EXEC sp_RefreshUserActivitySummary;
 GO
+
+IF OBJECT_ID('Messages', 'U') IS NOT NULL DROP TABLE Messages;
+GO
+
+CREATE TABLE Messages (
+    message_id INT IDENTITY(1,1) PRIMARY KEY,
+    sender_id INT,
+    receiver_id INT,
+    message_content NVARCHAR(MAX) NOT NULL,
+    is_read BIT DEFAULT 0,
+    sent_at DATETIME DEFAULT GETDATE(),
+    message_type NVARCHAR(20) DEFAULT 'text' CHECK (message_type IN ('text','notification','alert')),
+    
+    -- Foreign keys with NO ACTION to avoid cascade conflicts
+    CONSTRAINT FK_Messages_Sender FOREIGN KEY (sender_id) 
+        REFERENCES Users(user_id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+    CONSTRAINT FK_Messages_Receiver FOREIGN KEY (receiver_id) 
+        REFERENCES Users(user_id) ON DELETE NO ACTION ON UPDATE NO ACTION
+);
+GO
+
+-- Create indexes for better performance
+CREATE INDEX idx_messages_receiver ON Messages(receiver_id);
+CREATE INDEX idx_messages_sender ON Messages(sender_id);
+CREATE INDEX idx_messages_sent_at ON Messages(sent_at DESC);
+GO
+
+-- Insert sample messages (optional - for testing)
+DECLARE @admin_id INT = (SELECT user_id FROM Users WHERE username = 'admin');
+DECLARE @doctor2_id INT = (SELECT user_id FROM Users WHERE username = 'doctor2');
+DECLARE @pharma2_id INT = (SELECT user_id FROM Users WHERE username = 'pharma2');
+DECLARE @manager2_id INT = (SELECT user_id FROM Users WHERE username = 'manager2');
+
+IF @admin_id IS NOT NULL AND @doctor2_id IS NOT NULL
+BEGIN
+    INSERT INTO Messages (sender_id, receiver_id, message_content, message_type, is_read, sent_at)
+    VALUES 
+    (@admin_id, @doctor2_id, N'Chào bác sĩ, có yêu cầu thuốc mới cần duyệt', 'notification', 0, GETDATE()),
+    (@doctor2_id, @admin_id, N'Cảm ơn, tôi sẽ kiểm tra ngay', 'text', 1, DATEADD(MINUTE, 5, GETDATE())),
+    (@pharma2_id, @manager2_id, N'Kho thuốc Paracetamol sắp hết, cần đặt hàng', 'alert', 0, DATEADD(HOUR, -2, GETDATE())),
+    (@manager2_id, @pharma2_id, N'Đã tạo đơn đặt hàng mới', 'text', 1, DATEADD(HOUR, -1, GETDATE())),
+    (@admin_id, @pharma2_id, N'Vui lòng kiểm tra lô thuốc mới nhập kho', 'notification', 0, DATEADD(DAY, -1, GETDATE()));
+END
+GO

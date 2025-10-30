@@ -414,8 +414,8 @@
         <servlet-class>Controller.ViewMedicineRequest</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>ViewMedicineServlet</servlet-name>
-        <url-pattern>/view-medicine</url-pattern>
+        <servlet-name>ViewMedicineRequest</servlet-name>
+        <url-pattern>/pharmacist/View_MedicineRequest</url-pattern>
     </servlet-mapping>
     <servlet>
         <servlet-name>PharmacistUpdateRequest</servlet-name>

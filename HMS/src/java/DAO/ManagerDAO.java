@@ -177,135 +177,133 @@ public class ManagerDAO extends DBContext {
         return null;
     }
 
-    // === CẬP NHẬT: Lấy PO Items với thông tin thuốc đầy đủ ===
- 
-
-    // === CẬP NHẬT: Tạo PO mới dùng medicine_code ===
-    public int createPurchaseOrder(int managerId, Integer supplierId, Date expectedDeliveryDate, 
-                                  String notes, List<PurchaseOrderItem> items) {
-        String poQuery = "INSERT INTO PurchaseOrders (manager_id, supplier_id, status, order_date, expected_delivery_date, notes, updated_at) " +
-                        "VALUES (?, ?, 'Draft', GETDATE(), ?, ?, GETDATE())";
-        String itemQuery = "INSERT INTO PurchaseOrderItems (po_id, medicine_code, quantity, priority, notes) " +
-                         "VALUES (?, ?, ?, ?, ?)";
-        
-        try {
-            connection.setAutoCommit(false);
-            try (PreparedStatement ps = connection.prepareStatement(poQuery, Statement.RETURN_GENERATED_KEYS)) {
-                ps.setInt(1, managerId);
-                if (supplierId != null) {
-                    ps.setInt(2, supplierId);
-                } else {
-                    ps.setNull(2, java.sql.Types.INTEGER);
-                }
-                ps.setDate(3, expectedDeliveryDate);
-                ps.setString(4, notes);
-                
-                int result = ps.executeUpdate();
-                if (result == 0) {
-                    connection.rollback();
-                    return -1;
-                }
-                
-                ResultSet rs = ps.getGeneratedKeys();
-                if (rs.next()) {
-                    int poId = rs.getInt(1);
-                    try (PreparedStatement psItem = connection.prepareStatement(itemQuery)) {
-                        for (PurchaseOrderItem item : items) {
-                            psItem.setInt(1, poId);
-                            psItem.setString(2, item.getMedicineCode());
-                            psItem.setInt(3, item.getQuantity());
-                            psItem.setString(4, item.getPriority());
-                            psItem.setString(5, item.getNotes());
-                            psItem.addBatch();
-                        }
-                        psItem.executeBatch();
+ // === CẬP NHẬT: Tạo PO mới dùng medicine_code + unit_price ===
+public int createPurchaseOrder(int managerId, Integer supplierId, Date expectedDeliveryDate, 
+                              String notes, List<PurchaseOrderItem> items) {
+    String poQuery = "INSERT INTO PurchaseOrders (manager_id, supplier_id, status, order_date, expected_delivery_date, notes, updated_at) " +
+                    "VALUES (?, ?, 'Draft', GETDATE(), ?, ?, GETDATE())";
+    String itemQuery = "INSERT INTO PurchaseOrderItems (po_id, medicine_code, quantity, unit_price, priority, notes) " +
+                     "VALUES (?, ?, ?, ?, ?, ?)";
+    
+    try {
+        connection.setAutoCommit(false);
+        try (PreparedStatement ps = connection.prepareStatement(poQuery, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setInt(1, managerId);
+            if (supplierId != null) {
+                ps.setInt(2, supplierId);
+            } else {
+                ps.setNull(2, java.sql.Types.INTEGER);
+            }
+            ps.setDate(3, expectedDeliveryDate);
+            ps.setString(4, notes);
+            
+            int result = ps.executeUpdate();
+            if (result == 0) {
+                connection.rollback();
+                return -1;
+            }
+            
+            ResultSet rs = ps.getGeneratedKeys();
+            if (rs.next()) {
+                int poId = rs.getInt(1);
+                try (PreparedStatement psItem = connection.prepareStatement(itemQuery)) {
+                    for (PurchaseOrderItem item : items) {
+                        psItem.setInt(1, poId);
+                        psItem.setString(2, item.getMedicineCode());
+                        psItem.setInt(3, item.getQuantity());
+                        psItem.setDouble(4, item.getUnitPrice()); // ✅ THÊM unit_price
+                        psItem.setString(5, item.getPriority());
+                        psItem.setString(6, item.getNotes());
+                        psItem.addBatch();
                     }
-                    connection.commit();
-                    System.out.println("Created PO #" + poId + " with " + items.size() + " items (using medicine_code).");
-                    return poId;
+                    psItem.executeBatch();
                 }
-            }
-        } catch (SQLException e) {
-            try {
-                connection.rollback();
-            } catch (SQLException rollbackEx) {
-                rollbackEx.printStackTrace();
-            }
-            System.err.println("Error creating purchase order: " + e.getMessage());
-            e.printStackTrace();
-        } finally {
-            try {
-                connection.setAutoCommit(true);
-            } catch (SQLException e) {
-                e.printStackTrace();
+                connection.commit();
+                System.out.println("Created PO #" + poId + " with " + items.size() + " items (with unit_price).");
+                return poId;
             }
         }
-        return -1;
-    }
-
-    // === CẬP NHẬT: Cập nhật PO dùng medicine_code ===
-    public boolean updatePurchaseOrder(int poId, Integer supplierId, Date expectedDeliveryDate, 
-                                      String notes, List<PurchaseOrderItem> items) {
-        String poQuery = "UPDATE PurchaseOrders SET supplier_id = ?, expected_delivery_date = ?, notes = ?, updated_at = GETDATE() " +
-                        "WHERE po_id = ? AND status = 'Draft'";
-        String deleteItemsQuery = "DELETE FROM PurchaseOrderItems WHERE po_id = ?";
-        String itemQuery = "INSERT INTO PurchaseOrderItems (po_id, medicine_code, quantity, priority, notes) " +
-                         "VALUES (?, ?, ?, ?, ?)";
-        
+    } catch (SQLException e) {
         try {
-            connection.setAutoCommit(false);
-            try (PreparedStatement ps = connection.prepareStatement(poQuery)) {
-                if (supplierId != null) {
-                    ps.setInt(1, supplierId);
-                } else {
-                    ps.setNull(1, java.sql.Types.INTEGER);
-                }
-                ps.setDate(2, expectedDeliveryDate);
-                ps.setString(3, notes);
-                ps.setInt(4, poId);
-                int result = ps.executeUpdate();
-                if (result == 0) {
-                    connection.rollback();
-                    System.out.println("Update PO #" + poId + " failed: No rows affected or not in Draft.");
-                    return false;
-                }
-            }
-            try (PreparedStatement psDelete = connection.prepareStatement(deleteItemsQuery)) {
-                psDelete.setInt(1, poId);
-                psDelete.executeUpdate();
-            }
-            try (PreparedStatement psItem = connection.prepareStatement(itemQuery)) {
-                for (PurchaseOrderItem item : items) {
-                    psItem.setInt(1, poId);
-                    psItem.setString(2, item.getMedicineCode());
-                    psItem.setInt(3, item.getQuantity());
-                    psItem.setString(4, item.getPriority());
-                    psItem.setString(5, item.getNotes());
-                    psItem.addBatch();
-                }
-                psItem.executeBatch();
-            }
-            connection.commit();
-            System.out.println("Updated PO #" + poId + " with " + items.size() + " items (using medicine_code).");
-            return true;
+            connection.rollback();
+        } catch (SQLException rollbackEx) {
+            rollbackEx.printStackTrace();
+        }
+        System.err.println("Error creating purchase order: " + e.getMessage());
+        e.printStackTrace();
+    } finally {
+        try {
+            connection.setAutoCommit(true);
         } catch (SQLException e) {
-            try {
-                connection.rollback();
-            } catch (SQLException rollbackEx) {
-                rollbackEx.printStackTrace();
-            }
-            System.err.println("Error updating purchase order #" + poId + ": " + e.getMessage());
             e.printStackTrace();
-            return false;
-        } finally {
-            try {
-                connection.setAutoCommit(true);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
     }
+    return -1;
+}
 
+// === CẬP NHẬT: Cập nhật PO dùng medicine_code + unit_price ===
+public boolean updatePurchaseOrder(int poId, Integer supplierId, Date expectedDeliveryDate, 
+                                  String notes, List<PurchaseOrderItem> items) {
+    String poQuery = "UPDATE PurchaseOrders SET supplier_id = ?, expected_delivery_date = ?, notes = ?, updated_at = GETDATE() " +
+                    "WHERE po_id = ? AND status = 'Draft'";
+    String deleteItemsQuery = "DELETE FROM PurchaseOrderItems WHERE po_id = ?";
+    String itemQuery = "INSERT INTO PurchaseOrderItems (po_id, medicine_code, quantity, unit_price, priority, notes) " +
+                     "VALUES (?, ?, ?, ?, ?, ?)";
+    
+    try {
+        connection.setAutoCommit(false);
+        try (PreparedStatement ps = connection.prepareStatement(poQuery)) {
+            if (supplierId != null) {
+                ps.setInt(1, supplierId);
+            } else {
+                ps.setNull(1, java.sql.Types.INTEGER);
+            }
+            ps.setDate(2, expectedDeliveryDate);
+            ps.setString(3, notes);
+            ps.setInt(4, poId);
+            int result = ps.executeUpdate();
+            if (result == 0) {
+                connection.rollback();
+                System.out.println("Update PO #" + poId + " failed: No rows affected or not in Draft.");
+                return false;
+            }
+        }
+        try (PreparedStatement psDelete = connection.prepareStatement(deleteItemsQuery)) {
+            psDelete.setInt(1, poId);
+            psDelete.executeUpdate();
+        }
+        try (PreparedStatement psItem = connection.prepareStatement(itemQuery)) {
+            for (PurchaseOrderItem item : items) {
+                psItem.setInt(1, poId);
+                psItem.setString(2, item.getMedicineCode());
+                psItem.setInt(3, item.getQuantity());
+                psItem.setDouble(4, item.getUnitPrice()); // ✅ THÊM unit_price
+                psItem.setString(5, item.getPriority());
+                psItem.setString(6, item.getNotes());
+                psItem.addBatch();
+            }
+            psItem.executeBatch();
+        }
+        connection.commit();
+        System.out.println("Updated PO #" + poId + " with " + items.size() + " items (with unit_price).");
+        return true;
+    } catch (SQLException e) {
+        try {
+            connection.rollback();
+        } catch (SQLException rollbackEx) {
+            rollbackEx.printStackTrace();
+        }
+        System.err.println("Error updating purchase order #" + poId + ": " + e.getMessage());
+        e.printStackTrace();
+        return false;
+    } finally {
+        try {
+            connection.setAutoCommit(true);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+}
     // === Các method cũ giữ nguyên ===
     public boolean deletePurchaseOrder(int poId) {
         String deleteItemsQuery = "DELETE FROM PurchaseOrderItems WHERE po_id = ?";

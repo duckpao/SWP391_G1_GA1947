@@ -30,7 +30,7 @@
         }
         /* Sidebar */
         .sidebar {
-            width: 260px;
+            width: 0;
             background: #f8f9fa;
             border-right: 1px solid #dee2e6;
             padding: 30px 0;

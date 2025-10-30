@@ -409,6 +409,22 @@
         <servlet-name>EditProfileServlet</servlet-name>
         <url-pattern>/edit-profile</url-pattern>
     </servlet-mapping>
+      <servlet>
+        <servlet-name>ViewMedicineRequest</servlet-name>
+        <servlet-class>Controller.ViewMedicineRequest</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ViewMedicineRequest</servlet-name>
+        <url-pattern>/pharmacist/View_MedicineRequest</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>PharmacistUpdateRequest</servlet-name>
+        <servlet-class>Controller.PharmacistUpdateRequest</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>PharmacistUpdateRequest</servlet-name>
+        <url-pattern>/PharmacistUpdateRequest</url-pattern>
+    </servlet-mapping>
     <welcome-file-list>
         <welcome-file>login.jsp</welcome-file>
     </welcome-file-list>

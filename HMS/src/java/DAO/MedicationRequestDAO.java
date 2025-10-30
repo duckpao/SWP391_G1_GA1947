@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
+import java.sql.Connection;
 public class MedicationRequestDAO extends DBContext {
 
     public int createRequest(MedicationRequest request) {

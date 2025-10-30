@@ -1,93 +1,77 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
-
 package Controller;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
-/**
- *
- * @author ADMIN
- */
 public class AuditorDashboard extends HttpServlet {
-   
-    /** 
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet AuditorDashboard</title>");  
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet AuditorDashboard at " + request.getContextPath () + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
-    } 
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /** 
-     * Handles the HTTP <code>GET</code> method.
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
+            throws ServletException, IOException {
+
         HttpSession session = request.getSession(false);
+
+        // ❌ Nếu chưa đăng nhập → quay lại login
         if (session == null || session.getAttribute("role") == null) {
-            response.sendRedirect("login");
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
         String role = (String) session.getAttribute("role");
+        String path = request.getServletPath();
+
+        // ✅ Admin được vào tất cả dashboard
+        if ("Admin".equals(role)) {
+            request.getRequestDispatcher("/auditor/auditor-dashboard.jsp").forward(request, response);
+            return;
+        }
+
+        // ✅ Auditor chỉ được vào auditor-dashboard
         if ("Auditor".equals(role)) {
             request.getRequestDispatcher("/auditor/auditor-dashboard.jsp").forward(request, response);
-        } else {
-            response.sendRedirect("login"); 
+            return;
         }
-    } 
 
-    /** 
-     * Handles the HTTP <code>POST</code> method.
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
-        processRequest(request, response);
+        // ✅ Doctor → đá về doctor-dashboard
+        if ("Doctor".equals(role)) {
+            response.sendRedirect(request.getContextPath() + "/doctor-dashboard");
+            return;
+        }
+
+        // ✅ Pharmacist → đá về pharmacist-dashboard
+        if ("Pharmacist".equals(role)) {
+            response.sendRedirect(request.getContextPath() + "/pharmacist-dashboard");
+            return;
+        }
+
+        // ✅ Manager → đá về manager-dashboard
+        if ("Manager".equals(role)) {
+            response.sendRedirect(request.getContextPath() + "/manager-dashboard");
+            return;
+        }
+
+        // ✅ Supplier → đá về supplier-dashboard
+        if ("Supplier".equals(role)) {
+            response.sendRedirect(request.getContextPath() + "/supplier-dashboard");
+            return;
+        }
+
+        // ❌ Không hợp lệ → quay về login
+        response.sendRedirect(request.getContextPath() + "/login");
     }
 
-    /** 
-     * Returns a short description of the servlet.
-     * @return a String containing servlet description
-     */
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        doGet(request, response);
+    }
+
     @Override
     public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
-
+        return "Auditor Dashboard Servlet with Role-based Access Control";
+    }
 }

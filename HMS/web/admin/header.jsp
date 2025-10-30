@@ -195,7 +195,7 @@
                 <a href="/HMS/supplierDashboard" class="header-logo">
             </c:when>
             <c:otherwise>
-                <a href="logout" class="header-logo">
+                <a href="home" class="header-logo">
             </c:otherwise>
         </c:choose>
 
@@ -206,27 +206,38 @@
         </a>
 
         <div class="header-nav">
-            <c:if test="${not empty sessionScope.user}">
-                <a href="chat" class="nav-btn nav-btn-chat">
-                    <i class="fas fa-comments"></i>
-                    <span>Chat</span>
-                </a>
-                
-                <a href="logout" class="nav-btn nav-btn-logout">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Logout</span>
-                </a>
-                
-                <a href="profile" class="nav-btn nav-btn-profile">
-                    <div class="user-avatar">
-                        ${sessionScope.user.username.substring(0, 1).toUpperCase()}
-                    </div>
-                    <div class="user-details">
-                        <span class="user-name">${sessionScope.user.username}</span>
-                        <span class="user-role">${sessionScope.user.role}</span>
-                    </div>
-                </a>
-            </c:if>
-        </div>
+    <c:if test="${not empty sessionScope.user}">
+        
+        <%-- Nút ch? hi?n th? cho Admin --%>
+        <c:if test="${sessionScope.user.role == 'Admin'}">
+            <a href="/HMS/admin-dashboard" 
+               class="nav-btn" 
+               style="background:#6c757d;color:#fff;border-color:#5a6268;">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Admin Dashboard</span>
+            </a>
+        </c:if>
+
+        <a href="/HMS/chat" class="nav-btn nav-btn-chat">
+            <i class="fas fa-comments"></i>
+            <span>Chat</span>
+        </a>
+        
+        <a href="/HMS/logout" class="nav-btn nav-btn-logout">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+        </a>
+        
+        <a href="/HMS/profile" class="nav-btn nav-btn-profile">
+            <div class="user-avatar">
+                ${sessionScope.user.username.substring(0, 1).toUpperCase()}
+            </div>
+            <div class="user-details">
+                <span class="user-name">${sessionScope.user.username}</span>
+                <span class="user-role">${sessionScope.user.role}</span>
+            </div>
+        </a>
+    </c:if>
+</div>
     </div>
 </header>

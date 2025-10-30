@@ -15,25 +15,49 @@ public class pharmacistdashboard extends HttpServlet {
 
         HttpSession session = request.getSession(false);
 
-        if (session == null || !"Pharmacist".equals(session.getAttribute("role"))) {
-            // Chưa login hoặc role không phải Pharmacist → về login
-            response.sendRedirect(request.getContextPath() + "/login.jsp");
+        // ❌ Nếu chưa đăng nhập hoặc không có role
+        if (session == null || session.getAttribute("role") == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
-        // Nếu đúng role, chuyển sang pharmacist-dashboard.jsp trong thư mục pharmacist
-        request.getRequestDispatcher("/pharmacist/pharmacist-dashboard.jsp")
-               .forward(request, response);
+        String role = (String) session.getAttribute("role");
+
+        // ✅ Cho phép Admin hoặc Pharmacist truy cập
+        if ("Pharmacist".equals(role) || "Admin".equals(role)) {
+            System.out.println("Access granted to Pharmacist Dashboard. Role: " + role);
+            request.getRequestDispatcher("/pharmacist/pharmacist-dashboard.jsp").forward(request, response);
+            return;
+        }
+
+        // 🚫 Các role khác thì điều hướng đúng dashboard của họ
+        switch (role) {
+            case "Doctor":
+                response.sendRedirect(request.getContextPath() + "/doctor-dashboard");
+                break;
+            case "Manager":
+                response.sendRedirect(request.getContextPath() + "/manager-dashboard");
+                break;
+            case "Auditor":
+                response.sendRedirect(request.getContextPath() + "/auditor-dashboard");
+                break;
+            case "Supplier":
+                response.sendRedirect(request.getContextPath() + "/supplier-dashboard");
+                break;
+            default:
+                response.sendRedirect(request.getContextPath() + "/login");
+                break;
+        }
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        doGet(request, response); // POST cũng chạy giống GET
+        doGet(request, response);
     }
 
     @Override
     public String getServletInfo() {
-        return "Servlet redirect sang pharmacist dashboard";
+        return "Pharmacist Dashboard Servlet - allows Admin & Pharmacist roles";
     }
 }

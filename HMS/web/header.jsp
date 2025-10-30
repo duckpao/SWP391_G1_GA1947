@@ -177,22 +177,22 @@
         <%-- Dynamic logo redirect based on user role --%>
         <c:choose>
             <c:when test="${sessionScope.user.role == 'Admin'}">
-                <a href="admin-dashboard" class="header-logo">
+                <a href="/HMS/admin-dashboard" class="header-logo">
             </c:when>
             <c:when test="${sessionScope.user.role == 'Doctor'}">
-                <a href="doctor-dashboard" class="header-logo">
+                <a href="/HMS/doctor-dashboard" class="header-logo">
             </c:when>
             <c:when test="${sessionScope.user.role == 'Pharmacist'}">
-                <a href="pharmacist-dashboard" class="header-logo">
+                <a href="/HMS/pharmacist-dashboard" class="header-logo">
             </c:when>
             <c:when test="${sessionScope.user.role == 'Manager'}">
-                <a href="manager-dashboard" class="header-logo">
+                <a href="/HMS/manager-dashboard" class="header-logo">
             </c:when>
             <c:when test="${sessionScope.user.role == 'Auditor'}">
-                <a href="auditor-dashboard" class="header-logo">
+                <a href="/HMS/auditor-dashboard" class="header-logo">
             </c:when>
             <c:when test="${sessionScope.user.role == 'Supplier'}">
-                <a href="supplierDashboard" class="header-logo">
+                <a href="/HMS/supplierDashboard" class="header-logo">
             </c:when>
             <c:otherwise>
                 <a href="home" class="header-logo">
@@ -206,27 +206,38 @@
         </a>
 
         <div class="header-nav">
-            <c:if test="${not empty sessionScope.user}">
-                <a href="chat" class="nav-btn nav-btn-chat">
-                    <i class="fas fa-comments"></i>
-                    <span>Chat</span>
-                </a>
-                
-                <a href="logout" class="nav-btn nav-btn-logout">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Logout</span>
-                </a>
-                
-                <a href="profile" class="nav-btn nav-btn-profile">
-                    <div class="user-avatar">
-                        ${sessionScope.user.username.substring(0, 1).toUpperCase()}
-                    </div>
-                    <div class="user-details">
-                        <span class="user-name">${sessionScope.user.username}</span>
-                        <span class="user-role">${sessionScope.user.role}</span>
-                    </div>
-                </a>
-            </c:if>
-        </div>
+    <c:if test="${not empty sessionScope.user}">
+        
+        <%-- Nút ch? hi?n th? cho Admin --%>
+        <c:if test="${sessionScope.user.role == 'Admin'}">
+            <a href="/HMS/admin-dashboard" 
+               class="nav-btn" 
+               style="background:#6c757d;color:#fff;border-color:#5a6268;">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Admin Dashboard</span>
+            </a>
+        </c:if>
+
+        <a href="chat" class="nav-btn nav-btn-chat">
+            <i class="fas fa-comments"></i>
+            <span>Chat</span>
+        </a>
+        
+        <a href="logout" class="nav-btn nav-btn-logout">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+        </a>
+        
+        <a href="/HMS/profile" class="nav-btn nav-btn-profile">
+            <div class="user-avatar">
+                ${sessionScope.user.username.substring(0, 1).toUpperCase()}
+            </div>
+            <div class="user-details">
+                <span class="user-name">${sessionScope.user.username}</span>
+                <span class="user-role">${sessionScope.user.role}</span>
+            </div>
+        </a>
+    </c:if>
+</div>
     </div>
 </header>

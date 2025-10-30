@@ -6,111 +6,81 @@ import java.util.*;
 
 public class TransactionDAO {
 
-    private DBContext dbContext = new DBContext();
+    private Connection connection;
 
-    // ✅ Ghi nhận một transaction mới (ví dụ: Expired / Damaged)
-    public boolean insertTransaction(Transaction t) {
-        String sql = """
-            INSERT INTO Transactions (batch_id, user_id, dn_id, type, quantity, transaction_date, notes)
-            VALUES (?, ?, ?, ?, ?, GETDATE(), ?)
-        """;
-
-        try (Connection conn = dbContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, t.getBatchId());
-            ps.setInt(2, t.getUserId());
-
-            if (t.getDnId() != null) {
-                ps.setInt(3, t.getDnId());
-            } else {
-                ps.setNull(3, Types.INTEGER);
-            }
-
-            ps.setString(4, t.getType());
-            ps.setInt(5, t.getQuantity());
-            ps.setString(6, t.getNotes());
-
-            return ps.executeUpdate() > 0;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
+    public TransactionDAO(Connection connection) {
+        this.connection = connection;
     }
 
-    // ✅ Lấy danh sách tất cả các transaction (dùng cho audit hoặc history)
-    public List<Transaction> getAllTransactions() {
+    // Lấy danh sách giao dịch hết hạn / hư hỏng
+    public List<Transaction> getExpiredOrDamaged() throws SQLException {
         List<Transaction> list = new ArrayList<>();
-        String sql = "SELECT * FROM Transactions ORDER BY transaction_date DESC";
+        String sql = """
+            SELECT 
+                t.transaction_id,
+                t.batch_id,
+                t.user_id,
+                u.username,
+                b.lot_number AS lotNumber,
+                t.dn_id,
+                t.type,
+                t.quantity,
+                t.transaction_date,
+                t.notes,
+                m.name AS medicine_name
+            FROM Transactions t
+            LEFT JOIN Users u ON t.user_id = u.user_id
+            LEFT JOIN Batches b ON t.batch_id = b.batch_id
+            LEFT JOIN Medicines m ON b.medicine_code = m.medicine_code
+            WHERE t.type IN ('Expired', 'Damaged')
+            ORDER BY t.transaction_date DESC
+        """;
 
-        try (Connection conn = dbContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 Transaction t = new Transaction();
                 t.setTransactionId(rs.getInt("transaction_id"));
                 t.setBatchId(rs.getInt("batch_id"));
                 t.setUserId(rs.getInt("user_id"));
-                t.setDnId((Integer) rs.getObject("dn_id"));
+
+                // Xử lý dn_id có thể null
+                Object dnObj = rs.getObject("dn_id");
+                t.setDnId(dnObj != null ? (Integer) dnObj : null);
+
                 t.setType(rs.getString("type"));
                 t.setQuantity(rs.getInt("quantity"));
                 t.setTransactionDate(rs.getTimestamp("transaction_date"));
                 t.setNotes(rs.getString("notes"));
+                t.setUsername(rs.getString("username"));
+                t.setMedicineName(rs.getString("medicine_name"));
+                t.setLotNumber(rs.getString("lotNumber"));
                 list.add(t);
             }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
-
         return list;
     }
 
-    // ✅ Lấy danh sách transaction theo batch_id (xem lịch sử 1 lô thuốc)
-    public List<Transaction> getTransactionsByBatchId(int batchId) {
-        List<Transaction> list = new ArrayList<>();
-        String sql = "SELECT * FROM Transactions WHERE batch_id = ? ORDER BY transaction_date DESC";
+    // Thêm giao dịch mới
+    public void addTransaction(Transaction t) throws SQLException {
+        String sql = """
+            INSERT INTO Transactions 
+                (batch_id, user_id, dn_id, type, quantity, notes)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """;
 
-        try (Connection conn = dbContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, batchId);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    Transaction t = new Transaction();
-                    t.setTransactionId(rs.getInt("transaction_id"));
-                    t.setBatchId(rs.getInt("batch_id"));
-                    t.setUserId(rs.getInt("user_id"));
-                    t.setDnId((Integer) rs.getObject("dn_id"));
-                    t.setType(rs.getString("type"));
-                    t.setQuantity(rs.getInt("quantity"));
-                    t.setTransactionDate(rs.getTimestamp("transaction_date"));
-                    t.setNotes(rs.getString("notes"));
-                    list.add(t);
-                }
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, t.getBatchId());
+            ps.setInt(2, t.getUserId());
+            if (t.getDnId() != null) {
+                ps.setInt(3, t.getDnId());
+            } else {
+                ps.setNull(3, Types.INTEGER);
             }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return list;
-    }
-
-    // ✅ Xóa 1 transaction (nếu cần thiết)
-    public boolean deleteTransaction(int transactionId) {
-        String sql = "DELETE FROM Transactions WHERE transaction_id = ?";
-        try (Connection conn = dbContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, transactionId);
-            return ps.executeUpdate() > 0;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            ps.setString(4, t.getType());
+            ps.setInt(5, t.getQuantity());
+            ps.setString(6, t.getNotes());
+            ps.executeUpdate();
         }
     }
 }

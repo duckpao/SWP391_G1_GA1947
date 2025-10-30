@@ -58,8 +58,9 @@
                 margin: 15px 0;
             }
 
+            /* Removed user-info styling as it's now in header */
             .user-info {
-                margin-bottom: 20px;
+                display: none;
             }
 
             .user-info small {
@@ -377,18 +378,16 @@
             }
         </style>
     </head>
+    <%@ include file="header.jsp" %>
     <body>
+        
             <div class="dashboard-container">
                 <!-- Sidebar -->
                 <div class="sidebar">
                     <div class="sidebar-header">
-                        <h4><i class="bi bi-hospital"></i> Pharmacy</h4>
+                        <h4><i class="bi bi-hospital"></i> Auditor</h4>
                         <hr class="sidebar-divider">
-                        <div class="user-info">
-                            <small>Xin chào!</small>
-                            <h6>${sessionScope.username}</h6>
-                            <span class="user-badge">${sessionScope.role}</span>
-                        </div>
+                        <!-- Removed user-info section from sidebar -->
                     </div>
 
                     <nav>
@@ -543,4 +542,5 @@
                 </div>
             </div>
     </body>
+    <%@ include file="footer.jsp" %>
 </html>

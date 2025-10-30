@@ -90,18 +90,16 @@ public class ForgotPasswordServlet extends HttpServlet {
         try {
             // Send OTP via email
             String subject = "Password Reset Verification Code - Hospital Inventory Management System";
-            String htmlMessage = "<div style='font-family: Arial, sans-serif;'>"
-                    + "<h2 style='color:#4f46e5;'>🔐 Your Verification Code</h2>"
-                    + "<p>Hello,</p>"
-                    + "<p>You have requested to reset your password. Your OTP code is:</p>"
-                    + "<h3 style='font-size: 22px; color:#2563eb;'>" + otp + "</h3>"
-                    + "<p>This code is valid for only 5 minutes. If you did not request this, please ignore this email.</p>"
-                    + "<hr>"
-                    + "<p style='font-size:13px; color:#6b7280;'>© 2025 Hospital Inventory Management System</p>"
-                    + "</div>";
+            String plainMessage = "Your Verification Code\n\n"
+                    + "Hello,\n\n"
+                    + "You have requested to reset your password. Your OTP code is:\n\n"
+                    + otp + "\n\n"
+                    + "This code is valid for only 5 minutes. If you did not request this, please ignore this email.\n\n"
+                    + "---\n"
+                    + "© 2025 Hospital Inventory Management System";
 
             // Gửi OTP qua email
-            EmailSender.sendEmail(emailOrPhone, subject, htmlMessage);
+            EmailSender.sendEmail(emailOrPhone, subject, plainMessage);
 
             // Lưu OTP & email vào session (thời hạn 5 phút)
             HttpSession session = request.getSession();

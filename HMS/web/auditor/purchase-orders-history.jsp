@@ -22,11 +22,19 @@
             background: #f9fafb;
             min-height: 100vh;
             color: #374151;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page-wrapper {
+            display: flex;
+            flex: 1;
         }
 
         .dashboard-container {
             display: flex;
-            min-height: 100vh;
+            width: 100%;
+            flex: 1;
         }
 
         .sidebar {
@@ -59,33 +67,7 @@
             margin: 15px 0;
         }
 
-        .user-info {
-            margin-bottom: 20px;
-        }
-
-        .user-info small {
-            font-size: 12px;
-            opacity: 0.7;
-            color: #6b7280;
-        }
-
-        .user-info h6 {
-            font-size: 16px;
-            font-weight: 600;
-            margin: 5px 0;
-            color: #1f2937;
-        }
-
-        .user-badge {
-            display: inline-block;
-            background: #e0e7ff;
-            color: #3730a3;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-top: 8px;
-        }
+        /* Removed .user-info styles and HTML element */
 
         .nav-link {
             color: #6b7280;
@@ -565,254 +547,258 @@
     </style>
 </head>
 <body>
-    <div class="dashboard-container">
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <h4><i class="bi bi-hospital"></i> Pharmacy</h4>
-                <hr class="sidebar-divider">
-                <div class="user-info">
-                    <small>Xin chào!</small>
-                    <h6>${sessionScope.username}</h6>
-                    <span class="user-badge">${sessionScope.role}</span>
+    <!-- Include header.jsp at the top -->
+    <%@ include file="header.jsp" %>
+
+    <div class="page-wrapper">
+        <div class="dashboard-container">
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <h4><i class="bi bi-hospital"></i> Auditor</h4>
+                    <hr class="sidebar-divider">
+                    <!-- Removed user-info section -->
                 </div>
-            </div>
 
-            <nav>
-                <a class="nav-link" href="${pageContext.request.contextPath}/auditor/auditor-dashboard.jsp">
-                    <i class="bi bi-speedometer2"></i> Dashboard
-                </a>
-                <a class="nav-link" href="${pageContext.request.contextPath}/purchase-orders">
-                    <i class="bi bi-receipt"></i> Purchase Orders
-                </a>
-                <a class="nav-link active" href="${pageContext.request.contextPath}/purchase-orders/history">
-                    <i class="bi bi-clock-history"></i> PO History & Trends
-                </a>
-                <a class="nav-link" href="#">
-                    <i class="bi bi-box-seam"></i> Inventory Audit
-                </a>
-                <a class="nav-link" href="#">
-                    <i class="bi bi-graph-up"></i> Reports
-                </a>
-                <a class="nav-link" href="#">
-                    <i class="bi bi-journal-text"></i> System Logs
-                </a>
-                <hr class="nav-divider">
-                <a class="nav-link" href="${pageContext.request.contextPath}/logout">
-                    <i class="bi bi-box-arrow-right"></i> Đăng xuất
-                </a>
-            </nav>
-        </div>
-
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Header -->
-            <div class="page-header">
-                <h2><i class="bi bi-clock-history"></i> Purchase Orders History & Trend Analysis</h2>
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item">
-                            <a href="${pageContext.request.contextPath}/auditor-dashboard">Dashboard</a>
-                        </li>
-                        <li class="breadcrumb-item">
-                            <a href="${pageContext.request.contextPath}/purchase-orders">Purchase Orders</a>
-                        </li>
-                        <li class="breadcrumb-item active">History</li>
-                    </ol>
+                <nav>
+                    <a class="nav-link" href="${pageContext.request.contextPath}/auditor/auditor-dashboard.jsp">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </a>
+                    <a class="nav-link" href="${pageContext.request.contextPath}/purchase-orders">
+                        <i class="bi bi-receipt"></i> Purchase Orders
+                    </a>
+                    <a class="nav-link active" href="${pageContext.request.contextPath}/purchase-orders/history">
+                        <i class="bi bi-clock-history"></i> PO History & Trends
+                    </a>
+                    <a class="nav-link" href="#">
+                        <i class="bi bi-box-seam"></i> Inventory Audit
+                    </a>
+                    <a class="nav-link" href="#">
+                        <i class="bi bi-graph-up"></i> Reports
+                    </a>
+                    <a class="nav-link" href="#">
+                        <i class="bi bi-journal-text"></i> System Logs
+                    </a>
+                    <hr class="nav-divider">
+                    <a class="nav-link" href="${pageContext.request.contextPath}/logout">
+                        <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                    </a>
                 </nav>
             </div>
 
-            <!-- Statistics Cards -->
-            <div class="stats-grid">
-                <div class="stat-card primary">
-                    <div class="stat-info">
-                        <h6>Total Historical Orders</h6>
-                        <h3>${totalHistoricalOrders}</h3>
-                        <small><i class="bi bi-archive"></i> Completed & Received</small>
-                    </div>
+            <!-- Main Content -->
+            <div class="main-content">
+                <!-- Header -->
+                <div class="page-header">
+                    <h2><i class="bi bi-clock-history"></i> Purchase Orders History & Trend Analysis</h2>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item">
+                                <a href="${pageContext.request.contextPath}/auditor-dashboard">Dashboard</a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a href="${pageContext.request.contextPath}/purchase-orders">Purchase Orders</a>
+                            </li>
+                            <li class="breadcrumb-item active">History</li>
+                        </ol>
+                    </nav>
                 </div>
-                <div class="stat-card success">
-                    <div class="stat-info">
-                        <h6>Total Historical Amount</h6>
-                        <h3 style="color: #10b981;">
-                            <fmt:formatNumber value="${totalHistoricalAmount}" type="currency" currencySymbol="$"/>
-                        </h3>
-                        <small><i class="bi bi-cash-stack"></i> All completed orders</small>
-                    </div>
-                </div>
-                <div class="stat-card info">
-                    <div class="stat-info">
-                        <h6>Average Order Value</h6>
-                        <h3 style="color: #3b82f6;">
-                            <fmt:formatNumber value="${avgOrderValue}" type="currency" currencySymbol="$"/>
-                        </h3>
-                        <small><i class="bi bi-graph-up"></i> Per order</small>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Charts Row -->
-            <div class="charts-row">
-                <!-- Trend Chart -->
-                <div class="dashboard-card">
-                    <div class="card-header">
-                        <h5><i class="bi bi-graph-up-arrow"></i> Order Trends Over Time</h5>
+                <!-- Statistics Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card primary">
+                        <div class="stat-info">
+                            <h6>Total Historical Orders</h6>
+                            <h3>${totalHistoricalOrders}</h3>
+                            <small><i class="bi bi-archive"></i> Completed & Received</small>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <div class="chart-container">
-                            <canvas id="trendChart"></canvas>
+                    <div class="stat-card success">
+                        <div class="stat-info">
+                            <h6>Total Historical Amount</h6>
+                            <h3 style="color: #10b981;">
+                                <fmt:formatNumber value="${totalHistoricalAmount}" type="currency" currencySymbol="$"/>
+                            </h3>
+                            <small><i class="bi bi-cash-stack"></i> All completed orders</small>
+                        </div>
+                    </div>
+                    <div class="stat-card info">
+                        <div class="stat-info">
+                            <h6>Average Order Value</h6>
+                            <h3 style="color: #3b82f6;">
+                                <fmt:formatNumber value="${avgOrderValue}" type="currency" currencySymbol="$"/>
+                            </h3>
+                            <small><i class="bi bi-graph-up"></i> Per order</small>
                         </div>
                     </div>
                 </div>
 
-                <!-- Supplier Performance -->
-                <div class="dashboard-card">
-                    <div class="card-header">
-                        <h5><i class="bi bi-trophy"></i> Top Suppliers</h5>
+                <!-- Charts Row -->
+                <div class="charts-row">
+                    <!-- Trend Chart -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h5><i class="bi bi-graph-up-arrow"></i> Order Trends Over Time</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="trendChart"></canvas>
+                            </div>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <div class="supplier-list">
-                            <c:forEach var="perf" items="${supplierPerformance}" varStatus="status">
-                                <c:if test="${status.index < 5}">
-                                    <div class="supplier-item">
-                                        <div class="supplier-header">
-                                            <span class="supplier-name">${perf.supplierName}</span>
-                                            <span class="supplier-badge">#${status.index + 1}</span>
-                                        </div>
-                                        <div class="supplier-meta">
-                                            ${perf.totalOrders} orders • 
-                                            <fmt:formatNumber value="${perf.totalAmount}" type="currency" currencySymbol="$"/>
-                                        </div>
-                                        <div class="progress">
-                                            <div class="progress-bar" 
-                                                 style="width: ${(perf.completedOrders * 100.0 / perf.totalOrders)}%">
+
+                    <!-- Supplier Performance -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h5><i class="bi bi-trophy"></i> Top Suppliers</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="supplier-list">
+                                <c:forEach var="perf" items="${supplierPerformance}" varStatus="status">
+                                    <c:if test="${status.index < 5}">
+                                        <div class="supplier-item">
+                                            <div class="supplier-header">
+                                                <span class="supplier-name">${perf.supplierName}</span>
+                                                <span class="supplier-badge">#${status.index + 1}</span>
                                             </div>
-                                        </div>
-                                        <small style="color: #9ca3af;">
-                                            Completion: ${perf.completedOrders}/${perf.totalOrders} 
-                                            (${String.format("%.1f", (perf.completedOrders * 100.0 / perf.totalOrders))}%)
-                                        </small>
-                                    </div>
-                                </c:if>
-                            </c:forEach>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Filter Section -->
-            <div class="filter-section">
-                <form method="get" action="${pageContext.request.contextPath}/purchase-orders/history" id="filterForm">
-                    <div class="filter-row">
-                        <div class="form-group">
-                            <label>Supplier</label>
-                            <select name="supplierId" onchange="this.form.submit()">
-                                <option value="">All Suppliers</option>
-                                <c:forEach var="supplier" items="${suppliers}">
-                                    <option value="${supplier.supplierId}" 
-                                            ${selectedSupplierId == supplier.supplierId ? 'selected' : ''}>
-                                        ${supplier.name}
-                                    </option>
-                                </c:forEach>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>From Date</label>
-                            <input type="date" name="fromDate" value="${fromDate}">
-                        </div>
-                        <div class="form-group">
-                            <label>To Date</label>
-                            <input type="date" name="toDate" value="${toDate}">
-                        </div>
-                        <div class="form-group">
-                            <label>Search</label>
-                            <input type="text" name="search" placeholder="PO ID, Supplier..." value="${searchKeyword}">
-                        </div>
-                    </div>
-                    <div class="button-group">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-search"></i> Filter
-                        </button>
-                        <button type="button" class="btn btn-secondary" onclick="clearFilters()">
-                            <i class="bi bi-x-circle"></i> Clear
-                        </button>
-                        <button type="button" class="btn btn-success" onclick="exportToExcel()">
-                            <i class="bi bi-file-earmark-excel"></i> Export Excel
-                        </button>
-                        <button type="button" class="btn btn-danger" onclick="exportToPDF()">
-                            <i class="bi bi-file-earmark-pdf"></i> Export PDF
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Historical Orders Table -->
-            <div class="dashboard-card">
-                <div class="card-header">
-                    <h5><i class="bi bi-table"></i> Historical Purchase Orders</h5>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>PO ID</th>
-                                    <th>Order Date</th>
-                                    <th>Supplier</th>
-                                    <th>Manager</th>
-                                    <th>Status</th>
-                                    <th>Items</th>
-                                    <th>Total Amount</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <c:choose>
-                                    <c:when test="${empty historicalOrders}">
-                                        <tr>
-                                            <td colspan="8">
-                                                <div class="empty-state">
-                                                    <i class="bi bi-inbox"></i>
-                                                    <p>No historical orders found for selected criteria</p>
+                                            <div class="supplier-meta">
+                                                ${perf.totalOrders} orders • 
+                                                <fmt:formatNumber value="${perf.totalAmount}" type="currency" currencySymbol="$"/>
+                                            </div>
+                                            <div class="progress">
+                                                <div class="progress-bar" 
+                                                     style="width: ${(perf.completedOrders * 100.0 / perf.totalOrders)}%">
                                                 </div>
-                                            </td>
-                                        </tr>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <c:forEach var="po" items="${historicalOrders}">
+                                            </div>
+                                            <small style="color: #9ca3af;">
+                                                Completion: ${perf.completedOrders}/${perf.totalOrders} 
+                                                (${String.format("%.1f", (perf.completedOrders * 100.0 / perf.totalOrders))}%)
+                                            </small>
+                                        </div>
+                                    </c:if>
+                                </c:forEach>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filter Section -->
+                <div class="filter-section">
+                    <form method="get" action="${pageContext.request.contextPath}/purchase-orders/history" id="filterForm">
+                        <div class="filter-row">
+                            <div class="form-group">
+                                <label>Supplier</label>
+                                <select name="supplierId" onchange="this.form.submit()">
+                                    <option value="">All Suppliers</option>
+                                    <c:forEach var="supplier" items="${suppliers}">
+                                        <option value="${supplier.supplierId}" 
+                                                ${selectedSupplierId == supplier.supplierId ? 'selected' : ''}>
+                                            ${supplier.name}
+                                        </option>
+                                    </c:forEach>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>From Date</label>
+                                <input type="date" name="fromDate" value="${fromDate}">
+                            </div>
+                            <div class="form-group">
+                                <label>To Date</label>
+                                <input type="date" name="toDate" value="${toDate}">
+                            </div>
+                            <div class="form-group">
+                                <label>Search</label>
+                                <input type="text" name="search" placeholder="PO ID, Supplier..." value="${searchKeyword}">
+                            </div>
+                        </div>
+                        <div class="button-group">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-search"></i> Filter
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="clearFilters()">
+                                <i class="bi bi-x-circle"></i> Clear
+                            </button>
+                            <button type="button" class="btn btn-success" onclick="exportToExcel()">
+                                <i class="bi bi-file-earmark-excel"></i> Export Excel
+                            </button>
+                            <button type="button" class="btn btn-danger" onclick="exportToPDF()">
+                                <i class="bi bi-file-earmark-pdf"></i> Export PDF
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Historical Orders Table -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-table"></i> Historical Purchase Orders</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>PO ID</th>
+                                        <th>Order Date</th>
+                                        <th>Supplier</th>
+                                        <th>Manager</th>
+                                        <th>Status</th>
+                                        <th>Items</th>
+                                        <th>Total Amount</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <c:choose>
+                                        <c:when test="${empty historicalOrders}">
                                             <tr>
-                                                <td><strong>#${po.poId}</strong></td>
-                                                <td>
-                                                    <fmt:formatDate value="${po.orderDate}" pattern="dd/MM/yyyy"/>
-                                                </td>
-                                                <td>${po.supplierName}</td>
-                                                <td>${po.managerName}</td>
-                                                <td>
-                                                    <span class="status-badge ${po.statusBadgeClass}">${po.status}</span>
-                                                </td>
-                                                <td>
-                                                    <span class="items-badge">${po.itemCount} items</span>
-                                                </td>
-                                                <td>
-                                                    <fmt:formatNumber value="${po.totalAmount}" 
-                                                                    type="currency" currencySymbol="$"/>
-                                                </td>
-                                                <td>
-                                                    <a href="${pageContext.request.contextPath}/purchase-orders?action=view&id=${po.poId}" 
-                                                       class="action-btn">
-                                                        <i class="bi bi-eye"></i> View
-                                                    </a>
+                                                <td colspan="8">
+                                                    <div class="empty-state">
+                                                        <i class="bi bi-inbox"></i>
+                                                        <p>No historical orders found for selected criteria</p>
+                                                    </div>
                                                 </td>
                                             </tr>
-                                        </c:forEach>
-                                    </c:otherwise>
-                                </c:choose>
-                            </tbody>
-                        </table>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <c:forEach var="po" items="${historicalOrders}">
+                                                <tr>
+                                                    <td><strong>#${po.poId}</strong></td>
+                                                    <td>
+                                                        <fmt:formatDate value="${po.orderDate}" pattern="dd/MM/yyyy"/>
+                                                    </td>
+                                                    <td>${po.supplierName}</td>
+                                                    <td>${po.managerName}</td>
+                                                    <td>
+                                                        <span class="status-badge ${po.statusBadgeClass}">${po.status}</span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="items-badge">${po.itemCount} items</span>
+                                                    </td>
+                                                    <td>
+                                                        <fmt:formatNumber value="${po.totalAmount}" 
+                                                                        type="currency" currencySymbol="$"/>
+                                                    </td>
+                                                    <td>
+                                                        <a href="${pageContext.request.contextPath}/purchase-orders?action=view&id=${po.poId}" 
+                                                           class="action-btn">
+                                                            <i class="bi bi-eye"></i> View
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            </c:forEach>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Include footer.jsp at the bottom -->
+    <%@ include file="footer.jsp" %>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script>

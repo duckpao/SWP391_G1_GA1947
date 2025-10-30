@@ -50,7 +50,7 @@ public class LoginServlet extends HttpServlet {
                         response.sendRedirect(request.getContextPath() + "/doctor-dashboard");
                         break;
                     case "Pharmacist":
-                        response.sendRedirect(request.getContextPath() + "/pharmacist-dashboard");
+                        response.sendRedirect(request.getContextPath() + "/view-medicine");
                         break;
                     case "Manager":
                         response.sendRedirect(request.getContextPath() + "/manager-dashboard");

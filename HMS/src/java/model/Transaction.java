@@ -11,6 +11,9 @@ public class Transaction {
     private int quantity;
     private Date transactionDate;
     private String notes;
+private String username;
+private String medicineName;
+private String lotNumber;
 
     // Getters & Setters
     public int getTransactionId() { return transactionId; }
@@ -36,4 +39,17 @@ public class Transaction {
 
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
+    
+    public String getMedicineName() { return medicineName; }
+    public void setMedicineName(String medicineName) { this.medicineName = medicineName; }
+    
+    public String getLotNumber() {
+    return lotNumber;
+}
+
+public void setLotNumber(String lotNumber) {
+    this.lotNumber = lotNumber;
+}
 }

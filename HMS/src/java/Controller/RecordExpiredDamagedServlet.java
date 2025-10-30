@@ -2,84 +2,101 @@ package Controller;
 
 import DAO.BatchDAO;
 import DAO.TransactionDAO;
-import model.Batches;
+import DAO.DBContext;
 import model.Transaction;
+import model.User;
 
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.*;
 import jakarta.servlet.http.*;
+import jakarta.servlet.annotation.WebServlet;
+
 import java.io.IOException;
+import java.sql.Connection;
+import java.util.List;
+import java.util.Map;
+
 
 public class RecordExpiredDamagedServlet extends HttpServlet {
-
-    private final BatchDAO batchDAO = new BatchDAO();
-    private final TransactionDAO transactionDAO = new TransactionDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Chuyển hướng đến form nhập liệu
-        request.getRequestDispatcher("/pharmacist/recordExpiredDamaged.jsp").forward(request, response);
+
+        try (Connection conn = new DBContext().getConnection()) {
+
+            if (conn == null) {
+                throw new ServletException("Không thể kết nối tới database");
+            }
+            System.out.println("✅ DB Connection OK");
+
+            // Khởi tạo DAO với connection
+            BatchDAO batchDAO = new BatchDAO();
+            TransactionDAO transactionDAO = new TransactionDAO(conn);
+
+            // Lấy danh sách các lô thuốc còn hàng
+            List<Map<String, Object>> batches = batchDAO.getAvailableBatches();
+            request.setAttribute("batches", batches);
+            System.out.println("✅ Batches size: " + batches.size());
+
+            // Lấy danh sách giao dịch hết hạn / hư hỏng
+            List<Transaction> transactions = transactionDAO.getExpiredOrDamaged();
+            request.setAttribute("transactions", transactions);
+            System.out.println("✅ Transactions size: " + transactions.size());
+
+            // Forward sang JSP
+            request.getRequestDispatcher("/pharmacist/recordExpiredDamaged.jsp").forward(request, response);
+
+        } catch (Exception e) {
+            e.printStackTrace(); // in đầy đủ stacktrace
+            throw new ServletException("Lỗi khi tải danh sách lô thuốc và giao dịch", e);
+        }
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        try {
-            // 1️⃣ Lấy dữ liệu từ form
+        request.setCharacterEncoding("UTF-8");
+
+        try (Connection conn = new DBContext().getConnection()) {
+
+            if (conn == null) {
+                throw new ServletException("Không thể kết nối database");
+            }
+
+            // Lấy user đăng nhập
+            HttpSession session = request.getSession();
+            User currentUser = (User) session.getAttribute("user");
+            if (currentUser == null) {
+                response.sendRedirect(request.getContextPath() + "/login.jsp");
+                return;
+            }
+
+            // Lấy dữ liệu từ form
+            int userId = currentUser.getUserId();
             int batchId = Integer.parseInt(request.getParameter("batchId"));
-            int userId = Integer.parseInt(request.getParameter("userId"));
+            String type = request.getParameter("type"); // "Expired" hoặc "Damaged"
             int quantity = Integer.parseInt(request.getParameter("quantity"));
-            String reason = request.getParameter("reason"); // Expired / Damaged
             String notes = request.getParameter("notes");
 
-            // 2️⃣ Lấy thông tin batch từ DB
-            Batches batch = batchDAO.getBatchById(batchId);
-
-            if (batch == null) {
-                request.setAttribute("error", "Không tìm thấy lô thuốc với ID: " + batchId);
-                request.getRequestDispatcher("/pharmacist/recordExpiredDamaged.jsp").forward(request, response);
-                return;
-            }
-
-            // 3️⃣ Kiểm tra số lượng hợp lệ
-            if (quantity <= 0 || quantity > batch.getCurrentQuantity()) {
-                request.setAttribute("error", "Số lượng không hợp lệ (phải nhỏ hơn hoặc bằng số lượng hiện có).");
-                request.getRequestDispatcher("/pharmacist/recordExpiredDamaged.jsp").forward(request, response);
-                return;
-            }
-
-            // 4️⃣ Cập nhật lại batch
-            boolean updated = batchDAO.updateBatchAfterRecord(batchId, quantity, reason);
-            if (!updated) {
-                request.setAttribute("error", "Không thể cập nhật lô thuốc. Vui lòng thử lại.");
-                request.getRequestDispatcher("/pharmacist/recordExpiredDamaged.jsp").forward(request, response);
-                return;
-            }
-
-            // 5️⃣ Ghi transaction mới
+            // Tạo Transaction
             Transaction t = new Transaction();
             t.setBatchId(batchId);
             t.setUserId(userId);
-            t.setType(reason); // Expired hoặc Damaged
+            t.setType(type);
             t.setQuantity(quantity);
             t.setNotes(notes);
 
-            boolean inserted = transactionDAO.insertTransaction(t);
+            // Ghi vào DB
+            TransactionDAO transactionDAO = new TransactionDAO(conn);
+            transactionDAO.addTransaction(t);
 
-            if (inserted) {
-                request.setAttribute("message", "Ghi nhận thuốc " + reason.toLowerCase() + " thành công!");
-            } else {
-                request.setAttribute("error", "Lỗi khi lưu giao dịch vào hệ thống.");
-            }
+            // Redirect về lại trang hiển thị
+            response.sendRedirect(request.getContextPath() + "/pharmacist/recordExpiredDamaged");
 
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("error", "Đã xảy ra lỗi: " + e.getMessage());
+            throw new ServletException("Lỗi khi ghi nhận giao dịch thuốc hết hạn/hư hỏng", e);
         }
-
-        // 6️⃣ Trả về giao diện form
-        request.getRequestDispatcher("/pharmacist/recordExpiredDamaged.jsp").forward(request, response);
     }
 }

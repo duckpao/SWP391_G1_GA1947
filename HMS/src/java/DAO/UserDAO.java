@@ -520,5 +520,17 @@ public class UserDAO extends DBContext {
             return rowsAffected > 0;
         }
     }
+    
+    public User findByEmail(String email) throws SQLException {
+    String sql = "SELECT * FROM Users WHERE email = ?";
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        ps.setString(1, email);
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return mapRow(rs);
+            }
+        }
+    }
+    return null;
 }
-
+}

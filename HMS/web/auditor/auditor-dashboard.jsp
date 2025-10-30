@@ -400,19 +400,6 @@
                         <a class="nav-link" href="${pageContext.request.contextPath}/purchase-orders/history">
                             <i class="bi bi-clock-history"></i> PO History & Trends
                         </a>
-                        <a class="nav-link" href="#">
-                            <i class="bi bi-box-seam"></i> Inventory Audit
-                        </a>
-                        <a class="nav-link" href="#">
-                            <i class="bi bi-graph-up"></i> Reports
-                        </a>
-                        <a class="nav-link" href="#">
-                            <i class="bi bi-journal-text"></i> System Logs
-                        </a>
-                        <hr class="nav-divider">
-                        <a class="nav-link" href="${pageContext.request.contextPath}/logout">
-                            <i class="bi bi-box-arrow-right"></i> Đăng xuất
-                        </a>
                     </nav>
                 </div>
 
@@ -482,15 +469,15 @@
                                     <strong>View Purchase Orders</strong>
                                     <small>Check all PO records</small>
                                 </a>
-                                <a href="#" class="action-btn">
+                                <a href="${pageContext.request.contextPath}/purchase-orders/history" class="action-btn">
                                     <i class="bi bi-box-seam"></i>
-                                    <strong>Inventory Audit</strong>
-                                    <small>Verify stock levels</small>
+                                    <strong>PO History & Trends</strong>
+                                    <small>Check purchase order's history</small>
                                 </a>
                                 <a href="#" class="action-btn">
                                     <i class="bi bi-file-earmark-text"></i>
-                                    <strong>Generate Report</strong>
-                                    <small>Create audit reports</small>
+                                    <strong>Audit Log</strong>
+                                    <small>Check audit log</small>
                                 </a>
                             </div>
                         </div>

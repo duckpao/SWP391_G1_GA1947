@@ -192,6 +192,35 @@
           <div class="info-box">
             💡 Tài khoản mới sẽ được kích hoạt tự động sau khi tạo
           </div>
+
+          <%-- Thông báo lỗi hoặc thành công --%>
+          <c:if test="${not empty error}">
+            <div style="
+              background:#fee2e2;
+              color:#b91c1c;
+              padding:12px 16px;
+              border-radius:8px;
+              border:1px solid #fecaca;
+              margin-bottom:20px;
+              font-size:14px;
+              font-weight:500;">
+              ⚠️ ${error}
+            </div>
+          </c:if>
+
+          <c:if test="${not empty success}">
+            <div style="
+              background:#dcfce7;
+              color:#166534;
+              padding:12px 16px;
+              border-radius:8px;
+              border:1px solid #bbf7d0;
+              margin-bottom:20px;
+              font-size:14px;
+              font-weight:500;">
+              ✅ ${success}
+            </div>
+          </c:if>
           
           <form action="${pageContext.request.contextPath}/admin-dashboard/create" method="post">
             <div class="form-group">

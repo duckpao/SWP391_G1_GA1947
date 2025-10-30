@@ -108,6 +108,89 @@
                 background: #c82333;
             }
 
+            /* Đồng bộ font nút Chuyển Dashboard với các sidebar-item khác */
+            .sidebar-item[type="button"] {
+                font-family: inherit;
+                font-weight: 500;
+                font-size: 14px;
+                color: #495057;
+                border: none;
+                background: none;
+                width: 100%;
+                text-align: left;
+                padding: 12px 16px;
+                border-radius: 8px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                transition: all 0.3s ease;
+            }
+
+            .sidebar-item[type="button"]:hover {
+                background: #e9ecef;
+                color: #2c3e50;
+            }
+
+            /* ---- Modal chuyển dashboard ---- */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.45);
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.25s ease;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    animation: slideDown 0.25s ease;
+}
+
+.modal-header {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.modal-body p {
+    font-size: 15px;
+    color: #495057;
+    margin-bottom: 12px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideDown {
+    from { transform: translateY(-15px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}    
+            
             /* Main content layout */
             .main-content {
                 flex: 1;
@@ -552,6 +635,9 @@
                     <a class="sidebar-item" href="${pageContext.request.contextPath}/admin-dashboard/create">
                         ➕ Tạo tài khoản
                     </a>
+                    <button class="sidebar-item" type="button" onclick="openSwitchDashboardModal()">
+                        🔁 Chuyển Dashboard
+                    </button>
                 </div>
             </div>
 
@@ -611,9 +697,6 @@
                             <div class="config-section">
                                 <div class="section-header">
                                     <h2>🔧 Cấu hình hiện tại</h2>
-                                    <button type="button" class="btn btn-add" onclick="toggleAddForm()">
-                                        ➕ Thêm cấu hình mới
-                                    </button>
                                 </div>
 
                                 <div class="config-grid">
@@ -624,7 +707,7 @@
                                                 <c:if test="${config.configKey == 'low_stock_threshold' || 
                                                               config.configKey == 'max_failed_attempts' || 
                                                               config.configKey == 'quarantine_period_days'}">
-                                                    <span class="critical-badge">🛡️ Quan trọng</span>
+                                                      <span class="critical-badge">🛡️ Quan trọng</span>
                                                 </c:if>
                                                 <div class="timestamp">
                                                     <fmt:formatDate value="${config.updatedAt}" pattern="dd/MM/yyyy HH:mm" />
@@ -641,10 +724,10 @@
                                                 <c:if test="${config.configKey != 'low_stock_threshold' && 
                                                               config.configKey != 'max_failed_attempts' && 
                                                               config.configKey != 'quarantine_period_days'}">
-                                                    <button type="button" class="btn btn-danger" 
-                                                            onclick="confirmDelete('${config.configKey}')">
-                                                        🗑️ Xóa
-                                                    </button>
+                                                      <button type="button" class="btn btn-danger" 
+                                                              onclick="confirmDelete('${config.configKey}')">
+                                                          🗑️ Xóa
+                                                      </button>
                                                 </c:if>
                                             </div>
                                         </div>
@@ -675,8 +758,8 @@
                                     </div>
                                     <div style="margin-top: 16px; text-align: right;">
                                         <button type="submit" class="btn btn-success" 
-                                                onclick="this.form.action='${pageContext.request.contextPath}/admin-dashboard/config'; 
-                                                         this.form.querySelector('[name=action]').value='add';">
+                                                onclick="this.form.action = '${pageContext.request.contextPath}/admin-dashboard/config';
+                                                        this.form.querySelector('[name=action]').value = 'add';">
                                             ✓ Thêm cấu hình
                                         </button>
                                     </div>
@@ -718,7 +801,24 @@
                 </div>
             </div>
         </div>
-
+        <!-- 🔁 Modal Chuyển Dashboard -->
+        <div id="switchDashboardModal" class="modal">
+  <div class="modal-content" style="max-width:600px;">
+    <div class="modal-header">🔁 Chuyển Dashboard</div>
+    <div class="modal-body">
+      <p>Chọn dashboard bạn muốn truy cập:</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:16px;">
+        <a href="doctor-dashboard" style="background:#495057;color:#ffffff;padding:12px;border-radius:8px;text-align:center;text-decoration:none;font-weight:600;">Doctor</a>
+        <a href="pharmacist-dashboard" style="background:#495057;color:#ffffff;padding:12px;border-radius:8px;text-align:center;text-decoration:none;font-weight:600;">Pharmacist</a>
+        <a href="manager-dashboard" style="background:#495057;color:#ffffff;padding:12px;border-radius:8px;text-align:center;text-decoration:none;font-weight:600;">Manager</a>
+        <a href="auditor-dashboard" style="background:#495057;color:#ffffff;padding:12px;border-radius:8px;text-align:center;text-decoration:none;font-weight:600;">Auditor</a>
+      </div>
+    </div>
+    <div class="modal-actions" style="justify-content:center;margin-top:20px;">
+      <button onclick="closeSwitchDashboardModal()" style="background:#f1f3f5;color:#212529;padding:10px 20px;border:none;border-radius:6px;font-weight:600;cursor:pointer;">Đóng</button>
+    </div>
+  </div>
+</div>
         <script>
             function toggleAddForm() {
                 const form = document.getElementById('addConfigForm');
@@ -741,6 +841,18 @@
                     closeDeleteModal();
                 }
             });
+            // ---- Modal chuyển dashboard ----
+            function openSwitchDashboardModal() {
+                document.getElementById("switchDashboardModal").classList.add("active");
+            }
+            function closeSwitchDashboardModal() {
+                document.getElementById("switchDashboardModal").classList.remove("active");
+            }
+            document.getElementById("switchDashboardModal").addEventListener("click", function (e) {
+                if (e.target === this)
+                    closeSwitchDashboardModal();
+            });
+
         </script>
     </body>
 </html>

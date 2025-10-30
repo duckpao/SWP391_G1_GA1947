@@ -173,13 +173,38 @@
 
 <header class="main-header">
     <div class="header-container">
-        <a href="javascript:history.back()" class="header-logo">
+
+        <%-- Dynamic logo redirect based on user role --%>
+        <c:choose>
+            <c:when test="${sessionScope.user.role == 'Admin'}">
+                <a href="/HMS/admin-dashboard" class="header-logo">
+            </c:when>
+            <c:when test="${sessionScope.user.role == 'Doctor'}">
+                <a href="/HMS/doctor-dashboard" class="header-logo">
+            </c:when>
+            <c:when test="${sessionScope.user.role == 'Pharmacist'}">
+                <a href="/HMS/pharmacist-dashboard" class="header-logo">
+            </c:when>
+            <c:when test="${sessionScope.user.role == 'Manager'}">
+                <a href="/HMS/manager-dashboard" class="header-logo">
+            </c:when>
+            <c:when test="${sessionScope.user.role == 'Auditor'}">
+                <a href="/HMS/auditor-dashboard" class="header-logo">
+            </c:when>
+            <c:when test="${sessionScope.user.role == 'Supplier'}">
+                <a href="/HMS/supplierDashboard" class="header-logo">
+            </c:when>
+            <c:otherwise>
+                <a href="logout" class="header-logo">
+            </c:otherwise>
+        </c:choose>
+
             <div class="logo-text">
                 <span class="logo-title">PWMS</span>
                 <span class="logo-subtitle">Pharmacy Warehouse Management</span>
             </div>
         </a>
-        
+
         <div class="header-nav">
             <c:if test="${not empty sessionScope.user}">
                 <a href="chat" class="nav-btn nav-btn-chat">

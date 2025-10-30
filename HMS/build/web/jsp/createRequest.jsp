@@ -376,10 +376,10 @@
                             <button type="button" onclick="removeItem(this)">🗑️ Xóa</button>
                         </div>
                     </div>
-                    <button type="button" class="add-medicine-btn" onclick="addMedicineItem()">Thêm thuốc</button>
+                    <button type="button" class="add-medicine-btn" onclick="addMedicineItem()">➕ Thêm thuốc</button>
                 </div>
 
-                <button type="submit" class="submit-btn">Gửi Yêu Cầu</button>
+                <button type="submit" class="submit-btn">📤 Gửi Yêu Cầu</button>
             </form>
         </div>
     </div>
@@ -387,7 +387,7 @@
     <!-- Success Modal -->
     <div id="successModal" class="modal">
         <div class="modal-content">
-            <h3>=Đặt thuốc thành công!</h3>
+            <h3>✅ Đặt thuốc thành công!</h3>
             <p>Yêu cầu của bạn đã được ghi nhận.</p>
             <div class="modal-buttons">
                 <button onclick="continueOrder()">Đặt thuốc tiếp</button>
@@ -401,13 +401,16 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        // Template HTML cho medicine item
-        const medicineOptions = `
-            <option value="">-- Chọn thuốc --</option>
-            <c:forEach var="med" items="${medicines}">
-                <option value="${med.medicineCode}">${med.displayName}</option>
-            </c:forEach>
-        `;
+        // Lấy options từ select đầu tiên làm template
+        let medicineOptionsHTML = '';
+        
+        // Chờ DOM load xong
+        document.addEventListener('DOMContentLoaded', function() {
+            const firstSelect = document.querySelector('select[name="medicine_code"]');
+            if (firstSelect) {
+                medicineOptionsHTML = firstSelect.innerHTML;
+            }
+        });
 
         // Thêm medicine item mới
         function addMedicineItem() {
@@ -416,10 +419,10 @@
             newItem.className = 'medicine-item';
             newItem.innerHTML = `
                 <select name="medicine_code" required>
-                    ${medicineOptions}
+                    ` + medicineOptionsHTML + `
                 </select>
                 <input type="number" name="quantity" min="1" placeholder="Số lượng" required>
-                <button type="button" onclick="removeItem(this)">🗑️ Xóa</button>
+                <button type="button" onclick="removeItem(this)">Xóa</button>
             `;
             container.appendChild(newItem);
         }
@@ -429,7 +432,6 @@
             const container = document.getElementById('medicineContainer');
             const items = container.getElementsByClassName('medicine-item');
             
-            // Không cho xóa nếu chỉ còn 1 item
             if (items.length <= 1) {
                 alert('Phải có ít nhất 1 thuốc trong yêu cầu!');
                 return;
@@ -441,19 +443,16 @@
         // Đóng modal và reset form
         function continueOrder() {
             document.getElementById('successModal').style.display = 'none';
-            
-            // Reset form
             document.getElementById('requestForm').reset();
             
-            // Reset về 1 medicine item
             const container = document.getElementById('medicineContainer');
             container.innerHTML = `
                 <div class="medicine-item">
                     <select name="medicine_code" required>
-                        ${medicineOptions}
+                        ` + medicineOptionsHTML + `
                     </select>
                     <input type="number" name="quantity" min="1" placeholder="Số lượng" required>
-                    <button type="button" onclick="removeItem(this)">🗑️ Xóa</button>
+                    <button type="button" onclick="removeItem(this)">Xóa</button>
                 </div>
             `;
         }

@@ -414,7 +414,6 @@
 </head>
 <body>
     <div class="container-fluid">
-        <!-- Restored all HTML content from original file -->
         <!-- Header -->
         <div class="header-section">
             <h2>
@@ -541,7 +540,7 @@
                         <table id="reportTable">
                             <thead>
                                 <tr>
-                                    <th>Medicine ID</th>
+                                    <th>Medicine Code</th>
                                     <th>Medicine Name</th>
                                     <th>Category</th>
                                     <th>Total Batches</th>
@@ -555,7 +554,7 @@
                             <tbody>
                                 <c:forEach items="${reports}" var="report">
                                     <tr>
-                                        <td><strong>#${report.medicineId}</strong></td>
+                                        <td><strong>${report.medicineCode}</strong></td>
                                         <td>${report.medicineName}</td>
                                         <td><span class="badge badge-secondary">${report.category}</span></td>
                                         <td><span class="badge badge-primary">${report.totalBatches}</span></td>
@@ -620,6 +619,7 @@
                             <thead>
                                 <tr>
                                     <th>Batch ID</th>
+                                    <th>Medicine Code</th>
                                     <th>Medicine Name</th>
                                     <th>Lot Number</th>
                                     <th>Status</th>
@@ -633,6 +633,7 @@
                                 <c:forEach items="${reports}" var="report">
                                     <tr>
                                         <td><strong>#${report.batchId}</strong></td>
+                                        <td><code>${report.medicineCode}</code></td>
                                         <td>${report.medicineName}</td>
                                         <td>${report.lotNumber}</td>
                                         <td>
@@ -706,7 +707,7 @@
             const printWindow = window.open('', '', 'height=600,width=900');
             printWindow.document.write('<html><head><title>Inventory Report</title>');
             printWindow.document.write('<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">');
-            printWindow.document.write('<style>body { padding: 20px; font-family: Inter, sans-serif; }</style>');
+            printWindow.document.write('<style>body { padding: 20px; font-family: Inter, sans-serif; } table { width: 100%; border-collapse: collapse; } th, td { border: 1px solid #ddd; padding: 8px; text-align: left; } th { background-color: #f9fafb; }</style>');
             printWindow.document.write('</head><body>');
             printWindow.document.write('<h2 class="mb-4">${pageTitle}</h2>');
             printWindow.document.write(table);

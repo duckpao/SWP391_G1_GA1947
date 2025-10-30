@@ -18,32 +18,6 @@ public class MedicineDAO {
         dbContext = new DBContext();
     }
 
-    /*public List<Medicine> getMedicineDetails() {
-        List<Medicine> medicines = new ArrayList<>();
-        String sql = "SELECT m.medicine_id, m.name, m.category, m.description, " +
-                     "b.batch_id, b.lot_number, b.expiry_date, b.current_quantity, b.status, b.received_date " +
-                     "FROM Medicines m " +
-                     "LEFT JOIN Batches b ON m.medicine_id = b.medicine_id " +
-                     "WHERE b.status = 'Approved' AND b.expiry_date > GETDATE() " +
-                     "ORDER BY m.medicine_id, b.expiry_date";
-        
-        try (Connection conn = dbContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            
-            medicines = processMedicineResultSet(rs);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        
-        return medicines;
-    }*
-
-    /**
-     * Lấy toàn bộ danh sách thuốc, kèm:
-     * - Tổng số lượng tồn (SUM(current_quantity))
-     * - Ngày hết hạn gần nhất (MIN(expiry_date))
-     */
     // ✅ Lấy danh sách thuốc có tổng tồn và hạn gần nhất
     public List<Medicine> getAllMedicines() {
         List<Medicine> medicines = new ArrayList<>();
@@ -200,7 +174,7 @@ public class MedicineDAO {
         return categories;
     }
 
-    // ===================== ADD =====================
+  /*  // ===================== ADD =====================
     public boolean addMedicine(Medicine med, Batches batch) {
         String sqlMed = """
         INSERT INTO Medicines
@@ -254,59 +228,66 @@ public class MedicineDAO {
             return false;
         }
     }
+*/
+    // ===================== KIỂM TRA TRÙNG MÃ =====================
+    public boolean existsMedicineCode(String code) {
+        String sql = "SELECT 1 FROM Medicines WHERE medicine_code = ?";
+        try (Connection conn = dbContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, code);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
-    // ===================== UPDATE =====================
-   
-    // Update medicine + batch
-    public boolean updateMedicine(Medicine med, Batches batch) {
+    // ===================== THÊM THUỐC MỚI =====================
+    public boolean addMedicine(Medicine med, Batches batch) {
         String sqlMed = """
-            UPDATE Medicines
-            SET name=?, category=?, description=?, active_ingredient=?, dosage_form=?, strength=?,
-                unit=?, manufacturer=?, country_of_origin=?, drug_group=?, drug_type=?
-            WHERE medicine_code=?
+            INSERT INTO Medicines
+            (medicine_code, name, category, description, active_ingredient, dosage_form,
+             strength, unit, manufacturer, country_of_origin, drug_group, drug_type)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """;
 
         String sqlBatch = """
-            UPDATE Batches
-            SET lot_number=?, expiry_date=?, current_quantity=?, status=?, supplier_id=?
-            WHERE batch_id=?
+            INSERT INTO Batches
+            (medicine_code, supplier_id, lot_number, expiry_date, initial_quantity,
+             current_quantity, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
         """;
 
         try (Connection conn = dbContext.getConnection()) {
             conn.setAutoCommit(false);
 
             try (PreparedStatement psMed = conn.prepareStatement(sqlMed)) {
-                psMed.setString(1, med.getName());
-                psMed.setString(2, med.getCategory());
-                psMed.setString(3, med.getDescription());
-                psMed.setString(4, med.getActiveIngredient());
-                psMed.setString(5, med.getDosageForm());
-                psMed.setString(6, med.getStrength());
-                psMed.setString(7, med.getUnit());
-                psMed.setString(8, med.getManufacturer());
-                psMed.setString(9, med.getCountryOfOrigin());
-                psMed.setString(10, med.getDrugGroup());
-                psMed.setString(11, med.getDrugType());
-                psMed.setString(12, med.getMedicineCode());
-                int rows = psMed.executeUpdate();
-                if(rows==0){
-                    conn.rollback(); return false;
-                }
+                psMed.setString(1, med.getMedicineCode());
+                psMed.setString(2, med.getName());
+                psMed.setString(3, med.getCategory());
+                psMed.setString(4, med.getDescription());
+                psMed.setString(5, med.getActiveIngredient());
+                psMed.setString(6, med.getDosageForm());
+                psMed.setString(7, med.getStrength());
+                psMed.setString(8, med.getUnit());
+                psMed.setString(9, med.getManufacturer());
+                psMed.setString(10, med.getCountryOfOrigin());
+                psMed.setString(11, med.getDrugGroup());
+                psMed.setString(12, med.getDrugType());
+                psMed.executeUpdate();
             }
 
             try (PreparedStatement psBatch = conn.prepareStatement(sqlBatch)) {
-                psBatch.setString(1, batch.getLotNumber());
-                if(batch.getExpiryDate()!=null){
-                    psBatch.setDate(2, new java.sql.Date(batch.getExpiryDate().getTime()));
-                } else psBatch.setNull(2, java.sql.Types.DATE);
-                psBatch.setInt(3, batch.getCurrentQuantity());
-                psBatch.setString(4, batch.getStatus());
-                psBatch.setInt(5, batch.getSupplierId());
-                psBatch.setInt(6, batch.getBatchId());
-                int rows = psBatch.executeUpdate();
-                if(rows==0){
-                    conn.rollback(); return false;
-                }
+                psBatch.setString(1, med.getMedicineCode());
+                psBatch.setInt(2, batch.getSupplierId());
+                psBatch.setString(3, batch.getLotNumber());
+                psBatch.setDate(4, new java.sql.Date(batch.getExpiryDate().getTime()));
+                psBatch.setInt(5, batch.getInitialQuantity());
+                psBatch.setInt(6, batch.getCurrentQuantity());
+                psBatch.setString(7, batch.getStatus());
+                psBatch.executeUpdate();
             }
 
             conn.commit();
@@ -317,6 +298,73 @@ public class MedicineDAO {
             return false;
         }
     }
+
+    // ===================== UPDATE =====================
+   
+  public boolean updateMedicine(Medicine med, Batches batch) {
+    String sqlMed = """
+        UPDATE Medicines
+        SET name=?, category=?, description=?, active_ingredient=?, dosage_form=?, strength=?,
+            unit=?, manufacturer=?, country_of_origin=?, drug_group=?, drug_type=?
+        WHERE medicine_code=?
+    """;
+
+    String sqlBatch = """
+        UPDATE Batches
+        SET lot_number=?, expiry_date=?, current_quantity=?, status=?, supplier_id=?
+        WHERE batch_id=?
+    """;
+
+    try (Connection conn = dbContext.getConnection()) {
+        conn.setAutoCommit(false);
+
+        try (PreparedStatement psMed = conn.prepareStatement(sqlMed)) {
+            psMed.setString(1, med.getName());
+            psMed.setString(2, med.getCategory());
+            psMed.setString(3, med.getDescription());
+            psMed.setString(4, med.getActiveIngredient());
+            psMed.setString(5, med.getDosageForm());
+            psMed.setString(6, med.getStrength());
+            psMed.setString(7, med.getUnit());
+            psMed.setString(8, med.getManufacturer());
+            psMed.setString(9, med.getCountryOfOrigin());
+            psMed.setString(10, med.getDrugGroup());
+            psMed.setString(11, med.getDrugType());
+            psMed.setString(12, med.getMedicineCode());
+
+            if (psMed.executeUpdate() == 0) {
+                conn.rollback();
+                return false;
+            }
+        }
+
+        try (PreparedStatement psBatch = conn.prepareStatement(sqlBatch)) {
+            psBatch.setString(1, batch.getLotNumber());
+            if (batch.getExpiryDate() != null)
+                psBatch.setDate(2, new java.sql.Date(batch.getExpiryDate().getTime()));
+            else
+                psBatch.setNull(2, java.sql.Types.DATE);
+
+            psBatch.setInt(3, batch.getCurrentQuantity());
+            psBatch.setString(4, batch.getStatus());
+            psBatch.setInt(5, batch.getSupplierId());
+            psBatch.setInt(6, batch.getBatchId());
+
+            if (psBatch.executeUpdate() == 0) {
+                conn.rollback();
+                return false;
+            }
+        }
+
+        conn.commit();
+        return true;
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+        return false;
+    }
+}
+
 
 
     // ===================== DELETE =====================

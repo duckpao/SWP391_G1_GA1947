@@ -174,7 +174,6 @@
             <!-- About Section -->
             <div class="footer-section">
                 <div class="footer-brand">
-                    <span class="footer-brand-icon">?</span>
                     <span class="footer-brand-text">PWMS</span>
                 </div>
                 <p>

@@ -79,18 +79,6 @@
         border: 2px solid transparent;
     }
     
-    .nav-btn-profile {
-        background: #f8f9fa;
-        color: #495057;
-        border-color: #dee2e6;
-    }
-    
-    .nav-btn-profile:hover {
-        background: #e9ecef;
-        border-color: #adb5bd;
-        transform: translateY(-1px);
-    }
-    
     .nav-btn-chat {
         background: #495057;
         color: white;
@@ -103,15 +91,29 @@
         box-shadow: 0 4px 12px rgba(52, 58, 64, 0.2);
     }
     
-    .user-info {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 16px;
+    .nav-btn-logout {
+        background: #dc3545;
+        color: white;
+        border-color: #c82333;
+    }
+    
+    .nav-btn-logout:hover {
+        background: #c82333;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.2);
+    }
+    
+    .nav-btn-profile {
         background: #f8f9fa;
-        border-radius: 8px;
-        border: 1px solid #dee2e6;
-        margin-right: 12px;
+        color: #495057;
+        border-color: #dee2e6;
+        padding: 8px 16px;
+    }
+    
+    .nav-btn-profile:hover {
+        background: #e9ecef;
+        border-color: #adb5bd;
+        transform: translateY(-1px);
     }
     
     .user-avatar {
@@ -154,10 +156,6 @@
             display: none;
         }
         
-        .user-info {
-            display: none;
-        }
-        
         .nav-btn {
             padding: 8px 16px;
             font-size: 13px;
@@ -166,13 +164,16 @@
         .nav-btn span {
             display: none;
         }
+        
+        .nav-btn-profile .user-details {
+            display: none;
+        }
     }
 </style>
 
 <header class="main-header">
     <div class="header-container">
         <a href="javascript:history.back()" class="header-logo">
-            <span class="logo-icon">?</span>
             <div class="logo-text">
                 <span class="logo-title">PWMS</span>
                 <span class="logo-subtitle">Pharmacy Warehouse Management</span>
@@ -181,7 +182,17 @@
         
         <div class="header-nav">
             <c:if test="${not empty sessionScope.user}">
-                <div class="user-info">
+                <a href="chat" class="nav-btn nav-btn-chat">
+                    <i class="fas fa-comments"></i>
+                    <span>Chat</span>
+                </a>
+                
+                <a href="logout" class="nav-btn nav-btn-logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+                
+                <a href="profile" class="nav-btn nav-btn-profile">
                     <div class="user-avatar">
                         ${sessionScope.user.username.substring(0, 1).toUpperCase()}
                     </div>
@@ -189,16 +200,6 @@
                         <span class="user-name">${sessionScope.user.username}</span>
                         <span class="user-role">${sessionScope.user.role}</span>
                     </div>
-                </div>
-                
-                <a href="profile" class="nav-btn nav-btn-profile">
-                    <i class="fas fa-user"></i>
-                    <span>Profile</span>
-                </a>
-                
-                <a href="chat" class="nav-btn nav-btn-chat">
-                    <i class="fas fa-comments"></i>
-                    <span>Chat</span>
                 </a>
             </c:if>
         </div>

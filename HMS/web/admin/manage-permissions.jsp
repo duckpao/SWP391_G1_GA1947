@@ -667,9 +667,6 @@
                 <a class="sidebar-item" href="${pageContext.request.contextPath}/admin-dashboard/create">
                     ➕ Tạo tài khoản
                 </a>
-                <a class="sidebar-item sidebar-item-logout" href="${pageContext.request.contextPath}/logout">
-                    🚪 Logout
-                </a>
             </div>
         </div>
 

@@ -19,19 +19,16 @@ public class ReportDAO extends DBContext {
     
     /**
      * Get medicines expiring soon with filters
-     * @param daysThreshold - số ngày từ hôm nay để check hạn sử dụng
-     * @param statusFilter - filter theo status (null = all, "Approved", "Quarantined", etc.)
-     * @return List of expiry records
      */
     public List<ExpiryReport> getExpiryReport(int daysThreshold, String statusFilter) {
         List<ExpiryReport> reports = new ArrayList<>();
         
-        String query = "SELECT b.batch_id, m.medicine_id, m.name, m.category, " +
+        String query = "SELECT b.batch_id, m.medicine_code, m.name, m.category, " +
                       "b.lot_number, b.expiry_date, b.current_quantity, " +
                       "s.name as supplier_name, b.status, " +
                       "DATEDIFF(DAY, CAST(GETDATE() AS DATE), b.expiry_date) as days_until_expiry " +
                       "FROM Batches b " +
-                      "INNER JOIN Medicines m ON b.medicine_id = m.medicine_id " +
+                      "INNER JOIN Medicines m ON b.medicine_code = m.medicine_code " +
                       "LEFT JOIN Suppliers s ON b.supplier_id = s.supplier_id " +
                       "WHERE b.status NOT IN ('Expired', 'Rejected') " +
                       "  AND DATEDIFF(DAY, CAST(GETDATE() AS DATE), b.expiry_date) <= ? " +
@@ -54,7 +51,7 @@ public class ReportDAO extends DBContext {
             while (rs.next()) {
                 ExpiryReport report = new ExpiryReport();
                 report.setBatchId(rs.getInt("batch_id"));
-                report.setMedicineId(rs.getInt("medicine_id"));
+                report.setMedicineCode(rs.getString("medicine_code"));
                 report.setMedicineName(rs.getString("name"));
                 report.setCategory(rs.getString("category"));
                 report.setLotNumber(rs.getString("lot_number"));
@@ -64,9 +61,19 @@ public class ReportDAO extends DBContext {
                 report.setStatus(rs.getString("status"));
                 report.setDaysUntilExpiry(rs.getInt("days_until_expiry"));
                 
+                // Set alert level based on days
+                int days = rs.getInt("days_until_expiry");
+                if (days <= 7) {
+                    report.setAlertLevel("Critical");
+                } else if (days <= 14) {
+                    report.setAlertLevel("High");
+                } else {
+                    report.setAlertLevel("Medium");
+                }
+                
                 reports.add(report);
             }
-            System.out.println("Loaded " + reports.size() + " expiry records (threshold: " + daysThreshold + " days, status: " + statusFilter + ")");
+            System.out.println("Loaded " + reports.size() + " expiry records");
         } catch (SQLException e) {
             System.err.println("Error getting expiry report: " + e.getMessage());
             e.printStackTrace();
@@ -80,12 +87,12 @@ public class ReportDAO extends DBContext {
     public List<ExpiryReport> getExpiryReportByDateRange(Date startDate, Date endDate, String statusFilter) {
         List<ExpiryReport> reports = new ArrayList<>();
         
-        String query = "SELECT b.batch_id, m.medicine_id, m.name, m.category, " +
+        String query = "SELECT b.batch_id, m.medicine_code, m.name, m.category, " +
                       "b.lot_number, b.expiry_date, b.current_quantity, " +
                       "s.name as supplier_name, b.status, " +
                       "DATEDIFF(DAY, CAST(GETDATE() AS DATE), b.expiry_date) as days_until_expiry " +
                       "FROM Batches b " +
-                      "INNER JOIN Medicines m ON b.medicine_id = m.medicine_id " +
+                      "INNER JOIN Medicines m ON b.medicine_code = m.medicine_code " +
                       "LEFT JOIN Suppliers s ON b.supplier_id = s.supplier_id " +
                       "WHERE b.status NOT IN ('Expired', 'Rejected') " +
                       "  AND b.expiry_date BETWEEN ? AND ? ";
@@ -108,7 +115,7 @@ public class ReportDAO extends DBContext {
             while (rs.next()) {
                 ExpiryReport report = new ExpiryReport();
                 report.setBatchId(rs.getInt("batch_id"));
-                report.setMedicineId(rs.getInt("medicine_id"));
+                report.setMedicineCode(rs.getString("medicine_code"));
                 report.setMedicineName(rs.getString("name"));
                 report.setCategory(rs.getString("category"));
                 report.setLotNumber(rs.getString("lot_number"));
@@ -117,6 +124,15 @@ public class ReportDAO extends DBContext {
                 report.setSupplierName(rs.getString("supplier_name"));
                 report.setStatus(rs.getString("status"));
                 report.setDaysUntilExpiry(rs.getInt("days_until_expiry"));
+                
+                int days = rs.getInt("days_until_expiry");
+                if (days <= 7) {
+                    report.setAlertLevel("Critical");
+                } else if (days <= 14) {
+                    report.setAlertLevel("High");
+                } else {
+                    report.setAlertLevel("Medium");
+                }
                 
                 reports.add(report);
             }
@@ -166,7 +182,14 @@ public class ReportDAO extends DBContext {
             while (rs.next()) {
                 String level = rs.getString("alert_level");
                 int count = rs.getInt("count");
-                stats.put(level + " (" + count + ")", count);
+                
+                if ("Critical".equals(level)) {
+                    stats.put("Critical (0-7 days)", count);
+                } else if ("High".equals(level)) {
+                    stats.put("High (8-14 days)", count);
+                } else {
+                    stats.put("Medium (15-30 days)", count);
+                }
                 total += count;
             }
             stats.put("Total", total);
@@ -175,47 +198,6 @@ public class ReportDAO extends DBContext {
             e.printStackTrace();
         }
         return stats;
-    }
-
-    /**
-     * Get all expired medicines
-     */
-    public List<ExpiryReport> getExpiredMedicines() {
-        List<ExpiryReport> reports = new ArrayList<>();
-        
-        String query = "SELECT b.batch_id, m.medicine_id, m.name, m.category, " +
-                      "b.lot_number, b.expiry_date, b.current_quantity, " +
-                      "s.name as supplier_name, b.status, " +
-                      "DATEDIFF(DAY, b.expiry_date, CAST(GETDATE() AS DATE)) as days_expired " +
-                      "FROM Batches b " +
-                      "INNER JOIN Medicines m ON b.medicine_id = m.medicine_id " +
-                      "LEFT JOIN Suppliers s ON b.supplier_id = s.supplier_id " +
-                      "WHERE b.status = 'Expired' OR b.expiry_date < CAST(GETDATE() AS DATE) " +
-                      "ORDER BY b.expiry_date DESC";
-        
-        try (PreparedStatement ps = connection.prepareStatement(query);
-             ResultSet rs = ps.executeQuery()) {
-            
-            while (rs.next()) {
-                ExpiryReport report = new ExpiryReport();
-                report.setBatchId(rs.getInt("batch_id"));
-                report.setMedicineId(rs.getInt("medicine_id"));
-                report.setMedicineName(rs.getString("name"));
-                report.setCategory(rs.getString("category"));
-                report.setLotNumber(rs.getString("lot_number"));
-                report.setExpiryDate(rs.getDate("expiry_date"));
-                report.setCurrentQuantity(rs.getInt("current_quantity"));
-                report.setSupplierName(rs.getString("supplier_name"));
-                report.setStatus(rs.getString("status"));
-                report.setDaysUntilExpiry(rs.getInt("days_expired"));
-                
-                reports.add(report);
-            }
-        } catch (SQLException e) {
-            System.err.println("Error getting expired medicines: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return reports;
     }
 
     // =========================================
@@ -228,7 +210,7 @@ public class ReportDAO extends DBContext {
     public List<InventoryReport> getInventoryReport() {
         List<InventoryReport> reports = new ArrayList<>();
         
-        String query = "SELECT m.medicine_id, m.name, m.category, " +
+        String query = "SELECT m.medicine_code, m.name, m.category, " +
                       "COUNT(DISTINCT b.batch_id) as total_batches, " +
                       "SUM(CASE WHEN b.status NOT IN ('Expired', 'Rejected') " +
                       "         THEN b.current_quantity ELSE 0 END) as total_quantity, " +
@@ -239,8 +221,8 @@ public class ReportDAO extends DBContext {
                       "MIN(b.expiry_date) as nearest_expiry, " +
                       "MAX(b.received_date) as last_received " +
                       "FROM Medicines m " +
-                      "LEFT JOIN Batches b ON m.medicine_id = b.medicine_id " +
-                      "GROUP BY m.medicine_id, m.name, m.category " +
+                      "LEFT JOIN Batches b ON m.medicine_code = b.medicine_code " +
+                      "GROUP BY m.medicine_code, m.name, m.category " +
                       "ORDER BY m.category, m.name";
         
         try (PreparedStatement ps = connection.prepareStatement(query);
@@ -248,7 +230,7 @@ public class ReportDAO extends DBContext {
             
             while (rs.next()) {
                 InventoryReport report = new InventoryReport();
-                report.setMedicineId(rs.getInt("medicine_id"));
+                report.setMedicineCode(rs.getString("medicine_code"));
                 report.setMedicineName(rs.getString("name"));
                 report.setCategory(rs.getString("category"));
                 report.setTotalBatches(rs.getInt("total_batches"));
@@ -273,7 +255,7 @@ public class ReportDAO extends DBContext {
     public Map<String, Object> getInventoryStatistics() {
         Map<String, Object> stats = new LinkedHashMap<>();
         
-        String query = "SELECT COUNT(DISTINCT m.medicine_id) as total_medicines, " +
+        String query = "SELECT COUNT(DISTINCT m.medicine_code) as total_medicines, " +
                       "COUNT(DISTINCT b.batch_id) as total_batches, " +
                       "SUM(CASE WHEN b.status NOT IN ('Expired', 'Rejected') " +
                       "         THEN b.current_quantity ELSE 0 END) as total_quantity, " +
@@ -282,7 +264,7 @@ public class ReportDAO extends DBContext {
                       "SUM(CASE WHEN b.status = 'Quarantined' " +
                       "         THEN b.current_quantity ELSE 0 END) as quarantined_quantity " +
                       "FROM Medicines m " +
-                      "LEFT JOIN Batches b ON m.medicine_id = b.medicine_id";
+                      "LEFT JOIN Batches b ON m.medicine_code = b.medicine_code";
         
         try (PreparedStatement ps = connection.prepareStatement(query);
              ResultSet rs = ps.executeQuery()) {
@@ -311,10 +293,10 @@ public class ReportDAO extends DBContext {
                       "COUNT(DISTINCT b.batch_id) as total_batches, " +
                       "SUM(CASE WHEN b.status NOT IN ('Expired', 'Rejected') " +
                       "         THEN b.current_quantity ELSE 0 END) as total_quantity, " +
-                      "COUNT(DISTINCT m.medicine_id) as medicine_types " +
+                      "COUNT(DISTINCT m.medicine_code) as medicine_types " +
                       "FROM Suppliers s " +
                       "LEFT JOIN Batches b ON s.supplier_id = b.supplier_id " +
-                      "LEFT JOIN Medicines m ON b.medicine_id = m.medicine_id " +
+                      "LEFT JOIN Medicines m ON b.medicine_code = m.medicine_code " +
                       "GROUP BY s.supplier_id, s.name " +
                       "ORDER BY total_quantity DESC";
         
@@ -344,12 +326,12 @@ public class ReportDAO extends DBContext {
     public List<InventoryReport> getBatchInventoryDetails(Date startDate, Date endDate) {
         List<InventoryReport> reports = new ArrayList<>();
         
-        String query = "SELECT b.batch_id, m.medicine_id, m.name as medicine_name, " +
+        String query = "SELECT b.batch_id, m.medicine_code, m.name as medicine_name, " +
                       "b.lot_number, b.status, b.current_quantity, " +
                       "b.expiry_date, b.received_date, " +
                       "s.name as supplier_name " +
                       "FROM Batches b " +
-                      "INNER JOIN Medicines m ON b.medicine_id = m.medicine_id " +
+                      "INNER JOIN Medicines m ON b.medicine_code = m.medicine_code " +
                       "LEFT JOIN Suppliers s ON b.supplier_id = s.supplier_id " +
                       "WHERE b.status NOT IN ('Rejected') ";
         
@@ -370,7 +352,7 @@ public class ReportDAO extends DBContext {
             while (rs.next()) {
                 InventoryReport report = new InventoryReport();
                 report.setBatchId(rs.getInt("batch_id"));
-                report.setMedicineId(rs.getInt("medicine_id"));
+                report.setMedicineCode(rs.getString("medicine_code"));
                 report.setMedicineName(rs.getString("medicine_name"));
                 report.setLotNumber(rs.getString("lot_number"));
                 report.setStatus(rs.getString("status"));

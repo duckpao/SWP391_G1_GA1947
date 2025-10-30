@@ -797,7 +797,6 @@
                                             <option value="Pharmacist" ${param.role == 'Pharmacist' ? 'selected' : ''}>Pharmacist</option>
                                             <option value="Manager" ${param.role == 'Manager' ? 'selected' : ''}>Manager</option>
                                             <option value="Auditor" ${param.role == 'Auditor' ? 'selected' : ''}>Auditor</option>
-                                            <option value="ProcurementOfficer" ${param.role == 'ProcurementOfficer' ? 'selected' : ''}>Procurement Officer</option>
                                             <option value="Supplier" ${param.role == 'Supplier' ? 'selected' : ''}>Supplier</option>
                                         </select>
                                     </div>

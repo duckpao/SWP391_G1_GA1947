@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.List;
 
 public class ChatControllerServlet extends HttpServlet {
-    
+
     private MessageDAO messageDAO;
     private UserDAO userDAO;
     private Gson gson;
@@ -28,15 +28,23 @@ public class ChatControllerServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         String action = request.getParameter("action");
-        
-        // Check session
+
         HttpSession session = request.getSession(false);
+
+        System.out.println("=== ChatControllerServlet ===");
+        System.out.println("Session exists: " + (session != null));
+
         if (session == null || session.getAttribute("user") == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
+            System.out.println("No session or user not logged in");
+            response.sendRedirect(request.getContextPath() + "/login.jsp");
             return;
         }
+
+        User user = (User) session.getAttribute("user");
+        System.out.println("User in session: " + user.getUsername());
+        System.out.println("User ID: " + user.getUserId());
 
         if (action == null) {
             // Show chat page
@@ -72,9 +80,9 @@ public class ChatControllerServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         String action = request.getParameter("action");
-        
+
         // Check session
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("user") == null) {
@@ -119,8 +127,8 @@ public class ChatControllerServlet extends HttpServlet {
         try {
             int userId1 = Integer.parseInt(request.getParameter("userId1"));
             int userId2 = Integer.parseInt(request.getParameter("userId2"));
-            int limit = request.getParameter("limit") != null ? 
-                       Integer.parseInt(request.getParameter("limit")) : 50;
+            int limit = request.getParameter("limit") != null
+                    ? Integer.parseInt(request.getParameter("limit")) : 50;
 
             List<Message> messages = messageDAO.getMessagesBetweenUsers(userId1, userId2, limit);
             response.getWriter().write(gson.toJson(messages));
@@ -151,7 +159,7 @@ public class ChatControllerServlet extends HttpServlet {
             throws IOException {
         try {
             int messageId = Integer.parseInt(request.getParameter("messageId"));
-            boolean success = messageDAO.markAsRead(messageId);
+            boolean success = messageDAO.markMessageAsRead(messageId);
             response.getWriter().write("{\"success\":" + success + "}");
         } catch (Exception e) {
             e.printStackTrace();
@@ -179,8 +187,8 @@ public class ChatControllerServlet extends HttpServlet {
             int senderId = Integer.parseInt(request.getParameter("senderId"));
             int receiverId = Integer.parseInt(request.getParameter("receiverId"));
             String content = request.getParameter("content");
-            String type = request.getParameter("type") != null ? 
-                         request.getParameter("type") : "text";
+            String type = request.getParameter("type") != null
+                    ? request.getParameter("type") : "text";
 
             Message message = new Message(senderId, receiverId, content, type);
             boolean success = messageDAO.insertMessage(message);

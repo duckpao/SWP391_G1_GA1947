@@ -1,349 +1,278 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
-    <title>Quản lý lô thuốc</title>
-
-    <!-- Bootstrap & Icons -->
+    <title>Quản lý số lô (Batch / Lot)</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
         body {
             display: flex;
-            min-height: 100vh;
-            background-color: #f3f4f6;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            flex-direction: column;
+            background-color: #ffffff;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #333;
         }
+
+        .page-wrapper {
+            display: flex;
+            flex: 1;
+            min-height: calc(100vh - 60px);
+        }
+
+        /* Updated sidebar styling to match view-med with white theme and light border */
         .sidebar {
             width: 250px;
-            background: linear-gradient(180deg, #6d28d9, #4f46e5);
-            color: white;
+            background-color: #ffffff;
+            color: #6c757d;
             display: flex;
             flex-direction: column;
-            padding-top: 20px;
+            padding-top: 15px;
+            border-right: 1px solid #e9ecef;
+            box-shadow: none;
         }
-        .profile {
-            text-align: center;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: 15px;
-            margin-bottom: 10px;
-        }
-        .profile img {
-            width: 70px; height: 70px; border-radius: 50%;
-            border: 2px solid #a78bfa; margin-bottom: 8px;
-        }
-        .menu a {
-            display: flex; align-items: center;
-            padding: 12px 25px; color: #e5e7eb;
-            text-decoration: none; font-size: 14px;
-            transition: 0.3s;
-        }
-        .menu a:hover, .menu a.active {
-            background-color: rgba(255,255,255,0.15);
-            color: #fff;
-        }
-        .main { flex: 1; padding: 30px; }
-        h1 {
-            font-size: 26px; margin-bottom: 25px;
-            font-weight: 600; color: #111827;
-        }
-        .search-bar {
-            background: #fff; border-radius: 12px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-            padding: 15px 20px; margin-bottom: 20px;
-            display: flex; flex-wrap: wrap;
-            gap: 10px; align-items: center;
-        }
-        .btn-search { background-color: #16a34a; color: #fff; border-radius: 8px; }
-        .btn-reset { background-color: #6b7280; color: #fff; border-radius: 8px; }
-        table {
-            background: white; border-collapse: collapse;
-            width: 100%; box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-            border-radius: 8px; overflow: hidden;
-        }
-        thead { background: linear-gradient(135deg,#7c3aed,#6366f1); color: white; }
-        th, td { padding: 12px; border-bottom: 1px solid #e0e0e0; text-align: center; }
-        .status-badge {
-            padding: 5px 12px; border-radius: 20px;
-            font-size: 12px; font-weight: 500;
-        }
-        .status-available { background: #d4edda; color: #155724; }
-        .status-low { background: #fff3cd; color: #856404; }
-        .status-expired { background: #f8d7da; color: #721c24; }
 
-        /* pagination */
-        .pagination { display:flex; justify-content:center; margin-top:20px; gap:5px; }
-        .page-item .page-link {
-            color:#4f46e5; border:1px solid #ddd;
-            border-radius:6px; padding:6px 12px;
+        .menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 25px;
+            color: #6c757d;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            border-radius: 0;
         }
-        .page-item.active .page-link {
-            background-color:#4f46e5; color:white; border-color:#4f46e5;
+
+        /* Added icon styling */
+        .menu a i {
+            width: 20px;
+            margin-right: 10px;
+            color: #6c757d;
         }
-        .page-item.disabled .page-link {
-            background-color:#f3f4f6; color:#9ca3af;
+
+        .menu a:hover {
+            background-color: #f0f7ff;
+            color: #495057;
+            border-left-color: transparent;
+            padding-left: 25px;
+        }
+
+        .menu a.active {
+            background-color: #e7f1ff;
+            color: #0066cc;
+            border-left-color: #0066cc;
+            padding-left: 22px;
+        }
+
+        /* Active icon color */
+        .menu a.active i {
+            color: #0066cc;
+        }
+
+        .main {
+            flex: 1;
+            padding: 30px;
+            background-color: #ffffff;
+            overflow-y: auto;
+        }
+
+        h3 {
+            font-size: 28px;
+            margin-bottom: 25px;
+            font-weight: 700;
+            color: #1a1a1a;
+            letter-spacing: -0.5px;
+        }
+
+        /* Updated all button colors to gray theme */
+        .btn-primary, .btn-outline-primary, .btn-outline-danger, .btn-outline-success, .btn-outline-secondary {
+            background-color: #6c757d;
+            color: white;
+            border: 1px solid #6c757d;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover, .btn-outline-primary:hover, .btn-outline-danger:hover, .btn-outline-success:hover, .btn-outline-secondary:hover {
+            background-color: #5a6268;
+            border-color: #5a6268;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.2);
+        }
+
+        .table {
+            background-color: #ffffff;
+            border-collapse: collapse;
+        }
+
+        /* Updated table header to light gray instead of dark */
+        .table thead.table-dark {
+            background-color: transparent;
+            color: #ffffff;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .table thead th {
+            font-weight: 600;
+            font-size: 13px;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+            color: #ffffff;
+        }
+
+        .table tbody tr {
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .form-control {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 10px 12px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: #6c757d;
+            box-shadow: 0 0 0 3px rgba(108, 117, 125, 0.1);
+            outline: none;
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .container {
+            max-width: 100%;
         }
     </style>
 </head>
-
 <body>
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <div class="profile">
-            <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="User">
-            <h5>${sessionScope.username}</h5>
-            <span>${sessionScope.role}</span>
-        </div>
-        <div class="menu">
-            <a href="${pageContext.request.contextPath}/home.jsp"><i class="fa fa-home"></i> Trang chủ</a>
-            <a href="${pageContext.request.contextPath}/view-medicine"><i class="fa fa-pills"></i> Quản lý thuốc</a>
-            <a href="${pageContext.request.contextPath}/create-request"><i class="fa fa-file-medical"></i> Yêu cầu thuốc</a>
-            <a href="${pageContext.request.contextPath}/pharmacist/manage-batch" class="active"><i class="fa fa-warehouse"></i> Quản lý số lô</a>
-            <a href="${pageContext.request.contextPath}/doctor-management"><i class="fa fa-user-md"></i> Quản lý bác sĩ</a>
-            <a href="${pageContext.request.contextPath}/report"><i class="fa fa-chart-line"></i> Báo cáo</a>
-            <a href="${pageContext.request.contextPath}/logout"><i class="fa fa-sign-out-alt"></i> Đăng xuất</a>
-        </div>
-    </div>
+    <%@ include file="header.jsp" %>
 
-    <!-- Main content -->
-    <div class="main">
-        <h1>Quản lý số lô thuốc</h1>
+    <div class="page-wrapper">
+        <!-- Updated sidebar with icons matching view-med -->
+        <div class="sidebar">
+            <div class="menu">
+                <a href="${pageContext.request.contextPath}/view-medicine"><i class="fa fa-pills"></i> Quản lý thuốc</a>
+                <a href="${pageContext.request.contextPath}/create-request"><i class="fa fa-file-medical"></i> Yêu cầu thuốc</a>
+                <a href="${pageContext.request.contextPath}/pharmacist/manage-batch" class="active"><i class="fa fa-warehouse"></i> Quản lý số lô/lô hàng</a>
+                <a href="${pageContext.request.contextPath}/pharmacist/recordExpiredDamaged"><i class="fa fa-user-md"></i> thuốc hết hạn/hư hỏng</a>
+                <a href="${pageContext.request.contextPath}/report"><i class="fa fa-chart-line"></i> Báo cáo thống kê</a>
+            </div>
+        </div>
 
-        <!-- Thanh tìm kiếm -->
-        <div class="search-bar">
-            <div class="input-group" style="flex: 1 1 300px;">
-                <span class="input-group-text bg-white border-end-0"><i class="fa fa-search"></i></span>
-                <input type="text" id="searchInput" class="form-control border-start-0" placeholder="Tìm tên thuốc hoặc số lô...">
+        <div class="main">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="fw-bold">Quản lý số lô (Batch / Lot)</h3>
+                <a href="${pageContext.request.contextPath}/batch/manage?action=new" class="btn btn-primary">
+                    Thêm lô mới
+                </a>
             </div>
 
-            <select id="categoryFilter" class="form-select" style="max-width:200px;">
-                <option value="">Tất cả loại</option>
-                <option value="Tablet">Viên nén</option>
-                <option value="Syrup">Siro</option>
-                <option value="Injection">Tiêm</option>
-            </select>
+            <!-- Ô tìm kiếm -->
+            <form class="row mb-3" method="get" action="${pageContext.request.contextPath}/batch/manage">
+                <input type="hidden" name="action" value="search"/>
+                <div class="col-md-4">
+                    <input type="text" name="keyword" class="form-control" placeholder="Tìm theo tên thuốc hoặc số lô...">
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-outline-secondary" type="submit">Tìm kiếm</button>
+                </div>
+            </form>
 
-            <select id="statusFilter" class="form-select" style="max-width:180px;">
-                <option value="">Tất cả trạng thái</option>
-                <option value="Available">Còn hàng</option>
-                <option value="Low Stock">Sắp hết</option>
-                <option value="Expired">Hết hạn</option>
-            </select>
-
-            <button class="btn btn-search px-4" onclick="applyFilter()">Tìm kiếm</button>
-            <button class="btn btn-reset px-4" onclick="resetFilter()">Reset</button>
-            <button class="btn btn-success ms-auto" data-bs-toggle="modal" data-bs-target="#addBatchModal">➕ Thêm lô mới</button>
-        </div>
-
-        <!-- Bảng danh sách -->
-        <c:choose>
-            <c:when test="${not empty batchList}">
-                <table id="batchTable">
-                    <thead>
+            <!-- Bảng danh sách lô thuốc -->
+            <table class="table table-bordered table-striped align-middle">
+                <thead class="table-dark text-center">
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên thuốc</th>
+                        <th>Nhà cung cấp</th>
+                        <th>Số lô</th>
+                        <th>Ngày nhận</th>
+                        <th>Ngày hết hạn</th>
+                        <th>Số lượng ban đầu</th>
+                        <th>Số lượng hiện tại</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <c:forEach var="batch" items="${batchList}">
                         <tr>
-                            <th>ID</th>
-                            <th>Số lô</th>
-                            <th>Tên thuốc</th>
-                            <th>Nhà cung cấp</th>
-                            <th>Hạn dùng</th>
-                            <th>SL ban đầu</th>
-                            <th>SL hiện tại</th>
-                            <th>Trạng thái</th>
-                            <th>Chỉnh sửa</th>
-                            <th>Xóa</th>
+                            <td class="text-center">${batch.batchId}</td>
+                            <td>${batch.medicineName}</td>
+                            <td>${batch.supplierName}</td>
+                            <td>${batch.lotNumber}</td>
+                            <td>${batch.receivedDate}</td>
+                            <td class="${batch.expirySoon ? 'text-danger fw-bold' : ''}">${batch.expiryDate}</td>
+                            <td class="text-end">${batch.initialQuantity}</td>
+                            <td class="text-end">${batch.currentQuantity}</td>
+                            <td class="text-center">
+                                <span class="badge 
+                                    <c:choose>
+                                        <c:when test="${batch.status == 'Approved'}">bg-success</c:when>
+                                        <c:when test="${batch.status == 'Quarantined'}">bg-warning text-dark</c:when>
+                                        <c:when test="${batch.status == 'Rejected'}">bg-danger</c:when>
+                                        <c:otherwise>bg-secondary</c:otherwise>
+                                    </c:choose>">
+                                    ${batch.status}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <a href="${pageContext.request.contextPath}/batch/manage?action=edit&id=${batch.batchId}" class="btn btn-sm btn-outline-primary">Sửa</a>
+                                <a href="${pageContext.request.contextPath}/batch/manage?action=delete&id=${batch.batchId}" 
+                                   onclick="return confirm('Bạn có chắc muốn xóa lô này?')" 
+                                   class="btn btn-sm btn-outline-danger">Xóa</a>
+                                <c:if test="${batch.status == 'Quarantined'}">
+                                    <a href="${pageContext.request.contextPath}/batch/manage?action=release&id=${batch.batchId}" 
+                                       class="btn btn-sm btn-outline-success">Giải phóng</a>
+                                </c:if>
+                                <c:if test="${batch.status != 'Expired'}">
+                                    <a href="${pageContext.request.contextPath}/batch/manage?action=markExpired&id=${batch.batchId}" 
+                                       class="btn btn-sm btn-outline-secondary">Hết hạn</a>
+                                </c:if>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        <c:forEach var="b" items="${batchList}">
-                            <tr>
-                                <td>${b.batchId}</td>
-                                <td>${b.lotNumber}</td>
-                                <td>${b.medicineName}</td>
-                                <td>${b.supplierName}</td>
-                                <td><fmt:formatDate value="${b.expiryDate}" pattern="dd/MM/yyyy"/></td>
-                                <td>${b.initialQuantity}</td>
-                                <td>${b.currentQuantity}</td>
-                                <td>
-                                    <span class="status-badge
-                                        ${b.status == 'Available' ? 'status-available' :
-                                          (b.status == 'Low Stock' ? 'status-low' : 'status-expired')}">
-                                        ${b.status}
-                                    </span>
-                                </td>
-                                <td>
-                                    <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editBatchModal"
-                                            onclick="fillEdit('${b.batchId}','${b.lotNumber}','${b.expiryDate}','${b.currentQuantity}','${b.status}')">✏️</button>
-                                </td>
-                                <td>
-                                    <a href="delete-batch?id=${b.batchId}" class="btn btn-danger btn-sm"
-                                       onclick="return confirm('Bạn có chắc muốn xóa lô này không?')">🗑</a>
-                                </td>
-                            </tr>
-                        </c:forEach>
-                    </tbody>
-                </table>
-                <nav><ul class="pagination" id="pagination"></ul></nav>
-            </c:when>
-            <c:otherwise>
-                <div class="text-center text-muted mt-4">Không có dữ liệu lô hàng.</div>
-            </c:otherwise>
-        </c:choose>
-    </div>
+                    </c:forEach>
 
-    <!-- Modal thêm -->
-    <div class="modal fade" id="addBatchModal" tabindex="-1">
-        <div class="modal-dialog">
-            <form action="add-batch" method="post" class="modal-content">
-                <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title">Thêm lô thuốc mới</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label>Số lô</label>
-                        <input type="text" name="lotNumber" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label>Hạn dùng</label>
-                        <input type="date" name="expiryDate" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label>Số lượng ban đầu</label>
-                        <input type="number" name="initialQuantity" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label>Trạng thái</label>
-                        <select name="status" class="form-select">
-                            <option value="Available">Còn hàng</option>
-                            <option value="Low Stock">Sắp hết</option>
-                            <option value="Expired">Hết hạn</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                    <button class="btn btn-success">Lưu</button>
-                </div>
-            </form>
+                    <c:if test="${empty batchList}">
+                        <tr>
+                            <td colspan="10" class="text-center text-muted">Không có lô thuốc nào trong hệ thống.</td>
+                        </tr>
+                    </c:if>
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <!-- Modal chỉnh sửa -->
-    <div class="modal fade" id="editBatchModal" tabindex="-1">
-        <div class="modal-dialog">
-            <form action="update-batch" method="post" class="modal-content">
-                <div class="modal-header bg-warning">
-                    <h5 class="modal-title">Chỉnh sửa lô thuốc</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <input type="hidden" id="edit-id" name="batchId">
-                    <div class="mb-3">
-                        <label>Số lô</label>
-                        <input type="text" id="edit-lot" name="lotNumber" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label>Hạn dùng</label>
-                        <input type="date" id="edit-expiry" name="expiryDate" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label>Số lượng hiện tại</label>
-                        <input type="number" id="edit-qty" name="currentQuantity" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label>Trạng thái</label>
-                        <select id="edit-status" name="status" class="form-select">
-                            <option value="Available">Còn hàng</option>
-                            <option value="Low Stock">Sắp hết</option>
-                            <option value="Expired">Hết hạn</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                    <button class="btn btn-warning">Cập nhật</button>
-                </div>
-            </form>
-        </div>
-    </div>
+    <%@ include file="footer.jsp" %>
 
-    <!-- Script -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        function fillEdit(id, lot, expiry, qty, status) {
-            document.getElementById('edit-id').value = id;
-            document.getElementById('edit-lot').value = lot;
-            document.getElementById('edit-expiry').value = expiry.split('T')[0];
-            document.getElementById('edit-qty').value = qty;
-            document.getElementById('edit-status').value = status;
-        }
-
-        // Pagination + Filter
-        const rowsPerPage = 10;
-        const table = document.getElementById("batchTable");
-        const pagination = document.getElementById("pagination");
-        const allRows = table ? Array.from(table.querySelectorAll("tbody tr")) : [];
-        let filteredRows = [...allRows];
-        let currentPage = 1;
-
-        function displayPage(page) {
-            const start = (page - 1) * rowsPerPage;
-            const end = start + rowsPerPage;
-            filteredRows.forEach((r, i) => r.style.display = (i >= start && i < end) ? "" : "none");
-        }
-
-        function setupPagination() {
-            pagination.innerHTML = "";
-            const pageCount = Math.ceil(filteredRows.length / rowsPerPage);
-            if (pageCount === 0) return;
-            const prev = document.createElement("li");
-            prev.className = "page-item" + (currentPage === 1 ? " disabled" : "");
-            prev.innerHTML = `<a class="page-link" href="#">&laquo;</a>`;
-            prev.addEventListener("click", () => {
-                if (currentPage > 1) { currentPage--; displayPage(currentPage); setupPagination(); }
-            });
-            pagination.appendChild(prev);
-            for (let i = 1; i <= pageCount; i++) {
-                const li = document.createElement("li");
-                li.className = "page-item" + (i === currentPage ? " active" : "");
-                li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
-                li.addEventListener("click", () => { currentPage = i; displayPage(currentPage); setupPagination(); });
-                pagination.appendChild(li);
-            }
-            const next = document.createElement("li");
-            next.className = "page-item" + (currentPage === pageCount ? " disabled" : "");
-            next.innerHTML = `<a class="page-link" href="#">&raquo;</a>`;
-            next.addEventListener("click", () => {
-                if (currentPage < pageCount) { currentPage++; displayPage(currentPage); setupPagination(); }
-            });
-            pagination.appendChild(next);
-            displayPage(currentPage);
-        }
-
-        function applyFilter() {
-            const s = document.getElementById("searchInput").value.toLowerCase();
-            const c = document.getElementById("categoryFilter").value.toLowerCase();
-            const st = document.getElementById("statusFilter").value.toLowerCase();
-            filteredRows = allRows.filter(row => {
-                const text = row.innerText.toLowerCase();
-                return text.includes(s) && (c ? text.includes(c) : true) && (st ? text.includes(st) : true);
-            });
-            allRows.forEach(r => r.style.display = "none");
-            currentPage = 1; setupPagination();
-        }
-
-        function resetFilter() {
-            document.getElementById("searchInput").value = "";
-            document.getElementById("categoryFilter").value = "";
-            document.getElementById("statusFilter").value = "";
-            filteredRows = [...allRows]; currentPage = 1; setupPagination();
-        }
-
-        if (allRows.length > 0) setupPagination();
-    </script>
 </body>
 </html>

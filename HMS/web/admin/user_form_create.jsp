@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tạo tài khoản - Hệ thống quản lý kho bệnh viện</title>
+  <title>Tạo tài khoản - Pharmacy Warehouse Management System</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * {
@@ -13,11 +13,26 @@
       box-sizing: border-box;
     }
     
+    html, body {
+      height: 100%;
+    }
+    
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       background: #f9fafb;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .page-wrapper {
+      display: flex;
+      flex-direction: column;
       min-height: 100vh;
-      padding: 20px;
+    }
+    
+    .main-content {
+      flex: 1;
+      padding: 40px 20px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -86,8 +101,8 @@
     
     input:focus, select:focus {
       outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      border-color: #495057;
+      box-shadow: 0 0 0 3px rgba(73, 80, 87, 0.1);
     }
     
     input::placeholder {
@@ -121,15 +136,16 @@
       gap: 8px;
     }
     
+    /* Changed button color from #3b82f6 to #495057 */
     .btn-primary {
-      background: #3b82f6;
+      background: #495057;
       color: white;
     }
     
     .btn-primary:hover {
-      background: #2563eb;
+      background: #3d444d;
       transform: translateY(-2px);
-      box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+      box-shadow: 0 8px 16px rgba(73, 80, 87, 0.3);
     }
     
     .btn-secondary {
@@ -144,7 +160,7 @@
     
     .info-box {
       background: #eff6ff;
-      border-left: 4px solid #3b82f6;
+      border-left: 4px solid #495057;
       padding: 16px;
       border-radius: 8px;
       margin-bottom: 24px;
@@ -160,64 +176,73 @@
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <h1>
-        <span class="header-icon">➕</span>
-        Tạo tài khoản mới
-      </h1>
-    </div>
-    
-    <div class="form-container">
-      <div class="info-box">
-        💡 Tài khoản mới sẽ được kích hoạt tự động sau khi tạo
+  <!-- Include header.jsp -->
+  <%@ include file="header.jsp" %>
+  
+  <div class="page-wrapper">
+    <div class="main-content">
+      <div class="container">
+        <div class="header">
+          <h1>
+            Tạo tài khoản mới
+          </h1>
+        </div>
+        
+        <div class="form-container">
+          <div class="info-box">
+            💡 Tài khoản mới sẽ được kích hoạt tự động sau khi tạo
+          </div>
+          
+          <form action="${pageContext.request.contextPath}/admin-dashboard/create" method="post">
+            <div class="form-group">
+              <label>Tên đăng nhập <span>*</span></label>
+              <input type="text" name="username" placeholder="Nhập tên đăng nhập" required minlength="3">
+            </div>
+            
+            <div class="form-group">
+              <label>Mật khẩu <span>*</span></label>
+              <input type="password" name="password" placeholder="Nhập mật khẩu" required minlength="6">
+              <div class="password-hint">⚠️ Mật khẩu phải có ít nhất 6 ký tự</div>
+            </div>
+            
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" name="email" placeholder="example@hospital.com">
+            </div>
+            
+            <div class="form-group">
+              <label>Số điện thoại</label>
+              <input type="tel" name="phone" placeholder="0123456789">
+            </div>
+            
+            <div class="form-group">
+              <label>Vai trò <span>*</span></label>
+              <select name="role" required>
+                <option value="">-- Chọn vai trò --</option>
+                <option value="Admin">👑 Admin - Quản trị viên</option>
+                <option value="Doctor">👨‍⚕️ Doctor - Bác sĩ</option>
+                <option value="Pharmacist">💊 Pharmacist - Dược sĩ</option>
+                <option value="Manager">📊 Manager - Quản lý</option>
+                <option value="Auditor">🔍 Auditor - Kiểm toán</option>
+                <option value="Supplier">🚚 Supplier - Nhà cung cấp</option>
+              </select>
+            </div>
+            
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">
+                ✓ Tạo tài khoản
+              </button>
+              <a href="${pageContext.request.contextPath}/admin-dashboard" class="btn btn-secondary">
+                ← Quay lại
+              </a>
+            </div>
+          </form>
+        </div>
       </div>
-      
-      <form action="${pageContext.request.contextPath}/admin-dashboard/create" method="post">
-        <div class="form-group">
-          <label>Tên đăng nhập <span>*</span></label>
-          <input type="text" name="username" placeholder="Nhập tên đăng nhập" required minlength="3">
-        </div>
-        
-        <div class="form-group">
-          <label>Mật khẩu <span>*</span></label>
-          <input type="password" name="password" placeholder="Nhập mật khẩu" required minlength="6">
-          <div class="password-hint">⚠️ Mật khẩu phải có ít nhất 6 ký tự</div>
-        </div>
-        
-        <div class="form-group">
-          <label>Email</label>
-          <input type="email" name="email" placeholder="example@hospital.com">
-        </div>
-        
-        <div class="form-group">
-          <label>Số điện thoại</label>
-          <input type="tel" name="phone" placeholder="0123456789">
-        </div>
-        
-        <div class="form-group">
-          <label>Vai trò <span>*</span></label>
-          <select name="role" required>
-            <option value="">-- Chọn vai trò --</option>
-            <option value="Admin">👑 Admin - Quản trị viên</option>
-            <option value="Doctor">👨‍⚕️ Doctor - Bác sĩ</option>
-            <option value="Pharmacist">💊 Pharmacist - Dược sĩ</option>
-            <option value="Manager">📊 Manager - Quản lý</option>
-            <option value="Auditor">🔍 Auditor - Kiểm toán</option>
-            <option value="Supplier">🚚 Supplier - Nhà cung cấp</option>
-          </select>
-        </div>
-        
-        <div class="form-actions">
-          <button type="submit" class="btn btn-primary">
-            ✓ Tạo tài khoản
-          </button>
-          <a href="${pageContext.request.contextPath}/admin-dashboard" class="btn btn-secondary">
-            ← Quay lại
-          </a>
-        </div>
-      </form>
     </div>
   </div>
+  
+  <!-- Include footer.jsp -->
+  <%@ include file="footer.jsp" %>
 </body>
 </html>

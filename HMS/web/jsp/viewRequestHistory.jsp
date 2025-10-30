@@ -16,7 +16,7 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f9fafb;
+            background: #ffffff;
             min-height: 100vh;
             padding: 40px 20px;
         }
@@ -52,7 +52,7 @@
             color: #1f2937;
             padding: 40px 30px;
             text-align: center;
-            border-bottom: 4px solid #3b82f6;
+            border-bottom: 4px solid #6c757d;
         }
 
         .header-icon {
@@ -109,14 +109,14 @@
             font-size: 15px;
             font-family: inherit;
             transition: all 0.3s ease;
-            background: #f9fafb;
+            background: #ffffff;
         }
 
         .form-control:focus {
             outline: none;
-            border-color: #3b82f6;
+            border-color: #6c757d;
             background: white;
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+            box-shadow: 0 0 0 4px rgba(108, 117, 125, 0.1);
         }
 
         .btn {
@@ -131,14 +131,14 @@
         }
 
         .btn-search {
-            background: #3b82f6;
+            background: #6c757d;
             color: white;
         }
 
         .btn-search:hover {
-            background: #2563eb;
+            background: #5a6268;
             transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 10px 30px rgba(108, 117, 125, 0.4);
         }
 
         .btn-clear {
@@ -159,10 +159,10 @@
         }
 
         .results-header {
-            background: #f9fafb;
+            background: #ffffff;
             padding: 24px 30px;
             border-bottom: 1px solid #e5e7eb;
-            border-left: 4px solid #3b82f6;
+            border-left: 4px solid #6c757d;
         }
 
         .results-header h2 {
@@ -184,8 +184,8 @@
         }
 
         .request-item:hover {
-            border-color: #3b82f6;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+            border-color: #6c757d;
+            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.1);
         }
 
         .request-header {
@@ -238,7 +238,7 @@
         }
 
         .items-list {
-            background: #f9fafb;
+            background: #ffffff;
             border-radius: 8px;
             padding: 12px;
             margin-top: 12px;
@@ -276,13 +276,13 @@
 
         .footer-section {
             padding: 24px 30px;
-            background: #f9fafb;
+            background: #ffffff;
             border-top: 1px solid #e5e7eb;
             text-align: center;
         }
 
         .footer-section a {
-            color: #3b82f6;
+            color: #6c757d;
             text-decoration: none;
             font-weight: 600;
             font-size: 14px;
@@ -290,7 +290,7 @@
         }
 
         .footer-section a:hover {
-            color: #2563eb;
+            color: #5a6268;
             text-decoration: underline;
         }
 

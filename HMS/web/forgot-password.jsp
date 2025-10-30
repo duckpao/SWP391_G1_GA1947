@@ -15,7 +15,7 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f9fafb;
+            background: #f0f2f5;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -30,8 +30,8 @@
 
         .card {
             background: white;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
             overflow: hidden;
             animation: slideUp 0.4s ease;
         }
@@ -52,25 +52,26 @@
             color: #1f2937;
             padding: 32px;
             text-align: center;
-            border-bottom: 3px solid #3b82f6;
+            border-bottom: 1px solid #e5e7eb;
         }
 
         .card-header-icon {
-            width: 64px;
-            height: 64px;
-            background: #eff6ff;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #e8f0fe 0%, #d3e3fd 100%);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 32px;
-            margin: 0 auto 16px;
+            font-size: 36px;
+            margin: 0 auto 20px;
         }
 
         .card-header h1 {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: 700;
             margin-bottom: 8px;
+            color: #1f2937;
         }
 
         .card-header p {
@@ -84,8 +85,8 @@
         }
 
         .info-box {
-            background: #eff6ff;
-            border: 1px solid #bfdbfe;
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
             border-radius: 8px;
             padding: 16px;
             margin-bottom: 24px;
@@ -100,7 +101,7 @@
 
         .info-text {
             font-size: 13px;
-            color: #1e40af;
+            color: #374151;
             line-height: 1.5;
         }
 
@@ -126,24 +127,24 @@
             top: 50%;
             transform: translateY(-50%);
             font-size: 18px;
-            color: #9ca3af;
+            color: #6b7280;
         }
 
         input[type="text"] {
             width: 100%;
-            padding: 12px 16px 12px 48px;
-            border: 2px solid #e5e7eb;
+            padding: 14px 16px 14px 48px;
+            border: none;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 15px;
             font-family: inherit;
-            transition: all 0.3s ease;
-            background: white;
+            transition: all 0.2s ease;
+            background: #f3f4f6;
+            color: #1f2937;
         }
 
         input[type="text"]:focus {
             outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            background: #e5e7eb;
         }
 
         input[type="text"]::placeholder {
@@ -158,7 +159,7 @@
             font-size: 15px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             font-family: inherit;
             display: flex;
             align-items: center;
@@ -167,19 +168,16 @@
         }
 
         .btn-primary {
-            background: #3b82f6;
+            background: #6b7280;
             color: white;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
 
         .btn-primary:hover {
-            background: #2563eb;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+            background: #4b5563;
         }
 
         .btn-primary:active {
-            transform: translateY(0);
+            transform: scale(0.98);
         }
 
         .alert {
@@ -206,26 +204,26 @@
         }
 
         .alert-danger {
-            background: #fee2e2;
+            background: #fef2f2;
             color: #991b1b;
             border: 1px solid #fecaca;
         }
 
         .alert-success {
-            background: #d1fae5;
+            background: #f0fdf4;
             color: #065f46;
-            border: 1px solid #a7f3d0;
+            border: 1px solid #86efac;
         }
 
         .card-footer {
-            padding: 20px 32px;
-            background: #f9fafb;
+            padding: 24px 32px;
+            background: #ffffff;
             border-top: 1px solid #e5e7eb;
             text-align: center;
         }
 
         .card-footer a {
-            color: #3b82f6;
+            color: #6b7280;
             text-decoration: none;
             font-weight: 600;
             font-size: 14px;
@@ -236,8 +234,7 @@
         }
 
         .card-footer a:hover {
-            color: #2563eb;
-            text-decoration: underline;
+            color: #374151;
         }
 
         .help-text {
@@ -246,6 +243,20 @@
             margin-top: 12px;
             text-align: center;
             line-height: 1.5;
+        }
+
+        @media (max-width: 640px) {
+            .card-header {
+                padding: 24px;
+            }
+
+            .card-body {
+                padding: 24px;
+            }
+
+            .card-footer {
+                padding: 20px 24px;
+            }
         }
     </style>
 </head>

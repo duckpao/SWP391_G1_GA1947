@@ -15,7 +15,7 @@
 
         body {
             font-family: Arial, sans-serif;
-            background: #f9fafb;
+            background: #ffffff;
             min-height: 100vh;
             padding: 20px;
         }
@@ -30,12 +30,12 @@
             padding: 25px 30px;
             border-radius: 15px;
             margin-bottom: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            border-top: 4px solid #3b82f6;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border-top: 4px solid #e5e7eb;
         }
 
         .header h1 {
-            color: #1f2937;
+            color: #000000;
             font-size: 28px;
             margin-bottom: 5px;
         }
@@ -78,24 +78,24 @@
             background: white;
             padding: 30px;
             border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             margin-bottom: 20px;
         }
 
         .requests-section h2 {
-            color: #1f2937;
+            color: #000000;
             margin-bottom: 20px;
             font-size: 22px;
-            border-bottom: 3px solid #3b82f6;
+            border-bottom: 3px solid #e5e7eb;
             padding-bottom: 10px;
         }
 
         .request-card {
-            background: #f8f9fa;
+            background: #f9fafb;
             padding: 20px;
             border-radius: 10px;
             margin-bottom: 15px;
-            border-left: 4px solid #3b82f6;
+            border-left: 4px solid #e5e7eb;
         }
 
         .request-info {
@@ -103,13 +103,13 @@
         }
 
         .request-info p {
-            color: #333;
+            color: #000000;
             margin: 8px 0;
             font-size: 15px;
         }
 
         .request-info strong {
-            color: #3b82f6;
+            color: #000000;
             min-width: 120px;
             display: inline-block;
         }
@@ -151,22 +151,23 @@
             font-size: 14px;
         }
 
+        /* Changed button colors to gray */
         .btn-update {
-            background: #28a745;
+            background: #6c757d;
             color: white;
         }
 
         .btn-update:hover {
-            background: #218838;
+            background: #5a6268;
         }
 
         .btn-cancel {
-            background: #dc3545;
+            background: #6c757d;
             color: white;
         }
 
         .btn-cancel:hover {
-            background: #c82333;
+            background: #5a6268;
         }
 
         .history-link {
@@ -174,12 +175,12 @@
             padding: 20px;
             border-radius: 15px;
             text-align: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
 
         .history-link a {
             display: inline-block;
-            background: #3b82f6;
+            background: #6c757d;
             color: white;
             padding: 12px 30px;
             text-decoration: none;
@@ -189,13 +190,13 @@
         }
 
         .history-link a:hover {
-            background: #2563eb;
+            background: #5a6268;
         }
 
         .no-requests {
             text-align: center;
             padding: 40px;
-            color: #666;
+            color: #000000;
             font-size: 16px;
         }
     </style>
@@ -205,8 +206,8 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>📋 Quản lý Yêu cầu Cấp phát Thuốc</h1>
-            <a href="doctor-dashboard" class="back-btn">⬅️ Quay lại Dashboard</a>
+            <h1>Quản lý Yêu cầu Cấp phát Thuốc</h1>
+            <a href="doctor-dashboard" class="back-btn">Quay lại Dashboard</a>
         </div>
 
         <!-- Thông báo -->
@@ -214,12 +215,12 @@
             <c:choose>
                 <c:when test="${param.message == 'cancel_success'}">
                     <div class="alert alert-success">
-                        ✅ Hủy yêu cầu thành công!
+                        Hủy yêu cầu thành công!
                     </div>
                 </c:when>
                 <c:when test="${param.message == 'error_cancel'}">
                     <div class="alert alert-error">
-                        ❌ Hủy yêu cầu thất bại. Vui lòng thử lại!
+                        Hủy yêu cầu thất bại. Vui lòng thử lại!
                     </div>
                 </c:when>
             </c:choose>
@@ -227,35 +228,35 @@
 
         <!-- Danh sách yêu cầu đang chờ -->
         <div class="requests-section">
-            <h2>⏳ Yêu cầu Đang Chờ Xử Lý</h2>
+            <h2>Yêu cầu Đang Chờ Xử Lý</h2>
             
             <c:choose>
                 <c:when test="${empty requests}">
                     <div class="no-requests">
-                        📭 Không có yêu cầu nào đang chờ xử lý
+                        Không có yêu cầu nào đang chờ xử lý
                     </div>
                 </c:when>
                 <c:otherwise>
                     <c:forEach var="req" items="${requests}">
                         <div class="request-card">
                             <div class="request-info">
-                                <p><strong>🆔 Mã yêu cầu:</strong> ${req.requestId}</p>
-                                <p><strong>📅 Ngày tạo:</strong> ${req.requestDate}</p>
-                                <p><strong>🏷️ Trạng thái:</strong> 
+                                <p><strong>Mã yêu cầu:</strong> ${req.requestId}</p>
+                                <p><strong>Ngày tạo:</strong> ${req.requestDate}</p>
+                                <p><strong>Trạng thái:</strong> 
                                     <span class="status status-${req.status.toLowerCase()}">
                                         ${req.status}
                                     </span>
                                 </p>
-                                <p><strong>📝 Ghi chú:</strong> ${req.notes != null && req.notes != '' ? req.notes : 'Không có'}</p>
+                                <p><strong>Ghi chú:</strong> ${req.notes != null && req.notes != '' ? req.notes : 'Không có'}</p>
                             </div>
                             <div class="btn-group">
                                 <a href="update-request?requestId=${req.requestId}" class="btn btn-update">
-                                    ✏️ Cập nhật
+                                    Cập nhật
                                 </a>
                                 <a href="cancel-request?requestId=${req.requestId}" 
                                    class="btn btn-cancel"
-                                   onclick="return confirm('⚠️ Bạn có chắc muốn hủy yêu cầu này?')">
-                                    ❌ Hủy yêu cầu
+                                   onclick="return confirm('Bạn có chắc muốn hủy yêu cầu này?')">
+                                    Hủy yêu cầu
                                 </a>
                             </div>
                         </div>
@@ -266,7 +267,7 @@
 
         <!-- Link xem lịch sử -->
         <div class="history-link">
-            <a href="view-request-history">📚 Xem Lịch sử Yêu cầu</a>
+            <a href="view-request-history">Xem Lịch sử Yêu cầu</a>
         </div>
     </div>
 </body>

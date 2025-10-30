@@ -187,7 +187,7 @@
                     <span>Chat</span>
                 </a>
                 
-                <a href="logout" class="nav-btn nav-btn-logout">
+                <a href="/HMS/logout" class="nav-btn nav-btn-logout">
                     <i class="fas fa-sign-out-alt"></i>
                     <span>Logout</span>
                 </a>

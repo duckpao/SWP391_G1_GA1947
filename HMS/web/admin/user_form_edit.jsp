@@ -14,19 +14,32 @@
                 box-sizing: border-box;
             }
 
+            html, body {
+                height: 100%;
+            }
+
             body {
                 font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-                background: #f9fafb;
-                min-height: 100vh;
-                padding: 20px;
+                background: #ffffff;
                 display: flex;
-                align-items: center;
-                justify-content: center;
+                flex-direction: column;
+            }
+
+            .page-wrapper {
+                display: flex;
+                flex-direction: column;
+                flex: 1;
+            }
+
+            .main-content {
+                flex: 1;
+                padding: 40px 20px;
+                background: #ffffff;
             }
 
             .container {
                 max-width: 600px;
-                width: 100%;
+                margin: 0 auto;
                 background: white;
                 border-radius: 16px;
                 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
@@ -35,7 +48,7 @@
 
             .header {
                 background: white;
-                border-bottom: 4px solid #3b82f6;
+                border-bottom: 4px solid #495057;
                 color: #1f2937;
                 padding: 30px 40px;
                 text-align: center;
@@ -71,7 +84,7 @@
             .user-avatar {
                 width: 50px;
                 height: 50px;
-                background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+                background: linear-gradient(135deg, #495057 0%, #343a40 100%);
                 border-radius: 50%;
                 display: flex;
                 align-items: center;
@@ -125,8 +138,8 @@
 
             input:focus, select:focus {
                 outline: none;
-                border-color: #3b82f6;
-                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+                border-color: #495057;
+                box-shadow: 0 0 0 3px rgba(73, 80, 87, 0.1);
             }
 
             input[readonly] {
@@ -162,15 +175,16 @@
                 gap: 8px;
             }
 
+            /* Updated button colors to #495057 */
             .btn-primary {
-                background: #3b82f6;
+                background: #495057;
                 color: white;
             }
 
             .btn-primary:hover {
-                background: #2563eb;
+                background: #343a40;
                 transform: translateY(-2px);
-                box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+                box-shadow: 0 8px 16px rgba(73, 80, 87, 0.3);
             }
 
             .btn-secondary {
@@ -193,8 +207,8 @@
             }
 
             .password-section {
-                background: #eff6ff;
-                border: 2px solid #bfdbfe;
+                background: #f8f9fa;
+                border: 2px solid #e5e7eb;
                 border-radius: 8px;
                 padding: 20px;
                 margin-bottom: 24px;
@@ -202,7 +216,7 @@
 
             .password-section h3 {
                 font-size: 16px;
-                color: #1e40af;
+                color: #495057;
                 margin-bottom: 16px;
                 display: flex;
                 align-items: center;
@@ -254,105 +268,115 @@
         </style>
     </head>
     <body>
-        <div class="container">
-            <div class="header">
-                <h1>
-                    <span class="header-icon">✏️</span>
-                    Chỉnh sửa tài khoản
-                </h1>
-            </div>
+        <!-- Include header.jsp -->
+        <%@ include file="header.jsp" %>
 
-            <div class="form-container">
-                <div class="user-info">
-                    <div class="user-avatar">
-                        ${user.username.substring(0,1).toUpperCase()}
-                    </div>
-                    <div class="user-details">
-                        <strong>${user.username}</strong>
-                        <span>ID: #${user.userId} | ${user.role}</span>
-                    </div>
-                </div>
-
-                <c:if test="${not empty param.error}">
-                    <div class="error-message">
-                        ⚠️ ${param.error}
-                    </div>
-                </c:if>
-
-                <div class="info-note">
-                    ℹ️ Không thể thay đổi tên đăng nhập. Mật khẩu là tùy chọn - chỉ điền nếu muốn thay đổi.
-                </div>
-
-                <form action="${pageContext.request.contextPath}/admin-dashboard/edit" method="post">
-                    <input type="hidden" name="userId" value="${user.userId}">
-                    <input type="hidden" name="username" value="${user.username}">
-
-                    <div class="form-group">
-                        <label>Tên đăng nhập</label>
-                        <input type="text" value="${user.username}" readonly>
+        <div class="page-wrapper">
+            <div class="main-content">
+                <div class="container">
+                    <div class="header">
+                        <h1>
+                            <span class="header-icon">✏️</span>
+                            Chỉnh sửa tài khoản
+                        </h1>
                     </div>
 
-                    <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" name="email" value="${user.email}" placeholder="example@hospital.com">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Số điện thoại</label>
-                        <input type="tel" name="phone" value="${user.phone}" placeholder="0123456789">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Vai trò <span>*</span></label>
-                        <select name="role" required>
-                            <c:set var="r" value="${user.role}" />
-                            <option value="Admin" ${r=='Admin'?'selected':''}>👑 Admin - Quản trị viên</option>
-                            <option value="Doctor" ${r=='Doctor'?'selected':''}>👨‍⚕️ Doctor - Bác sĩ</option>
-                            <option value="Pharmacist" ${r=='Pharmacist'?'selected':''}>💊 Pharmacist - Dược sĩ</option>
-                            <option value="Manager" ${r=='Manager'?'selected':''}>📊 Manager - Quản lý</option>
-                            <option value="Auditor" ${r=='Auditor'?'selected':''}>🔍 Auditor - Kiểm toán</option>
-                            <option value="ProcurementOfficer" ${r=='ProcurementOfficer'?'selected':''}>📦 Procurement Officer</option>
-                            <option value="Supplier" ${r=='Supplier'?'selected':''}>🚚 Supplier - Nhà cung cấp</option>
-                        </select>
-                    </div>
-
-                    <!-- Password Section -->
-                    <div class="password-section">
-                        <h3>🔐 Đổi mật khẩu</h3>
-                        
-                        <div class="password-toggle">
-                            <input type="checkbox" id="changePassword" onchange="togglePasswordFields()">
-                            <label for="changePassword">Tôi muốn đổi mật khẩu</label>
+                    <div class="form-container">
+                        <div class="user-info">
+                            <div class="user-avatar">
+                                ${user.username.substring(0,1).toUpperCase()}
+                            </div>
+                            <div class="user-details">
+                                <strong>${user.username}</strong>
+                                <span>ID: #${user.userId} | ${user.role}</span>
+                            </div>
                         </div>
 
-                        <div class="password-fields" id="passwordFields">
+                        <c:if test="${not empty param.error}">
+                            <div class="error-message">
+                                ⚠️ ${param.error}
+                            </div>
+                        </c:if>
+
+                        <div class="info-note">
+                            ℹ️ Không thể thay đổi tên đăng nhập. Mật khẩu là tùy chọn - chỉ điền nếu muốn thay đổi.
+                        </div>
+
+                        <form action="${pageContext.request.contextPath}/admin-dashboard/edit" method="post">
+                            <input type="hidden" name="userId" value="${user.userId}">
+                            <input type="hidden" name="username" value="${user.username}">
+
                             <div class="form-group">
-                                <label>Mật khẩu mới</label>
-                                <input type="password" name="newPassword" id="newPassword" 
-                                       placeholder="Nhập mật khẩu mới (tối thiểu 6 ký tự)">
-                                <div class="password-hint">
-                                    💡 Mật khẩu nên có ít nhất 6 ký tự, bao gồm chữ và số
+                                <label>Tên đăng nhập</label>
+                                <input type="text" value="${user.username}" readonly>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" name="email" value="${user.email}" placeholder="example@hospital.com">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Số điện thoại</label>
+                                <input type="tel" name="phone" value="${user.phone}" placeholder="0123456789">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Vai trò <span>*</span></label>
+                                <select name="role" required>
+                                    <c:set var="r" value="${user.role}" />
+                                    <option value="Admin" ${r=='Admin'?'selected':''}>👑 Admin - Quản trị viên</option>
+                                    <option value="Doctor" ${r=='Doctor'?'selected':''}>👨‍⚕️ Doctor - Bác sĩ</option>
+                                    <option value="Pharmacist" ${r=='Pharmacist'?'selected':''}>💊 Pharmacist - Dược sĩ</option>
+                                    <option value="Manager" ${r=='Manager'?'selected':''}>📊 Manager - Quản lý</option>
+                                    <option value="Auditor" ${r=='Auditor'?'selected':''}>🔍 Auditor - Kiểm toán</option>
+                                    <option value="ProcurementOfficer" ${r=='ProcurementOfficer'?'selected':''}>📦 Procurement Officer</option>
+                                    <option value="Supplier" ${r=='Supplier'?'selected':''}>🚚 Supplier - Nhà cung cấp</option>
+                                </select>
+                            </div>
+
+                            <!-- Password Section -->
+                            <div class="password-section">
+                                <h3>🔐 Đổi mật khẩu</h3>
+                                
+                                <div class="password-toggle">
+                                    <input type="checkbox" id="changePassword" onchange="togglePasswordFields()">
+                                    <label for="changePassword">Tôi muốn đổi mật khẩu</label>
+                                </div>
+
+                                <div class="password-fields" id="passwordFields">
+                                    <div class="form-group">
+                                        <label>Mật khẩu mới</label>
+                                        <input type="password" name="newPassword" id="newPassword" 
+                                               placeholder="Nhập mật khẩu mới (tối thiểu 6 ký tự)">
+                                        <div class="password-hint">
+                                            💡 Mật khẩu nên có ít nhất 6 ký tự, bao gồm chữ và số
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Xác nhận mật khẩu mới</label>
+                                        <input type="password" name="confirmPassword" id="confirmPassword" 
+                                               placeholder="Nhập lại mật khẩu mới">
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="form-group">
-                                <label>Xác nhận mật khẩu mới</label>
-                                <input type="password" name="confirmPassword" id="confirmPassword" 
-                                       placeholder="Nhập lại mật khẩu mới">
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">
+                                    ✓ Cập nhật
+                                </button>
+                                <a href="${pageContext.request.contextPath}/admin-dashboard" class="btn btn-secondary">
+                                    ← Quay lại
+                                </a>
                             </div>
-                        </div>
+                        </form>
                     </div>
-
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">
-                            ✓ Cập nhật
-                        </button>
-                        <a href="${pageContext.request.contextPath}/admin-dashboard" class="btn btn-secondary">
-                            ← Quay lại
-                        </a>
-                    </div>
-                </form>
+                </div>
             </div>
+
+            <!-- Include footer.jsp -->
+            <%@ include file="footer.jsp" %>
         </div>
 
         <script>

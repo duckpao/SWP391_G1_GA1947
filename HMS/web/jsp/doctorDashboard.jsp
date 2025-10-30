@@ -15,7 +15,7 @@
 
         body {
             font-family: Arial, sans-serif;
-            background: #f9fafb;
+            background: #ffffff;
             min-height: 100vh;
             padding: 20px;
         }
@@ -31,7 +31,7 @@
             border-radius: 15px;
             margin-bottom: 20px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            border-top: 4px solid #3b82f6;
+            border-top: 4px solid #6c757d;
         }
 
         .header h1 {
@@ -47,7 +47,7 @@
 
         .logout-btn {
             float: right;
-            background: #dc3545;
+            background: #6c757d;
             color: white;
             padding: 10px 20px;
             text-decoration: none;
@@ -57,7 +57,7 @@
         }
 
         .logout-btn:hover {
-            background: #c82333;
+            background: #5a6268;
         }
 
         .menu-grid {
@@ -75,7 +75,7 @@
             text-decoration: none;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             transition: transform 0.3s, box-shadow 0.3s;
-            border-top: 4px solid #3b82f6;
+            border-top: 4px solid #6c757d;
         }
 
         .menu-card:hover {
@@ -109,7 +109,6 @@
 <body>
     <div class="container">
         <div class="header">
-            <a href="logout" class="logout-btn">🚪 Đăng xuất</a>
             <h1>Chào mừng, Bác sĩ! 👨‍⚕️</h1>
             <p>Quản lý yêu cầu cấp phát thuốc và tra cứu thông tin thuốc</p>
             <div class="clear"></div>

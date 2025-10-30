@@ -15,7 +15,7 @@
 
             body {
                 font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-                background: #f9fafb;
+                background: #f0f2f5;
                 min-height: 100vh;
                 display: flex;
                 align-items: center;
@@ -27,8 +27,8 @@
                 width: 100%;
                 max-width: 450px;
                 background: white;
-                border-radius: 20px;
-                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                border-radius: 12px;
+                box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
                 overflow: hidden;
                 animation: slideUp 0.5s ease;
             }
@@ -49,30 +49,31 @@
                 color: #1f2937;
                 padding: 40px 30px;
                 text-align: center;
-                border-bottom: 4px solid #3b82f6;
+                border-bottom: 1px solid #e5e7eb;
             }
 
             .otp-icon {
                 width: 80px;
                 height: 80px;
-                background: #eff6ff;
+                background: linear-gradient(135deg, #e8f0fe 0%, #d3e3fd 100%);
                 border-radius: 50%;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 margin: 0 auto 20px;
-                font-size: 40px;
+                font-size: 36px;
             }
 
             .otp-header h1 {
                 font-size: 28px;
                 font-weight: 700;
                 margin-bottom: 8px;
+                color: #1f2937;
             }
 
             .otp-header p {
                 font-size: 14px;
-                opacity: 0.7;
+                color: #6b7280;
                 line-height: 1.5;
             }
 
@@ -81,9 +82,9 @@
             }
 
             .info-box {
-                background: #eff6ff;
-                border: 1px solid #bfdbfe;
-                border-radius: 10px;
+                background: #f3f4f6;
+                border: 1px solid #e5e7eb;
+                border-radius: 8px;
                 padding: 16px;
                 margin-bottom: 24px;
                 display: flex;
@@ -98,7 +99,7 @@
 
             .info-box-text {
                 font-size: 14px;
-                color: #1e40af;
+                color: #374151;
                 line-height: 1.6;
             }
 
@@ -124,57 +125,54 @@
                 top: 50%;
                 transform: translateY(-50%);
                 font-size: 18px;
-                color: #9ca3af;
+                color: #6b7280;
             }
 
             .form-control {
                 width: 100%;
                 padding: 14px 16px 14px 48px;
-                border: 2px solid #e5e7eb;
-                border-radius: 10px;
+                border: none;
+                border-radius: 8px;
                 font-size: 15px;
                 font-family: inherit;
-                transition: all 0.3s ease;
-                background: #f9fafb;
+                transition: all 0.2s ease;
+                background: #f3f4f6;
                 text-align: center;
                 letter-spacing: 0.5em;
                 font-weight: 600;
+                color: #1f2937;
             }
 
             .form-control:focus {
                 outline: none;
-                border-color: #3b82f6;
-                background: white;
-                box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+                background: #e5e7eb;
             }
 
             .btn-verify {
                 width: 100%;
                 padding: 16px;
-                background: #3b82f6;
+                background: #6b7280;
                 color: white;
                 border: none;
-                border-radius: 10px;
+                border-radius: 8px;
                 font-size: 16px;
                 font-weight: 600;
                 cursor: pointer;
-                transition: all 0.3s ease;
+                transition: all 0.2s ease;
                 margin-top: 8px;
             }
 
             .btn-verify:hover {
-                background: #2563eb;
-                transform: translateY(-2px);
-                box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+                background: #4b5563;
             }
 
             .btn-verify:active {
-                transform: translateY(0);
+                transform: scale(0.98);
             }
 
             .alert {
                 padding: 14px 16px;
-                border-radius: 10px;
+                border-radius: 8px;
                 margin-bottom: 20px;
                 font-size: 14px;
                 font-weight: 500;
@@ -184,26 +182,26 @@
             }
 
             .alert-danger {
-                background: #fee2e2;
-                border: 1px solid #fca5a5;
+                background: #fef2f2;
+                border: 1px solid #fecaca;
                 color: #991b1b;
             }
 
             .alert-success {
-                background: #d1fae5;
-                border: 1px solid #6ee7b7;
+                background: #f0fdf4;
+                border: 1px solid #86efac;
                 color: #065f46;
             }
 
             .otp-footer {
                 padding: 24px 30px;
-                background: #f9fafb;
+                background: #ffffff;
                 border-top: 1px solid #e5e7eb;
                 text-align: center;
             }
 
             .otp-footer a {
-                color: #3b82f6;
+                color: #6b7280;
                 text-decoration: none;
                 font-weight: 600;
                 font-size: 14px;
@@ -211,12 +209,11 @@
             }
 
             .otp-footer a:hover {
-                color: #2563eb;
-                text-decoration: underline;
+                color: #374151;
             }
 
             .divider {
-                color: #9ca3af;
+                color: #d1d5db;
                 margin: 0 8px;
             }
 
@@ -228,20 +225,34 @@
             }
 
             .resend-link {
-                color: #3b82f6;
+                color: #6b7280;
                 cursor: pointer;
                 font-weight: 600;
                 text-decoration: none;
             }
 
             .resend-link:hover {
-                text-decoration: underline;
+                color: #374151;
             }
 
             .resend-link.disabled {
                 color: #9ca3af;
                 cursor: not-allowed;
                 text-decoration: none;
+            }
+
+            @media (max-width: 640px) {
+                .otp-header {
+                    padding: 32px 24px;
+                }
+
+                .otp-body {
+                    padding: 32px 24px;
+                }
+
+                .otp-footer {
+                    padding: 20px 24px;
+                }
             }
         </style>
     </head>
@@ -314,6 +325,68 @@
         </div>
 
         <script>
+            let countdown = 60;
+            const countdownElement = document.getElementById('countdown');
+            const resendLink = document.getElementById('resend-link');
+
+            const timer = setInterval(() => {
+                countdown--;
+                countdownElement.textContent = countdown;
+
+                if (countdown <= 0) {
+                    clearInterval(timer);
+                    resendLink.classList.remove('disabled');
+                    resendLink.innerHTML = 'Gửi lại mã';
+                }
+            }, 1000);
+
+            function resendOTP(event) {
+                event.preventDefault();
+                
+                if (resendLink.classList.contains('disabled')) {
+                    return false;
+                }
+
+                // Gửi request để gửi lại OTP
+                fetch('ResendOTPServlet', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Mã OTP mới đã được gửi đến email của bạn!');
+                        
+                        // Reset countdown
+                        countdown = 60;
+                        resendLink.classList.add('disabled');
+                        resendLink.innerHTML = 'Gửi lại (<span id="countdown">60</span>s)';
+                        
+                        // Restart timer
+                        const newCountdownElement = document.getElementById('countdown');
+                        const newTimer = setInterval(() => {
+                            countdown--;
+                            newCountdownElement.textContent = countdown;
+
+                            if (countdown <= 0) {
+                                clearInterval(newTimer);
+                                resendLink.classList.remove('disabled');
+                                resendLink.innerHTML = 'Gửi lại mã';
+                            }
+                        }, 1000);
+                    } else {
+                        alert('Có lỗi xảy ra. Vui lòng thử lại!');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Có lỗi xảy ra. Vui lòng thử lại!');
+                });
+
+                return false;
+            }
         </script>
     </body>
 </html>

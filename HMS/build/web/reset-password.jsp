@@ -7,248 +7,143 @@
     <title>Đặt lại mật khẩu - Hệ thống quản lý kho bệnh viện</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin:0; padding:0; box-sizing:border-box; }
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f9fafb;
+            background: #f0f2f5;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
         }
-
-        .container {
-            width: 100%;
-            max-width: 480px;
-        }
-
+        .container { width:100%; max-width:480px; }
         .card {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-            animation: slideUp 0.4s ease;
+            background:white;
+            border-radius:12px;
+            box-shadow:0 2px 12px rgba(0,0,0,0.08);
+            overflow:hidden;
+            animation:slideUp 0.4s ease;
         }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
+        @keyframes slideUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
         .card-header {
-            background: white;
-            color: #1f2937;
-            padding: 32px;
-            text-align: center;
-            border-bottom: 3px solid #3b82f6;
+            background:white;
+            color:#1f2937;
+            padding:32px;
+            text-align:center;
+            border-bottom:1px solid #e5e7eb;
         }
-
         .card-header-icon {
-            width: 64px;
-            height: 64px;
-            background: #eff6ff;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            margin: 0 auto 16px;
+            width:64px;
+            height:64px;
+            background:linear-gradient(135deg,#e8f0fe 0%,#d3e3fd 100%);
+            border-radius:50%;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:32px;
+            margin:0 auto 16px;
         }
-
         .card-header h1 {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 8px;
+            font-size:24px;
+            font-weight:700;
+            margin-bottom:8px;
         }
-
         .card-header p {
-            font-size: 14px;
-            color: #6b7280;
-            margin: 0;
+            font-size:14px;
+            color:#6b7280;
+            margin:0;
         }
-
-        .card-body {
-            padding: 32px;
-        }
-
+        .card-body { padding:32px; }
         .info-box {
-            background: #eff6ff;
-            border: 1px solid #bfdbfe;
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 24px;
-            display: flex;
-            gap: 12px;
+            background:#f3f4f6;
+            border:1px solid #e5e7eb;
+            border-radius:8px;
+            padding:16px;
+            margin-bottom:24px;
+            display:flex;
+            gap:12px;
+            align-items:flex-start;
         }
-
-        .info-icon {
-            font-size: 20px;
-            flex-shrink: 0;
-        }
-
-        .info-text {
-            font-size: 13px;
-            color: #1e40af;
-            line-height: 1.5;
-        }
-
-        .form-group {
-            margin-bottom: 24px;
-        }
-
+        .info-icon { font-size:20px; flex-shrink:0; }
+        .info-text { font-size:14px; color:#374151; line-height:1.5; }
+        .form-group { margin-bottom:24px; }
         label {
-            display: block;
-            font-size: 14px;
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 8px;
+            display:block;
+            font-size:14px;
+            font-weight:600;
+            color:#374151;
+            margin-bottom:8px;
         }
-
-        .input-wrapper {
-            position: relative;
-        }
-
+        .input-wrapper { position:relative; }
         input[type="password"] {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            font-size: 14px;
-            font-family: inherit;
-            transition: all 0.3s ease;
-            background: white;
+            width:100%;
+            padding:14px 16px;
+            border:none;
+            border-radius:8px;
+            font-size:15px;
+            font-family:inherit;
+            transition:all 0.2s ease;
+            background:#f3f4f6;
+            color:#1f2937;
         }
-
-        input[type="password"]:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        input[type="password"]::placeholder {
-            color: #9ca3af;
-        }
-
+        input[type="password"]:focus { outline:none; background:#e5e7eb; }
+        input[type="password"]::placeholder { color:#9ca3af; }
         .validation-message {
-            margin-top: 8px;
-            font-size: 13px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            margin-top:8px;
+            font-size:14px;
+            font-weight:500;
+            display:flex;
+            align-items:center;
+            gap:6px;
         }
-
-        .validation-message.error {
-            color: #dc2626;
-        }
-
-        .validation-message.success {
-            color: #059669;
-        }
-
-        .password-hint {
-            margin-top: 8px;
-            font-size: 12px;
-            color: #6b7280;
-        }
-
+        .validation-message.error { color:#dc2626; }
+        .validation-message.success { color:#059669; }
         .btn {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: inherit;
+            width:100%;
+            padding:16px;
+            border:none;
+            border-radius:8px;
+            font-size:16px;
+            font-weight:600;
+            cursor:pointer;
+            transition:all 0.2s ease;
+            font-family:inherit;
         }
-
         .btn-primary {
-            background: #3b82f6;
-            color: white;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+            background:#6b7280;
+            color:white;
         }
-
-        .btn-primary:hover {
-            background: #2563eb;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
-        }
-
-        .btn-primary:active {
-            transform: translateY(0);
-        }
-
+        .btn-primary:hover { background:#4b5563; }
         .alert {
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            animation: fadeIn 0.3s ease;
+            padding:14px 16px;
+            border-radius:8px;
+            margin-bottom:20px;
+            font-size:14px;
+            font-weight:500;
+            display:flex;
+            align-items:center;
+            gap:10px;
         }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .alert-danger {
-            background: #fee2e2;
-            color: #991b1b;
-            border: 1px solid #fecaca;
-        }
-
-        .alert-success {
-            background: #d1fae5;
-            color: #065f46;
-            border: 1px solid #a7f3d0;
-        }
-
+        .alert-danger { background:#fef2f2; border:1px solid #fecaca; color:#991b1b; }
+        .alert-success { background:#f0fdf4; border:1px solid #86efac; color:#065f46; }
         .card-footer {
-            padding: 20px 32px;
-            background: #f9fafb;
-            border-top: 1px solid #e5e7eb;
-            text-align: center;
+            padding:24px 32px;
+            background:#ffffff;
+            border-top:1px solid #e5e7eb;
+            text-align:center;
         }
-
         .card-footer a {
-            color: #3b82f6;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 14px;
-            transition: all 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
+            color:#6b7280;
+            text-decoration:none;
+            font-weight:600;
+            font-size:14px;
+            transition:all 0.2s;
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
         }
-
-        .card-footer a:hover {
-            color: #2563eb;
-            text-decoration: underline;
-        }
+        .card-footer a:hover { color:#374151; text-decoration:underline; }
     </style>
 </head>
 <body>
@@ -259,7 +154,6 @@
                 <h1>Đặt lại mật khẩu</h1>
                 <p>Vui lòng nhập mật khẩu mới của bạn</p>
             </div>
-
             <div class="card-body">
                 <div class="info-box">
                     <div class="info-icon">💡</div>
@@ -286,28 +180,14 @@
                     <div class="form-group">
                         <label for="newPassword">Mật khẩu mới</label>
                         <div class="input-wrapper">
-                            <input type="password" 
-                                   id="newPassword" 
-                                   name="newPassword" 
-                                   placeholder="Nhập mật khẩu mới (tối thiểu 6 ký tự)" 
-                                   minlength="6"
-                                   required>
-                        </div>
-                        <div class="password-hint">
-                            ℹ️ Mật khẩu phải có ít nhất 6 ký tự
+                            <input type="password" id="newPassword" name="newPassword" placeholder="Nhập mật khẩu mới (tối thiểu 6 ký tự)" minlength="6" required>
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label for="confirmPassword">Xác nhận mật khẩu mới</label>
                         <div class="input-wrapper">
-                            <input type="password" 
-                                   id="confirmPassword" 
-                                   name="confirmPassword" 
-                                   placeholder="Nhập lại mật khẩu mới" 
-                                   minlength="6"
-                                   oninput="validatePassword()" 
-                                   required>
+                            <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Nhập lại mật khẩu mới" minlength="6" oninput="validatePassword()" required>
                         </div>
                         <div id="matchMessage" class="validation-message"></div>
                     </div>
@@ -319,10 +199,7 @@
             </div>
 
             <div class="card-footer">
-                <a href="${pageContext.request.contextPath}/login">
-                    <span>←</span>
-                    <span>Quay lại Đăng nhập</span>
-                </a>
+                <a href="${pageContext.request.contextPath}/login">← Quay lại Đăng nhập</a>
             </div>
         </div>
     </div>
@@ -333,11 +210,7 @@
             const confirm = document.getElementById('confirmPassword').value;
             const matchMessage = document.getElementById('matchMessage');
 
-            if (confirm.length === 0) {
-                matchMessage.textContent = '';
-                return;
-            }
-
+            if (confirm.length === 0) { matchMessage.textContent = ''; return; }
             if (newPass !== confirm) {
                 matchMessage.className = 'validation-message error';
                 matchMessage.innerHTML = '<span>❌</span><span>Mật khẩu không khớp</span>';
@@ -350,17 +223,8 @@
         function validateForm() {
             const newPass = document.getElementById('newPassword').value;
             const confirm = document.getElementById('confirmPassword').value;
-
-            if (newPass.length < 6) {
-                alert('Mật khẩu phải có ít nhất 6 ký tự!');
-                return false;
-            }
-
-            if (newPass !== confirm) {
-                alert('Mật khẩu xác nhận không khớp!');
-                return false;
-            }
-
+            if (newPass.length < 6) { alert('Mật khẩu phải có ít nhất 6 ký tự!'); return false; }
+            if (newPass !== confirm) { alert('Mật khẩu xác nhận không khớp!'); return false; }
             return true;
         }
     </script>

@@ -46,7 +46,7 @@
 
             .login-header {
                 background: white;
-                border-bottom: 3px solid #3b82f6;
+                border-bottom: 3px solid #6c757d;
                 color: #1f2937;
                 padding: 40px 30px;
                 text-align: center;
@@ -113,20 +113,20 @@
                 font-size: 15px;
                 font-family: inherit;
                 transition: all 0.3s ease;
-                background: #f9fafb;
+                background: #ffffff;
             }
 
             .form-control:focus {
                 outline: none;
-                border-color: #3b82f6;
+                border-color: #6c757d;
                 background: white;
-                box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+                box-shadow: 0 0 0 4px rgba(108, 117, 125, 0.1);
             }
 
             .btn-login {
                 width: 100%;
                 padding: 16px;
-                background: #3b82f6;
+                background: #6c757d;
                 color: white;
                 border: none;
                 border-radius: 10px;
@@ -138,9 +138,9 @@
             }
 
             .btn-login:hover {
-                background: #2563eb;
+                background: #5a6268;
                 transform: translateY(-2px);
-                box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+                box-shadow: 0 10px 30px rgba(108, 117, 125, 0.3);
             }
 
             .btn-login:active {
@@ -172,13 +172,13 @@
 
             .login-footer {
                 padding: 24px 30px;
-                background: #f9fafb;
+                background: #ffffff;
                 border-top: 1px solid #e5e7eb;
                 text-align: center;
             }
 
             .login-footer a {
-                color: #3b82f6;
+                color: #6c757d;
                 text-decoration: none;
                 font-weight: 600;
                 font-size: 14px;
@@ -186,7 +186,7 @@
             }
 
             .login-footer a:hover {
-                color: #2563eb;
+                color: #5a6268;
                 text-decoration: underline;
             }
 
@@ -207,14 +207,14 @@
             }
 
             .password-toggle:hover {
-                color: #3b82f6;
+                color: #6c757d;
             }
         </style>
     </head>
     <body>
         <div class="login-container">
             <div class="login-header">
-                <div class="login-icon">🏥</div>
+                <div class="login-icon"></div>
                 <h1>Đăng nhập</h1>
                 <p>Hệ thống quản lý kho bệnh viện</p>
             </div>
@@ -222,14 +222,14 @@
             <div class="login-body">
                 <% if (request.getAttribute("error") != null) { %>
                 <div class="alert alert-danger">
-                    <span>⚠️</span>
+                    <span>Lỗi</span>
                     <span>${error}</span>
                 </div>
                 <% } %>
 
                 <% if (request.getAttribute("message") != null) { %>
                 <div class="alert alert-success">
-                    <span>✅</span>
+                    <span>Thành công</span>
                     <span>${message}</span>
                 </div>
                 <% } %>
@@ -238,7 +238,7 @@
                     <div class="form-group">
                         <label for="emailOrUsername">Email hoặc Username</label>
                         <div class="input-wrapper">
-                            <span class="input-icon">📧</span>
+                            <span class="input-icon">👤</span>
                             <input 
                                 type="text" 
                                 id="emailOrUsername" 
@@ -253,7 +253,7 @@
                     <div class="form-group">
                         <label for="password">Mật khẩu</label>
                         <div class="input-wrapper">
-                            <span class="input-icon">🔒</span>
+                            <span class="input-icon">🔐</span>
                             <input 
                                 type="password" 
                                 id="password" 
@@ -266,16 +266,16 @@
                     </div>
 
                     <button type="submit" class="btn-login">
-                        🚀 Đăng nhập
+                        Đăng nhập
                     </button>
                 </form>
 
             </div>
 
             <div class="login-footer">
-                <a href="${pageContext.request.contextPath}/register">📝 Đăng ký tài khoản</a>
+                <a href="${pageContext.request.contextPath}/register">Đăng ký tài khoản</a>
                 <span class="divider">|</span>
-                <a href="${pageContext.request.contextPath}/forgot-password">🔑 Quên mật khẩu?</a>
+                <a href="${pageContext.request.contextPath}/forgot-password">Quên mật khẩu?</a>
             </div>
         </div>
 

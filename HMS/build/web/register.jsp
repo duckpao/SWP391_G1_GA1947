@@ -15,7 +15,7 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f9fafb;
+            background: #f0f2f5;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -26,88 +26,121 @@
         .container {
             width: 100%;
             max-width: 500px;
-            background: #fff;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
             overflow: hidden;
         }
 
         .header {
             background: #ffffff;
-            color: #1f2937;
-            padding: 30px 40px;
+            padding: 48px 40px 32px;
             text-align: center;
-            border-bottom: 3px solid #3b82f6;
+        }
+
+        .icon-circle {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #e8f0fe 0%, #d3e3fd 100%);
+            border-radius: 50%;
+            margin: 0 auto 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
         }
 
         .header h1 {
             font-size: 28px;
             font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
+            color: #1f2937;
+            margin-bottom: 8px;
         }
 
-        .header-icon {
-            font-size: 32px;
+        .header p {
+            font-size: 14px;
+            color: #6b7280;
+            font-weight: 400;
+        }
+
+        .divider {
+            height: 1px;
+            background: #e5e7eb;
+            margin: 0 40px;
         }
 
         .content {
-            padding: 40px;
+            padding: 32px 40px 40px;
         }
 
         .form-group {
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
 
         .form-group label {
             display: block;
             font-size: 14px;
             font-weight: 600;
-            color: #1f2937;
+            color: #374151;
             margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
 
-        .form-group input,
-        .form-group select {
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 16px;
+            font-size: 18px;
+            z-index: 1;
+        }
+
+        .form-group input {
             width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e5e7eb;
+            padding: 14px 16px 14px 48px;
+            border: none;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 15px;
             font-family: inherit;
-            transition: all 0.3s ease;
-            background: #f9fafb;
+            background: #f3f4f6;
+            color: #1f2937;
+            transition: all 0.2s ease;
         }
 
-        .form-group input:focus,
-        .form-group select:focus {
+        .form-group input:focus {
             outline: none;
-            border-color: #3b82f6;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            background: #e5e7eb;
         }
 
         .form-group input::placeholder {
             color: #9ca3af;
         }
 
+        .password-toggle {
+            position: absolute;
+            right: 16px;
+            cursor: pointer;
+            font-size: 18px;
+            z-index: 1;
+            user-select: none;
+        }
+
         .password-strength {
-            font-size: 13px;
-            font-weight: 600;
-            margin-top: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-top: 8px;
             display: inline-block;
         }
 
         .match-status {
-            font-size: 13px;
-            font-weight: 600;
-            margin-top: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-top: 8px;
             display: block;
-            min-height: 20px;
+            min-height: 18px;
         }
 
         .btn {
@@ -116,52 +149,39 @@
             border: none;
             border-radius: 8px;
             font-size: 15px;
-            font-weight: 700;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
+            margin-top: 8px;
         }
 
         .btn-register {
-            background: #3b82f6;
-            color: white;
-            margin-bottom: 16px;
+            background: #6b7280;
+            color: #ffffff;
         }
 
         .btn-register:hover {
-            background: #2563eb;
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+            background: #4b5563;
         }
 
         .btn-register:active {
-            transform: translateY(0);
-        }
-
-        .btn-home {
-            background: #f3f4f6;
-            color: #3b82f6;
-            border: 2px solid #e5e7eb;
-        }
-
-        .btn-home:hover {
-            background: #e5e7eb;
-            border-color: #d1d5db;
+            transform: scale(0.98);
         }
 
         .error-message {
-            background: #fee2e2;
+            background: #fef2f2;
             color: #991b1b;
             padding: 12px 16px;
             border-radius: 8px;
             font-size: 13px;
-            font-weight: 600;
+            font-weight: 500;
             margin-bottom: 16px;
-            border-left: 4px solid #dc2626;
+            border-left: 3px solid #dc2626;
             display: none;
         }
 
@@ -170,14 +190,14 @@
         }
 
         .success-message {
-            background: #d1fae5;
+            background: #f0fdf4;
             color: #065f46;
             padding: 12px 16px;
             border-radius: 8px;
             font-size: 13px;
-            font-weight: 600;
+            font-weight: 500;
             margin-bottom: 16px;
-            border-left: 4px solid #059669;
+            border-left: 3px solid #10b981;
             display: none;
         }
 
@@ -185,46 +205,62 @@
             display: block;
         }
 
-        .divider {
+        .footer-links {
             text-align: center;
-            margin: 24px 0;
-            color: #9ca3af;
-            font-size: 13px;
-        }
-
-        .login-link {
-            text-align: center;
+            padding: 24px 40px 32px;
+            border-top: 1px solid #e5e7eb;
             font-size: 14px;
             color: #6b7280;
         }
 
-        .login-link a {
-            color: #3b82f6;
+        .footer-links a {
+            color: #6b7280;
             text-decoration: none;
-            font-weight: 700;
-            transition: all 0.2s ease;
+            font-weight: 600;
+            transition: color 0.2s ease;
         }
 
-        .login-link a:hover {
-            color: #2563eb;
-            text-decoration: underline;
+        .footer-links a:hover {
+            color: #374151;
+        }
+
+        .separator {
+            margin: 0 12px;
+            color: #d1d5db;
         }
 
         @media (max-width: 640px) {
             .header {
-                padding: 24px;
-            }
-
-            .header h1 {
-                font-size: 22px;
+                padding: 40px 24px 24px;
             }
 
             .content {
                 padding: 24px;
             }
+
+            .footer-links {
+                padding: 20px 24px 28px;
+            }
+
+            .divider {
+                margin: 0 24px;
+            }
         }
     </style>
     <script>
+        function togglePassword(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                icon.textContent = '👁️';
+            }
+        }
+
         function validatePassword() {
             const password = document.getElementById("password").value;
             const confirm = document.getElementById("confirmPassword").value;
@@ -251,6 +287,9 @@
             if (confirm && password !== confirm) {
                 document.getElementById("match").textContent = "❌ Mật khẩu không khớp";
                 document.getElementById("match").style.color = "#dc2626";
+            } else if (confirm && password === confirm) {
+                document.getElementById("match").textContent = "✓ Mật khẩu khớp";
+                document.getElementById("match").style.color = "#059669";
             } else {
                 document.getElementById("match").textContent = "";
             }
@@ -286,11 +325,12 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>
-                <span class="header-icon">📝</span>
-                Đăng ký tài khoản
-            </h1>
+            <div class="icon-circle">✨</div>
+            <h1>Đăng ký</h1>
+            <p>Hệ thống quản lý kho bệnh viện</p>
         </div>
+
+        <div class="divider"></div>
 
         <div class="content">
             <div class="error-message"></div>
@@ -298,46 +338,59 @@
 
             <form action="register" method="post" onsubmit="handleSubmit(event)">
                 <div class="form-group">
-                    <label>Họ tên</label>
-                    <input type="text" name="username" placeholder="Nhập họ tên của bạn" required>
+                    <label>Họ và tên</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">👤</span>
+                        <input type="text" name="username" placeholder="Nguyễn Văn A" required>
+                    </div>
                 </div>
 
                 <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" name="email" placeholder="Nhập địa chỉ email" required>
+                    <label>Email hoặc Username</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">📧</span>
+                        <input type="email" name="email" placeholder="example@email.com" required>
+                    </div>
                 </div>
 
                 <div class="form-group">
                     <label>Số điện thoại</label>
-                    <input type="text" name="phone" placeholder="Nhập số điện thoại" required>
+                    <div class="input-wrapper">
+                        <span class="input-icon">📱</span>
+                        <input type="text" name="phone" placeholder="0912345678" required>
+                    </div>
                 </div>
 
                 <div class="form-group">
                     <label>Mật khẩu</label>
-                    <input type="password" id="password" name="password" placeholder="Tối thiểu 6 ký tự" onkeyup="validatePassword()" required>
+                    <div class="input-wrapper">
+                        <span class="input-icon">🔒</span>
+                        <input type="password" id="password" name="password" placeholder="••••••" onkeyup="validatePassword()" required>
+                        <span class="password-toggle" id="toggleIcon1" onclick="togglePassword('password', 'toggleIcon1')">👁️</span>
+                    </div>
                     <span class="password-strength" id="strength"></span>
                 </div>
 
                 <div class="form-group">
-                    <label>Nhập lại mật khẩu</label>
-                    <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Xác nhận mật khẩu" onkeyup="validatePassword()" required>
+                    <label>Xác nhận mật khẩu</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">🔒</span>
+                        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="••••••" onkeyup="validatePassword()" required>
+                        <span class="password-toggle" id="toggleIcon2" onclick="togglePassword('confirmPassword', 'toggleIcon2')">👁️</span>
+                    </div>
                     <span class="match-status" id="match"></span>
                 </div>
 
                 <button type="submit" class="btn btn-register">
-                    🚀 Đăng ký
+                    Đăng ký
                 </button>
             </form>
+        </div>
 
-            <div class="divider">━━━━━━━━━━━━━━━━</div>
-
-            <button onclick="window.location.href='home.jsp'" class="btn btn-home">
-                🏠 Quay lại Trang chủ
-            </button>
-
-            <div class="login-link" style="margin-top: 20px;">
-                Đã có tài khoản? <a href="${pageContext.request.contextPath}/login">Đăng nhập ngay</a>
-            </div>
+        <div class="footer-links">
+            <a href="${pageContext.request.contextPath}/login">Đăng nhập</a>
+            <span class="separator">|</span>
+            <a href="home.jsp">Quay lại trang chủ</a>
         </div>
     </div>
 </body>

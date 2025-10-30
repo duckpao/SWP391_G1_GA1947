@@ -1,15 +1,16 @@
-
 package model;
 
 import java.util.Date;
 import java.util.List;
 
 public class MedicationRequest {
+
     private int requestId;
     private int doctorId;
     private String status;
     private Date requestDate;
     private String notes;
+    private String doctorName;
     private List<MedicationRequestItem> items;
 
     // Constructor mặc định (thêm để fix lỗi)
@@ -79,4 +80,12 @@ public class MedicationRequest {
     public String toString() {
         return "MedicationRequest{" + "requestId=" + requestId + ", doctorId=" + doctorId + ", status=" + status + ", requestDate=" + requestDate + ", notes=" + notes + ", items=" + items + '}';
     }
+
+ public String getDoctorName() {
+    return doctorName;
+}
+
+public void setDoctorName(String doctorName) {
+    this.doctorName = doctorName;
+}
 }

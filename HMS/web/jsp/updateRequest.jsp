@@ -202,11 +202,11 @@
                                 <div class="medicine-row">
                                     <div>
                                         <span class="field-label">Tên thuốc</span>
-                                        <select name="medicine_id" class="form-control" required>
+                                        <select name="medicine_code" class="form-control" required>
                                             <option value="">-- Chọn thuốc --</option>
                                             <c:forEach var="med" items="${medicines}">
-                                                <option value="${med.medicineId}" 
-                                                        ${item.medicineId == med.medicineId ? 'selected' : ''}>
+                                                <option value="${med.medicineCode}" 
+                                                        ${item.medicineCode == med.medicineCode ? 'selected' : ''}>
                                                     ${med.name}
                                                 </option>
                                             </c:forEach>

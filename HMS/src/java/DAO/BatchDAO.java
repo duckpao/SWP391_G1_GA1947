@@ -1,123 +1,100 @@
 package DAO;
 
-import model.Batches;
 import java.sql.*;
 import java.util.*;
+import DAO.DBContext;
+import model.Batches;
 
-public class BatchDAO {
-    private DBContext dbContext = new DBContext();
+public class BatchDAO extends DBContext {
 
-    public List<Map<String, Object>> getAllBatches() {
+    public List<Map<String, Object>> getBatchList() {
         List<Map<String, Object>> list = new ArrayList<>();
         String sql = """
-            SELECT b.batch_id, b.medicine_code, b.supplier_id, b.lot_number,
-                   b.expiry_date, b.initial_quantity, b.current_quantity, b.status,
-                   m.name AS medicine_name, s.name AS supplier_name
+            SELECT 
+                b.batch_id AS batchId,
+                b.lot_number AS lotNumber,
+                m.name AS medicineName,
+                s.name AS supplierName,
+                b.received_date AS receivedDate,   -- 🆕 thêm cột này
+                b.expiry_date AS expiryDate,
+                b.initial_quantity AS initialQuantity,
+                b.current_quantity AS currentQuantity,
+                poi.unit_price AS unitPrice,
+                b.status AS status
             FROM Batches b
-            LEFT JOIN Medicines m ON b.medicine_code = m.medicine_code
-            LEFT JOIN Suppliers s ON b.supplier_id = s.supplier_id
-            ORDER BY b.created_at DESC
+            JOIN Medicines m ON b.medicine_code = m.medicine_code
+            JOIN Suppliers s ON b.supplier_id = s.supplier_id
+            LEFT JOIN PurchaseOrderItems poi 
+                ON b.medicine_code = poi.medicine_code
+            ORDER BY b.batch_id DESC;
         """;
 
-        try (Connection conn = dbContext.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 Map<String, Object> row = new HashMap<>();
-                row.put("batchId", rs.getInt("batch_id"));
-                row.put("medicineName", rs.getString("medicine_name"));
-                row.put("supplierName", rs.getString("supplier_name"));
-                row.put("lotNumber", rs.getString("lot_number"));
-                row.put("expiryDate", rs.getDate("expiry_date"));
-                row.put("initialQuantity", rs.getInt("initial_quantity"));
-                row.put("currentQuantity", rs.getInt("current_quantity"));
+                row.put("batchId", rs.getInt("batchId"));
+                row.put("lotNumber", rs.getString("lotNumber"));
+                row.put("medicineName", rs.getString("medicineName"));
+                row.put("supplierName", rs.getString("supplierName"));
+                row.put("receivedDate", rs.getDate("receivedDate")); // 🆕 thêm dòng này
+                row.put("expiryDate", rs.getDate("expiryDate"));
+                row.put("initialQuantity", rs.getInt("initialQuantity"));
+                row.put("currentQuantity", rs.getInt("currentQuantity"));
+                row.put("unitPrice", rs.getBigDecimal("unitPrice"));
                 row.put("status", rs.getString("status"));
                 list.add(row);
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         return list;
     }
     
-     // ✅ Lấy thông tin một batch theo ID
-    public Batches getBatchById(int batchId) {
-        String sql = "SELECT * FROM Batches WHERE batch_id = ?";
-        try (Connection conn = dbContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+   //--------- Add batch -------------
 
-            ps.setInt(1, batchId);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    Batches b = new Batches();
-                    b.setBatchId(rs.getInt("batch_id"));
-                    b.setMedicineCode(rs.getString("medicine_code"));
-                    b.setSupplierId(rs.getInt("supplier_id"));
-                    b.setLotNumber(rs.getString("lot_number"));
-                    b.setExpiryDate(rs.getDate("expiry_date"));
-                    b.setInitialQuantity(rs.getInt("initial_quantity"));
-                    b.setCurrentQuantity(rs.getInt("current_quantity"));
-                    b.setStatus(rs.getString("status"));
-                    return b;
-                }
+    public boolean addBatch(Batches batch) throws SQLException {
+        // 1. Lấy unit_price từ PurchaseOrderItem
+        String priceQuery = "SELECT TOP 1 unitPrice FROM PurchaseOrderItem WHERE medicineCode = ? ORDER BY poItemId DESC";
+        double unitPrice = 0;
+        try (Connection conn = getConnection();
+                PreparedStatement ps = conn.prepareStatement(priceQuery)) {
+            ps.setString(1, batch.getMedicineCode());
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                unitPrice = rs.getDouble("unitPrice");
+            } else {
+                throw new SQLException("Không tìm thấy unitPrice cho medicineCode: " + batch.getMedicineCode());
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
-        return null;
-    }
 
-    // ✅ Cập nhật số lượng & trạng thái sau khi ghi nhận thuốc hư/hết hạn
-    public boolean updateBatchAfterRecord(int batchId, int quantity, String reason) {
-        String newStatus = (reason.equalsIgnoreCase("Expired")) ? "Expired" : "Damaged";
+        // 2. Chèn lô thuốc mới vào bảng Batches
+        String insertQuery = "INSERT INTO Batches (medicineCode, supplierId, lotNumber, expiryDate, receivedDate, initialQuantity, currentQuantity, status, quarantineNotes, createdAt, updatedAt) " +
+                             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        String sql = """
-            UPDATE Batches
-            SET current_quantity = CASE
-                    WHEN current_quantity - ? < 0 THEN 0
-                    ELSE current_quantity - ?
-                END,
-                status = CASE
-                    WHEN current_quantity - ? <= 0 THEN ?
-                    ELSE status
-                END,
-                updated_at = GETDATE()
-            WHERE batch_id = ?
-        """;
+        try (Connection conn = getConnection();
+                PreparedStatement ps = conn.prepareStatement(insertQuery)) {
+            ps.setString(1, batch.getMedicineCode());
+            ps.setInt(2, batch.getSupplierId());
+            ps.setString(3, batch.getLotNumber());
+            ps.setDate(4, batch.getExpiryDate());
+            ps.setDate(5, batch.getReceivedDate());
+            ps.setInt(6, batch.getInitialQuantity());
+            ps.setInt(7, batch.getInitialQuantity()); // currentQuantity = initialQuantity
+            ps.setString(8, "Active"); // default status
+            ps.setString(9, batch.getQuarantineNotes());
+            Timestamp now = new Timestamp(System.currentTimeMillis());
+            ps.setTimestamp(10, now); // createdAt
+            ps.setTimestamp(11, now); // updatedAt
 
-        try (Connection conn = dbContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, quantity);
-            ps.setInt(2, quantity);
-            ps.setInt(3, quantity);
-            ps.setString(4, newStatus);
-            ps.setInt(5, batchId);
-
-            return ps.executeUpdate() > 0;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    // ✅ Cập nhật trực tiếp trạng thái batch (nếu cần)
-    public boolean updateBatchStatus(int batchId, String status) {
-        String sql = "UPDATE Batches SET status = ?, updated_at = GETDATE() WHERE batch_id = ?";
-        try (Connection conn = dbContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, status);
-            ps.setInt(2, batchId);
-
-            return ps.executeUpdate() > 0;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            int affected = ps.executeUpdate();
+            return affected > 0;
         }
     }
 }
+
 

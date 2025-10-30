@@ -26,7 +26,7 @@
             min-height: 100vh;
         }
         .main-wrapper {
-            display: flex;
+            display: block;
         }
         /* Sidebar */
         .sidebar {
@@ -69,6 +69,7 @@
             color: #495057;
             transition: all 0.3s ease;
             cursor: pointer;
+            display: none;
         }
         .sidebar-item:hover {
             background: #e9ecef;
@@ -92,7 +93,7 @@
         }
         /* Main Content */
         .main-content {
-            margin-left: 260px;
+            margin-left: 0;
             flex: 1;
             padding: 30px;
             background: #ffffff;

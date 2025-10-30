@@ -21,14 +21,22 @@
             background: #f9fafb;
             min-height: 100vh;
             color: #374151;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page-wrapper {
+            display: flex;
+            flex: 1;
         }
 
         .dashboard-container {
             display: flex;
-            min-height: 100vh;
+            flex: 1;
+            width: 100%;
         }
 
-        /* Sidebar styling - changed from purple gradient to white with border */
+        /* Sidebar styling */
         .sidebar {
             width: 280px;
             background: white;
@@ -59,33 +67,7 @@
             margin: 15px 0;
         }
 
-        .user-info {
-            margin-bottom: 20px;
-        }
-
-        .user-info small {
-            font-size: 12px;
-            opacity: 0.8;
-            color: #6b7280;
-        }
-
-        .user-info h6 {
-            font-size: 16px;
-            font-weight: 600;
-            margin: 5px 0;
-            color: #1f2937;
-        }
-
-        .user-badge {
-            display: inline-block;
-            background: #ede9fe;
-            color: #7c3aed;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-top: 8px;
-        }
+        /* Removed user-info styling */
 
         .nav-link {
             color: #6b7280;
@@ -125,7 +107,6 @@
             margin-bottom: 30px;
         }
 
-        /* Page header text color changed from white to dark gray */
         .page-header h2 {
             font-size: 32px;
             font-weight: 700;
@@ -143,7 +124,6 @@
             margin-bottom: 30px;
         }
 
-        /* Stat card border color changed from purple to blue */
         .stat-card {
             background: white;
             border-radius: 15px;
@@ -254,7 +234,6 @@
             transition: all 0.3s ease;
         }
 
-        /* Form focus state changed from purple to blue */
         .filter-section select:focus,
         .filter-section input:focus {
             outline: none;
@@ -282,7 +261,6 @@
             gap: 8px;
         }
 
-        /* Button colors changed from purple to blue */
         .btn-primary {
             background: #3b82f6;
             color: white;
@@ -357,7 +335,6 @@
             color: #374151;
         }
 
-        /* Button small color changed from purple to blue */
         .btn-sm {
             padding: 6px 12px;
             font-size: 12px;
@@ -446,222 +423,226 @@
     </style>
 </head>
 <body>
-    <div class="dashboard-container">
-        <!-- Sidebar navigation -->
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <h4><i class="bi bi-hospital"></i> Pharmacy</h4>
-                <hr class="sidebar-divider">
-                <div class="user-info">
-                    <small>Xin chào!</small>
-                    <h6>${sessionScope.username}</h6>
-                    <span class="user-badge">${sessionScope.role}</span>
+    <!-- Include header.jsp -->
+    <%@ include file="header.jsp" %>
+
+    <div class="page-wrapper">
+        <div class="dashboard-container">
+            <!-- Sidebar navigation -->
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <h4><i class="bi bi-hospital"></i> Pharmacy</h4>
+                    <hr class="sidebar-divider">
+                    <!-- Removed user-info section -->
                 </div>
+
+                <nav>
+                    <a class="nav-link" href="${pageContext.request.contextPath}/auditor-dashboard">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </a>
+                    <a class="nav-link active" href="${pageContext.request.contextPath}/purchase-orders">
+                        <i class="bi bi-receipt"></i> Purchase Orders
+                    </a>
+                    <a class="nav-link" href="${pageContext.request.contextPath}/purchase-orders/history">
+                        <i class="bi bi-clock-history"></i> PO History & Trends
+                    </a>
+                    <a class="nav-link" href="#">
+                        <i class="bi bi-box-seam"></i> Inventory Audit
+                    </a>
+                    <a class="nav-link" href="#">
+                        <i class="bi bi-graph-up"></i> Reports
+                    </a>
+                    <a class="nav-link" href="#">
+                        <i class="bi bi-journal-text"></i> System Logs
+                    </a>
+                    <hr class="nav-divider">
+                    <a class="nav-link" href="${pageContext.request.contextPath}/logout">
+                        <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                    </a>
+                </nav>
             </div>
 
-            <nav>
-                <a class="nav-link" href="${pageContext.request.contextPath}/auditor-dashboard">
-                    <i class="bi bi-speedometer2"></i> Dashboard
-                </a>
-                <a class="nav-link active" href="${pageContext.request.contextPath}/purchase-orders">
-                    <i class="bi bi-receipt"></i> Purchase Orders
-                </a>
-                <a class="nav-link" href="${pageContext.request.contextPath}/purchase-orders/history">
-                    <i class="bi bi-clock-history"></i> PO History & Trends
-                </a>
-                <a class="nav-link" href="#">
-                    <i class="bi bi-box-seam"></i> Inventory Audit
-                </a>
-                <a class="nav-link" href="#">
-                    <i class="bi bi-graph-up"></i> Reports
-                </a>
-                <a class="nav-link" href="#">
-                    <i class="bi bi-journal-text"></i> System Logs
-                </a>
-                <hr class="nav-divider">
-                <a class="nav-link" href="${pageContext.request.contextPath}/logout">
-                    <i class="bi bi-box-arrow-right"></i> Đăng xuất
-                </a>
-            </nav>
-        </div>
+            <!-- Main Content -->
+            <div class="main-content">
+                <div class="page-header">
+                    <h2><i class="bi bi-receipt"></i> Purchase Orders Management</h2>
+                </div>
 
-        <!-- Main Content -->
-        <div class="main-content">
-            <div class="page-header">
-                <h2><i class="bi bi-receipt"></i> Purchase Orders Management</h2>
-            </div>
+                <!-- Statistics Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-content">
+                            <div class="stat-info">
+                                <h6>Total Orders</h6>
+                                <h3>${totalOrders}</h3>
+                            </div>
+                            <div class="stat-icon" style="color: #3b82f6;">
+                                <i class="bi bi-cart"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card success">
+                        <div class="stat-content">
+                            <div class="stat-info">
+                                <h6>Completed</h6>
+                                <h3>${completedOrders}</h3>
+                            </div>
+                            <div class="stat-icon" style="color: #10b981;">
+                                <i class="bi bi-check-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card warning">
+                        <div class="stat-content">
+                            <div class="stat-info">
+                                <h6>Pending</h6>
+                                <h3>${pendingOrders}</h3>
+                            </div>
+                            <div class="stat-icon" style="color: #f59e0b;">
+                                <i class="bi bi-clock"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card info">
+                        <div class="stat-content">
+                            <div class="stat-info">
+                                <h6>Total Amount</h6>
+                                <h3><fmt:formatNumber value="${totalAmount}" type="currency" currencySymbol="$"/></h3>
+                            </div>
+                            <div class="stat-icon" style="color: #3b82f6;">
+                                <i class="bi bi-cash-stack"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-            <!-- Statistics Cards -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-content">
-                        <div class="stat-info">
-                            <h6>Total Orders</h6>
-                            <h3>${totalOrders}</h3>
+                <!-- Filter Section -->
+                <div class="filter-section">
+                    <form method="get" action="purchase-orders" id="filterForm">
+                        <input type="hidden" name="action" value="list">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 16px;">
+                            <div>
+                                <label>Status</label>
+                                <select name="status">
+                                    <option value="">All Statuses</option>
+                                    <c:forEach var="status" items="${statuses}">
+                                        <option value="${status}" ${selectedStatus == status ? 'selected' : ''}>
+                                            ${status}
+                                        </option>
+                                    </c:forEach>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Supplier</label>
+                                <select name="supplierId">
+                                    <option value="">All Suppliers</option>
+                                    <c:forEach var="supplier" items="${suppliers}">
+                                        <option value="${supplier.supplierId}" ${selectedSupplierId == supplier.supplierId ? 'selected' : ''}>
+                                            ${supplier.name}
+                                        </option>
+                                    </c:forEach>
+                                </select>
+                            </div>
+                            <div>
+                                <label>From Date</label>
+                                <input type="date" name="fromDate" value="${fromDate}">
+                            </div>
+                            <div>
+                                <label>To Date</label>
+                                <input type="date" name="toDate" value="${toDate}">
+                            </div>
+                            <div>
+                                <label>Search</label>
+                                <input type="text" name="search" placeholder="PO ID, Supplier..." value="${searchKeyword}">
+                            </div>
                         </div>
-                        <div class="stat-icon" style="color: #3b82f6;">
-                            <i class="bi bi-cart"></i>
+                        <div class="filter-buttons">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-search"></i> Filter
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="clearFilters()">
+                                <i class="bi bi-x-circle"></i> Clear
+                            </button>
+                            <button type="button" class="btn btn-success" onclick="exportToExcel()">
+                                <i class="bi bi-file-earmark-excel"></i> Export Excel
+                            </button>
                         </div>
-                    </div>
+                    </form>
                 </div>
-                <div class="stat-card success">
-                    <div class="stat-content">
-                        <div class="stat-info">
-                            <h6>Completed</h6>
-                            <h3>${completedOrders}</h3>
-                        </div>
-                        <div class="stat-icon" style="color: #10b981;">
-                            <i class="bi bi-check-circle"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="stat-card warning">
-                    <div class="stat-content">
-                        <div class="stat-info">
-                            <h6>Pending</h6>
-                            <h3>${pendingOrders}</h3>
-                        </div>
-                        <div class="stat-icon" style="color: #f59e0b;">
-                            <i class="bi bi-clock"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="stat-card info">
-                    <div class="stat-content">
-                        <div class="stat-info">
-                            <h6>Total Amount</h6>
-                            <h3><fmt:formatNumber value="${totalAmount}" type="currency" currencySymbol="$"/></h3>
-                        </div>
-                        <div class="stat-icon" style="color: #3b82f6;">
-                            <i class="bi bi-cash-stack"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Filter Section -->
-            <div class="filter-section">
-                <form method="get" action="purchase-orders" id="filterForm">
-                    <input type="hidden" name="action" value="list">
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 16px;">
-                        <div>
-                            <label>Status</label>
-                            <select name="status">
-                                <option value="">All Statuses</option>
-                                <c:forEach var="status" items="${statuses}">
-                                    <option value="${status}" ${selectedStatus == status ? 'selected' : ''}>
-                                        ${status}
-                                    </option>
-                                </c:forEach>
-                            </select>
-                        </div>
-                        <div>
-                            <label>Supplier</label>
-                            <select name="supplierId">
-                                <option value="">All Suppliers</option>
-                                <c:forEach var="supplier" items="${suppliers}">
-                                    <option value="${supplier.supplierId}" ${selectedSupplierId == supplier.supplierId ? 'selected' : ''}>
-                                        ${supplier.name}
-                                    </option>
-                                </c:forEach>
-                            </select>
-                        </div>
-                        <div>
-                            <label>From Date</label>
-                            <input type="date" name="fromDate" value="${fromDate}">
-                        </div>
-                        <div>
-                            <label>To Date</label>
-                            <input type="date" name="toDate" value="${toDate}">
-                        </div>
-                        <div>
-                            <label>Search</label>
-                            <input type="text" name="search" placeholder="PO ID, Supplier..." value="${searchKeyword}">
-                        </div>
+                <!-- Purchase Orders Table -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-list-ul"></i> Purchase Orders List</h5>
                     </div>
-                    <div class="filter-buttons">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-search"></i> Filter
-                        </button>
-                        <button type="button" class="btn btn-secondary" onclick="clearFilters()">
-                            <i class="bi bi-x-circle"></i> Clear
-                        </button>
-                        <button type="button" class="btn btn-success" onclick="exportToExcel()">
-                            <i class="bi bi-file-earmark-excel"></i> Export Excel
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Purchase Orders Table -->
-            <div class="dashboard-card">
-                <div class="card-header">
-                    <h5><i class="bi bi-list-ul"></i> Purchase Orders List</h5>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>PO ID</th>
-                                    <th>Order Date</th>
-                                    <th>Supplier</th>
-                                    <th>Manager</th>
-                                    <th>Status</th>
-                                    <th>Items</th>
-                                    <th>Total Amount</th>
-                                    <th>Expected Delivery</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <c:choose>
-                                    <c:when test="${empty purchaseOrders}">
-                                        <tr>
-                                            <td colspan="9">
-                                                <div class="empty-state">
-                                                    <i class="bi bi-inbox"></i>
-                                                    <p>No purchase orders found</p>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <c:forEach var="po" items="${purchaseOrders}">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>PO ID</th>
+                                        <th>Order Date</th>
+                                        <th>Supplier</th>
+                                        <th>Manager</th>
+                                        <th>Status</th>
+                                        <th>Items</th>
+                                        <th>Total Amount</th>
+                                        <th>Expected Delivery</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <c:choose>
+                                        <c:when test="${empty purchaseOrders}">
                                             <tr>
-                                                <td><strong>#${po.poId}</strong></td>
-                                                <td><fmt:formatDate value="${po.orderDate}" pattern="dd/MM/yyyy"/></td>
-                                                <td>${po.supplierName}</td>
-                                                <td>${po.managerName}</td>
-                                                <td><span class="${po.statusBadgeClass}">${po.status}</span></td>
-                                                <td><span class="badge badge-secondary">${po.itemCount} items</span></td>
-                                                <td><fmt:formatNumber value="${po.totalAmount}" type="currency" currencySymbol="$"/></td>
-                                                <td>
-                                                    <c:choose>
-                                                        <c:when test="${not empty po.expectedDeliveryDate}">
-                                                            <fmt:formatDate value="${po.expectedDeliveryDate}" pattern="dd/MM/yyyy"/>
-                                                        </c:when>
-                                                        <c:otherwise>
-                                                            <span style="color: #9ca3af;">N/A</span>
-                                                        </c:otherwise>
-                                                    </c:choose>
-                                                </td>
-                                                <td>
-                                                    <a href="purchase-orders?action=view&id=${po.poId}" class="btn-sm">
-                                                        <i class="bi bi-eye"></i>
-                                                    </a>
+                                                <td colspan="9">
+                                                    <div class="empty-state">
+                                                        <i class="bi bi-inbox"></i>
+                                                        <p>No purchase orders found</p>
+                                                    </div>
                                                 </td>
                                             </tr>
-                                        </c:forEach>
-                                    </c:otherwise>
-                                </c:choose>
-                            </tbody>
-                        </table>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <c:forEach var="po" items="${purchaseOrders}">
+                                                <tr>
+                                                    <td><strong>#${po.poId}</strong></td>
+                                                    <td><fmt:formatDate value="${po.orderDate}" pattern="dd/MM/yyyy"/></td>
+                                                    <td>${po.supplierName}</td>
+                                                    <td>${po.managerName}</td>
+                                                    <td><span class="${po.statusBadgeClass}">${po.status}</span></td>
+                                                    <td><span class="badge badge-secondary">${po.itemCount} items</span></td>
+                                                    <td><fmt:formatNumber value="${po.totalAmount}" type="currency" currencySymbol="$"/></td>
+                                                    <td>
+                                                        <c:choose>
+                                                            <c:when test="${not empty po.expectedDeliveryDate}">
+                                                                <fmt:formatDate value="${po.expectedDeliveryDate}" pattern="dd/MM/yyyy"/>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <span style="color: #9ca3af;">N/A</span>
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                    </td>
+                                                    <td>
+                                                        <a href="purchase-orders?action=view&id=${po.poId}" class="btn-sm">
+                                                            <i class="bi bi-eye"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            </c:forEach>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Include footer.jsp -->
+    <%@ include file="footer.jsp" %>
 
     <script>
         function clearFilters() {

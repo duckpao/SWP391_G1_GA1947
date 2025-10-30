@@ -5,8 +5,9 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Quản lý người dùng - Hệ thống quản lý kho bệnh viện</title>
+        <title>Quản lý người dùng - Pharmacy Warehouse Management System</title>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         <style>
             * {
                 margin: 0;
@@ -14,99 +15,43 @@
                 box-sizing: border-box;
             }
 
+            html, body {
+                height: 100%;
+            }
+
             body {
                 font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-                background: #f9fafb;
-                min-height: 100vh;
-                display: flex;
-            }
-
-            /* New navbar styling - horizontal navigation bar at top */
-            .navbar {
                 background: #ffffff;
-                border-bottom: 3px solid #3b82f6;
-                padding: 0 40px;
                 display: flex;
-                align-items: center;
-                justify-content: space-between;
-                height: 70px;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+                flex-direction: column;
+                color: #2c3e50;
             }
 
-            .navbar-brand {
-                font-size: 20px;
-                font-weight: 700;
-                color: #1f2937;
+            .main-wrapper {
                 display: flex;
-                align-items: center;
-                gap: 10px;
+                flex: 1;
             }
 
-            .navbar-menu {
-                display: flex;
-                gap: 12px;
-                align-items: center;
-            }
-
-            .navbar-btn {
-                padding: 10px 16px;
-                border: none;
-                border-radius: 6px;
-                font-size: 13px;
-                font-weight: 600;
-                cursor: pointer;
-                transition: all 0.3s ease;
-                text-decoration: none;
-                display: inline-flex;
-                align-items: center;
-                gap: 6px;
-                white-space: nowrap;
-            }
-
-            .navbar-btn-primary {
-                background: #3b82f6;
-                color: white;
-            }
-
-            .navbar-btn-primary:hover {
-                background: #2563eb;
-                transform: translateY(-1px);
-                box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
-            }
-
-            .navbar-btn-logout {
-                background: #ef4444;
-                color: white;
-            }
-
-            .navbar-btn-logout:hover {
-                background: #dc2626;
-            }
-
-            /* Added left sidebar styling */
+            /* Left sidebar styling */
             .sidebar {
                 width: 260px;
-                background: #ffffff;
-                border-right: 1px solid #e5e7eb;
+                background: #f8f9fa;
+                border-right: 1px solid #dee2e6;
                 padding: 30px 0;
-                min-height: 100vh;
-                box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
-                position: fixed;
-                left: 0;
-                top: 0;
+                min-height: calc(100vh - 73px);
                 overflow-y: auto;
             }
 
             .sidebar-brand {
                 padding: 0 20px 30px;
-                border-bottom: 1px solid #e5e7eb;
+                border-bottom: 1px solid #dee2e6;
                 margin-bottom: 20px;
                 display: flex;
                 align-items: center;
                 gap: 10px;
                 font-size: 18px;
                 font-weight: 700;
-                color: #1f2937;
+                color: #2c3e50;
             }
 
             .sidebar-menu {
@@ -125,7 +70,7 @@
                 gap: 10px;
                 font-size: 14px;
                 font-weight: 500;
-                color: #374151;
+                color: #495057;
                 transition: all 0.3s ease;
                 border: none;
                 cursor: pointer;
@@ -135,57 +80,59 @@
             }
 
             .sidebar-item:hover {
-                background: #f3f4f6;
-                color: #1f2937;
+                background: #e9ecef;
+                color: #2c3e50;
             }
 
             .sidebar-item-primary {
-                background: #eff6ff;
-                color: #3b82f6;
+                background: #495057;
+                color: white;
                 font-weight: 600;
             }
 
             .sidebar-item-primary:hover {
-                background: #dbeafe;
+                background: #343a40;
             }
 
             .sidebar-item-logout {
-                background: #fee2e2;
-                color: #dc2626;
+                background: #dc3545;
+                color: white;
                 font-weight: 600;
                 margin-top: 20px;
-                border-top: 1px solid #e5e7eb;
+                border-top: 1px solid #dee2e6;
                 padding-top: 20px;
             }
 
             .sidebar-item-logout:hover {
-                background: #fecaca;
+                background: #c82333;
             }
 
-            /* Updated main content layout to accommodate sidebar */
+            /* Main content layout */
             .main-content {
-                margin-left: 260px;
                 flex: 1;
-                padding: 20px;
+                padding: 30px;
+                overflow-y: auto;
+                background: #ffffff;
             }
 
             .container {
                 max-width: 1400px;
                 margin: 0 auto;
                 background: #fff;
-                border-radius: 16px;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
                 overflow: hidden;
+                border: 1px solid #e9ecef;
             }
 
             .header {
                 background: #ffffff;
-                color: #1f2937;
+                color: #2c3e50;
                 padding: 30px 40px;
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                border-bottom: 3px solid #3b82f6;
+                border-bottom: 2px solid #dee2e6;
             }
 
             .header h1 {
@@ -194,17 +141,19 @@
                 display: flex;
                 align-items: center;
                 gap: 12px;
+                color: #2c3e50;
             }
 
             .header-icon {
                 width: 40px;
                 height: 40px;
-                background: #eff6ff;
+                background: #f8f9fa;
                 border-radius: 10px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 font-size: 20px;
+                border: 1px solid #dee2e6;
             }
 
             .btn {
@@ -222,66 +171,72 @@
             }
 
             .btn-primary {
-                background: #3b82f6;
+                background: #495057;
                 color: white;
+                border: 1px solid #343a40;
             }
 
             .btn-primary:hover {
-                background: #2563eb;
-                transform: translateY(-2px);
-                box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+                background: #343a40;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba(52, 58, 64, 0.2);
             }
 
             .btn-edit {
-                background: #3b82f6;
+                background: #495057;
                 color: white;
                 padding: 8px 16px;
                 font-size: 13px;
+                border: 1px solid #343a40;
             }
 
             .btn-edit:hover {
-                background: #2563eb;
+                background: #343a40;
             }
 
             .btn-delete {
-                background: #ef4444;
+                background: #dc3545;
                 color: white;
                 padding: 8px 16px;
                 font-size: 13px;
+                border: 1px solid #c82333;
             }
 
             .btn-delete:hover {
-                background: #dc2626;
+                background: #c82333;
             }
 
             .btn-toggle {
-                background: #f59e0b;
-                color: white;
+                background: #ffc107;
+                color: #212529;
                 padding: 8px 16px;
                 font-size: 13px;
+                border: 1px solid #e0a800;
             }
 
             .btn-toggle:hover {
-                background: #d97706;
+                background: #e0a800;
             }
 
             .btn-unlock {
-                background: #10b981;
+                background: #28a745;
                 color: white;
+                border: 1px solid #218838;
             }
 
             .btn-unlock:hover {
-                background: #059669;
+                background: #218838;
             }
 
             .btn-reset {
-                background: #6b7280;
+                background: #6c757d;
                 color: white;
                 padding: 10px 20px;
+                border: 1px solid #5a6268;
             }
 
             .btn-reset:hover {
-                background: #4b5563;
+                background: #5a6268;
             }
 
             .content {
@@ -296,33 +251,35 @@
             }
 
             .stat-card {
-                background: #ffffff;
-                color: #1f2937;
+                background: #f8f9fa;
+                color: #2c3e50;
                 padding: 20px;
                 border-radius: 12px;
-                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-                border-left: 4px solid #3b82f6;
+                border: 1px solid #dee2e6;
+                border-left: 4px solid #495057;
             }
 
             .stat-card h3 {
                 font-size: 14px;
                 font-weight: 500;
-                color: #6b7280;
+                color: #6c757d;
                 margin-bottom: 8px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
             }
 
             .stat-card p {
                 font-size: 32px;
                 font-weight: 700;
-                color: #3b82f6;
+                color: #495057;
             }
 
             .filter-section {
-                background: #f9fafb;
+                background: #f8f9fa;
                 padding: 24px;
                 border-radius: 12px;
                 margin-bottom: 24px;
-                border: 1px solid #e5e7eb;
+                border: 1px solid #dee2e6;
             }
 
             .filter-header {
@@ -335,7 +292,7 @@
             .filter-header h2 {
                 font-size: 18px;
                 font-weight: 600;
-                color: #1f2937;
+                color: #2c3e50;
                 display: flex;
                 align-items: center;
                 gap: 8px;
@@ -357,22 +314,26 @@
             .form-group label {
                 font-size: 13px;
                 font-weight: 600;
-                color: #374151;
+                color: #495057;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
             }
 
             .form-control {
                 padding: 10px 14px;
-                border: 1px solid #d1d5db;
+                border: 2px solid #dee2e6;
                 border-radius: 8px;
                 font-size: 14px;
                 font-family: inherit;
                 transition: all 0.2s;
+                background: white;
+                color: #2c3e50;
             }
 
             .form-control:focus {
                 outline: none;
-                border-color: #3b82f6;
-                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+                border-color: #6c757d;
+                box-shadow: 0 0 0 3px rgba(108, 117, 125, 0.1);
             }
 
             .filter-actions {
@@ -389,7 +350,7 @@
             }
 
             .filter-tag {
-                background: #3b82f6;
+                background: #495057;
                 color: white;
                 padding: 6px 12px;
                 border-radius: 20px;
@@ -412,7 +373,7 @@
             .table-container {
                 overflow-x: auto;
                 border-radius: 12px;
-                border: 1px solid #e5e7eb;
+                border: 1px solid #dee2e6;
             }
 
             table {
@@ -422,8 +383,8 @@
             }
 
             thead {
-                background: #f9fafb;
-                border-bottom: 2px solid #e5e7eb;
+                background: #f8f9fa;
+                border-bottom: 2px solid #dee2e6;
             }
 
             th {
@@ -431,16 +392,16 @@
                 text-align: left;
                 font-weight: 600;
                 font-size: 13px;
-                color: #374151;
+                color: #495057;
                 text-transform: uppercase;
                 letter-spacing: 0.5px;
             }
 
             td {
                 padding: 16px;
-                border-bottom: 1px solid #f3f4f6;
+                border-bottom: 1px solid #f8f9fa;
                 font-size: 14px;
-                color: #1f2937;
+                color: #2c3e50;
             }
 
             tbody tr {
@@ -448,7 +409,7 @@
             }
 
             tbody tr:hover {
-                background: #f9fafb;
+                background: #f8f9fa;
             }
 
             .badge {
@@ -460,13 +421,15 @@
             }
 
             .badge-active {
-                background: #d1fae5;
-                color: #065f46;
+                background: #d4edda;
+                color: #155724;
+                border: 1px solid #c3e6cb;
             }
 
             .badge-locked {
-                background: #fee2e2;
-                color: #991b1b;
+                background: #f8d7da;
+                color: #721c24;
+                border: 1px solid #f5c6cb;
             }
 
             .role-badge {
@@ -478,32 +441,39 @@
             }
 
             .role-admin {
-                background: #dbeafe;
-                color: #1e40af;
+                background: #cfe2ff;
+                color: #084298;
+                border: 1px solid #9ec5fe;
             }
             .role-doctor {
-                background: #fef3c7;
-                color: #92400e;
+                background: #fff3cd;
+                color: #664d03;
+                border: 1px solid #ffecb5;
             }
             .role-pharmacist {
-                background: #d1fae5;
-                color: #065f46;
+                background: #d1e7dd;
+                color: #0f5132;
+                border: 1px solid #badbcc;
             }
             .role-manager {
-                background: #e0e7ff;
-                color: #3730a3;
+                background: #e7d6ff;
+                color: #4a148c;
+                border: 1px solid #d1b3ff;
             }
             .role-auditor {
-                background: #fce7f3;
-                color: #9f1239;
+                background: #f8d7da;
+                color: #842029;
+                border: 1px solid #f1aeb5;
             }
             .role-procurementofficer {
-                background: #f3e8ff;
-                color: #6b21a8;
+                background: #e2d9f3;
+                color: #5a23c8;
+                border: 1px solid #d3bef0;
             }
             .role-supplier {
-                background: #dbeafe;
-                color: #075985;
+                background: #cff4fc;
+                color: #055160;
+                border: 1px solid #b6effb;
             }
 
             .action-buttons {
@@ -520,13 +490,13 @@
             .empty-state {
                 text-align: center;
                 padding: 60px 20px;
-                color: #6b7280;
+                color: #6c757d;
             }
 
             .empty-state-icon {
                 font-size: 64px;
                 margin-bottom: 16px;
-                opacity: 0.5;
+                opacity: 0.3;
             }
 
             .modal {
@@ -552,17 +522,18 @@
                 border-radius: 12px;
                 max-width: 400px;
                 width: 90%;
+                border: 1px solid #dee2e6;
             }
 
             .modal-header {
                 font-size: 20px;
                 font-weight: 700;
                 margin-bottom: 16px;
-                color: #1f2937;
+                color: #2c3e50;
             }
 
             .modal-body {
-                color: #6b7280;
+                color: #6c757d;
                 margin-bottom: 24px;
                 line-height: 1.6;
             }
@@ -574,59 +545,56 @@
             }
 
             .btn-cancel {
-                background: #e5e7eb;
-                color: #374151;
+                background: #e9ecef;
+                color: #495057;
+                border: 1px solid #dee2e6;
             }
 
             .btn-cancel:hover {
-                background: #d1d5db;
+                background: #dee2e6;
             }
 
             .result-count {
                 padding: 12px 16px;
-                background: #f0f9ff;
-                border: 1px solid #bae6fd;
+                background: #e7f1ff;
+                border: 1px solid #b6d4fe;
                 border-radius: 8px;
-                color: #075985;
+                color: #084298;
                 font-size: 14px;
                 font-weight: 500;
                 margin-bottom: 16px;
             }
 
-            /* Responsive navbar for mobile */
-            @media (max-width: 768px) {
-                .navbar {
-                    padding: 0 20px;
-                    flex-wrap: wrap;
-                    height: auto;
-                    min-height: 70px;
-                }
-
-                .navbar-menu {
-                    width: 100%;
-                    flex-wrap: wrap;
-                    gap: 8px;
-                    padding: 10px 0;
-                }
-
-                .navbar-btn {
-                    padding: 8px 12px;
-                    font-size: 12px;
-                }
+            .alert {
+                padding: 16px;
+                margin-bottom: 20px;
+                border-radius: 8px;
+                font-size: 14px;
+                border: 1px solid;
             }
 
-            /* Responsive sidebar for mobile */
+            .alert-error {
+                background: #f8d7da;
+                border-color: #f5c6cb;
+                color: #721c24;
+            }
+
+            .alert-success {
+                background: #d4edda;
+                border-color: #c3e6cb;
+                color: #155724;
+            }
+
             @media (max-width: 768px) {
-                body {
+                .main-wrapper {
                     flex-direction: column;
                 }
 
                 .sidebar {
                     width: 100%;
                     min-height: auto;
-                    position: relative;
                     border-right: none;
-                    border-bottom: 1px solid #e5e7eb;
+                    border-bottom: 1px solid #dee2e6;
                     padding: 15px 0;
                 }
 
@@ -648,7 +616,6 @@
                 }
 
                 .main-content {
-                    margin-left: 0;
                     padding: 15px;
                 }
 
@@ -667,265 +634,275 @@
         </style>
     </head>
     <body>
-        <!-- Added left sidebar with navigation menu -->
-        <div class="sidebar">
-            <div class="sidebar-brand">
-                <span>🏥</span>
-                Hệ thống
-            </div>
-            <div class="sidebar-menu">
-                <!-- Added back to dashboard button at top -->
-                <a class="sidebar-item sidebar-item-primary" href="${pageContext.request.contextPath}/admin-dashboard">
-                    Dashboard
-                </a>
-                <a class="sidebar-item sidebar-item-primary" href="${pageContext.request.contextPath}/user-reports/generate">
-                    📊 Báo cáo
-                </a>
-                <a class="sidebar-item sidebar-item-primary" href="${pageContext.request.contextPath}/admin-dashboard/config">
-                    ⚙️ Cấu hình
-                </a>
-                <a class="sidebar-item sidebar-item-primary" href="${pageContext.request.contextPath}/admin/permissions">
-                    🔐 Phân quyền
-                </a>
-                <a class="sidebar-item sidebar-item-primary" href="${pageContext.request.contextPath}/admin-dashboard/create">
-                    ➕ Tạo tài khoản
-                </a>
-                <a class="sidebar-item sidebar-item-logout" href="${pageContext.request.contextPath}/logout">
-                    🚪 Logout
-                </a>
-            </div>
-        </div>
+        <!-- Header include -->
+        <%@ include file="header.jsp" %>
 
-        <!-- Wrapped main content in main-content div -->
-        <div class="main-content">
-            <div class="container">
-                <div class="header">
-                    <h1>
-                        <span class="header-icon">👥</span>
-                        Quản lý người dùng
-                    </h1>
+        <div class="main-wrapper">
+            <!-- Left sidebar -->
+            <div class="sidebar">
+                <div class="sidebar-brand">
+                    <span>🏥</span>
+                    Hệ thống
                 </div>
+                <div class="sidebar-menu">
+                    <a class="sidebar-item sidebar-item-primary" href="${pageContext.request.contextPath}/admin-dashboard">
+                        Dashboard
+                    </a>
+                    <a class="sidebar-item" href="${pageContext.request.contextPath}/user-reports/generate">
+                        📊 Báo cáo
+                    </a>
+                    <a class="sidebar-item" href="${pageContext.request.contextPath}/admin-dashboard/config">
+                        ⚙️ Cấu hình
+                    </a>
+                    <a class="sidebar-item" href="${pageContext.request.contextPath}/admin/permissions">
+                        🔐 Phân quyền
+                    </a>
+                    <a class="sidebar-item" href="${pageContext.request.contextPath}/admin-dashboard/create">
+                        ➕ Tạo tài khoản
+                    </a>
+                    <a class="sidebar-item sidebar-item-logout" href="${pageContext.request.contextPath}/logout">
+                        🚪 Logout
+                    </a>
+                </div>
+            </div>
 
-                <div class="content">
-                    <c:if test="${not empty param.error}">
-                        <div style="padding: 16px; margin-bottom: 20px; background: #fee2e2; border: 1px solid #fca5a5; border-radius: 8px; color: #991b1b;">
-                            <strong>⚠️ Lỗi:</strong>
-                            <c:choose>
-                                <c:when test="${param.error == 'cannot_modify_admin'}">
-                                    Không thể khóa/mở khóa tài khoản Admin!
-                                </c:when>
-                                <c:when test="${param.error == 'cannot_delete_admin'}">
-                                    Không thể xóa tài khoản Admin!
-                                </c:when>
-                                <c:when test="${param.error == 'delete_failed'}">
-                                    Xóa người dùng thất bại!
-                                </c:when>
-                                <c:otherwise>
-                                    ${param.error}
-                                </c:otherwise>
-                            </c:choose>
-                        </div>
-                    </c:if>
-
-                    <c:if test="${not empty param.success}">
-                        <div style="padding: 16px; margin-bottom: 20px; background: #d1fae5; border: 1px solid #6ee7b7; border-radius: 8px; color: #065f46;">
-                            <strong>✅ Thành công:</strong>
-                            <c:choose>
-                                <c:when test="${param.success == 'deleted'}">
-                                    Đã xóa người dùng thành công!
-                                </c:when>
-                                <c:otherwise>
-                                    ${param.success}
-                                </c:otherwise>
-                            </c:choose>
-                        </div>
-                    </c:if>
-
-                    <div class="stats-bar">
-                        <div class="stat-card">
-                            <h3>Tổng người dùng</h3>
-                            <p>${totalUsers}</p>
-                        </div>
-                        <div class="stat-card">
-                            <h3>Đang hoạt động</h3>
-                            <p>${activeUsers}</p>
-                        </div>
-                        <div class="stat-card">
-                            <h3>Bị khóa</h3>
-                            <p>${lockedUsers}</p>
-                        </div>
+            <!-- Main content -->
+            <div class="main-content">
+                <div class="container">
+                    <div class="header">
+                        <h1>
+                            <span class="header-icon">👥</span>
+                            Quản lý người dùng
+                        </h1>
                     </div>
 
-                    <!-- Filter Section -->
-                    <div class="filter-section">
-                        <div class="filter-header">
-                            <h2>🔍 Tìm kiếm & Lọc</h2>
+                    <div class="content">
+                        <!-- Error/Success messages -->
+                        <c:if test="${not empty param.error}">
+                            <div class="alert alert-error">
+                                <strong>⚠️ Lỗi:</strong>
+                                <c:choose>
+                                    <c:when test="${param.error == 'cannot_modify_admin'}">
+                                        Không thể khóa/mở khóa tài khoản Admin!
+                                    </c:when>
+                                    <c:when test="${param.error == 'cannot_delete_admin'}">
+                                        Không thể xóa tài khoản Admin!
+                                    </c:when>
+                                    <c:when test="${param.error == 'delete_failed'}">
+                                        Xóa người dùng thất bại!
+                                    </c:when>
+                                    <c:otherwise>
+                                        ${param.error}
+                                    </c:otherwise>
+                                </c:choose>
+                            </div>
+                        </c:if>
+
+                        <c:if test="${not empty param.success}">
+                            <div class="alert alert-success">
+                                <strong>✅ Thành công:</strong>
+                                <c:choose>
+                                    <c:when test="${param.success == 'deleted'}">
+                                        Đã xóa người dùng thành công!
+                                    </c:when>
+                                    <c:otherwise>
+                                        ${param.success}
+                                    </c:otherwise>
+                                </c:choose>
+                            </div>
+                        </c:if>
+
+                        <!-- Stats -->
+                        <div class="stats-bar">
+                            <div class="stat-card">
+                                <h3>Tổng người dùng</h3>
+                                <p>${totalUsers}</p>
+                            </div>
+                            <div class="stat-card">
+                                <h3>Đang hoạt động</h3>
+                                <p>${activeUsers}</p>
+                            </div>
+                            <div class="stat-card">
+                                <h3>Bị khóa</h3>
+                                <p>${lockedUsers}</p>
+                            </div>
                         </div>
 
-                        <form method="get" action="${pageContext.request.contextPath}/admin-dashboard">
-                            <div class="filter-grid">
-                                <div class="form-group">
-                                    <label for="keyword">Từ khóa</label>
-                                    <input 
-                                        type="text" 
-                                        id="keyword" 
-                                        name="keyword" 
-                                        class="form-control" 
-                                        placeholder="Tìm theo tên, email, số điện thoại..."
-                                        value="${param.keyword}">
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="role">Vai trò</label>
-                                    <select id="role" name="role" class="form-control">
-                                        <option value="">-- Tất cả vai trò --</option>
-                                        <option value="Admin" ${param.role == 'Admin' ? 'selected' : ''}>Admin</option>
-                                        <option value="Doctor" ${param.role == 'Doctor' ? 'selected' : ''}>Doctor</option>
-                                        <option value="Pharmacist" ${param.role == 'Pharmacist' ? 'selected' : ''}>Pharmacist</option>
-                                        <option value="Manager" ${param.role == 'Manager' ? 'selected' : ''}>Manager</option>
-                                        <option value="Auditor" ${param.role == 'Auditor' ? 'selected' : ''}>Auditor</option>
-                                        <option value="ProcurementOfficer" ${param.role == 'ProcurementOfficer' ? 'selected' : ''}>Procurement Officer</option>
-                                        <option value="Supplier" ${param.role == 'Supplier' ? 'selected' : ''}>Supplier</option>
-                                    </select>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="status">Trạng thái</label>
-                                    <select id="status" name="status" class="form-control">
-                                        <option value="">-- Tất cả trạng thái --</option>
-                                        <option value="active" ${param.status == 'active' ? 'selected' : ''}>Đang hoạt động</option>
-                                        <option value="locked" ${param.status == 'locked' ? 'selected' : ''}>Bị khóa</option>
-                                    </select>
-                                </div>
+                        <!-- Filter Section -->
+                        <div class="filter-section">
+                            <div class="filter-header">
+                                <h2>🔍 Tìm kiếm & Lọc</h2>
                             </div>
 
-                            <div class="filter-actions">
-                                <a href="${pageContext.request.contextPath}/admin-dashboard" class="btn btn-reset">
-                                    🔄 Xóa bộ lọc
-                                </a>
-                                <button type="submit" class="btn btn-primary">
-                                    🔍 Tìm kiếm
-                                </button>
-                            </div>
+                            <form method="get" action="${pageContext.request.contextPath}/admin-dashboard">
+                                <div class="filter-grid">
+                                    <div class="form-group">
+                                        <label for="keyword">Từ khóa</label>
+                                        <input 
+                                            type="text" 
+                                            id="keyword" 
+                                            name="keyword" 
+                                            class="form-control" 
+                                            placeholder="Tìm theo tên, email, số điện thoại..."
+                                            value="${param.keyword}">
+                                    </div>
 
-                            <!-- Active Filters Display -->
-                            <c:if test="${not empty param.keyword || not empty param.role || not empty param.status}">
-                                <div class="active-filters">
-                                    <c:if test="${not empty param.keyword}">
-                                        <span class="filter-tag">
-                                            Từ khóa: "${param.keyword}"
-                                            <a href="${pageContext.request.contextPath}/admin-dashboard?role=${param.role}&status=${param.status}">
-                                                <button type="button">×</button>
-                                            </a>
-                                        </span>
-                                    </c:if>
-                                    <c:if test="${not empty param.role}">
-                                        <span class="filter-tag">
-                                            Vai trò: ${param.role}
-                                            <a href="${pageContext.request.contextPath}/admin-dashboard?keyword=${param.keyword}&status=${param.status}">
-                                                <button type="button">×</button>
-                                            </a>
-                                        </span>
-                                    </c:if>
-                                    <c:if test="${not empty param.status}">
-                                        <span class="filter-tag">
-                                            Trạng thái: ${param.status == 'active' ? 'Đang hoạt động' : 'Bị khóa'}
-                                            <a href="${pageContext.request.contextPath}/admin-dashboard?keyword=${param.keyword}&role=${param.role}">
-                                                <button type="button">×</button>
-                                            </a>
-                                        </span>
-                                    </c:if>
+                                    <div class="form-group">
+                                        <label for="role">Vai trò</label>
+                                        <select id="role" name="role" class="form-control">
+                                            <option value="">-- Tất cả vai trò --</option>
+                                            <option value="Admin" ${param.role == 'Admin' ? 'selected' : ''}>Admin</option>
+                                            <option value="Doctor" ${param.role == 'Doctor' ? 'selected' : ''}>Doctor</option>
+                                            <option value="Pharmacist" ${param.role == 'Pharmacist' ? 'selected' : ''}>Pharmacist</option>
+                                            <option value="Manager" ${param.role == 'Manager' ? 'selected' : ''}>Manager</option>
+                                            <option value="Auditor" ${param.role == 'Auditor' ? 'selected' : ''}>Auditor</option>
+                                            <option value="ProcurementOfficer" ${param.role == 'ProcurementOfficer' ? 'selected' : ''}>Procurement Officer</option>
+                                            <option value="Supplier" ${param.role == 'Supplier' ? 'selected' : ''}>Supplier</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="status">Trạng thái</label>
+                                        <select id="status" name="status" class="form-control">
+                                            <option value="">-- Tất cả trạng thái --</option>
+                                            <option value="active" ${param.status == 'active' ? 'selected' : ''}>Đang hoạt động</option>
+                                            <option value="locked" ${param.status == 'locked' ? 'selected' : ''}>Bị khóa</option>
+                                        </select>
+                                    </div>
                                 </div>
-                            </c:if>
-                        </form>
-                    </div>
 
-                    <!-- Result Count -->
-                    <c:if test="${not empty users}">
-                        <div class="result-count">
-                            📊 Tìm thấy <strong>${users.size()}</strong> người dùng
+                                <div class="filter-actions">
+                                    <a href="${pageContext.request.contextPath}/admin-dashboard" class="btn btn-reset">
+                                        🔄 Xóa bộ lọc
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        🔍 Tìm kiếm
+                                    </button>
+                                </div>
+
+                                <!-- Active Filters -->
+                                <c:if test="${not empty param.keyword || not empty param.role || not empty param.status}">
+                                    <div class="active-filters">
+                                        <c:if test="${not empty param.keyword}">
+                                            <span class="filter-tag">
+                                                Từ khóa: "${param.keyword}"
+                                                <a href="${pageContext.request.contextPath}/admin-dashboard?role=${param.role}&status=${param.status}">
+                                                    <button type="button">×</button>
+                                                </a>
+                                            </span>
+                                        </c:if>
+                                        <c:if test="${not empty param.role}">
+                                            <span class="filter-tag">
+                                                Vai trò: ${param.role}
+                                                <a href="${pageContext.request.contextPath}/admin-dashboard?keyword=${param.keyword}&status=${param.status}">
+                                                    <button type="button">×</button>
+                                                </a>
+                                            </span>
+                                        </c:if>
+                                        <c:if test="${not empty param.status}">
+                                            <span class="filter-tag">
+                                                Trạng thái: ${param.status == 'active' ? 'Đang hoạt động' : 'Bị khóa'}
+                                                <a href="${pageContext.request.contextPath}/admin-dashboard?keyword=${param.keyword}&role=${param.role}">
+                                                    <button type="button">×</button>
+                                                </a>
+                                            </span>
+                                        </c:if>
+                                    </div>
+                                </c:if>
+                            </form>
                         </div>
-                    </c:if>
 
-                    <div class="table-container">
-                        <c:choose>
-                            <c:when test="${empty users}">
-                                <div class="empty-state">
-                                    <div class="empty-state-icon">📭</div>
-                                    <h3>Không tìm thấy người dùng nào</h3>
-                                    <p>Thử thay đổi bộ lọc hoặc tạo tài khoản mới</p>
-                                </div>
-                            </c:when>
-                            <c:otherwise>
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Tên đăng nhập</th>
-                                            <th>Email</th>
-                                            <th>Số điện thoại</th>
-                                            <th>Vai trò</th>
-                                            <th>Trạng thái</th>
-                                            <th>Thao tác</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <c:forEach var="u" items="${users}">
+                        <!-- Result Count -->
+                        <c:if test="${not empty users}">
+                            <div class="result-count">
+                                📊 Tìm thấy <strong>${users.size()}</strong> người dùng
+                            </div>
+                        </c:if>
+
+                        <!-- Users Table -->
+                        <div class="table-container">
+                            <c:choose>
+                                <c:when test="${empty users}">
+                                    <div class="empty-state">
+                                        <div class="empty-state-icon">📭</div>
+                                        <h3>Không tìm thấy người dùng nào</h3>
+                                        <p>Thử thay đổi bộ lọc hoặc tạo tài khoản mới</p>
+                                    </div>
+                                </c:when>
+                                <c:otherwise>
+                                    <table>
+                                        <thead>
                                             <tr>
-                                                <td><strong>#${u.userId}</strong></td>
-                                                <td>${u.username}</td>
-                                                <td>${u.email != null ? u.email : '-'}</td>
-                                                <td>${u.phone != null ? u.phone : '-'}</td>
-                                                <td>
-                                                    <span class="role-badge role-${u.role.toLowerCase()}">
-                                                        ${u.role}
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <span class="badge ${u.isActive ? 'badge-active' : 'badge-locked'}">
-                                                        ${u.isActive ? '✓ Active' : '🔒 Locked'}
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <div class="action-buttons">
-                                                        <c:choose>
-                                                            <c:when test="${u.role == 'Admin'}">
-                                                                <span class="badge" style="background: #fef3c7; color: #92400e;">
-                                                                    🛡️ Tài khoản được bảo vệ
-                                                                </span>
-                                                            </c:when>
-                                                            <c:otherwise>
-                                                                <a class="btn btn-edit" href="${pageContext.request.contextPath}/admin-dashboard/edit?id=${u.userId}">
-                                                                    ✏️ Sửa
-                                                                </a>
-
-                                                                <form class="inline" action="${pageContext.request.contextPath}/admin-dashboard/toggle" method="post">
-                                                                    <input type="hidden" name="id" value="${u.userId}" />
-                                                                    <input type="hidden" name="active" value="${!u.isActive}" />
-                                                                    <button class="btn ${u.isActive ? 'btn-toggle' : 'btn-unlock'}" type="submit">
-                                                                        ${u.isActive ? '🔒 Khóa' : '🔓 Mở'}
-                                                                    </button>
-                                                                </form>
-
-                                                                <button class="btn btn-delete" onclick="confirmDelete(${u.userId}, '${u.username}')">
-                                                                    🗑️ Xóa
-                                                                </button>
-                                                            </c:otherwise>
-                                                        </c:choose>
-                                                    </div>
-                                                </td>
+                                                <th>ID</th>
+                                                <th>Tên đăng nhập</th>
+                                                <th>Email</th>
+                                                <th>Số điện thoại</th>
+                                                <th>Vai trò</th>
+                                                <th>Trạng thái</th>
+                                                <th>Thao tác</th>
                                             </tr>
-                                        </c:forEach>
-                                    </tbody>
-                                </table>
-                            </c:otherwise>
-                        </c:choose>
+                                        </thead>
+                                        <tbody>
+                                            <c:forEach var="u" items="${users}">
+                                                <tr>
+                                                    <td><strong>#${u.userId}</strong></td>
+                                                    <td>${u.username}</td>
+                                                    <td>${u.email != null ? u.email : '-'}</td>
+                                                    <td>${u.phone != null ? u.phone : '-'}</td>
+                                                    <td>
+                                                        <span class="role-badge role-${u.role.toLowerCase()}">
+                                                            ${u.role}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge ${u.isActive ? 'badge-active' : 'badge-locked'}">
+                                                            ${u.isActive ? '✓ Active' : '🔒 Locked'}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <div class="action-buttons">
+                                                            <c:choose>
+                                                                <c:when test="${u.role == 'Admin'}">
+                                                                    <span class="badge" style="background: #fff3cd; color: #664d03; border: 1px solid #ffecb5;">
+                                                                        🛡️ Tài khoản được bảo vệ
+                                                                    </span>
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    <a class="btn btn-edit" href="${pageContext.request.contextPath}/admin-dashboard/edit?id=${u.userId}">
+                                                                        ✏️ Sửa
+                                                                    </a>
+
+                                                                    <form class="inline" action="${pageContext.request.contextPath}/admin-dashboard/toggle" method="post">
+                                                                        <input type="hidden" name="id" value="${u.userId}" />
+                                                                        <input type="hidden" name="active" value="${!u.isActive}" />
+                                                                        <button class="btn ${u.isActive ? 'btn-toggle' : 'btn-unlock'}" type="submit">
+                                                                            ${u.isActive ? '🔒 Khóa' : '🔓 Mở'}
+                                                                        </button>
+                                                                    </form>
+
+                                                                    <button class="btn btn-delete" onclick="confirmDelete(${u.userId}, '${u.username}')">
+                                                                        🗑️ Xóa
+                                                                    </button>
+                                                                </c:otherwise>
+                                                            </c:choose>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </c:forEach>
+                                        </tbody>
+                                    </table>
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Modal xác nhận xóa -->
+        <!-- Footer include -->
+        <%@ include file="footer.jsp" %>
+
+        <!-- Delete Confirmation Modal -->
         <div id="deleteModal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">⚠️ Xác nhận xóa</div>
@@ -955,7 +932,6 @@
                 document.getElementById('deleteModal').classList.remove('active');
             }
 
-            // Đóng modal khi click bên ngoài
             document.getElementById('deleteModal').addEventListener('click', function (e) {
                 if (e.target === this) {
                     closeDeleteModal();

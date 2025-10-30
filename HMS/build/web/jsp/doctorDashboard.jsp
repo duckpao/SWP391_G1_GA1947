@@ -105,6 +105,7 @@
         }
     </style>
 </head>
+<%@ include file="header.jsp" %>
 <body>
     <div class="container">
         <div class="header">
@@ -129,4 +130,5 @@
         </div>
     </div>
 </body>
+<%@ include file="footer.jsp" %>
 </html>

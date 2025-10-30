@@ -488,6 +488,7 @@
         }
     </style>
 </head>
+<%@ include file="header.jsp" %>
 <body>
     <div class="dashboard-container">
         <!-- Main Content -->
@@ -1019,4 +1020,5 @@
         }
     </script>
 </body>
+<%@ include file="footer.jsp" %>
 </html>

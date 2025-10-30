@@ -498,4 +498,27 @@ public class UserDAO extends DBContext {
             return false;
         }
     }
+
+    public User findByPhone(String phone) throws SQLException {
+        String sql = "SELECT * FROM Users WHERE phone=?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, phone);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? mapRow(rs) : null;
+            }
+        }
+    }
+
+// Cập nhật profile (chỉ username và phone)
+    public boolean updateProfile(int userId, String username, String phone) throws SQLException {
+        String sql = "UPDATE Users SET username=?, phone=?, updated_at=GETDATE() WHERE user_id=?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, username);
+            ps.setString(2, phone);
+            ps.setInt(3, userId);
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+        }
+    }
 }
+

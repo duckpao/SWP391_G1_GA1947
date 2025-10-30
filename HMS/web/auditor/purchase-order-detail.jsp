@@ -21,11 +21,18 @@
             background: #f9fafb;
             min-height: 100vh;
             color: #374151;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page-wrapper {
+            display: flex;
+            flex: 1;
         }
 
         .dashboard-container {
             display: flex;
-            min-height: 100vh;
+            width: 100%;
         }
 
         /* Sidebar styling updated to white theme */
@@ -57,34 +64,6 @@
             border: none;
             border-top: 1px solid #e5e7eb;
             margin: 15px 0;
-        }
-
-        .user-info {
-            margin-bottom: 20px;
-        }
-
-        .user-info small {
-            font-size: 12px;
-            opacity: 0.7;
-            color: #6b7280;
-        }
-
-        .user-info h6 {
-            font-size: 16px;
-            font-weight: 600;
-            margin: 5px 0;
-            color: #1f2937;
-        }
-
-        .user-badge {
-            display: inline-block;
-            background: #ede9fe;
-            color: #6d28d9;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-top: 8px;
         }
 
         .nav-link {
@@ -245,7 +224,6 @@
             color: #1f2937;
         }
 
-        /* Updated primary color from purple to blue */
         .info-value.primary {
             color: #3b82f6;
         }
@@ -341,7 +319,6 @@
             font-weight: 600;
         }
 
-        /* Updated action button hover to use blue instead of purple */
         .action-btn:hover {
             border-color: #3b82f6;
             background: #f9fafb;
@@ -358,6 +335,10 @@
 
         /* Responsive design */
         @media (max-width: 768px) {
+            .page-wrapper {
+                flex-direction: column;
+            }
+
             .dashboard-container {
                 flex-direction: column;
             }
@@ -412,228 +393,224 @@
     </style>
 </head>
 <body>
-    <div class="dashboard-container">
-        <!-- Sidebar from auditor dashboard -->
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <h4><i class="bi bi-hospital"></i> Pharmacy</h4>
-                <hr class="sidebar-divider">
-                <div class="user-info">
-                    <small>Xin chào!</small>
-                    <h6>${sessionScope.username}</h6>
-                    <span class="user-badge">${sessionScope.role}</span>
+    <!-- Include header.jsp -->
+    <%@ include file="header.jsp" %>
+
+    <div class="page-wrapper">
+        <div class="dashboard-container">
+            <!-- Sidebar from auditor dashboard -->
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <h4><i class="bi bi-hospital"></i> Auditor</h4>
+                    <hr class="sidebar-divider">
+                    <!-- Removed user info section -->
                 </div>
-            </div>
 
-            <nav>
-                <a class="nav-link" href="${pageContext.request.contextPath}/auditor-dashboard">
-                    <i class="bi bi-speedometer2"></i> Dashboard
-                </a>
-                <a class="nav-link" href="${pageContext.request.contextPath}/purchase-orders">
-                    <i class="bi bi-receipt"></i> Purchase Orders
-                </a>
-                <a class="nav-link" href="${pageContext.request.contextPath}/purchase-orders/history">
-                    <i class="bi bi-clock-history"></i> PO History & Trends
-                </a>
-                <a class="nav-link" href="#">
-                    <i class="bi bi-box-seam"></i> Inventory Audit
-                </a>
-                <a class="nav-link" href="#">
-                    <i class="bi bi-graph-up"></i> Reports
-                </a>
-                <a class="nav-link" href="#">
-                    <i class="bi bi-journal-text"></i> System Logs
-                </a>
-                <hr class="nav-divider">
-                <a class="nav-link" href="${pageContext.request.contextPath}/logout">
-                    <i class="bi bi-box-arrow-right"></i> Đăng xuất
-                </a>
-            </nav>
-        </div>
-
-        <!-- Main content with new styling -->
-        <div class="main-content">
-            <!-- Header -->
-            <div class="page-header">
-                <h2><i class="bi bi-receipt-cutoff"></i> Purchase Order Details</h2>
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item">
-                            <a href="purchase-orders">Purchase Orders</a>
-                        </li>
-                        <li class="breadcrumb-item active">PO #${purchaseOrder.poId}</li>
-                    </ol>
+                <nav>
+                    <a class="nav-link" href="${pageContext.request.contextPath}/auditor-dashboard">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </a>
+                    <a class="nav-link" href="${pageContext.request.contextPath}/purchase-orders">
+                        <i class="bi bi-receipt"></i> Purchase Orders
+                    </a>
+                    <a class="nav-link" href="${pageContext.request.contextPath}/purchase-orders/history">
+                        <i class="bi bi-clock-history"></i> PO History & Trends
+                    </a>
+                    <a class="nav-link" href="#">
+                        <i class="bi bi-box-seam"></i> Inventory Audit
+                    </a>
+                    <a class="nav-link" href="#">
+                        <i class="bi bi-graph-up"></i> Reports
+                    </a>
+                    <a class="nav-link" href="#">
+                        <i class="bi bi-journal-text"></i> System Logs
+                    </a>
+                    <hr class="nav-divider">
+                    <a class="nav-link" href="${pageContext.request.contextPath}/logout">
+                        <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                    </a>
                 </nav>
             </div>
 
-            <div class="page-actions">
-                <a href="purchase-orders" class="btn btn-secondary">
-                    <i class="bi bi-arrow-left"></i> Back to List
-                </a>
-                <button class="btn btn-primary" onclick="window.print()">
-                    <i class="bi bi-printer"></i> Print
-                </button>
-            </div>
-
-            <!-- PO Information -->
-            <div class="dashboard-card">
-                <div class="card-header">
-                    <h5><i class="bi bi-info-circle"></i> Purchase Order Information</h5>
+            <!-- Main content with new styling -->
+            <div class="main-content">
+                <!-- Header -->
+                <div class="page-header">
+                    <h2><i class="bi bi-receipt-cutoff"></i> Purchase Order Details</h2>
                 </div>
-                <div class="card-body">
-                    <div class="info-row">
-                        <div class="info-group">
-                            <span class="info-label">PO ID</span>
-                            <span class="info-value primary">#${purchaseOrder.poId}</span>
-                        </div>
-                        <div class="info-group">
-                            <span class="info-label">Status</span>
-                            <span class="badge badge-success">${purchaseOrder.status}</span>
-                        </div>
-                        <div class="info-group">
-                            <span class="info-label">Order Date</span>
-                            <span class="info-value">
-                                <i class="bi bi-calendar"></i>
-                                <fmt:formatDate value="${purchaseOrder.orderDate}" pattern="dd/MM/yyyy HH:mm"/>
-                            </span>
-                        </div>
-                        <div class="info-group">
-                            <span class="info-label">Expected Delivery</span>
-                            <span class="info-value">
-                                <c:choose>
-                                    <c:when test="${not empty purchaseOrder.expectedDeliveryDate}">
-                                        <i class="bi bi-truck"></i>
-                                        <fmt:formatDate value="${purchaseOrder.expectedDeliveryDate}" pattern="dd/MM/yyyy"/>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <span style="color: #9ca3af;">Not specified</span>
-                                    </c:otherwise>
-                                </c:choose>
-                            </span>
-                        </div>
-                        <div class="info-group">
-                            <span class="info-label">Manager</span>
-                            <span class="info-value"><i class="bi bi-person-badge"></i> ${purchaseOrder.managerName}</span>
-                        </div>
-                        <div class="info-group">
-                            <span class="info-label">Last Updated</span>
-                            <span class="info-value">
-                                <i class="bi bi-clock-history"></i>
-                                <fmt:formatDate value="${purchaseOrder.updatedAt}" pattern="dd/MM/yyyy HH:mm"/>
-                            </span>
-                        </div>
+
+                <div class="page-actions">
+                    <a href="purchase-orders" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to List
+                    </a>
+                    <button class="btn btn-primary" onclick="window.print()">
+                        <i class="bi bi-printer"></i> Print
+                    </button>
+                </div>
+
+                <!-- PO Information -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-info-circle"></i> Purchase Order Information</h5>
                     </div>
-                    <c:if test="${not empty purchaseOrder.notes}">
-                        <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 24px 0;">
-                        <div class="info-group">
-                            <span class="info-label">Notes</span>
-                            <span class="info-value">${purchaseOrder.notes}</span>
+                    <div class="card-body">
+                        <div class="info-row">
+                            <div class="info-group">
+                                <span class="info-label">PO ID</span>
+                                <span class="info-value primary">#${purchaseOrder.poId}</span>
+                            </div>
+                            <div class="info-group">
+                                <span class="info-label">Status</span>
+                                <span class="badge badge-success">${purchaseOrder.status}</span>
+                            </div>
+                            <div class="info-group">
+                                <span class="info-label">Order Date</span>
+                                <span class="info-value">
+                                    <i class="bi bi-calendar"></i>
+                                    <fmt:formatDate value="${purchaseOrder.orderDate}" pattern="dd/MM/yyyy HH:mm"/>
+                                </span>
+                            </div>
+                            <div class="info-group">
+                                <span class="info-label">Expected Delivery</span>
+                                <span class="info-value">
+                                    <c:choose>
+                                        <c:when test="${not empty purchaseOrder.expectedDeliveryDate}">
+                                            <i class="bi bi-truck"></i>
+                                            <fmt:formatDate value="${purchaseOrder.expectedDeliveryDate}" pattern="dd/MM/yyyy"/>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <span style="color: #9ca3af;">Not specified</span>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </span>
+                            </div>
+                            <div class="info-group">
+                                <span class="info-label">Manager</span>
+                                <span class="info-value"><i class="bi bi-person-badge"></i> ${purchaseOrder.managerName}</span>
+                            </div>
+                            <div class="info-group">
+                                <span class="info-label">Last Updated</span>
+                                <span class="info-value">
+                                    <i class="bi bi-clock-history"></i>
+                                    <fmt:formatDate value="${purchaseOrder.updatedAt}" pattern="dd/MM/yyyy HH:mm"/>
+                                </span>
+                            </div>
                         </div>
-                    </c:if>
+                        <c:if test="${not empty purchaseOrder.notes}">
+                            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 24px 0;">
+                            <div class="info-group">
+                                <span class="info-label">Notes</span>
+                                <span class="info-value">${purchaseOrder.notes}</span>
+                            </div>
+                        </c:if>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Items List Card -->
-            <div class="dashboard-card">
-                <div class="card-header">
-                    <h5><i class="bi bi-box-seam"></i> Order Items</h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Medicine Code</th>
-                                    <th>Medicine Name</th>
-                                    <th>Manufacturer</th>
-                                    <th>Quantity</th>
-                                    <th>Unit</th>
-                                    <th>Unit Price</th>
-                                    <th>Subtotal</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <c:set var="totalAmount" value="0"/>
-                                <c:forEach var="item" items="${items}" varStatus="status">
+                <!-- Items List Card -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-box-seam"></i> Order Items</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
                                     <tr>
-                                        <td>${status.index + 1}</td>
-                                        <td><code>${item.medicineCode}</code></td>
-                                        <td><strong>${item.medicineName}</strong></td>
-                                        <td>${item.manufacturer}</td>
-                                        <td><span class="badge badge-success">${item.quantity}</span></td>
-                                        <td>${item.unit}</td>
+                                        <th>#</th>
+                                        <th>Medicine Code</th>
+                                        <th>Medicine Name</th>
+                                        <th>Manufacturer</th>
+                                        <th>Quantity</th>
+                                        <th>Unit</th>
+                                        <th>Unit Price</th>
+                                        <th>Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <c:set var="totalAmount" value="0"/>
+                                    <c:forEach var="item" items="${items}" varStatus="status">
+                                        <tr>
+                                            <td>${status.index + 1}</td>
+                                            <td><code>${item.medicineCode}</code></td>
+                                            <td><strong>${item.medicineName}</strong></td>
+                                            <td>${item.manufacturer}</td>
+                                            <td><span class="badge badge-success">${item.quantity}</span></td>
+                                            <td>${item.unit}</td>
+                                            <td>
+                                                <fmt:formatNumber value="${item.unitPrice}" type="currency" currencySymbol="$"/>
+                                            </td>
+                                            <td>
+                                                <strong>
+                                                    <fmt:formatNumber value="${item.subtotal}" type="currency" currencySymbol="$"/>
+                                                </strong>
+                                            </td>
+                                        </tr>
+                                        <c:set var="totalAmount" value="${totalAmount + item.subtotal}"/>
+                                    </c:forEach>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="7" style="text-align: right;"><strong>Total Amount:</strong></td>
                                         <td>
-                                            <fmt:formatNumber value="${item.unitPrice}" type="currency" currencySymbol="$"/>
-                                        </td>
-                                        <td>
-                                            <strong>
-                                                <fmt:formatNumber value="${item.subtotal}" type="currency" currencySymbol="$"/>
+                                            <strong style="color: #3b82f6; font-size: 16px;">
+                                                <fmt:formatNumber value="${totalAmount}" type="currency" currencySymbol="$"/>
                                             </strong>
                                         </td>
                                     </tr>
-                                    <c:set var="totalAmount" value="${totalAmount + item.subtotal}"/>
-                                </c:forEach>
-                            </tbody>
-                            <tfoot>
-                                <tr>
-                                    <td colspan="7" style="text-align: right;"><strong>Total Amount:</strong></td>
-                                    <td>
-                                        <strong style="color: #3b82f6; font-size: 16px;">
-                                            <fmt:formatNumber value="${totalAmount}" type="currency" currencySymbol="$"/>
-                                        </strong>
-                                    </td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Supplier Info and Quick Actions -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
-                <!-- Supplier Information -->
-                <div class="dashboard-card">
-                    <div class="card-header">
-                        <h5><i class="bi bi-building"></i> Supplier Information</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="info-group" style="margin-bottom: 16px;">
-                            <span class="info-label">Supplier Name</span>
-                            <span class="info-value">${purchaseOrder.supplierName}</span>
-                        </div>
-                        <div class="info-group">
-                            <span class="info-label">Supplier ID</span>
-                            <span class="info-value">#${purchaseOrder.supplierId}</span>
+                                </tfoot>
+                            </table>
                         </div>
                     </div>
                 </div>
 
-                <!-- Quick Actions -->
-                <div class="dashboard-card">
-                    <div class="card-header">
-                        <h5><i class="bi bi-lightning"></i> Quick Actions</h5>
+                <!-- Supplier Info and Quick Actions -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                    <!-- Supplier Information -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h5><i class="bi bi-building"></i> Supplier Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="info-group" style="margin-bottom: 16px;">
+                                <span class="info-label">Supplier Name</span>
+                                <span class="info-value">${purchaseOrder.supplierName}</span>
+                            </div>
+                            <div class="info-group">
+                                <span class="info-label">Supplier ID</span>
+                                <span class="info-value">#${purchaseOrder.supplierId}</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <div class="quick-actions">
-                            <button class="action-btn" onclick="viewAuditLog()">
-                                <i class="bi bi-journal-text"></i>
-                                View Audit Log
-                            </button>
-                            <button class="action-btn" onclick="viewRelatedDocs()">
-                                <i class="bi bi-file-earmark-text"></i>
-                                Related Documents
-                            </button>
-                            <button class="action-btn" onclick="exportPDF()">
-                                <i class="bi bi-file-pdf"></i>
-                                Export as PDF
-                            </button>
+
+                    <!-- Quick Actions -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h5><i class="bi bi-lightning"></i> Quick Actions</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="quick-actions">
+                                <button class="action-btn" onclick="viewAuditLog()">
+                                    <i class="bi bi-journal-text"></i>
+                                    View Audit Log
+                                </button>
+                                <button class="action-btn" onclick="viewRelatedDocs()">
+                                    <i class="bi bi-file-earmark-text"></i>
+                                    Related Documents
+                                </button>
+                                <button class="action-btn" onclick="exportPDF()">
+                                    <i class="bi bi-file-pdf"></i>
+                                    Export as PDF
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Include footer.jsp -->
+    <%@ include file="footer.jsp" %>
 
     <script>
         function viewAuditLog() {

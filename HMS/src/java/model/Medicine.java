@@ -20,6 +20,7 @@ public class Medicine {
     private Timestamp createdAt;
     private Timestamp updatedAt;
     private List<Batches> batches = new ArrayList<>();
+     private double unitPrice;
 
     public Medicine() {}
 
@@ -100,6 +101,14 @@ public class Medicine {
         }
         
         return display.toString();
+    }
+
+    public double getUnitPrice() {
+        return unitPrice;
+    }
+
+    public void setUnitPrice(double unitPrice) {
+        this.unitPrice = unitPrice;
     }
     
 }

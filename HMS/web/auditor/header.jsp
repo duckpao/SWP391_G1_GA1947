@@ -208,7 +208,7 @@
         <div class="header-nav">
     <c:if test="${not empty sessionScope.user}">
         
-        <%-- Nút ch? hi?n th? cho Admin --%>
+        <%-- Nï¿½t ch? hi?n th? cho Admin --%>
         <c:if test="${sessionScope.user.role == 'Admin'}">
             <a href="/HMS/admin-dashboard" 
                class="nav-btn" 

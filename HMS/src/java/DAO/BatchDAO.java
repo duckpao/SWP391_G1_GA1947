@@ -54,7 +54,42 @@ public class BatchDAO extends DBContext {
 
         return list;
     }
-    
+
+
+        // ✅ Lấy danh sách các lô có thể chọn (status: Approved hoặc Received)
+  public List<Map<String, Object>> getAvailableBatches() {
+    List<Map<String, Object>> list = new ArrayList<>();
+    String sql = """
+        SELECT 
+            b.batch_id AS batchId,
+            b.lot_number AS lotNumber,
+            m.name AS medicineName,
+            b.status AS status
+        FROM Batches b
+        JOIN Medicines m ON b.medicine_code = m.medicine_code
+        WHERE b.status IN ('Approved', 'Received')
+        ORDER BY m.name ASC, b.lot_number ASC;
+    """;
+
+    try (Connection conn = getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+
+        while (rs.next()) {
+            Map<String, Object> row = new HashMap<>();
+            row.put("batchId", rs.getInt("batchId"));
+            row.put("lotNumber", rs.getString("lotNumber"));
+            row.put("medicineName", rs.getString("medicineName"));
+            row.put("status", rs.getString("status"));
+            list.add(row);
+        }
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+
+    return list;
+}
    //--------- Add batch -------------
 
     public boolean addBatch(Batches batch) throws SQLException {
@@ -96,5 +131,6 @@ public class BatchDAO extends DBContext {
         }
     }
 }
+
 
 

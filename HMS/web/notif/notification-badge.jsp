@@ -6,6 +6,7 @@
         position: relative;
         display: inline-flex;
         align-items: center;
+        z-index: 1000;
     }
     
     .notification-bell {
@@ -62,7 +63,7 @@
     
     .notification-dropdown {
         position: absolute;
-        top: 100%;
+        top: calc(100% + 8px);
         right: 0;
         width: 380px;
         max-height: 450px;
@@ -70,14 +71,18 @@
         border: 1px solid #dee2e6;
         box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
         border-radius: 8px;
-        margin-top: 8px;
         background: white;
         display: none;
         z-index: 1050;
+        opacity: 0;
+        transform: translateY(-10px);
+        transition: opacity 0.2s ease, transform 0.2s ease;
     }
     
     .notification-dropdown.show {
         display: block;
+        opacity: 1;
+        transform: translateY(0);
     }
     
     .notification-dropdown-header {
@@ -116,6 +121,7 @@
     .notification-list {
         max-height: 350px;
         overflow-y: auto;
+        overflow-x: hidden;
     }
     
     .notification-item-mini {
@@ -125,6 +131,8 @@
         cursor: pointer;
         display: flex;
         gap: 12px;
+        align-items: flex-start;
+        background: white;
     }
     
     .notification-item-mini:last-child {
@@ -136,8 +144,9 @@
     }
     
     .notification-item-mini.unread {
-        background-color: #e7f3ff;
+        background-color: #e7f3ff !important;
         border-left: 3px solid #0d6efd;
+        padding-left: 17px;
     }
     
     .notification-item-mini.unread:hover {
@@ -183,6 +192,7 @@
     .notification-content {
         flex: 1;
         min-width: 0;
+        overflow: hidden;
     }
     
     .notification-title {
@@ -191,6 +201,9 @@
         color: #2c3e50;
         margin: 0 0 4px 0;
         line-height: 1.3;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
     
     .notification-message {
@@ -203,6 +216,7 @@
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
+        word-break: break-word;
     }
     
     .notification-time {
@@ -268,9 +282,11 @@
     
     @media (max-width: 768px) {
         .notification-dropdown {
-            width: 320px;
+            width: calc(100vw - 32px);
+            max-width: 380px;
             position: fixed;
             right: 16px;
+            left: auto;
         }
     }
 </style>
@@ -333,11 +349,20 @@
         }
     });
 
+    // Prevent dropdown from closing when clicking inside
+    document.getElementById('notificationDropdownMenu')?.addEventListener('click', function(event) {
+        event.stopPropagation();
+    });
+
     // Load notification count
     function loadNotifications() {
         fetch('${pageContext.request.contextPath}/notifications?action=getUnreadCount')
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
             .then(data => {
+                console.log('Unread count data:', data); // ? Debug log
                 const countBadge = document.getElementById('notifCount');
                 if (data.unreadCount > 0) {
                     countBadge.textContent = data.unreadCount > 99 ? '99+' : data.unreadCount;
@@ -346,17 +371,30 @@
                     countBadge.style.display = 'none';
                 }
             })
-            .catch(error => console.error('Error loading notifications:', error));
+            .catch(error => {
+                console.error('Error loading notifications:', error);
+            });
+    }
+
+    // ? Helper function to safely get nested property
+    function getProperty(obj, path, defaultValue = '') {
+        return path.split('.').reduce((acc, part) => acc && acc[part], obj) || defaultValue;
     }
 
     // Load notification list
     function loadNotificationList() {
+        const list = document.getElementById('notificationDropdownList');
+        list.innerHTML = '<div class="notification-empty"><i class="fas fa-spinner fa-spin"></i><p>Loading...</p></div>';
+        
         fetch('${pageContext.request.contextPath}/notifications?action=getLatest&since=' + (lastNotificationCheck - 86400000))
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
             .then(notifications => {
-                const list = document.getElementById('notificationDropdownList');
-
-                if (notifications.length === 0) {
+                console.log('Raw notifications data:', notifications); // ? Debug log
+                
+                if (!Array.isArray(notifications) || notifications.length === 0) {
                     list.innerHTML = `
                         <div class="notification-empty">
                             <i class="fas fa-bell-slash"></i>
@@ -364,15 +402,32 @@
                         </div>`;
                 } else {
                     list.innerHTML = notifications.slice(0, 5).map(notif => {
-                        const iconClass = getNotificationIconClass(notif.notificationType);
-                        const icon = getNotificationIcon(notif.notificationType);
-                        const safeTitle = escapeHtml(notif.title);
-                        const safeMessage = escapeHtml(truncate(notif.message, 80));
-                        const formattedTime = formatTime(notif.createdAt);
+                        // ? Handle both camelCase and snake_case
+                        const notifType = notif.notificationType || notif.notification_type || 'info';
+                        const isRead = notif.isRead !== undefined ? notif.isRead : 
+                                      (notif.is_read !== undefined ? notif.is_read : false);
+                        const notifId = notif.notificationId || notif.notification_id || 0;
+                        const title = notif.title || 'Notification';
+                        const message = notif.message || '';
+                        const createdAt = notif.createdAt || notif.created_at || new Date().getTime();
+                        
+                        console.log('Processing notification:', { // ? Debug log
+                            id: notifId,
+                            type: notifType,
+                            isRead: isRead,
+                            title: title
+                        });
+                        
+                        const iconClass = getNotificationIconClass(notifType);
+                        const icon = getNotificationIcon(notifType);
+                        const safeTitle = escapeHtml(title);
+                        const safeMessage = escapeHtml(truncate(message, 80));
+                        const formattedTime = formatTime(createdAt);
 
                         return `
-                            <div class="notification-item-mini ${notif.isRead ? '' : 'unread'}" 
-                                 onclick="viewNotification(${notif.notificationId})">
+                            <div class="notification-item-mini ${isRead ? '' : 'unread'}" 
+                                 onclick="viewNotification(${notifId})"
+                                 data-read="${isRead}">
                                 <div class="notification-icon ${iconClass}">
                                     <i class="fas fa-${icon}"></i>
                                 </div>
@@ -387,7 +442,7 @@
             })
             .catch(error => {
                 console.error('Error loading notification list:', error);
-                document.getElementById('notificationDropdownList').innerHTML = `
+                list.innerHTML = `
                     <div class="notification-empty">
                         <i class="fas fa-exclamation-triangle"></i>
                         <p>Error loading notifications</p>
@@ -418,18 +473,21 @@
     }
 
     function viewNotification(id) {
-        window.location.href = '${pageContext.request.contextPath}/notifications';
+        window.location.href = '${pageContext.request.contextPath}/notifications?id=' + id;
     }
 
     function markAllAsReadQuick() {
         fetch('${pageContext.request.contextPath}/notifications?action=markAllAsRead', {
             method: 'POST'
         })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     loadNotifications();
-                    toggleNotificationDropdown();
+                    loadNotificationList();
                 }
             })
             .catch(error => console.error('Error marking as read:', error));
@@ -441,13 +499,25 @@
     }
 
     function escapeHtml(text) {
+        if (!text) return '';
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
     }
 
     function formatTime(timestamp) {
-        const date = new Date(timestamp);
+        if (!timestamp) return '';
+        
+        // Handle both timestamp (number) and Date string
+        let date;
+        if (typeof timestamp === 'number') {
+            date = new Date(timestamp);
+        } else if (typeof timestamp === 'string') {
+            date = new Date(timestamp);
+        } else {
+            date = new Date();
+        }
+        
         const now = new Date();
         const diff = Math.floor((now - date) / 1000);
 
@@ -460,9 +530,12 @@
 
     function checkNewNotifications() {
         fetch('${pageContext.request.contextPath}/notifications?action=getLatest&since=' + lastNotificationCheck)
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
             .then(notifications => {
-                if (notifications.length > 0) {
+                if (Array.isArray(notifications) && notifications.length > 0) {
                     showNotificationToast(notifications[0]);
                     loadNotifications();
                 }
@@ -472,19 +545,42 @@
     }
 
     function showNotificationToast(notif) {
+        if (!notif) return;
+        
+        const title = notif.title || notif.Title || 'Notification';
+        const message = notif.message || notif.Message || '';
+        
         if (Notification.permission === "granted") {
-            new Notification(notif.title, {
-                body: notif.message,
-                icon: '${pageContext.request.contextPath}/images/notification-icon.png',
-                tag: 'notification-' + notif.notificationId
-            });
+            try {
+                new Notification(title, {
+                    body: message,
+                    icon: '${pageContext.request.contextPath}/images/notification-icon.png',
+                    tag: 'notification-' + (notif.notificationId || notif.notification_id || Math.random())
+                });
+            } catch (error) {
+                console.error('Error showing notification:', error);
+            }
         }
     }
 
+    // Request notification permission
     if (Notification.permission === "default") {
         Notification.requestPermission();
     }
 
-    loadNotifications();
-    setInterval(checkNewNotifications, 10000);
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Notification bell initialized'); // ? Debug log
+        loadNotifications();
+        setInterval(checkNewNotifications, 10000);
+    });
+
+    // Fallback if DOMContentLoaded already fired
+    if (document.readyState === 'loading') {
+        // Already added listener above
+    } else {
+        console.log('Notification bell initialized (fallback)'); // ? Debug log
+        loadNotifications();
+        setInterval(checkNewNotifications, 10000);
+    }
 </script>

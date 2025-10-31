@@ -8,6 +8,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    
     <style>
         * {
             margin: 0;
@@ -22,11 +24,11 @@
         body {
             display: flex;
             flex-direction: column;
-            background-color: #ffffff;
+            background-color: #f9fafb;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             font-size: 14px;
             line-height: 1.5;
-            color: #333;
+            color: #374151;
         }
 
         .page-wrapper {
@@ -35,7 +37,7 @@
             min-height: calc(100vh - 60px);
         }
 
-        /* White theme sidebar with light border, similar to Auditor design */
+        /* White theme sidebar matching view-medicine */
         .sidebar {
             width: 250px;
             background-color: #ffffff;
@@ -43,51 +45,49 @@
             display: flex;
             flex-direction: column;
             padding-top: 15px;
-            border-right: 1px solid #e9ecef;
-            box-shadow: none;
+            border-right: 1px solid #e5e7eb;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.08);
         }
 
         .menu a {
             display: flex;
             align-items: center;
             padding: 12px 25px;
-            color: #6c757d;
+            color: #6b7280;
             text-decoration: none;
             font-size: 14px;
             font-weight: 500;
             transition: all 0.3s ease;
-            border-left: 3px solid transparent;
             border-radius: 0;
+            margin: 4px 0;
         }
 
         .menu a i {
             width: 20px;
-            margin-right: 10px;
-            color: #6c757d;
+            margin-right: 12px;
+            color: #6b7280;
         }
 
         .menu a:hover {
-            background-color: #f0f7ff;
+            background-color: #f3f4f6;
             color: #495057;
-            border-left-color: transparent;
-            padding-left: 25px;
+            transform: translateX(4px);
         }
 
         .menu a.active {
-            background-color: #e7f1ff;
-            color: #0066cc;
-            border-left-color: #0066cc;
-            padding-left: 22px;
+            background-color: #f3f4f6;
+            color: #6b7280;
+            font-weight: 600;
         }
 
         .menu a.active i {
-            color: #0066cc;
+            color: #6b7280;
         }
 
         .main {
             flex: 1;
             padding: 30px;
-            background-color: #ffffff;
+            background-color: #f9fafb;
             overflow-y: auto;
         }
 
@@ -95,7 +95,7 @@
             font-size: 28px;
             margin-bottom: 25px;
             font-weight: 700;
-            color: #1a1a1a;
+            color: #1f2937;
             letter-spacing: -0.5px;
         }
 
@@ -103,40 +103,42 @@
             display: block;
             margin-top: 15px;
             font-weight: 600;
-            color: #495057;
+            color: #374151;
             font-size: 14px;
         }
 
         textarea, input[type="number"], select {
             width: 100%;
             padding: 10px 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
             resize: vertical;
             min-height: 80px;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             font-size: 14px;
             transition: all 0.3s ease;
+            background: white;
         }
 
         textarea:focus, input[type="number"]:focus, select:focus {
-            border-color: #6c757d;
-            box-shadow: 0 0 0 3px rgba(108, 117, 125, 0.1);
+            border-color: #6b7280;
+            box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.1);
             outline: none;
         }
 
         .medicine-items {
             margin-top: 20px;
-            border: 1px solid #e9ecef;
-            padding: 20px;
-            border-radius: 8px;
-            background-color: #f8f9fa;
+            border: 2px solid #e5e7eb;
+            padding: 24px;
+            border-radius: 12px;
+            background-color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         }
 
         .medicine-items h3 {
             font-size: 16px;
             font-weight: 600;
-            color: #1a1a1a;
+            color: #1f2937;
             margin-bottom: 15px;
         }
 
@@ -146,17 +148,22 @@
             margin-bottom: 15px;
             align-items: center;
             padding: 15px;
-            background: white;
-            border-radius: 6px;
-            border: 1px solid #e0e0e0;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            background: #f9fafb;
+            border-radius: 8px;
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+
+        .medicine-item:hover {
+            border-color: #d1d5db;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
 
         .medicine-item select {
             flex: 2;
             padding: 10px 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
             font-size: 14px;
             width: auto;
             min-height: auto;
@@ -165,20 +172,20 @@
         .medicine-item input[type="number"] {
             flex: 1;
             padding: 10px 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
             font-size: 14px;
             width: auto;
             min-height: auto;
         }
 
-        /* Gray button styling for remove button */
+        /* Gray button styling */
         .medicine-item button {
             padding: 10px 15px;
-            background-color: #6c757d;
+            background-color: #6b7280;
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
             transition: all 0.3s ease;
@@ -186,38 +193,36 @@
         }
 
         .medicine-item button:hover {
-            background-color: #5a6268;
+            background-color: #4b5563;
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.2);
+            box-shadow: 0 4px 12px rgba(107, 114, 128, 0.2);
         }
 
-        /* Gray button styling for add medicine button */
         .add-medicine-btn {
             margin-top: 15px;
             padding: 10px 20px;
-            background-color: #6c757d;
+            background-color: #6b7280;
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
             transition: all 0.3s ease;
         }
 
         .add-medicine-btn:hover {
-            background-color: #5a6268;
+            background-color: #4b5563;
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.2);
+            box-shadow: 0 4px 12px rgba(107, 114, 128, 0.2);
         }
 
-        /* Gray button styling for submit button */
         .submit-btn {
             margin-top: 25px;
             padding: 12px 40px;
-            background-color: #6c757d;
+            background-color: #6b7280;
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 16px;
             font-weight: 600;
@@ -225,19 +230,19 @@
         }
 
         .submit-btn:hover {
-            background-color: #5a6268;
+            background-color: #4b5563;
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.2);
+            box-shadow: 0 4px 12px rgba(107, 114, 128, 0.2);
         }
 
         .error-msg {
-            color: #721c24;
-            background-color: #f8d7da;
-            padding: 15px;
-            border-radius: 6px;
-            margin-top: 15px;
-            border-left: 4px solid #f5c6cb;
-            border: 1px solid #f5c6cb;
+            color: #991b1b;
+            background-color: #fee2e2;
+            padding: 16px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #fecaca;
+            font-weight: 500;
         }
 
         /* Modal styles */
@@ -258,12 +263,12 @@
             background-color: white;
             margin: auto;
             padding: 30px;
-            border: 1px solid #e0e0e0;
-            border-radius: 10px;
+            border: none;
+            border-radius: 12px;
             width: 90%;
             max-width: 400px;
             text-align: center;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
             animation: slideDown 0.3s ease-out;
         }
 
@@ -279,14 +284,14 @@
         }
 
         .modal-content h3 {
-            color: #1a1a1a;
+            color: #1f2937;
             margin-top: 0;
             font-size: 24px;
             font-weight: 700;
         }
 
         .modal-content p {
-            color: #6c757d;
+            color: #6b7280;
             margin: 15px 0;
         }
 
@@ -300,7 +305,7 @@
         .modal-content button, .modal-content a {
             padding: 12px 25px;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
             text-decoration: none;
@@ -308,31 +313,65 @@
             transition: all 0.3s ease;
         }
 
-        /* Gray button styling for modal buttons */
         .modal-content button {
-            background-color: #6c757d;
+            background-color: #6b7280;
             color: white;
         }
 
         .modal-content button:hover {
-            background-color: #5a6268;
+            background-color: #4b5563;
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.2);
+            box-shadow: 0 4px 12px rgba(107, 114, 128, 0.2);
         }
 
         .modal-content a {
-            background-color: #e9ecef;
-            color: #495057;
+            background-color: #e5e7eb;
+            color: #374151;
             display: inline-block;
         }
 
         .modal-content a:hover {
-            background-color: #dee2e6;
-            color: #495057;
+            background-color: #d1d5db;
+            color: #374151;
         }
 
-        .container {
-            max-width: 100%;
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .page-wrapper {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #e5e7eb;
+            }
+
+            .main {
+                padding: 20px;
+            }
+
+            h2 {
+                font-size: 22px;
+            }
         }
     </style>
 </head>
@@ -340,16 +379,28 @@
     <%@ include file="header.jsp" %>
 
     <div class="page-wrapper">
+        <!-- Sidebar matching view-medicine -->
         <div class="sidebar">
             <div class="menu">
-                <a href="${pageContext.request.contextPath}/view-medicine"><i class="fa fa-pills"></i> Quản lý thuốc</a>
-                <a href="${pageContext.request.contextPath}/create-request" class="active"><i class="fa fa-file-medical"></i> Yêu cầu thuốc</a>
-                <a href="${pageContext.request.contextPath}/pharmacist/manage-batch"><i class="fa fa-warehouse"></i> Quản lý số lô/lô hàng</a>
-                <a href="${pageContext.request.contextPath}/pharmacist/recordExpiredDamaged"><i class="fa fa-user-md"></i> thuốc hết hạn/hư hỏng</a>
-                <a href="${pageContext.request.contextPath}/report"><i class="fa fa-chart-line"></i> Báo cáo thống kê</a>
+                <a href="${pageContext.request.contextPath}/view-medicine">
+                    <i class="bi bi-capsule"></i> Quản lý thuốc
+                </a>
+                <a href="${pageContext.request.contextPath}/create-request" class="active">
+                    <i class="bi bi-file-earmark-plus"></i> Yêu cầu thuốc
+                </a>
+                <a href="${pageContext.request.contextPath}/pharmacist/manage-batch">
+                    <i class="bi bi-box-seam"></i> Quản lý số lô/lô hàng
+                </a>
+                <a href="${pageContext.request.contextPath}/pharmacist/recordExpiredDamaged">
+                    <i class="bi bi-exclamation-triangle"></i> Thuốc hết hạn/hư hỏng
+                </a>
+                <a href="${pageContext.request.contextPath}/report">
+                    <i class="bi bi-graph-up"></i> Báo cáo thống kê
+                </a>
             </div>
         </div>
 
+        <!-- Main Content -->
         <div class="main">
             <h2>Tạo Yêu Cầu Thuốc Mới</h2>
 
@@ -422,7 +473,7 @@
                     ` + medicineOptionsHTML + `
                 </select>
                 <input type="number" name="quantity" min="1" placeholder="Số lượng" required>
-                <button type="button" onclick="removeItem(this)">Xóa</button>
+                <button type="button" onclick="removeItem(this)">🗑️ Xóa</button>
             `;
             container.appendChild(newItem);
         }
@@ -452,7 +503,7 @@
                         ` + medicineOptionsHTML + `
                     </select>
                     <input type="number" name="quantity" min="1" placeholder="Số lượng" required>
-                    <button type="button" onclick="removeItem(this)">Xóa</button>
+                    <button type="button" onclick="removeItem(this)">🗑️ Xóa</button>
                 </div>
             `;
         }

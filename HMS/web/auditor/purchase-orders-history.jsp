@@ -7,6 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PO History & Trend Analysis</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -548,7 +549,7 @@
 </head>
 <body>
     <!-- Include header.jsp at the top -->
-    <%@ include file="header.jsp" %>
+    <%@ include file="/admin/header.jsp" %>
 
     <div class="page-wrapper">
         <div class="dashboard-container">
@@ -778,7 +779,7 @@
     </div>
 
     <!-- Include footer.jsp at the bottom -->
-    <%@ include file="footer.jsp" %>
+    <%@ include file="/admin/footer.jsp" %>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script>

@@ -3,16 +3,14 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/DAO/ManagerDAO.java</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/DAO/ReportDAO.java</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/Controller/ExpiryReportServlet.java</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/Controller/StockAlertsServlet.java</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/web/edit-stock-request.jsp</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/web/stock-alerts.jsp</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/web/create-stock-request.jsp</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/web/inventory-report.jsp</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/Controller/InventoryReportServlet.java</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/web/expiry-report.jsp</file>
+            <file>file:/C:/App/SWP/dev%2031-10/SWP391_G1_GA1947/HMS/src/java/model/Notification.java</file>
+            <file>file:/C:/App/SWP/dev%2031-10/SWP391_G1_GA1947/HMS/src/java/Controller/AdminNotificationServlet.java</file>
+            <file>file:/C:/App/SWP/dev%2031-10/SWP391_G1_GA1947/HMS/web/notif/notification-badge.jsp</file>
+            <file>file:/C:/App/SWP/dev%2031-10/SWP391_G1_GA1947/HMS/web/WEB-INF/web.xml</file>
+            <file>file:/C:/App/SWP/dev%2031-10/SWP391_G1_GA1947/HMS/web/notif/admin-send-notification.jsp</file>
+            <file>file:/C:/App/SWP/dev%2031-10/SWP391_G1_GA1947/HMS/src/java/Controller/NotificationServlet.java</file>
+            <file>file:/C:/App/SWP/dev%2031-10/SWP391_G1_GA1947/HMS/web/notif/notifications.jsp</file>
+            <file>file:/C:/App/SWP/dev%2031-10/SWP391_G1_GA1947/HMS/src/java/DAO/NotificationDAO.java</file>
         </group>
     </open-files>
 </project-private>

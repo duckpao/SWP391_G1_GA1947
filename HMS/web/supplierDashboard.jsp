@@ -2,7 +2,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
-<jsp:include page="header.jsp" />
+<jsp:include page="/admin/header.jsp" />
 
 <!DOCTYPE html>
 <html>
@@ -12,6 +12,7 @@
     <title>Supplier Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
    
     <style>
         * {
@@ -1386,7 +1387,7 @@
     }
 </script>
 
-<jsp:include page="footer.jsp" />
+<jsp:include page="/admin/footer.jsp" />
 
 </body>
 </html>

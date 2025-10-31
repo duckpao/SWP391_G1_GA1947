@@ -9,7 +9,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -319,7 +319,7 @@
     </style>
 </head>
 <body>
-    <%@ include file="header.jsp" %>
+    <%@ include file="/admin/header.jsp" %>
 
     <div class="page-wrapper">
         <!-- Sidebar -->
@@ -435,7 +435,7 @@
         </div>
     </div>
 
-    <%@ include file="footer.jsp" %>
+    <%@ include file="/admin/footer.jsp" %>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

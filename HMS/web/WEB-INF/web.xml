@@ -201,6 +201,14 @@
         <servlet-name>EditProfileServlet</servlet-name>
         <servlet-class>Controller.EditProfileServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>NotificationServlet</servlet-name>
+        <servlet-class>Controller.NotificationServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>AdminNotificationServlet</servlet-name>
+        <servlet-class>Controller.AdminNotificationServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>UserServlet</servlet-name>
         <url-pattern>/admin-dashboard</url-pattern>
@@ -409,7 +417,7 @@
         <servlet-name>EditProfileServlet</servlet-name>
         <url-pattern>/edit-profile</url-pattern>
     </servlet-mapping>
-      <servlet>
+    <servlet>
         <servlet-name>ViewMedicineRequest</servlet-name>
         <servlet-class>Controller.ViewMedicineRequest</servlet-class>
     </servlet>
@@ -440,6 +448,14 @@
     <servlet-mapping>
         <servlet-name>BatchDeleteServlet</servlet-name>
         <url-pattern>/pharmacist/Batch-Delete</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>NotificationServlet</servlet-name>
+        <url-pattern>/notifications</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AdminNotificationServlet</servlet-name>
+        <url-pattern>/admin-dashboard/notifications</url-pattern>
     </servlet-mapping>
     <welcome-file-list>
         <welcome-file>login.jsp</welcome-file>

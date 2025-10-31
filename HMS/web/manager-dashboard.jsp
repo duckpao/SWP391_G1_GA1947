@@ -8,6 +8,7 @@
     <title>Manager Dashboard - Hospital System</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -488,7 +489,7 @@
         }
     </style>
 </head>
-<%@ include file="header.jsp" %>
+<%@ include file="/admin/header.jsp" %>
 <body>
     <div class="dashboard-container">
         <!-- Main Content -->
@@ -1020,5 +1021,5 @@
         }
     </script>
 </body>
-<%@ include file="footer.jsp" %>
+<%@ include file="/admin/footer.jsp" %>
 </html>

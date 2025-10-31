@@ -3,16 +3,11 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/web/admin/header.jsp</file>
-            <file>file:/C:/Users/ADMIN/Documents/GitHub/SWP391_G1_GA1947/HMS/src/java/Controller/ApproveStockServlet.java</file>
-            <file>file:/C:/App/SWP/dev%2031-10/SWP391_G1_GA1947/HMS/src/java/model/Notification.java</file>
-            <file>file:/C:/App/SWP/dev%2031-10/SWP391_G1_GA1947/HMS/src/java/Controller/AdminNotificationServlet.java</file>
-            <file>file:/C:/App/SWP/dev%2031-10/SWP391_G1_GA1947/HMS/web/notif/notification-badge.jsp</file>
-            <file>file:/C:/App/SWP/dev%2031-10/SWP391_G1_GA1947/HMS/web/WEB-INF/web.xml</file>
-            <file>file:/C:/App/SWP/dev%2031-10/SWP391_G1_GA1947/HMS/web/notif/admin-send-notification.jsp</file>
-            <file>file:/C:/App/SWP/dev%2031-10/SWP391_G1_GA1947/HMS/src/java/Controller/NotificationServlet.java</file>
-            <file>file:/C:/App/SWP/dev%2031-10/SWP391_G1_GA1947/HMS/web/notif/notifications.jsp</file>
-            <file>file:/C:/App/SWP/dev%2031-10/SWP391_G1_GA1947/HMS/src/java/DAO/NotificationDAO.java</file>
+            <file>file:/C:/App/SWP/dev%2031-10%20fixer/SWP391_G1_GA1947/HMS/web/userProfile.jsp</file>
+            <file>file:/C:/App/SWP/dev%2031-10%20fixer/SWP391_G1_GA1947/HMS/src/java/Controller/EditProfileServlet.java</file>
+            <file>file:/C:/App/SWP/dev%2031-10%20fixer/SWP391_G1_GA1947/HMS/src/java/DAO/UserDAO.java</file>
+            <file>file:/C:/App/SWP/dev%2031-10%20fixer/SWP391_G1_GA1947/HMS/src/java/Controller/CreateServlet.java</file>
+            <file>file:/C:/App/SWP/dev%2031-10%20fixer/SWP391_G1_GA1947/HMS/web/editProfile.jsp</file>
         </group>
     </open-files>
 </project-private>

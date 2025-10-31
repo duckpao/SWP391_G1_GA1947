@@ -1,13 +1,10 @@
 package DAO;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import model.User;
 import model.Supplier;
-
 public class UserDAO extends DBContext {
-
     // Map 1 row -> User
     private User mapRow(ResultSet rs) throws SQLException {
         User u = new User();
@@ -22,7 +19,6 @@ public class UserDAO extends DBContext {
         u.setLastLogin(rs.getTimestamp("last_login"));
         return u;
     }
-
     // Check if user exists by email or phone
     public boolean checkUserExists(String emailOrPhone) {
         String sql = "SELECT user_id FROM Users WHERE email = ? OR phone = ?";
@@ -37,7 +33,6 @@ public class UserDAO extends DBContext {
         }
         return false;
     }
-
     // Register new user
     public boolean register(User u) {
         String sqlUser = "INSERT INTO Users(username, password_hash, email, phone, role, is_active) VALUES(?,?,?,?,?,1)";
@@ -45,10 +40,8 @@ public class UserDAO extends DBContext {
         INSERT INTO Suppliers (user_id, name, contact_email, contact_phone, address, performance_rating, created_at, updated_at)
         VALUES (?, ?, ?, ?, '', NULL, GETDATE(), GETDATE())
     """;
-
         try (Connection conn = getConnection()) {
             conn.setAutoCommit(false);
-
             int userId = -1;
             try (PreparedStatement psUser = conn.prepareStatement(sqlUser, Statement.RETURN_GENERATED_KEYS)) {
                 psUser.setString(1, u.getUsername());
@@ -57,14 +50,12 @@ public class UserDAO extends DBContext {
                 psUser.setString(4, u.getPhone());
                 psUser.setString(5, u.getRole());
                 psUser.executeUpdate();
-
                 try (ResultSet rs = psUser.getGeneratedKeys()) {
                     if (rs.next()) {
                         userId = rs.getInt(1);
                     }
                 }
             }
-
             // Nếu role là Supplier thì thêm vào bảng Suppliers
             if ("Supplier".equalsIgnoreCase(u.getRole()) && userId > 0) {
                 try (PreparedStatement psSupp = conn.prepareStatement(sqlSupplier)) {
@@ -75,16 +66,13 @@ public class UserDAO extends DBContext {
                     psSupp.executeUpdate();
                 }
             }
-
             conn.commit();
             return true;
-
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
     }
-
     public int getSupplierIdByUserId(int userId) {
         String sql = "SELECT supplier_id FROM Suppliers WHERE user_id = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -100,7 +88,6 @@ public class UserDAO extends DBContext {
         }
         return -1; // Trả về -1 nếu không tìm thấy supplier
     }
-
     public Supplier getSupplierByUserId(int userId) throws SQLException {
         Supplier supplier = null;
         String sql = "SELECT * FROM Suppliers WHERE user_id = ?";
@@ -124,7 +111,6 @@ public class UserDAO extends DBContext {
                     if (updatedTs != null) {
                         supplier.setUpdatedAt(updatedTs.toLocalDateTime());
                     }
-
                 }
             }
         } catch (SQLException e) {
@@ -133,7 +119,6 @@ public class UserDAO extends DBContext {
         }
         return supplier;
     }
-
     // Update user password
     public boolean updatePassword(String email, String newPassword) {
         String sql = "UPDATE Users SET password_hash=? WHERE email=?";
@@ -147,7 +132,6 @@ public class UserDAO extends DBContext {
         }
         return false;
     }
-
     // Update password by email or phone
     public boolean updatePasswordByEmailOrPhone(String newPassword, String emailOrPhone) {
         String sql = "UPDATE Users SET password_hash=? WHERE email=? OR phone=?";
@@ -162,7 +146,6 @@ public class UserDAO extends DBContext {
         }
         return false;
     }
-
     // Login user by email or username
     public User findByEmailOrUsername(String emailOrUsername) {
         String sql = "SELECT * FROM Users WHERE (email = ? OR username = ?) AND is_active = 1";
@@ -179,7 +162,6 @@ public class UserDAO extends DBContext {
         }
         return null;
     }
-
     // Find all users
     public List<User> findAll() throws SQLException {
         String sql = "SELECT user_id, username, email, phone, role, is_active, failed_attempts, last_login, password_hash FROM Users ORDER BY user_id DESC";
@@ -191,14 +173,11 @@ public class UserDAO extends DBContext {
             return list;
         }
     }
-
     // Filter users with multiple criteria
     public List<User> filterUsers(String keyword, String role, String status) throws SQLException {
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT user_id, username, email, phone, role, is_active, failed_attempts, last_login, password_hash FROM Users WHERE 1=1 ");
-
         List<Object> params = new ArrayList<>();
-
         // Filter by keyword (username, email, phone)
         if (keyword != null && !keyword.trim().isEmpty()) {
             sql.append("AND (username LIKE ? OR email LIKE ? OR phone LIKE ?) ");
@@ -207,13 +186,11 @@ public class UserDAO extends DBContext {
             params.add(searchPattern);
             params.add(searchPattern);
         }
-
         // Filter by role
         if (role != null && !role.trim().isEmpty()) {
             sql.append("AND role = ? ");
             params.add(role.trim());
         }
-
         // Filter by status (active/locked)
         if (status != null && !status.trim().isEmpty()) {
             if ("active".equalsIgnoreCase(status.trim())) {
@@ -222,15 +199,12 @@ public class UserDAO extends DBContext {
                 sql.append("AND is_active = 0 ");
             }
         }
-
         sql.append("ORDER BY user_id DESC");
-
         try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
             // Set parameters
             for (int i = 0; i < params.size(); i++) {
                 ps.setObject(i + 1, params.get(i));
             }
-
             try (ResultSet rs = ps.executeQuery()) {
                 List<User> list = new ArrayList<>();
                 while (rs.next()) {
@@ -240,7 +214,6 @@ public class UserDAO extends DBContext {
             }
         }
     }
-
     // Find user by ID
     public User findById(int id) throws SQLException {
         String sql = "SELECT * FROM Users WHERE user_id=?";
@@ -251,7 +224,6 @@ public class UserDAO extends DBContext {
             }
         }
     }
-
     // Find user by username
     public User findByUsername(String username) throws SQLException {
         String sql = "SELECT * FROM Users WHERE username=?";
@@ -262,20 +234,59 @@ public class UserDAO extends DBContext {
             }
         }
     }
-
     // Create new user
     public void create(User u) throws SQLException {
-        String sql = "INSERT INTO Users(username, password_hash, email, phone, role) VALUES(?,?,?,?,?)";
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setString(1, u.getUsername());
-            ps.setString(2, u.getPasswordHash());
-            ps.setString(3, u.getEmail());
-            ps.setString(4, u.getPhone());
-            ps.setString(5, u.getRole());
-            ps.executeUpdate();
+        String sqlUser = "INSERT INTO Users(username, password_hash, email, phone, role, is_active) VALUES(?,?,?,?,?,1)";
+        String sqlSupplier = """
+INSERT INTO Suppliers (user_id, name, contact_email, contact_phone, address, performance_rating, created_at, updated_at)
+VALUES (?, ?, ?, ?, '', NULL, GETDATE(), GETDATE())
+""";
+        try {
+            connection.setAutoCommit(false);
+            int userId = -1;
+            try (PreparedStatement psUser = connection.prepareStatement(sqlUser, Statement.RETURN_GENERATED_KEYS)) {
+                psUser.setString(1, u.getUsername());
+                psUser.setString(2, u.getPasswordHash());
+                psUser.setString(3, u.getEmail());
+                psUser.setString(4, u.getPhone());
+                psUser.setString(5, u.getRole());
+                psUser.executeUpdate();
+                try (ResultSet rs = psUser.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        userId = rs.getInt(1);
+                    }
+                }
+            }
+// Nếu role là Supplier thì thêm vào bảng Suppliers
+            if ("Supplier".equalsIgnoreCase(u.getRole()) && userId > 0) {
+                try (PreparedStatement psSupp = connection.prepareStatement(sqlSupplier)) {
+                    psSupp.setInt(1, userId);
+                    psSupp.setString(2, u.getUsername());
+                    psSupp.setString(3, u.getEmail());
+                    psSupp.setString(4, u.getPhone());
+                    psSupp.executeUpdate();
+                }
+            }
+            connection.commit();
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            throw e;
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.setAutoCommit(true);
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
         }
     }
-
     // Update user information
     // Method update không đổi password (giữ nguyên method cũ)
     public void update(User u) throws SQLException {
@@ -288,7 +299,6 @@ public class UserDAO extends DBContext {
             ps.executeUpdate();
         }
     }
-
 // Method mới: update kèm password
     public void updateWithPassword(User u) throws SQLException {
         String sql = "UPDATE Users SET email=?, phone=?, role=?, password_hash=?, updated_at=GETDATE() WHERE user_id=?";
@@ -301,7 +311,6 @@ public class UserDAO extends DBContext {
             ps.executeUpdate();
         }
     }
-
 // Hoặc method update chỉ password
     public void updatePassword(int userId, String newPasswordHash) throws SQLException {
         String sql = "UPDATE Users SET password_hash=?, updated_at=GETDATE() WHERE user_id=?";
@@ -311,7 +320,6 @@ public class UserDAO extends DBContext {
             ps.executeUpdate();
         }
     }
-
     // Set user status active/inactive
     public void setActive(int userId, boolean active) throws SQLException {
         String sql = "UPDATE Users SET is_active=? WHERE user_id=?";
@@ -321,23 +329,53 @@ public class UserDAO extends DBContext {
             ps.executeUpdate();
         }
     }
-
     // Delete user by ID (ensure no deletion of Admin)
     public boolean delete(int userId) throws SQLException {
-        // Check if user is Admin
         User user = findById(userId);
-        if (user != null && "Admin".equals(user.getRole())) {
+        if (user == null) {
+            return false;
+        }
+        if ("Admin".equals(user.getRole())) {
             throw new SQLException("Cannot delete Admin account!");
         }
-
-        String sql = "DELETE FROM Users WHERE user_id=?";
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setInt(1, userId);
-            int rowsAffected = ps.executeUpdate();
-            return rowsAffected > 0;
+        String sqlDeleteUser = "DELETE FROM Users WHERE user_id=?";
+        String sqlDeleteSupplier = "DELETE FROM Suppliers WHERE user_id=?";
+        try {
+            connection.setAutoCommit(false);
+            // Nếu role là Supplier thì xóa từ bảng Suppliers trước
+            if ("Supplier".equalsIgnoreCase(user.getRole())) {
+                try (PreparedStatement psSupp = connection.prepareStatement(sqlDeleteSupplier)) {
+                    psSupp.setInt(1, userId);
+                    psSupp.executeUpdate();
+                }
+            }
+            boolean deleted = false;
+            try (PreparedStatement psUser = connection.prepareStatement(sqlDeleteUser)) {
+                psUser.setInt(1, userId);
+                int rowsAffected = psUser.executeUpdate();
+                deleted = rowsAffected > 0;
+            }
+            connection.commit();
+            return deleted;
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            throw e;
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.setAutoCommit(true);
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
         }
     }
-
     // Count total users
     public int countAll() throws SQLException {
         String sql = "SELECT COUNT(*) as total FROM Users";
@@ -348,7 +386,6 @@ public class UserDAO extends DBContext {
             return 0;
         }
     }
-
     // Count active users
     public int countActive() throws SQLException {
         String sql = "SELECT COUNT(*) as total FROM Users WHERE is_active=1";
@@ -359,7 +396,6 @@ public class UserDAO extends DBContext {
             return 0;
         }
     }
-
     // Count inactive users
     public int countInactive() throws SQLException {
         String sql = "SELECT COUNT(*) as total FROM Users WHERE is_active=0";
@@ -370,7 +406,6 @@ public class UserDAO extends DBContext {
             return 0;
         }
     }
-
     // Search users by keyword (username, email, phone)
     public List<User> search(String keyword) throws SQLException {
         String sql = "SELECT * FROM Users WHERE username LIKE ? OR email LIKE ? OR phone LIKE ? ORDER BY user_id DESC";
@@ -388,7 +423,6 @@ public class UserDAO extends DBContext {
             }
         }
     }
-
     // Find users by role
     public List<User> findByRole(String role) throws SQLException {
         String sql = "SELECT * FROM Users WHERE role = ? ORDER BY user_id DESC";
@@ -403,7 +437,6 @@ public class UserDAO extends DBContext {
             }
         }
     }
-
     // Find users by status
     public List<User> findByStatus(boolean isActive) throws SQLException {
         String sql = "SELECT * FROM Users WHERE is_active = ? ORDER BY user_id DESC";
@@ -418,7 +451,6 @@ public class UserDAO extends DBContext {
             }
         }
     }
-
     public boolean promoteUserToSupplier(int userId) throws SQLException {
         String updateRoleSql = "UPDATE Users SET role = 'Supplier' WHERE user_id = ?";
         String insertSupplierSql = """
@@ -426,24 +458,20 @@ public class UserDAO extends DBContext {
         SELECT user_id, username, email, phone, '', 0.0, GETDATE(), GETDATE()
         FROM Users WHERE user_id = ? AND role = 'Supplier'
     """;
-
         try (Connection conn = getConnection()) {
             conn.setAutoCommit(false);
             try (PreparedStatement psUpdate = conn.prepareStatement(updateRoleSql)) {
                 psUpdate.setInt(1, userId);
                 int updated = psUpdate.executeUpdate();
-
                 if (updated == 0) {
                     conn.rollback();
                     return false; // user không tồn tại
                 }
             }
-
             try (PreparedStatement psInsert = conn.prepareStatement(insertSupplierSql)) {
                 psInsert.setInt(1, userId);
                 psInsert.executeUpdate();
             }
-
             conn.commit();
             return true;
         } catch (SQLException e) {
@@ -451,7 +479,6 @@ public class UserDAO extends DBContext {
             throw e;
         }
     }
-
     public boolean updateRole(int userId, String newRole) throws SQLException {
         String sql = "UPDATE Users SET role = ? WHERE user_id = ?";
         try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -461,15 +488,12 @@ public class UserDAO extends DBContext {
             return affected > 0;
         }
     }
-
     // Add to UserDAO.java
     public static List<User> getAllUsers() {
         List<User> users = new ArrayList<>();
         String sql = "SELECT user_id, username, email, phone, role, is_active, last_login "
                 + "FROM Users WHERE is_active = 1 ORDER BY username";
-
         try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
-
             while (rs.next()) {
                 User user = new User();
                 user.setUserId(rs.getInt("user_id"));
@@ -486,7 +510,6 @@ public class UserDAO extends DBContext {
         }
         return users;
     }
-
     // Thêm vào UserDAO.java
     public static boolean updateLastLogin(int userId) {
         String sql = "UPDATE Users SET last_login = GETDATE() WHERE user_id = ?";
@@ -498,7 +521,6 @@ public class UserDAO extends DBContext {
             return false;
         }
     }
-
     public User findByPhone(String phone) throws SQLException {
         String sql = "SELECT * FROM Users WHERE phone=?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -508,7 +530,6 @@ public class UserDAO extends DBContext {
             }
         }
     }
-
 // Cập nhật profile (chỉ username và phone)
     public boolean updateProfile(int userId, String username, String phone) throws SQLException {
         String sql = "UPDATE Users SET username=?, phone=?, updated_at=GETDATE() WHERE user_id=?";
@@ -520,17 +541,28 @@ public class UserDAO extends DBContext {
             return rowsAffected > 0;
         }
     }
-    
-    public User findByEmail(String email) throws SQLException {
-    String sql = "SELECT * FROM Users WHERE email = ?";
-    try (PreparedStatement ps = connection.prepareStatement(sql)) {
-        ps.setString(1, email);
-        try (ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                return mapRow(rs);
-            }
+    // Cập nhật profile cho Supplier (name, address, và sync contact_phone)
+    public boolean updateSupplierProfile(int userId, String name, String address, String contactPhone) throws SQLException {
+        String sql = "UPDATE Suppliers SET name=?, address=?, contact_phone=?, updated_at=GETDATE() WHERE user_id=?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, name);
+            ps.setString(2, address);
+            ps.setString(3, contactPhone);
+            ps.setInt(4, userId);
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
         }
     }
-    return null;
-}
+    public User findByEmail(String email) throws SQLException {
+        String sql = "SELECT * FROM Users WHERE email = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, email);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapRow(rs);
+                }
+            }
+        }
+        return null;
+    }
 }

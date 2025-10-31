@@ -54,9 +54,9 @@ public class BatchDAO extends DBContext {
 
         return list;
     }
-
-
-        // ✅ Lấy danh sách các lô có thể chọn (status: Approved hoặc Received)
+    
+    
+    // ✅ Lấy danh sách các lô có thể chọn (status: Approved hoặc Received)
   public List<Map<String, Object>> getAvailableBatches() {
     List<Map<String, Object>> list = new ArrayList<>();
     String sql = """
@@ -90,47 +90,44 @@ public class BatchDAO extends DBContext {
 
     return list;
 }
-   //--------- Add batch -------------
 
-    public boolean addBatch(Batches batch) throws SQLException {
-        // 1. Lấy unit_price từ PurchaseOrderItem
-        String priceQuery = "SELECT TOP 1 unitPrice FROM PurchaseOrderItem WHERE medicineCode = ? ORDER BY poItemId DESC";
-        double unitPrice = 0;
+    
+ 
+      // ✅ UPDATE batch info
+    public boolean updateBatch(Batches batch) {
+        String sql = "UPDATE Batches "
+                   + "SET expiry_date = ?, current_quantity = ?, status = ? "
+                   + "WHERE batch_id = ?";
         try (Connection conn = getConnection();
-                PreparedStatement ps = conn.prepareStatement(priceQuery)) {
-            ps.setString(1, batch.getMedicineCode());
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                unitPrice = rs.getDouble("unitPrice");
-            } else {
-                throw new SQLException("Không tìm thấy unitPrice cho medicineCode: " + batch.getMedicineCode());
-            }
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setDate(1, batch.getExpiryDate());
+            ps.setInt(2, batch.getCurrentQuantity());
+            ps.setString(3, batch.getStatus());
+            ps.setInt(4, batch.getBatchId());
+
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
         }
+    }
 
-        // 2. Chèn lô thuốc mới vào bảng Batches
-        String insertQuery = "INSERT INTO Batches (medicineCode, supplierId, lotNumber, expiryDate, receivedDate, initialQuantity, currentQuantity, status, quarantineNotes, createdAt, updatedAt) " +
-                             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
+    // ✅ DELETE batch
+    public boolean deleteBatch(int batchId) {
+        String sql = "DELETE FROM Batches WHERE batch_id = ?";
         try (Connection conn = getConnection();
-                PreparedStatement ps = conn.prepareStatement(insertQuery)) {
-            ps.setString(1, batch.getMedicineCode());
-            ps.setInt(2, batch.getSupplierId());
-            ps.setString(3, batch.getLotNumber());
-            ps.setDate(4, batch.getExpiryDate());
-            ps.setDate(5, batch.getReceivedDate());
-            ps.setInt(6, batch.getInitialQuantity());
-            ps.setInt(7, batch.getInitialQuantity()); // currentQuantity = initialQuantity
-            ps.setString(8, "Active"); // default status
-            ps.setString(9, batch.getQuarantineNotes());
-            Timestamp now = new Timestamp(System.currentTimeMillis());
-            ps.setTimestamp(10, now); // createdAt
-            ps.setTimestamp(11, now); // updatedAt
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            int affected = ps.executeUpdate();
-            return affected > 0;
+            ps.setInt(1, batchId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
         }
     }
 }
+
 
 
 

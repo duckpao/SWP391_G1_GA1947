@@ -425,6 +425,22 @@
         <servlet-name>PharmacistUpdateRequest</servlet-name>
         <url-pattern>/PharmacistUpdateRequest</url-pattern>
     </servlet-mapping>
+    <servlet>
+        <servlet-name>BatchUpdateServlet</servlet-name>
+        <servlet-class>Controller.BatchUpdateServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>BatchDeleteServlet</servlet-name>
+        <servlet-class>Controller.BatchDeleteServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>BatchUpdateServlet</servlet-name>
+        <url-pattern>/pharmacist/Batch-Update</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>BatchDeleteServlet</servlet-name>
+        <url-pattern>/pharmacist/Batch-Delete</url-pattern>
+    </servlet-mapping>
     <welcome-file-list>
         <welcome-file>login.jsp</welcome-file>
     </welcome-file-list>

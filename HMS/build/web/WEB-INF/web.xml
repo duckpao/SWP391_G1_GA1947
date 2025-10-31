@@ -57,8 +57,8 @@
         <servlet-class>Controller.ViewASNServlet</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>UpdateTrackingServlet</servlet-name>
-        <servlet-class>Controller.UpdateTrackingServlet</servlet-class>
+        <servlet-name>UpdateASNStatusServlet</servlet-name>
+        <servlet-class>Controller.UpdateASNStatusServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>PurchaseOrderServlet</servlet-name>
@@ -200,6 +200,14 @@
     <servlet>
         <servlet-name>EditProfileServlet</servlet-name>
         <servlet-class>Controller.EditProfileServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>CancelASNServlet</servlet-name>
+        <servlet-class>Controller.CancelASNServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>UpdateTrackingServlet</servlet-name>
+        <servlet-class>Controller.UpdateTrackingServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>UserServlet</servlet-name>
@@ -370,8 +378,8 @@
         <url-pattern>/view-asn</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>UpdateTrackingServlet</servlet-name>
-        <url-pattern>/update-tracking</url-pattern>
+        <servlet-name>UpdateASNStatusServlet</servlet-name>
+        <url-pattern>/update-asn-status</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>PurchaseOrderServlet</servlet-name>
@@ -409,7 +417,7 @@
         <servlet-name>EditProfileServlet</servlet-name>
         <url-pattern>/edit-profile</url-pattern>
     </servlet-mapping>
-      <servlet>
+    <servlet>
         <servlet-name>ViewMedicineRequest</servlet-name>
         <servlet-class>Controller.ViewMedicineRequest</servlet-class>
     </servlet>
@@ -440,6 +448,14 @@
     <servlet-mapping>
         <servlet-name>BatchDeleteServlet</servlet-name>
         <url-pattern>/pharmacist/Batch-Delete</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CancelASNServlet</servlet-name>
+        <url-pattern>/cancel-asn</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>UpdateTrackingServlet</servlet-name>
+        <url-pattern>/update-tracking</url-pattern>
     </servlet-mapping>
     <welcome-file-list>
         <welcome-file>login.jsp</welcome-file>

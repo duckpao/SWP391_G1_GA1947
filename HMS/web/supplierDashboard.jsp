@@ -590,22 +590,27 @@
             color: #495057;
             line-height: 1.6;
         }
-        /* Notification */
         .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 16px 24px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 600;
-            animation: slideIn 0.3s ease;
-            max-width: 500px;
-        }
+           position: fixed;
+           top: 20px;
+           right: 20px;
+           padding: 16px 24px;
+           border-radius: 8px;
+           box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+           z-index: 9999;
+           display: flex;
+           align-items: center;
+           gap: 12px;
+           font-weight: 600;
+           animation: slideIn 0.3s ease;
+           max-width: 500px;
+           min-width: 300px;
+       }
+
+        .notification .message {
+           flex: 1;
+           line-height: 1.4;
+       }
         @keyframes slideIn {
             from {
                 transform: translateX(100%);
@@ -733,16 +738,27 @@
             <c:if test="${not empty param.success}">
                 <div class="notification success" id="notification">
                     <i class="bi bi-check-circle-fill icon"></i>
-                    <span>${param.success}</span>
+                    <span class="message">${param.success}</span>
                     <button class="close-btn" onclick="closeNotification()">
                         <i class="bi bi-x"></i>
                     </button>
                 </div>
             </c:if>
+
             <c:if test="${not empty param.error}">
                 <div class="notification error" id="notification">
                     <i class="bi bi-exclamation-triangle-fill icon"></i>
-                    <span>${param.error}</span>
+                    <span class="message">${param.error}</span>
+                    <button class="close-btn" onclick="closeNotification()">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+            </c:if>
+
+            <c:if test="${not empty param.info}">
+                <div class="notification info" id="notification">
+                    <i class="bi bi-info-circle-fill icon"></i>
+                    <span class="message">${param.info}</span>
                     <button class="close-btn" onclick="closeNotification()">
                         <i class="bi bi-x"></i>
                     </button>
@@ -799,6 +815,11 @@
                     <i class="bi bi-box-seam"></i>
                     Completed Orders
                     <span class="tab-badge">${stats.completedCount}</span>
+                </button>
+                <button class="tab-button" onclick="showTab('asn-tracking')">
+                    <i class="bi bi-truck"></i>
+                    ASN Tracking
+                    <span class="tab-badge">${asnStats.totalASNs}</span>
                 </button>
             </div>
             <!-- Pending Orders Tab -->
@@ -1066,16 +1087,47 @@
                                         </tbody>
                                     </table>
                                 </div>
+
+                                <!-- Thông báo nếu đã có ASN -->
+                                <c:if test="${poHasASN[order.poId]}">
+                                    <div style="background: #d1ecf1; border-left: 4px solid #0c5460; border: 1px solid #bee5eb; padding: 14px; border-radius: 8px; margin-top: 16px;">
+                                        <div style="display: flex; align-items: center; gap: 10px;">
+                                            <i class="bi bi-info-circle-fill" style="font-size: 20px; color: #0c5460;"></i>
+                                            <div>
+                                                <div style="font-size: 13px; font-weight: 600; color: #0c5460; margin-bottom: 4px;">
+                                                    ASN Already Created
+                                                </div>
+                                                <div style="font-size: 12px; color: #0c5460;">
+                                                    A shipping notice has already been created for this purchase order. Check the "ASN Tracking" tab for details.
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </c:if>
+
                                 <div class="order-actions">
                                     <button class="btn btn-view" onclick="toggleDetails('approved-${order.poId}')">
                                         <i class="bi bi-eye"></i>
                                         <span id="btn-text-approved-${order.poId}">View Details</span>
                                     </button>
-                                    <a href="${pageContext.request.contextPath}/create-asn?poId=${order.poId}" class="btn btn-create-asn">
-                                        <i class="bi bi-file-earmark-plus"></i>
-                                        Create Shipping Notice (ASN)
-                                    </a>
+
+                                    <!-- Chỉ hiện nút Create ASN nếu chưa có ASN -->
+                                    <c:choose>
+                                        <c:when test="${poHasASN[order.poId]}">
+                                            <button class="btn" style="background: #6c757d; color: white; border: 1px solid #5a6268; cursor: not-allowed; flex: 1;" disabled>
+                                                <i class="bi bi-check-circle-fill"></i>
+                                                ASN Already Created
+                                            </button>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <a href="${pageContext.request.contextPath}/create-asn?poId=${order.poId}" class="btn btn-create-asn">
+                                                <i class="bi bi-file-earmark-plus"></i>
+                                                Create Shipping Notice (ASN)
+                                            </a>
+                                        </c:otherwise>
+                                    </c:choose>
                                 </div>
+
                                 <!-- Details Section -->
                                 <div id="details-approved-${order.poId}" class="order-details">
                                     <div class="details-grid">
@@ -1101,6 +1153,23 @@
                                                 <tr>
                                                     <td>Total Items:</td>
                                                     <td><strong>${order.items.size()}</strong> items</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>ASN Status:</td>
+                                                    <td>
+                                                        <c:choose>
+                                                            <c:when test="${poHasASN[order.poId]}">
+                                                                <span class="status-badge" style="background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb;">
+                                                                    <i class="bi bi-check-circle-fill"></i> Created
+                                                                </span>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <span class="status-badge" style="background: #fff3cd; color: #664d03; border: 1px solid #ffecb5;">
+                                                                    <i class="bi bi-clock"></i> Pending
+                                                                </span>
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                    </td>
                                                 </tr>
                                             </table>
                                             <c:if test="${not empty order.notes}">
@@ -1319,11 +1388,39 @@
                     </c:otherwise>
                 </c:choose>
             </div>
+            <%@ include file="/asnTracking.jsp" %>
         </div>
     </div>
 </div>
 <script>
     // Tab switching
+        // Auto hide notification sau 5 giây
+    document.addEventListener('DOMContentLoaded', function() {
+        const notification = document.getElementById('notification');
+        if (notification) {
+            setTimeout(function() {
+                closeNotification();
+            }, 5000);
+        }
+    });
+
+    // Hàm đóng notification
+    function closeNotification() {
+        const notification = document.getElementById('notification');
+        if (notification) {
+            notification.style.animation = 'slideOut 0.3s ease';
+            setTimeout(function() {
+                notification.remove();
+                
+                // Xóa params khỏi URL
+                const url = new URL(window.location);
+                url.searchParams.delete('success');
+                url.searchParams.delete('error');
+                url.searchParams.delete('info');
+                window.history.replaceState({}, '', url);
+            }, 300);
+        }
+    }
     function showTab(tabName) {
         var tabs = document.querySelectorAll('.tab-content');
         for (var i = 0; i < tabs.length; i++) {

@@ -30,7 +30,7 @@ public class CreateASNServlet extends HttpServlet {
         String poIdStr = request.getParameter("poId");
         
         if (poIdStr == null) {
-            response.sendRedirect("supplierDashboard?error=" + 
+            response.sendRedirect("supplier-dashboard?error=" + 
                 URLEncoder.encode("Missing purchase order ID", "UTF-8"));
             return;
         }
@@ -42,7 +42,7 @@ public class CreateASNServlet extends HttpServlet {
             
             Supplier supplier = supplierDAO.getSupplierByUserId(userId);
             if (supplier == null) {
-                response.sendRedirect("supplierDashboard?error=" + 
+                response.sendRedirect("supplier-dashboard?error=" + 
                     URLEncoder.encode("Supplier information not found", "UTF-8"));
                 return;
             }
@@ -50,37 +50,37 @@ public class CreateASNServlet extends HttpServlet {
             // Get PO details
             PurchaseOrder po = supplierDAO.getPurchaseOrderById(poId, supplier.getSupplierId());
             if (po == null) {
-                response.sendRedirect("supplierDashboard?error=" + 
-                    URLEncoder.encode("Purchase order not found or you don't have permission", "UTF-8"));
+                response.sendRedirect("supplier-dashboard?error=" + 
+                    URLEncoder.encode("Purchase order not found or access denied", "UTF-8"));
                 return;
             }
             
             // Check if PO is approved
             if (!"Approved".equals(po.getStatus())) {
-                response.sendRedirect("supplierDashboard?error=" + 
-                    URLEncoder.encode("Only approved orders can have shipping notices created", "UTF-8"));
+                response.sendRedirect("supplier-dashboard?error=" + 
+                    URLEncoder.encode("Only approved orders can have shipping notices", "UTF-8"));
                 return;
             }
             
             // Check if ASN already exists
             if (asnDAO.hasASNForPO(poId)) {
-                response.sendRedirect("supplierDashboard?error=" + 
+                response.sendRedirect("supplier-dashboard?error=" + 
                     URLEncoder.encode("A shipping notice already exists for this order", "UTF-8"));
                 return;
             }
             
-            // Forward to ASN form
+            // Forward to form
             request.setAttribute("po", po);
             request.setAttribute("supplier", supplier);
             request.getRequestDispatcher("/createASN.jsp").forward(request, response);
             
         } catch (NumberFormatException e) {
-            response.sendRedirect("supplierDashboard?error=" + 
+            response.sendRedirect("supplier-dashboard?error=" + 
                 URLEncoder.encode("Invalid purchase order ID", "UTF-8"));
         } catch (Exception e) {
             e.printStackTrace();
-            response.sendRedirect("supplierDashboard?error=" + 
-                URLEncoder.encode("An error occurred: " + e.getMessage(), "UTF-8"));
+            response.sendRedirect("supplier-dashboard?error=" + 
+                URLEncoder.encode("Error: " + e.getMessage(), "UTF-8"));
         }
     }
     
@@ -103,8 +103,9 @@ public class CreateASNServlet extends HttpServlet {
             String carrier = request.getParameter("carrier");
             String trackingNumber = request.getParameter("trackingNumber");
             String notes = request.getParameter("notes");
+            String submitAction = request.getParameter("submitAction"); // "draft" or "submit"
             
-            // Validate inputs
+            // Validate
             if (shipmentDateStr == null || carrier == null || trackingNumber == null) {
                 response.sendRedirect("create-asn?poId=" + poId + "&error=" + 
                     URLEncoder.encode("All required fields must be filled", "UTF-8"));
@@ -117,42 +118,50 @@ public class CreateASNServlet extends HttpServlet {
             Supplier supplier = supplierDAO.getSupplierByUserId(userId);
             
             if (supplier == null) {
-                response.sendRedirect("supplierDashboard?error=" + 
-                    URLEncoder.encode("Supplier information not found", "UTF-8"));
+                response.sendRedirect("supplier-dashboard?error=" + 
+                    URLEncoder.encode("Supplier not found", "UTF-8"));
                 return;
             }
             
-            // Create ASN
+            // Xác định trạng thái ban đầu
+            String initialStatus = "Sent"; // Mặc định là Sent (ready to ship)
+            if ("draft".equals(submitAction)) {
+                initialStatus = "Pending"; // Lưu nháp
+            }
+            
+            // Create ASN with status
             ASNDAO asnDAO = new ASNDAO();
-            boolean success = asnDAO.createASN(
+            int asnId = asnDAO.createASNWithStatus(
                 poId, 
                 supplier.getSupplierId(), 
                 shipmentDate,
                 carrier, 
                 trackingNumber, 
                 notes != null ? notes : "",
-                supplier.getName()
+                supplier.getName(),
+                initialStatus
             );
             
-            if (success) {
-                String message = "Shipping notice created successfully for Order #" + poId + 
-                                "! Tracking: " + trackingNumber;
-                response.sendRedirect("supplierDashboard?success=" + URLEncoder.encode(message, "UTF-8"));
+            if (asnId > 0) {
+                String message = "Shipping notice created successfully! ASN #" + asnId + 
+                                " (Status: " + initialStatus + ")";
+                response.sendRedirect("supplier-dashboard?success=" + 
+                    URLEncoder.encode(message, "UTF-8"));
             } else {
-                response.sendRedirect("supplierDashboard?error=" + 
-                    URLEncoder.encode("Failed to create shipping notice. Please try again.", "UTF-8"));
+                response.sendRedirect("supplier-dashboard?error=" + 
+                    URLEncoder.encode("Failed to create shipping notice", "UTF-8"));
             }
             
         } catch (NumberFormatException e) {
-            response.sendRedirect("supplierDashboard?error=" + 
+            response.sendRedirect("supplier-dashboard?error=" + 
                 URLEncoder.encode("Invalid order ID", "UTF-8"));
         } catch (IllegalArgumentException e) {
-            response.sendRedirect("supplierDashboard?error=" + 
+            response.sendRedirect("supplier-dashboard?error=" + 
                 URLEncoder.encode("Invalid date format", "UTF-8"));
         } catch (Exception e) {
             e.printStackTrace();
-            response.sendRedirect("supplierDashboard?error=" + 
-                URLEncoder.encode("Error creating shipping notice: " + e.getMessage(), "UTF-8"));
+            response.sendRedirect("supplier-dashboard?error=" + 
+                URLEncoder.encode("Error: " + e.getMessage(), "UTF-8"));
         }
     }
 }

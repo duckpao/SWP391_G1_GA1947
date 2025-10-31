@@ -4,18 +4,20 @@ import model.AdvancedShippingNotice;
 import model.ASNItem;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ASNDAO extends DBContext {
 
-    // ==================== CREATE ASN ====================
-    public boolean createASN(int poId, int supplierId, Date shipmentDate, 
+    // ==================== CREATE ASN WITH STATUS ====================
+    public int createASNWithStatus(int poId, int supplierId, Date shipmentDate, 
                             String carrier, String trackingNumber, String notes, 
-                            String submittedBy) {
+                            String submittedBy, String initialStatus) {
         String sql = "INSERT INTO AdvancedShippingNotices " +
                      "(po_id, supplier_id, shipment_date, carrier, tracking_number, " +
                      "status, notes, submitted_by, submitted_at, created_at, updated_at) " +
-                     "VALUES (?, ?, ?, ?, ?, 'Sent', ?, ?, GETDATE(), GETDATE(), GETDATE())";
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, GETDATE(), GETDATE(), GETDATE())";
 
         try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, poId);
@@ -23,8 +25,9 @@ public class ASNDAO extends DBContext {
             ps.setDate(3, shipmentDate);
             ps.setString(4, carrier);
             ps.setString(5, trackingNumber);
-            ps.setString(6, notes);
-            ps.setString(7, submittedBy);
+            ps.setString(6, initialStatus != null ? initialStatus : "Pending");
+            ps.setString(7, notes);
+            ps.setString(8, submittedBy);
             
             int rowsAffected = ps.executeUpdate();
             
@@ -34,14 +37,16 @@ public class ASNDAO extends DBContext {
                     int asnId = generatedKeys.getInt(1);
                     
                     // Copy items from PO to ASN
-                    return copyPOItemsToASN(poId, asnId);
+                    if (copyPOItemsToASN(poId, asnId)) {
+                        return asnId;
+                    }
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error in createASN: " + e.getMessage());
+            System.err.println("Error in createASNWithStatus: " + e.getMessage());
             e.printStackTrace();
         }
-        return false;
+        return -1;
     }
 
     // ==================== COPY PO ITEMS TO ASN ====================
@@ -86,9 +91,10 @@ public class ASNDAO extends DBContext {
                      "asn.carrier, asn.tracking_number, asn.status, asn.notes, " +
                      "asn.submitted_by, asn.approved_by, asn.submitted_at, asn.approved_at, " +
                      "asn.rejection_reason, asn.created_at, asn.updated_at, " +
-                     "po.status as po_status " +
+                     "po.status as po_status, s.name as supplier_name " +
                      "FROM AdvancedShippingNotices asn " +
                      "LEFT JOIN PurchaseOrders po ON asn.po_id = po.po_id " +
+                     "LEFT JOIN Suppliers s ON asn.supplier_id = s.supplier_id " +
                      "WHERE asn.supplier_id = ? " +
                      "ORDER BY asn.created_at DESC";
 
@@ -98,10 +104,7 @@ public class ASNDAO extends DBContext {
 
             while (rs.next()) {
                 AdvancedShippingNotice asn = mapResultSetToASN(rs);
-                
-                // Get items for this ASN
                 asn.setItems(getASNItems(asn.getAsnId()));
-                
                 asns.add(asn);
             }
         } catch (SQLException e) {
@@ -118,9 +121,10 @@ public class ASNDAO extends DBContext {
                      "asn.carrier, asn.tracking_number, asn.status, asn.notes, " +
                      "asn.submitted_by, asn.approved_by, asn.submitted_at, asn.approved_at, " +
                      "asn.rejection_reason, asn.created_at, asn.updated_at, " +
-                     "po.status as po_status " +
+                     "po.status as po_status, s.name as supplier_name " +
                      "FROM AdvancedShippingNotices asn " +
                      "LEFT JOIN PurchaseOrders po ON asn.po_id = po.po_id " +
+                     "LEFT JOIN Suppliers s ON asn.supplier_id = s.supplier_id " +
                      "WHERE asn.supplier_id = ? AND asn.status = ? " +
                      "ORDER BY asn.created_at DESC";
 
@@ -173,7 +177,7 @@ public class ASNDAO extends DBContext {
     public List<ASNItem> getASNItems(int asnId) {
         List<ASNItem> items = new ArrayList<>();
         String sql = "SELECT ai.item_id, ai.asn_id, ai.medicine_code, ai.quantity, ai.lot_number, " +
-                     "m.name as medicine_name, m.strength, m.unit " +
+                     "m.name as medicine_name, m.strength, m.unit, m.category " +
                      "FROM ASNItems ai " +
                      "LEFT JOIN Medicines m ON ai.medicine_code = m.medicine_code " +
                      "WHERE ai.asn_id = ?";
@@ -202,13 +206,13 @@ public class ASNDAO extends DBContext {
     }
 
     // ==================== UPDATE ASN STATUS ====================
-    public boolean updateASNStatus(int asnId, String status) {
+    public boolean updateASNStatus(int asnId, String newStatus) {
         String sql = "UPDATE AdvancedShippingNotices " +
                      "SET status = ?, updated_at = GETDATE() " +
                      "WHERE asn_id = ?";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setString(1, status);
+            ps.setString(1, newStatus);
             ps.setInt(2, asnId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -236,63 +240,63 @@ public class ASNDAO extends DBContext {
         return false;
     }
 
-    // ==================== UPDATE LOT NUMBERS ====================
-    public boolean updateItemLotNumber(int itemId, String lotNumber) {
-        String sql = "UPDATE ASNItems SET lot_number = ? WHERE item_id = ?";
+    // ==================== MARK AS SHIPPED (Pending -> Sent) ====================
+    public boolean markAsShipped(int asnId) {
+        return updateASNStatus(asnId, "Sent");
+    }
+
+    // ==================== MARK AS IN TRANSIT (Sent -> InTransit) ====================
+    public boolean markAsInTransit(int asnId) {
+        return updateASNStatus(asnId, "InTransit");
+    }
+
+    // ==================== CANCEL ASN ====================
+    public boolean cancelASN(int asnId, String reason) {
+        String sql = "UPDATE AdvancedShippingNotices " +
+                     "SET status = 'Cancelled', rejection_reason = ?, updated_at = GETDATE() " +
+                     "WHERE asn_id = ? AND status IN ('Pending', 'Sent')";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setString(1, lotNumber);
-            ps.setInt(2, itemId);
+            ps.setString(1, reason);
+            ps.setInt(2, asnId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.err.println("Error in updateItemLotNumber: " + e.getMessage());
+            System.err.println("Error in cancelASN: " + e.getMessage());
             e.printStackTrace();
         }
         return false;
     }
 
-    // ==================== DELETE ASN ====================
-    public boolean deleteASN(int asnId) {
-        // First delete ASN items (cascade should handle this, but explicit is better)
-        String deleteItems = "DELETE FROM ASNItems WHERE asn_id = ?";
-        String deleteASN = "DELETE FROM AdvancedShippingNotices WHERE asn_id = ?";
-
-        try {
-            // Delete items first
-            try (PreparedStatement ps = connection.prepareStatement(deleteItems)) {
-                ps.setInt(1, asnId);
-                ps.executeUpdate();
-            }
-            
-            // Then delete ASN
-            try (PreparedStatement ps = connection.prepareStatement(deleteASN)) {
-                ps.setInt(1, asnId);
-                return ps.executeUpdate() > 0;
-            }
-        } catch (SQLException e) {
-            System.err.println("Error in deleteASN: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    // ==================== GET ASN STATS BY SUPPLIER ====================
-    public int getASNCountByStatus(int supplierId, String status) {
-        String sql = "SELECT COUNT(*) FROM AdvancedShippingNotices " +
-                     "WHERE supplier_id = ? AND status = ?";
+    // ==================== GET ASN STATISTICS ====================
+    public Map<String, Integer> getASNStatsBySupplier(int supplierId) {
+        Map<String, Integer> stats = new HashMap<>();
+        String sql = "SELECT " +
+                     "COUNT(CASE WHEN status = 'Pending' THEN 1 END) as pending_count, " +
+                     "COUNT(CASE WHEN status = 'Sent' THEN 1 END) as sent_count, " +
+                     "COUNT(CASE WHEN status = 'InTransit' THEN 1 END) as in_transit_count, " +
+                     "COUNT(CASE WHEN status = 'Delivered' THEN 1 END) as delivered_count, " +
+                     "COUNT(CASE WHEN status = 'Rejected' THEN 1 END) as rejected_count, " +
+                     "COUNT(*) as total_count " +
+                     "FROM AdvancedShippingNotices " +
+                     "WHERE supplier_id = ?";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, supplierId);
-            ps.setString(2, status);
             ResultSet rs = ps.executeQuery();
+
             if (rs.next()) {
-                return rs.getInt(1);
+                stats.put("pendingCount", rs.getInt("pending_count"));
+                stats.put("sentCount", rs.getInt("sent_count"));
+                stats.put("inTransitCount", rs.getInt("in_transit_count"));
+                stats.put("deliveredCount", rs.getInt("delivered_count"));
+                stats.put("rejectedCount", rs.getInt("rejected_count"));
+                stats.put("totalCount", rs.getInt("total_count"));
             }
         } catch (SQLException e) {
-            System.err.println("Error in getASNCountByStatus: " + e.getMessage());
+            System.err.println("Error in getASNStatsBySupplier: " + e.getMessage());
             e.printStackTrace();
         }
-        return 0;
+        return stats;
     }
 
     // ==================== HELPER: MAP RESULTSET TO ASN ====================
@@ -322,6 +326,8 @@ public class ASNDAO extends DBContext {
         asn.setRejectionReason(rs.getString("rejection_reason"));
         asn.setCreatedAt(rs.getTimestamp("created_at"));
         asn.setUpdatedAt(rs.getTimestamp("updated_at"));
+        asn.setPoStatus(rs.getString("po_status"));
+        asn.setSupplierName(rs.getString("supplier_name"));
         
         return asn;
     }

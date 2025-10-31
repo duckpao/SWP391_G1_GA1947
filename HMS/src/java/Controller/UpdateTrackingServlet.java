@@ -1,9 +1,7 @@
 package Controller;
 
 import DAO.ASNDAO;
-import DAO.SupplierDAO;
 import model.AdvancedShippingNotice;
-import model.Supplier;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -11,7 +9,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
-import java.net.URLEncoder;
 
 public class UpdateTrackingServlet extends HttpServlet {
     
@@ -25,61 +22,36 @@ public class UpdateTrackingServlet extends HttpServlet {
             return;
         }
         
-        Integer userId = (Integer) session.getAttribute("userId");
-        String asnIdStr = request.getParameter("asnId");
-        
-        if (asnIdStr == null) {
-            response.sendRedirect("supplierDashboard?error=" + 
-                URLEncoder.encode("Missing ASN ID", "UTF-8"));
-            return;
-        }
-        
         try {
-            int asnId = Integer.parseInt(asnIdStr);
-            
-            SupplierDAO supplierDAO = new SupplierDAO();
-            Supplier supplier = supplierDAO.getSupplierByUserId(userId);
-            
-            if (supplier == null) {
-                response.sendRedirect("supplierDashboard?error=" + 
-                    URLEncoder.encode("Supplier information not found", "UTF-8"));
-                return;
-            }
+            int asnId = Integer.parseInt(request.getParameter("asnId"));
             
             ASNDAO asnDAO = new ASNDAO();
             AdvancedShippingNotice asn = asnDAO.getASNById(asnId);
             
             if (asn == null) {
-                response.sendRedirect("supplierDashboard?error=" + 
-                    URLEncoder.encode("Shipping notice not found", "UTF-8"));
+                response.sendRedirect("supplier-dashboard?error=" + 
+                    java.net.URLEncoder.encode("ASN not found!", "UTF-8"));
                 return;
             }
             
-            // Verify ownership
-            if (asn.getSupplierId() != supplier.getSupplierId()) {
-                response.sendRedirect("supplierDashboard?error=" + 
-                    URLEncoder.encode("Access denied", "UTF-8"));
-                return;
-            }
-            
-            // Only allow updates if status is "Sent"
-            if (!"Sent".equals(asn.getStatus())) {
-                response.sendRedirect("supplierDashboard?error=" + 
-                    URLEncoder.encode("Cannot update tracking for shipped items", "UTF-8"));
+            // Kiểm tra xem ASN có thể chỉnh sửa không (chỉ Pending hoặc Sent)
+            if (!"Pending".equals(asn.getStatus()) && !"Sent".equals(asn.getStatus())) {
+                response.sendRedirect("supplier-dashboard?error=" + 
+                    java.net.URLEncoder.encode("This ASN cannot be edited anymore (Status: " + 
+                    asn.getStatus() + ")", "UTF-8"));
                 return;
             }
             
             request.setAttribute("asn", asn);
-            request.setAttribute("supplier", supplier);
-            request.getRequestDispatcher("/jsp/updateTracking.jsp").forward(request, response);
+            request.getRequestDispatcher("/editTracking.jsp").forward(request, response);
             
         } catch (NumberFormatException e) {
-            response.sendRedirect("supplierDashboard?error=" + 
-                URLEncoder.encode("Invalid ASN ID", "UTF-8"));
+            response.sendRedirect("supplier-dashboard?error=" + 
+                java.net.URLEncoder.encode("Invalid ASN ID!", "UTF-8"));
         } catch (Exception e) {
             e.printStackTrace();
-            response.sendRedirect("supplierDashboard?error=" + 
-                URLEncoder.encode("Error: " + e.getMessage(), "UTF-8"));
+            response.sendRedirect("supplier-dashboard?error=" + 
+                java.net.URLEncoder.encode("Error loading ASN: " + e.getMessage(), "UTF-8"));
         }
     }
     
@@ -93,58 +65,60 @@ public class UpdateTrackingServlet extends HttpServlet {
             return;
         }
         
-        Integer userId = (Integer) session.getAttribute("userId");
-        
         try {
             int asnId = Integer.parseInt(request.getParameter("asnId"));
             String carrier = request.getParameter("carrier");
             String trackingNumber = request.getParameter("trackingNumber");
-            String newStatus = request.getParameter("status");
             
-            if (carrier == null || trackingNumber == null) {
+            // Validate inputs
+            if (carrier == null || carrier.trim().isEmpty() || 
+                trackingNumber == null || trackingNumber.trim().isEmpty()) {
                 response.sendRedirect("update-tracking?asnId=" + asnId + "&error=" + 
-                    URLEncoder.encode("All fields are required", "UTF-8"));
-                return;
-            }
-            
-            SupplierDAO supplierDAO = new SupplierDAO();
-            Supplier supplier = supplierDAO.getSupplierByUserId(userId);
-            
-            if (supplier == null) {
-                response.sendRedirect("supplierDashboard?error=" + 
-                    URLEncoder.encode("Supplier not found", "UTF-8"));
+                    java.net.URLEncoder.encode("All fields are required!", "UTF-8"));
                 return;
             }
             
             ASNDAO asnDAO = new ASNDAO();
-            AdvancedShippingNotice asn = asnDAO.getASNById(asnId);
             
-            if (asn == null || asn.getSupplierId() != supplier.getSupplierId()) {
-                response.sendRedirect("supplierDashboard?error=" + 
-                    URLEncoder.encode("Access denied", "UTF-8"));
+            // Kiểm tra ASN tồn tại
+            AdvancedShippingNotice asn = asnDAO.getASNById(asnId);
+            if (asn == null) {
+                response.sendRedirect("supplier-dashboard?error=" + 
+                    java.net.URLEncoder.encode("ASN not found!", "UTF-8"));
+                return;
+            }
+            
+            // Kiểm tra trạng thái có thể chỉnh sửa
+            if (!"Pending".equals(asn.getStatus()) && !"Sent".equals(asn.getStatus())) {
+                response.sendRedirect("supplier-dashboard?error=" + 
+                    java.net.URLEncoder.encode("This ASN cannot be edited anymore!", "UTF-8"));
                 return;
             }
             
             // Update tracking info
-            boolean updated = asnDAO.updateTrackingInfo(asnId, carrier, trackingNumber);
+            boolean success = asnDAO.updateTrackingInfo(asnId, carrier.trim(), trackingNumber.trim());
             
-            // Update status if provided
-            if (newStatus != null && !newStatus.isEmpty() && !newStatus.equals(asn.getStatus())) {
-                asnDAO.updateASNStatus(asnId, newStatus);
-            }
-            
-            if (updated) {
-                String message = "Tracking information updated successfully! ASN #" + asnId;
-                response.sendRedirect("supplierDashboard?success=" + URLEncoder.encode(message, "UTF-8"));
+            if (success) {
+                System.out.println("=== TRACKING INFO UPDATED ===");
+                System.out.println("ASN ID: " + asnId);
+                System.out.println("New Carrier: " + carrier);
+                System.out.println("New Tracking: " + trackingNumber);
+                
+                response.sendRedirect("supplier-dashboard?success=" + 
+                    java.net.URLEncoder.encode("Tracking information updated successfully for ASN #" + 
+                    asnId, "UTF-8"));
             } else {
-                response.sendRedirect("supplierDashboard?error=" + 
-                    URLEncoder.encode("Failed to update tracking information", "UTF-8"));
+                response.sendRedirect("update-tracking?asnId=" + asnId + "&error=" + 
+                    java.net.URLEncoder.encode("Failed to update tracking information!", "UTF-8"));
             }
             
+        } catch (NumberFormatException e) {
+            response.sendRedirect("supplier-dashboard?error=" + 
+                java.net.URLEncoder.encode("Invalid ASN ID!", "UTF-8"));
         } catch (Exception e) {
             e.printStackTrace();
-            response.sendRedirect("supplierDashboard?error=" + 
-                URLEncoder.encode("Error updating tracking: " + e.getMessage(), "UTF-8"));
+            response.sendRedirect("supplier-dashboard?error=" + 
+                java.net.URLEncoder.encode("Error updating tracking: " + e.getMessage(), "UTF-8"));
         }
     }
 }

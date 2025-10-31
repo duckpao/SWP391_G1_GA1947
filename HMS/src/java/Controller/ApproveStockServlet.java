@@ -9,7 +9,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 
-@WebServlet(name = "ApproveStockServlet", urlPatterns = {"/approve-stock"})
 public class ApproveStockServlet extends HttpServlet {
 
     @Override

@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Shipping Notice (ASN)</title>
+    <title>Update Tracking Information - ASN #${asn.asnId}</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     
@@ -25,7 +25,7 @@
         }
 
         .container {
-            max-width: 900px;
+            max-width: 800px;
             margin: 0 auto;
         }
 
@@ -66,12 +66,12 @@
         }
 
         .form-header h1 {
-            font-size: 28px;
+            font-size: 24px;
             color: #1f2937;
             flex: 1;
         }
 
-        .po-info-box {
+        .asn-info-box {
             background: #f0f9ff;
             border-left: 4px solid #3b82f6;
             padding: 20px;
@@ -79,25 +79,51 @@
             margin-bottom: 32px;
         }
 
-        .po-info-row {
+        .info-row {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(2, 1fr);
             gap: 20px;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
 
-        .po-info-item label {
+        .info-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-item label {
             font-size: 12px;
             color: #6b7280;
             font-weight: 600;
             display: block;
             margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .po-info-item span {
+        .info-item span {
             font-size: 15px;
             color: #1f2937;
             font-weight: 600;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #664d03;
+            border: 1px solid #ffecb5;
+        }
+
+        .status-sent {
+            background: #cfe2ff;
+            color: #084298;
+            border: 1px solid #9ec5fe;
         }
 
         .form-section {
@@ -146,38 +172,10 @@
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
-        textarea.form-control {
-            min-height: 100px;
-            resize: vertical;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-        }
-
-        .items-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 16px;
-        }
-
-        .items-table th {
-            background: #f9fafb;
-            padding: 12px;
-            text-align: left;
+        .help-text {
             font-size: 13px;
-            font-weight: 600;
             color: #6b7280;
-            border-bottom: 2px solid #e5e7eb;
-        }
-
-        .items-table td {
-            padding: 14px 12px;
-            border-bottom: 1px solid #f3f4f6;
-            font-size: 14px;
-            color: #1f2937;
+            margin-top: 6px;
         }
 
         .form-actions {
@@ -220,12 +218,6 @@
 
         .btn-secondary:hover {
             background: #e5e7eb;
-        }
-
-        .help-text {
-            font-size: 13px;
-            color: #6b7280;
-            margin-top: 6px;
         }
 
         /* Notification Styles */
@@ -308,8 +300,7 @@
         }
 
         @media (max-width: 768px) {
-            .po-info-row,
-            .form-row {
+            .info-row {
                 grid-template-columns: 1fr;
             }
         }
@@ -346,112 +337,69 @@
                 <i class="bi bi-arrow-left"></i>
             </button>
             <h1>
-                <i class="bi bi-file-earmark-plus"></i>
-                Create Advanced Shipping Notice (ASN)
+                <i class="bi bi-pencil-square"></i>
+                Update Tracking Information
             </h1>
         </div>
 
-        <!-- PO Information -->
-        <div class="po-info-box">
-            <div class="po-info-row">
-                <div class="po-info-item">
+        <!-- ASN Information -->
+        <div class="asn-info-box">
+            <div class="info-row">
+                <div class="info-item">
+                    <label>ASN ID</label>
+                    <span>ASN #${asn.asnId}</span>
+                </div>
+                <div class="info-item">
                     <label>Purchase Order</label>
-                    <span>PO #${po.poId}</span>
-                </div>
-                <div class="po-info-item">
-                    <label>Order Date</label>
-                    <span><fmt:formatDate value="${po.orderDate}" pattern="dd MMM yyyy"/></span>
-                </div>
-                <div class="po-info-item">
-                    <label>Expected Delivery</label>
-                    <span><fmt:formatDate value="${po.expectedDeliveryDate}" pattern="dd MMM yyyy"/></span>
+                    <span>PO #${asn.poId}</span>
                 </div>
             </div>
-            <div class="po-info-row">
-                <div class="po-info-item">
-                    <label>Total Items</label>
-                    <span>${po.items.size()} items</span>
+            <div class="info-row">
+                <div class="info-item">
+                    <label>Current Status</label>
+                    <span class="status-badge status-${asn.status.toLowerCase()}">
+                        ${asn.status}
+                    </span>
                 </div>
-                <div class="po-info-item">
-                    <label>Supplier</label>
-                    <span>${supplier.name}</span>
+                <div class="info-item">
+                    <label>Created</label>
+                    <span><fmt:formatDate value="${asn.createdAt}" pattern="dd MMM yyyy, HH:mm"/></span>
                 </div>
             </div>
         </div>
 
-        <!-- ASN Form -->
-        <form action="create-asn" method="POST" onsubmit="return validateForm()">
-            <input type="hidden" name="poId" value="${po.poId}">
+        <!-- Edit Form -->
+        <form action="update-tracking" method="POST" onsubmit="return validateForm()">
+            <input type="hidden" name="asnId" value="${asn.asnId}">
 
             <div class="form-section">
                 <div class="section-title">
                     <i class="bi bi-truck"></i>
-                    Shipping Information
+                    Tracking Information
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Shipment Date <span class="required">*</span></label>
-                        <input type="date" name="shipmentDate" class="form-control" required 
-                               min="<%= new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date()) %>">
-                        <div class="help-text">When will the shipment depart?</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Carrier <span class="required">*</span></label>
-                        <select name="carrier" class="form-control" required>
-                            <option value="">-- Select Carrier --</option>
-                            <option value="Vietnam Post">Vietnam Post</option>
-                            <option value="Grab Express">Grab Express</option>
-                            <option value="Shopee Express">Shopee Express</option>
-                            <option value="Kerry Express">Kerry Express</option>
-                            <option value="DHL">DHL</option>
-                            <option value="FedEx">FedEx</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
+                <div class="form-group">
+                    <label>Carrier <span class="required">*</span></label>
+                    <select name="carrier" class="form-control" required>
+                        <option value="">-- Select Carrier --</option>
+                        <option value="Vietnam Post" ${asn.carrier == 'Vietnam Post' ? 'selected' : ''}>Vietnam Post</option>
+                        <option value="Grab Express" ${asn.carrier == 'Grab Express' ? 'selected' : ''}>Grab Express</option>
+                        <option value="Shopee Express" ${asn.carrier == 'Shopee Express' ? 'selected' : ''}>Shopee Express</option>
+                        <option value="Kerry Express" ${asn.carrier == 'Kerry Express' ? 'selected' : ''}>Kerry Express</option>
+                        <option value="DHL" ${asn.carrier == 'DHL' ? 'selected' : ''}>DHL</option>
+                        <option value="FedEx" ${asn.carrier == 'FedEx' ? 'selected' : ''}>FedEx</option>
+                        <option value="Other" ${asn.carrier == 'Other' ? 'selected' : ''}>Other</option>
+                    </select>
+                    <div class="help-text">Current: ${asn.carrier}</div>
                 </div>
 
                 <div class="form-group">
                     <label>Tracking Number <span class="required">*</span></label>
-                    <input type="text" name="trackingNumber" class="form-control" required 
-                           placeholder="Enter tracking number">
-                    <div class="help-text">Provide the carrier's tracking number for this shipment</div>
+                    <input type="text" name="trackingNumber" class="form-control" 
+                           value="${asn.trackingNumber}" required 
+                           placeholder="Enter new tracking number">
+                    <div class="help-text">Update the carrier's tracking number if it has changed</div>
                 </div>
-
-                <div class="form-group">
-                    <label>Additional Notes</label>
-                    <textarea name="notes" class="form-control" 
-                              placeholder="Any special handling instructions or notes about this shipment..."></textarea>
-                </div>
-            </div>
-
-            <div class="form-section">
-                <div class="section-title">
-                    <i class="bi bi-box-seam"></i>
-                    Items Being Shipped
-                </div>
-
-                <table class="items-table">
-                    <thead>
-                        <tr>
-                            <th>Medicine Code</th>
-                            <th>Medicine Name</th>
-                            <th>Quantity</th>
-                            <th>Unit</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <c:forEach var="item" items="${po.items}">
-                            <tr>
-                                <td><strong>${item.medicineCode}</strong></td>
-                                <td>${item.medicineName}</td>
-                                <td><strong>${item.quantity}</strong></td>
-                                <td>${item.unit != null ? item.unit : '-'}</td>
-                            </tr>
-                        </c:forEach>
-                    </tbody>
-                </table>
             </div>
 
             <div class="form-actions">
@@ -461,7 +409,7 @@
                 </button>
                 <button type="submit" class="btn btn-primary">
                     <i class="bi bi-check-circle"></i>
-                    Create Shipping Notice
+                    Update Tracking Info
                 </button>
             </div>
         </form>
@@ -495,16 +443,15 @@
     }
 
     function validateForm() {
-        const shipmentDate = document.querySelector('input[name="shipmentDate"]').value;
         const carrier = document.querySelector('select[name="carrier"]').value;
         const trackingNumber = document.querySelector('input[name="trackingNumber"]').value;
 
-        if (!shipmentDate || !carrier || !trackingNumber) {
+        if (!carrier || !trackingNumber) {
             alert('Please fill in all required fields');
             return false;
         }
 
-        return confirm('Are you sure you want to create this shipping notice? The hospital will be notified about the shipment.');
+        return confirm('Are you sure you want to update the tracking information for this shipment?');
     }
 </script>
 

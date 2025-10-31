@@ -1,4 +1,5 @@
-<%@ page contentType="text/html" pageEncoding="UTF-8"%>
+
+page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html>
@@ -8,6 +9,7 @@
     <title>Create Stock Request</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -476,7 +478,7 @@
                     <!-- Total Summary Box -->
                     <div id="totalSummary" class="total-summary">
                         <div class="total-label">Total Amount:</div>
-                        <div class="total-amount" id="totalAmount">0 VNĐ</div>
+                        <div class="total-amount" id="totalAmount">0 VN?</div>
                     </div>
 
                     <button type="button" class="btn-add-medicine" onclick="addMedicineItem()">
@@ -602,7 +604,7 @@
                 // Unit Price (NEW)
                 '<div class="form-group">' +
                 '<label for="unitPrice_' + index + '">' +
-                'Unit Price (VNĐ) <span class="required">*</span>' +
+                'Unit Price (VN?) <span class="required">*</span>' +
                 '</label>' +
                 '<div class="input-wrapper">' +
                 '<i class="bi bi-currency-dollar input-icon"></i>' +
@@ -665,7 +667,7 @@
             }
 
             // Format number with Vietnamese currency format
-            var formattedTotal = total.toLocaleString('vi-VN') + ' VNĐ';
+            var formattedTotal = total.toLocaleString('vi-VN') + ' VN?';
             document.getElementById('totalAmount').textContent = formattedTotal;
 
             // Show/hide summary box

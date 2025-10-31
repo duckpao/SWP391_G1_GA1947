@@ -2,6 +2,8 @@
     Header component for PWMS
     Encoding: UTF-8
 --%>
+<!-- Bootstrap CSS -->
+
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <style>
     .main-header {
@@ -171,6 +173,7 @@
     }
 </style>
 
+
 <header class="main-header">
     <div class="header-container">
 
@@ -208,6 +211,8 @@
         <div class="header-nav">
     <c:if test="${not empty sessionScope.user}">
         
+        <%-- Thêm Notification Badge ? ?ây --%>
+        <%@ include file="/notif/notification-badge.jsp" %>
         
         <c:if test="${sessionScope.user.role == 'Admin'}">
             <a href="/HMS/admin-dashboard" 

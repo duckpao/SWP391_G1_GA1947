@@ -209,6 +209,14 @@
         <servlet-name>UpdateTrackingServlet</servlet-name>
         <servlet-class>Controller.UpdateTrackingServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>NotificationServlet</servlet-name>
+        <servlet-class>Controller.NotificationServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>AdminNotificationServlet</servlet-name>
+        <servlet-class>Controller.AdminNotificationServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>UserServlet</servlet-name>
         <url-pattern>/admin-dashboard</url-pattern>
@@ -456,6 +464,14 @@
     <servlet-mapping>
         <servlet-name>UpdateTrackingServlet</servlet-name>
         <url-pattern>/update-tracking</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>NotificationServlet</servlet-name>
+        <url-pattern>/notifications</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AdminNotificationServlet</servlet-name>
+        <url-pattern>/admin-dashboard/notifications</url-pattern>
     </servlet-mapping>
     <welcome-file-list>
         <welcome-file>login.jsp</welcome-file>

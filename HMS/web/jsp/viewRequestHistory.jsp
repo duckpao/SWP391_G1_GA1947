@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lịch sử yêu cầu - Hệ thống quản lý kho bệnh viện</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -310,7 +311,7 @@
         }
     </style>
 </head>
-<%@ include file="header.jsp" %>
+<%@ include file="/admin/header.jsp" %>
 <body>
     <div class="container">
         <!-- Header -->
@@ -416,6 +417,6 @@
         </div>
     </div>
 </body>
-<%@ include file="footer.jsp" %>
+<%@ include file="/admin/footer.jsp" %>
 
 </html>

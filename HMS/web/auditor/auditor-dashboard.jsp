@@ -1,5 +1,6 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page contentType="text/html; charset=UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -8,6 +9,7 @@
         <title>Auditor Dashboard</title>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         <style>
             * {
                 margin: 0;
@@ -378,9 +380,9 @@
             }
         </style>
     </head>
-    <%@ include file="header.jsp" %>
+    
     <body>
-        
+        <%@ include file="/admin/header.jsp" %>
             <div class="dashboard-container">
                 <!-- Sidebar -->
                 <div class="sidebar">
@@ -528,6 +530,9 @@
                     </div>
                 </div>
             </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>                                
+    <%@ include file="/admin/footer.jsp" %>
+    
     </body>
-    <%@ include file="footer.jsp" %>
+    
 </html>

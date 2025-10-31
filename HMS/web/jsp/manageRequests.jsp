@@ -339,7 +339,7 @@
     </style>
 </head>
 <body>
-    <%@ include file="header.jsp" %>
+    <%@ include file="/admin/header.jsp" %>
 
     <div class="page-wrapper">
         <div class="main">
@@ -437,7 +437,7 @@
         </div>
     </div>
 
-    <%@ include file="footer.jsp" %>
+    <%@ include file="/admin/footer.jsp" %>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

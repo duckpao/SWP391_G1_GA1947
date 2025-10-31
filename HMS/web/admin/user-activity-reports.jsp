@@ -602,6 +602,9 @@
                     <a class="sidebar-item" href="${pageContext.request.contextPath}/admin-dashboard/config">
                         ⚙️ Cấu hình
                     </a>
+                        <a class="sidebar-item" href="${pageContext.request.contextPath}/admin-dashboard/notifications">
+                        🛎 ️Gửi Thông báo
+                    </a>
                     <a class="sidebar-item" href="${pageContext.request.contextPath}/admin/permissions">
                         🔐 Phân quyền
                     </a>

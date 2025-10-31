@@ -8,6 +8,7 @@
     <title>Hệ Thống Nhắn Tin - ${sessionScope.user.username}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
         body {
             background-color: #ffffff;
@@ -311,7 +312,7 @@
     </style>
 </head>
 <body>
-    <jsp:include page="header.jsp" />
+    <jsp:include page="/admin/header.jsp" />
 
     <div class="chat-main-container">
         <div class="chat-header-title">

@@ -175,7 +175,7 @@
                     dashboardUrl = 'admin-dashboard';
                     break;
                 case 'supplier':
-                    dashboardUrl = 'supplier-dashboard';
+                    dashboardUrl = 'supplierDashboard';
                     break;
                 case 'auditor':
                     dashboardUrl = 'auditor-dashboard';
@@ -184,7 +184,7 @@
                     dashboardUrl = 'doctor-dashboard';
                     break;
                 case 'pharmacist':
-                    dashboardUrl = 'pharmacist-dashboard';
+                    dashboardUrl = 'view-medicine';
                     break;
                 default:
                     dashboardUrl = 'logout';

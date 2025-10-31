@@ -455,8 +455,8 @@ VALUES (?, ?, ?, ?, '', NULL, GETDATE(), GETDATE())
         String updateRoleSql = "UPDATE Users SET role = 'Supplier' WHERE user_id = ?";
         String insertSupplierSql = """
         INSERT INTO Suppliers (user_id, name, contact_email, contact_phone, address, performance_rating, created_at, updated_at)
-        SELECT user_id, username, email, phone, '', 0.0, GETDATE(), GETDATE()
-        FROM Users WHERE user_id = ? AND role = 'Supplier'
+        SELECT user_id, username, email, phone, '', NULL, GETDATE(), GETDATE()
+        FROM Users WHERE user_id = ?
     """;
         try (Connection conn = getConnection()) {
             conn.setAutoCommit(false);
@@ -553,6 +553,42 @@ VALUES (?, ?, ?, ?, '', NULL, GETDATE(), GETDATE())
             return rowsAffected > 0;
         }
     }
+    // Insert new Supplier
+    public void insertSupplier(int userId, String name, String contactEmail, String contactPhone, String address) throws SQLException {
+        String sql = """
+            INSERT INTO Suppliers (user_id, name, contact_email, contact_phone, address, performance_rating, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, NULL, GETDATE(), GETDATE())
+        """;
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.setString(2, name);
+            ps.setString(3, contactEmail);
+            ps.setString(4, contactPhone);
+            ps.setString(5, address);
+            ps.executeUpdate();
+        }
+    }
+    // Update Supplier (name, contact_email, contact_phone, address)
+    public boolean updateSupplier(int userId, String name, String contactEmail, String contactPhone, String address) throws SQLException {
+        String sql = "UPDATE Suppliers SET name=?, contact_email=?, contact_phone=?, address=?, updated_at=GETDATE() WHERE user_id=?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, name);
+            ps.setString(2, contactEmail);
+            ps.setString(3, contactPhone);
+            ps.setString(4, address);
+            ps.setInt(5, userId);
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+        }
+    }
+    // Delete Supplier by userId
+    public void deleteSupplierByUserId(int userId) throws SQLException {
+        String sql = "DELETE FROM Suppliers WHERE user_id=?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.executeUpdate();
+        }
+    }
     public User findByEmail(String email) throws SQLException {
         String sql = "SELECT * FROM Users WHERE email = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -560,6 +596,34 @@ VALUES (?, ?, ?, ?, '', NULL, GETDATE(), GETDATE())
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return mapRow(rs);
+                }
+            }
+        }
+        return null;
+    }
+    public Supplier findSupplierByName(String name) throws SQLException {
+        String sql = "SELECT * FROM Suppliers WHERE name = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, name);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Supplier supplier = new Supplier();
+                    supplier.setSupplierId(rs.getInt("supplier_id"));
+                    supplier.setUserId(rs.getInt("user_id"));
+                    supplier.setName(rs.getString("name"));
+                    supplier.setContactEmail(rs.getString("contact_email"));
+                    supplier.setContactPhone(rs.getString("contact_phone"));
+                    supplier.setAddress(rs.getString("address"));
+                    supplier.setPerformanceRating(rs.getDouble("performance_rating"));
+                    Timestamp createdTs = rs.getTimestamp("created_at");
+                    if (createdTs != null) {
+                        supplier.setCreatedAt(createdTs.toLocalDateTime());
+                    }
+                    Timestamp updatedTs = rs.getTimestamp("updated_at");
+                    if (updatedTs != null) {
+                        supplier.setUpdatedAt(updatedTs.toLocalDateTime());
+                    }
+                    return supplier;
                 }
             }
         }

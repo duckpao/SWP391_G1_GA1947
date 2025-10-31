@@ -92,7 +92,7 @@ public class VerifyOTPServlet extends HttpServlet {
             String password = (String) session.getAttribute("password");
 
             String hashedPassword = PasswordUtils.hash(password);
-            User newUser = new User(0, username, email, phone, hashedPassword, "Pharmacist");
+            User newUser = new User(0, username, email, phone, hashedPassword, "none");
 
             UserDAO dao = new UserDAO();
             boolean ok = dao.register(newUser);

@@ -2204,3 +2204,263 @@ PRINT '  - sp_GetUserActionTimeline';
 PRINT '';
 PRINT 'PART 8 COMPLETED!';
 GO
+
+
+
+-- Supplier cho Công ty Dược B
+IF NOT EXISTS (SELECT 1 FROM Users WHERE username = 'supplier_duocb')
+BEGIN
+    INSERT INTO Users (username, password_hash, email, phone, role, is_active)
+    VALUES ('supplier_duocb', '$2a$12$AfoWp3rMoA9hMUNmTSFZOOsW0CQXp56TjuapkN8OwRDkziBqhL4Qi', 
+            'supplier@duocb.vn', '0905555556', 'Supplier', 1);
+    PRINT 'Created user: supplier_duocb';
+END
+
+-- Supplier cho Công ty Dược C
+IF NOT EXISTS (SELECT 1 FROM Users WHERE username = 'supplier_duocc')
+BEGIN
+    INSERT INTO Users (username, password_hash, email, phone, role, is_active)
+    VALUES ('supplier_duocc', '$2a$12$AfoWp3rMoA9hMUNmTSFZOOsW0CQXp56TjuapkN8OwRDkziBqhL4Qi', 
+            'supplier@duocc.vn', '0907777777', 'Supplier', 1);
+    PRINT 'Created user: supplier_duocc';
+END
+
+-- Supplier cho Công ty Dược D
+IF NOT EXISTS (SELECT 1 FROM Users WHERE username = 'supplier_duocd')
+BEGIN
+    INSERT INTO Users (username, password_hash, email, phone, role, is_active)
+    VALUES ('supplier_duocd', '$2a$12$AfoWp3rMoA9hMUNmTSFZOOsW0CQXp56TjuapkN8OwRDkziBqhL4Qi', 
+            'supplier@duocd.vn', '0908888888', 'Supplier', 1);
+    PRINT 'Created user: supplier_duocd';
+END
+
+-- Supplier cho Công ty Dược E
+IF NOT EXISTS (SELECT 1 FROM Users WHERE username = 'supplier_duoce')
+BEGIN
+    INSERT INTO Users (username, password_hash, email, phone, role, is_active)
+    VALUES ('supplier_duoce', '$2a$12$AfoWp3rMoA9hMUNmTSFZOOsW0CQXp56TjuapkN8OwRDkziBqhL4Qi', 
+            'supplier@duoce.vn', '0909999999', 'Supplier', 1);
+    PRINT 'Created user: supplier_duoce';
+END
+
+-- Supplier cho Công ty Dược F
+IF NOT EXISTS (SELECT 1 FROM Users WHERE username = 'supplier_duocf')
+BEGIN
+    INSERT INTO Users (username, password_hash, email, phone, role, is_active)
+    VALUES ('supplier_duocf', '$2a$12$AfoWp3rMoA9hMUNmTSFZOOsW0CQXp56TjuapkN8OwRDkziBqhL4Qi', 
+            'supplier@duocf.vn', '0900000000', 'Supplier', 1);
+    PRINT 'Created user: supplier_duocf';
+END
+GO
+
+-- =====================================================
+-- 2. Cập nhật bảng Suppliers với user_id
+-- =====================================================
+PRINT '';
+PRINT 'Step 2: Linking supplier users to companies...';
+
+-- Công ty Dược B
+DECLARE @userB INT = (SELECT user_id FROM Users WHERE username = 'supplier_duocb');
+DECLARE @suppB INT = (SELECT supplier_id FROM Suppliers WHERE name = N'Công ty Dược B');
+
+IF @userB IS NOT NULL AND @suppB IS NOT NULL
+BEGIN
+    UPDATE Suppliers 
+    SET user_id = @userB,
+        contact_email = 'supplier@duocb.vn',
+        contact_phone = '0905555556',
+        updated_at = GETDATE()
+    WHERE supplier_id = @suppB;
+    PRINT 'Linked supplier_duocb to Công ty Dược B';
+END
+
+-- Công ty Dược C
+DECLARE @userC INT = (SELECT user_id FROM Users WHERE username = 'supplier_duocc');
+DECLARE @suppC INT = (SELECT supplier_id FROM Suppliers WHERE name = N'Công ty Dược C');
+
+IF @userC IS NOT NULL AND @suppC IS NOT NULL
+BEGIN
+    UPDATE Suppliers 
+    SET user_id = @userC,
+        contact_email = 'supplier@duocc.vn',
+        contact_phone = '0907777777',
+        updated_at = GETDATE()
+    WHERE supplier_id = @suppC;
+    PRINT 'Linked supplier_duocc to Công ty Dược C';
+END
+
+-- Công ty Dược D
+DECLARE @userD INT = (SELECT user_id FROM Users WHERE username = 'supplier_duocd');
+DECLARE @suppD INT = (SELECT supplier_id FROM Suppliers WHERE name = N'Công ty Dược D');
+
+IF @userD IS NOT NULL AND @suppD IS NOT NULL
+BEGIN
+    UPDATE Suppliers 
+    SET user_id = @userD,
+        contact_email = 'supplier@duocd.vn',
+        contact_phone = '0908888888',
+        updated_at = GETDATE()
+    WHERE supplier_id = @suppD;
+    PRINT 'Linked supplier_duocd to Công ty Dược D';
+END
+
+-- Công ty Dược E
+DECLARE @userE INT = (SELECT user_id FROM Users WHERE username = 'supplier_duoce');
+DECLARE @suppE INT = (SELECT supplier_id FROM Suppliers WHERE name = N'Công ty Dược E');
+
+IF @userE IS NOT NULL AND @suppE IS NOT NULL
+BEGIN
+    UPDATE Suppliers 
+    SET user_id = @userE,
+        contact_email = 'supplier@duoce.vn',
+        contact_phone = '0909999999',
+        updated_at = GETDATE()
+    WHERE supplier_id = @suppE;
+    PRINT 'Linked supplier_duoce to Công ty Dược E';
+END
+
+-- Công ty Dược F
+DECLARE @userF INT = (SELECT user_id FROM Users WHERE username = 'supplier_duocf');
+DECLARE @suppF INT = (SELECT supplier_id FROM Suppliers WHERE name = N'Công ty Dược F');
+
+IF @userF IS NOT NULL AND @suppF IS NOT NULL
+BEGIN
+    UPDATE Suppliers 
+    SET user_id = @userF,
+        contact_email = 'supplier@duocf.vn',
+        contact_phone = '0900000000',
+        updated_at = GETDATE()
+    WHERE supplier_id = @suppF;
+    PRINT 'Linked supplier_duocf to Công ty Dược F';
+END
+GO
+
+-- =====================================================
+-- 3. Cấp quyền cho các Supplier mới
+-- =====================================================
+PRINT '';
+PRINT 'Step 3: Assigning permissions to supplier users...';
+
+DECLARE @permissionId INT = (SELECT permission_id FROM Permissions WHERE permission_name = 'create_asn');
+
+-- Supplier Dược B
+DECLARE @userB INT = (SELECT user_id FROM Users WHERE username = 'supplier_duocb');
+IF @userB IS NOT NULL AND @permissionId IS NOT NULL AND NOT EXISTS (SELECT 1 FROM UserPermissions WHERE user_id = @userB)
+BEGIN
+    INSERT INTO UserPermissions (user_id, permission_id) VALUES (@userB, @permissionId);
+    PRINT 'Granted create_asn permission to supplier_duocb';
+END
+
+-- Supplier Dược C
+DECLARE @userC INT = (SELECT user_id FROM Users WHERE username = 'supplier_duocc');
+IF @userC IS NOT NULL AND @permissionId IS NOT NULL AND NOT EXISTS (SELECT 1 FROM UserPermissions WHERE user_id = @userC)
+BEGIN
+    INSERT INTO UserPermissions (user_id, permission_id) VALUES (@userC, @permissionId);
+    PRINT 'Granted create_asn permission to supplier_duocc';
+END
+
+-- Supplier Dược D
+DECLARE @userD INT = (SELECT user_id FROM Users WHERE username = 'supplier_duocd');
+IF @userD IS NOT NULL AND @permissionId IS NOT NULL AND NOT EXISTS (SELECT 1 FROM UserPermissions WHERE user_id = @userD)
+BEGIN
+    INSERT INTO UserPermissions (user_id, permission_id) VALUES (@userD, @permissionId);
+    PRINT 'Granted create_asn permission to supplier_duocd';
+END
+
+-- Supplier Dược E
+DECLARE @userE INT = (SELECT user_id FROM Users WHERE username = 'supplier_duoce');
+IF @userE IS NOT NULL AND @permissionId IS NOT NULL AND NOT EXISTS (SELECT 1 FROM UserPermissions WHERE user_id = @userE)
+BEGIN
+    INSERT INTO UserPermissions (user_id, permission_id) VALUES (@userE, @permissionId);
+    PRINT 'Granted create_asn permission to supplier_duoce';
+END
+
+-- Supplier Dược F
+DECLARE @userF INT = (SELECT user_id FROM Users WHERE username = 'supplier_duocf');
+IF @userF IS NOT NULL AND @permissionId IS NOT NULL AND NOT EXISTS (SELECT 1 FROM UserPermissions WHERE user_id = @userF)
+BEGIN
+    INSERT INTO UserPermissions (user_id, permission_id) VALUES (@userF, @permissionId);
+    PRINT 'Granted create_asn permission to supplier_duocf';
+END
+GO
+
+-- =====================================================
+-- 4. VERIFICATION - Kiểm tra kết quả
+-- =====================================================
+PRINT '';
+PRINT '========================================';
+PRINT 'VERIFICATION RESULTS';
+PRINT '========================================';
+PRINT '';
+
+-- Kiểm tra Users
+PRINT 'Supplier Users Created:';
+SELECT 
+    user_id,
+    username,
+    email,
+    phone,
+    role,
+    is_active,
+    created_at
+FROM Users
+WHERE role = 'Supplier'
+ORDER BY user_id;
+
+-- Kiểm tra Suppliers với user_id
+PRINT '';
+PRINT 'Suppliers Linked to Users:';
+SELECT 
+    s.supplier_id,
+    s.name,
+    s.user_id,
+    u.username,
+    s.contact_email,
+    s.contact_phone,
+    s.performance_rating
+FROM Suppliers s
+LEFT JOIN Users u ON s.user_id = u.user_id
+ORDER BY s.supplier_id;
+
+-- Kiểm tra Permissions
+PRINT '';
+PRINT 'Supplier Permissions:';
+SELECT 
+    u.username,
+    u.email,
+    p.permission_name,
+    p.description
+FROM UserPermissions up
+INNER JOIN Users u ON up.user_id = u.user_id
+INNER JOIN Permissions p ON up.permission_id = p.permission_id
+WHERE u.role = 'Supplier'
+ORDER BY u.username;
+
+-- Thống kê
+PRINT '';
+PRINT '========================================';
+PRINT 'SUMMARY';
+PRINT '========================================';
+SELECT 
+    COUNT(DISTINCT u.user_id) AS total_supplier_users,
+    COUNT(DISTINCT s.supplier_id) AS total_suppliers,
+    COUNT(DISTINCT CASE WHEN s.user_id IS NOT NULL THEN s.supplier_id END) AS suppliers_with_users
+FROM Users u
+FULL OUTER JOIN Suppliers s ON u.user_id = s.user_id
+WHERE u.role = 'Supplier' OR s.supplier_id IS NOT NULL;
+
+PRINT '';
+PRINT '==========================================';
+PRINT 'COMPLETED SUCCESSFULLY!';
+PRINT '==========================================';
+PRINT '';
+PRINT 'Created Supplier Accounts:';
+PRINT '  - supplier_duocb (Công ty Dược B)';
+PRINT '  - supplier_duocc (Công ty Dược C)';
+PRINT '  - supplier_duocd (Công ty Dược D)';
+PRINT '  - supplier_duoce (Công ty Dược E)';
+PRINT '  - supplier_duocf (Công ty Dược F)';
+PRINT '';
+PRINT 'All suppliers have been granted "create_asn" permission';
+PRINT 'Default password for all: 123456 (hashed)';
+GO

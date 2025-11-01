@@ -1498,17 +1498,50 @@ ORDER BY c.column_id;
 
 GO
 
+USE SWP391;
+GO
+
+-- =====================================================
+-- PART 1: FIX AUDITREPORTS CHECK CONSTRAINT
+-- =====================================================
+PRINT '========================================';
+PRINT 'PART 1: Fixing AuditReports Constraint';
+PRINT '========================================';
+
+-- Drop old constraint
+DECLARE @ConstraintName NVARCHAR(200);
+SELECT @ConstraintName = cc.name 
+FROM sys.check_constraints cc
+WHERE cc.parent_object_id = OBJECT_ID('AuditReports')
+  AND cc.definition LIKE '%report_type%';
+
+IF @ConstraintName IS NOT NULL
+BEGIN
+    DECLARE @DropSQL NVARCHAR(500) = 'ALTER TABLE AuditReports DROP CONSTRAINT ' + QUOTENAME(@ConstraintName);
+    EXEC sp_executesql @DropSQL;
+    PRINT 'Dropped old CHECK constraint: ' + @ConstraintName;
+END
+
+-- Add new constraint
+ALTER TABLE AuditReports ADD CONSTRAINT CK_AuditReports_Type 
+    CHECK (report_type IN ('SupplierPerformance','PurchaseHistory','InventoryAudit','UserActivity','ComprehensiveAudit','SecurityAudit'));
+
+PRINT 'Added new CHECK constraint with ComprehensiveAudit';
+PRINT 'PART 1 COMPLETED!';
+PRINT '';
+GO
 
 USE SWP391;
 GO
 
 -- =====================================================
--- AUDIT LOG FEATURE FOR AUDITOR ROLE
+-- PART 2: CREATE AUDIT VIEWS
 -- =====================================================
+PRINT '========================================';
+PRINT 'PART 2: Creating Audit Views';
+PRINT '========================================';
 
--- =====================================================
--- 1. ENHANCED VIEW: Audit Log Details
--- =====================================================
+-- View 1: Audit Log Details
 IF OBJECT_ID('vw_AuditLogDetails', 'V') IS NOT NULL 
     DROP VIEW vw_AuditLogDetails;
 GO
@@ -1543,9 +1576,9 @@ FROM SystemLogs sl
 LEFT JOIN Users u ON sl.user_id = u.user_id;
 GO
 
--- =====================================================
--- 2. VIEW: Daily Audit Summary
--- =====================================================
+PRINT 'Created view: vw_AuditLogDetails';
+
+-- View 2: Daily Audit Summary
 IF OBJECT_ID('vw_DailyAuditSummary', 'V') IS NOT NULL 
     DROP VIEW vw_DailyAuditSummary;
 GO
@@ -1564,9 +1597,9 @@ FROM SystemLogs
 GROUP BY CAST(log_date AS DATE);
 GO
 
--- =====================================================
--- 3. VIEW: User Risk Profile
--- =====================================================
+PRINT 'Created view: vw_DailyAuditSummary';
+
+-- View 3: User Risk Profile
 IF OBJECT_ID('vw_UserRiskProfile', 'V') IS NOT NULL 
     DROP VIEW vw_UserRiskProfile;
 GO
@@ -1592,9 +1625,21 @@ LEFT JOIN SystemLogs sl ON u.user_id = sl.user_id
 GROUP BY u.user_id, u.username, u.role;
 GO
 
+PRINT 'Created view: vw_UserRiskProfile';
+PRINT 'PART 2 COMPLETED!';
+PRINT '';
+GO
+
+USE SWP391;
+GO
+
 -- =====================================================
--- 4. STORED PROCEDURE: Get Audit Logs with Filters
+-- PART 3: STORED PROCEDURE - GET AUDIT LOGS
 -- =====================================================
+PRINT '========================================';
+PRINT 'PART 3: Creating sp_GetAuditLogs';
+PRINT '========================================';
+
 IF OBJECT_ID('sp_GetAuditLogs', 'P') IS NOT NULL 
     DROP PROCEDURE sp_GetAuditLogs;
 GO
@@ -1654,9 +1699,21 @@ BEGIN
 END;
 GO
 
+PRINT 'Created procedure: sp_GetAuditLogs';
+PRINT 'PART 3 COMPLETED!';
+PRINT '';
+GO
+
+USE SWP391;
+GO
+
 -- =====================================================
--- 5. STORED PROCEDURE: Get Audit Statistics
+-- PART 4: STORED PROCEDURE - GET AUDIT STATISTICS
 -- =====================================================
+PRINT '========================================';
+PRINT 'PART 4: Creating sp_GetAuditStatistics';
+PRINT '========================================';
+
 IF OBJECT_ID('sp_GetAuditStatistics', 'P') IS NOT NULL 
     DROP PROCEDURE sp_GetAuditStatistics;
 GO
@@ -1741,9 +1798,21 @@ BEGIN
 END;
 GO
 
+PRINT 'Created procedure: sp_GetAuditStatistics';
+PRINT 'PART 4 COMPLETED!';
+PRINT '';
+GO
+
+USE SWP391;
+GO
+
 -- =====================================================
--- 6. STORED PROCEDURE: Export Audit Report
+-- PART 5: STORED PROCEDURE - EXPORT AUDIT REPORT
 -- =====================================================
+PRINT '========================================';
+PRINT 'PART 5: Creating sp_ExportAuditReport';
+PRINT '========================================';
+
 IF OBJECT_ID('sp_ExportAuditReport', 'P') IS NOT NULL 
     DROP PROCEDURE sp_ExportAuditReport;
 GO
@@ -1817,9 +1886,21 @@ BEGIN
 END;
 GO
 
+PRINT 'Created procedure: sp_ExportAuditReport';
+PRINT 'PART 5 COMPLETED!';
+PRINT '';
+GO
+
+USE SWP391;
+GO
+
 -- =====================================================
--- 7. STORED PROCEDURE: Detect Suspicious Activities
+-- PART 6: STORED PROCEDURE - DETECT SUSPICIOUS ACTIVITIES
 -- =====================================================
+PRINT '========================================';
+PRINT 'PART 6: Creating sp_DetectSuspiciousActivities';
+PRINT '========================================';
+
 IF OBJECT_ID('sp_DetectSuspiciousActivities', 'P') IS NOT NULL 
     DROP PROCEDURE sp_DetectSuspiciousActivities;
 GO
@@ -1839,12 +1920,19 @@ BEGIN
         u.role,
         COUNT(*) AS attempt_count,
         MAX(sl.log_date) AS last_attempt,
-        STRING_AGG(sl.ip_address, ', ') AS ip_addresses
+        STUFF((
+            SELECT DISTINCT ', ' + CAST(ip_address AS VARCHAR(50))
+            FROM SystemLogs sl2
+            WHERE sl2.user_id = sl.user_id 
+              AND sl2.action = 'FAILED_LOGIN'
+              AND sl2.log_date >= @StartTime
+            FOR XML PATH('')
+        ), 1, 2, '') AS ip_addresses
     FROM SystemLogs sl
     INNER JOIN Users u ON sl.user_id = u.user_id
     WHERE sl.action = 'FAILED_LOGIN' 
         AND sl.log_date >= @StartTime
-    GROUP BY u.username, u.role
+    GROUP BY u.username, u.role, sl.user_id
     HAVING COUNT(*) >= 3;
     
     -- Unusual number of delete operations
@@ -1854,12 +1942,19 @@ BEGIN
         u.role,
         COUNT(*) AS delete_count,
         MAX(sl.log_date) AS last_delete,
-        STRING_AGG(sl.table_name, ', ') AS affected_tables
+        STUFF((
+            SELECT DISTINCT ', ' + CAST(table_name AS VARCHAR(50))
+            FROM SystemLogs sl2
+            WHERE sl2.user_id = sl.user_id 
+              AND sl2.action = 'DELETE'
+              AND sl2.log_date >= @StartTime
+            FOR XML PATH('')
+        ), 1, 2, '') AS affected_tables
     FROM SystemLogs sl
     INNER JOIN Users u ON sl.user_id = u.user_id
     WHERE sl.action = 'DELETE' 
         AND sl.log_date >= @StartTime
-    GROUP BY u.username, u.role
+    GROUP BY u.username, u.role, sl.user_id
     HAVING COUNT(*) >= 10;
     
     -- After-hours activities
@@ -1883,20 +1978,39 @@ BEGIN
         u.username,
         u.role,
         COUNT(DISTINCT sl.ip_address) AS ip_count,
-        STRING_AGG(DISTINCT sl.ip_address, ', ') AS ip_addresses,
+        STUFF((
+            SELECT DISTINCT ', ' + CAST(ip_address AS VARCHAR(50))
+            FROM SystemLogs sl2
+            WHERE sl2.user_id = sl.user_id 
+              AND sl2.action = 'LOGIN'
+              AND sl2.log_date >= @StartTime
+            FOR XML PATH('')
+        ), 1, 2, '') AS ip_addresses,
         MAX(sl.log_date) AS last_login
     FROM SystemLogs sl
     INNER JOIN Users u ON sl.user_id = u.user_id
     WHERE sl.action = 'LOGIN' 
         AND sl.log_date >= @StartTime
-    GROUP BY u.username, u.role
+    GROUP BY u.username, u.role, sl.user_id
     HAVING COUNT(DISTINCT sl.ip_address) >= 3;
 END;
 GO
 
+PRINT 'Created procedure: sp_DetectSuspiciousActivities';
+PRINT 'PART 6 COMPLETED!';
+PRINT '';
+GO
+
+USE SWP391;
+GO
+
 -- =====================================================
--- 8. STORED PROCEDURE: Get User Action Timeline
+-- PART 7: STORED PROCEDURE - GET USER ACTION TIMELINE
 -- =====================================================
+PRINT '========================================';
+PRINT 'PART 7: Creating sp_GetUserActionTimeline';
+PRINT '========================================';
+
 IF OBJECT_ID('sp_GetUserActionTimeline', 'P') IS NOT NULL 
     DROP PROCEDURE sp_GetUserActionTimeline;
 GO
@@ -1945,78 +2059,135 @@ BEGIN
 END;
 GO
 
--- =====================================================
--- 9. SAMPLE QUERIES FOR AUDITOR DASHBOARD
--- =====================================================
+PRINT 'Created procedure: sp_GetUserActionTimeline';
+PRINT 'PART 7 COMPLETED!';
+PRINT '';
+GO
 
--- Query 1: Get logs for last 7 days with high risk
+USE SWP391;
+GO
+
+-- =====================================================
+-- PART 8: TEST & VERIFICATION
+-- =====================================================
+PRINT '========================================';
+PRINT 'PART 8: Testing All Audit Components';
+PRINT '========================================';
+
+-- Test 1: Check all views exist
+PRINT 'Checking views...';
+SELECT 
+    TABLE_NAME AS ViewName,
+    'Exists' AS Status
+FROM INFORMATION_SCHEMA.VIEWS
+WHERE TABLE_NAME LIKE '%Audit%'
+ORDER BY TABLE_NAME;
+
+-- Test 2: Check all stored procedures exist
+PRINT '';
+PRINT 'Checking stored procedures...';
+SELECT 
+    name AS ProcedureName,
+    create_date AS CreatedDate,
+    modify_date AS LastModified
+FROM sys.procedures
+WHERE name LIKE '%Audit%' OR name LIKE '%Suspicious%' OR name LIKE '%UserActionTimeline%'
+ORDER BY name;
+
+-- Test 3: Check AuditReports constraint
+PRINT '';
+PRINT 'Checking AuditReports constraint...';
+SELECT 
+    cc.name AS ConstraintName,
+    cc.definition AS AllowedValues
+FROM sys.check_constraints cc
+WHERE cc.parent_object_id = OBJECT_ID('AuditReports')
+  AND cc.definition LIKE '%report_type%';
+
+-- Test 4: Test sp_GetAuditLogs (last 7 days)
+PRINT '';
+PRINT 'Testing sp_GetAuditLogs...';
 EXEC sp_GetAuditLogs 
-    @StartDate = NULL,  -- Will use last 30 days by default
-    @RiskLevel = 'high',
+    @StartDate = NULL,
+    @EndDate = NULL,
     @PageNumber = 1,
-    @PageSize = 20;
+    @PageSize = 10;
 
--- Query 2: Get audit statistics for last 30 days
+-- Test 5: Test sp_GetAuditStatistics
+PRINT '';
+PRINT 'Testing sp_GetAuditStatistics...';
 EXEC sp_GetAuditStatistics 
     @StartDate = NULL,
     @EndDate = NULL;
 
--- Query 3: Detect suspicious activities in last 24 hours
+-- Test 6: Test sp_DetectSuspiciousActivities
+PRINT '';
+PRINT 'Testing sp_DetectSuspiciousActivities...';
 EXEC sp_DetectSuspiciousActivities @Hours = 24;
 
--- Query 4: Get user action timeline
-DECLARE @test_user_id INT = (SELECT TOP 1 user_id FROM Users WHERE role = 'Doctor');
-EXEC sp_GetUserActionTimeline 
-    @UserId = @test_user_id,
-    @StartDate = NULL,
-    @EndDate = NULL;
+-- Test 7: Test sp_ExportAuditReport
+PRINT '';
+PRINT 'Testing sp_ExportAuditReport...';
+DECLARE @auditor_id INT;
+DECLARE @start_date DATETIME;
+DECLARE @end_date DATETIME;
 
--- Query 5: Export audit report
-DECLARE @auditor_id INT = (SELECT TOP 1 user_id FROM Users WHERE role = 'Auditor');
+SET @auditor_id = (SELECT TOP 1 user_id FROM Users WHERE role = 'Auditor');
+SET @start_date = DATEADD(DAY, -7, GETDATE());
+SET @end_date = GETDATE();
+
 IF @auditor_id IS NOT NULL
 BEGIN
     EXEC sp_ExportAuditReport 
         @auditor_id = @auditor_id,
-        @StartDate = NULL,
-        @EndDate = NULL,
+        @StartDate = @start_date,
+        @EndDate = @end_date,
         @ReportType = 'ComprehensiveAudit',
         @ExportFormat = 'Excel';
+    
+    PRINT 'Export report test successful!';
 END
-
--- =====================================================
--- 10. CREATE SAMPLE AUDIT LOGS FOR TESTING
--- =====================================================
-
--- Insert sample audit logs
-DECLARE @admin_id INT = (SELECT user_id FROM Users WHERE username = 'admin');
-DECLARE @doctor2_id INT = (SELECT user_id FROM Users WHERE username = 'doctor2');
-DECLARE @pharma2_id INT = (SELECT user_id FROM Users WHERE username = 'pharma2');
-DECLARE @manager2_id INT = (SELECT user_id FROM Users WHERE username = 'manager2');
-
-IF @admin_id IS NOT NULL
+ELSE
 BEGIN
-    INSERT INTO SystemLogs (user_id, action, table_name, record_id, details, ip_address, log_date)
-    VALUES
-    (@admin_id, 'LOGIN', 'Users', @admin_id, N'Admin đăng nhập hệ thống', '192.168.1.100', GETDATE()),
-    (@doctor2_id, 'CREATE', 'MedicationRequests', NULL, N'Tạo yêu cầu thuốc mới', '192.168.1.101', GETDATE()-1),
-    (@pharma2_id, 'UPDATE', 'Batches', NULL, N'Cập nhật trạng thái lô thuốc', '192.168.1.102', GETDATE()-2),
-    (@manager2_id, 'APPROVE', 'PurchaseOrders', NULL, N'Phê duyệt đơn hàng', '192.168.1.103', GETDATE()-3),
-    (@admin_id, 'DELETE', 'Users', NULL, N'Xóa tài khoản không hoạt động', '192.168.1.100', GETDATE()-4),
-    (@doctor2_id, 'LOGIN', 'Users', @doctor2_id, N'Đăng nhập thành công', '192.168.1.101', GETDATE()-5),
-    (@pharma2_id, 'CREATE', 'Transactions', NULL, N'Tạo giao dịch xuất kho', '192.168.1.102', GETDATE()-6),
-    (@manager2_id, 'UPDATE', 'Suppliers', NULL, N'Cập nhật thông tin nhà cung cấp', '192.168.1.103', GETDATE()-7),
-    (@admin_id, 'FAILED_LOGIN', 'Users', @admin_id, N'Đăng nhập thất bại - sai mật khẩu', '192.168.1.200', GETDATE()-8),
-    (@doctor2_id, 'REJECT', 'MedicationRequests', NULL, N'Từ chối yêu cầu thuốc', '192.168.1.101', GETDATE()-9);
+    PRINT 'WARNING: No auditor found for testing export report';
 END
-GO
 
--- =====================================================
--- VERIFICATION QUERIES
--- =====================================================
+-- Test 8: View recent audit reports
+PRINT '';
+PRINT 'Recent audit reports:';
+SELECT TOP 5 
+    report_id,
+    report_type,
+    generated_date,
+    exported_format,
+    notes
+FROM AuditReports
+ORDER BY generated_date DESC;
+
+-- Test 9: View audit log statistics
+PRINT '';
+PRINT 'Audit log statistics:';
+SELECT 
+    COUNT(*) AS total_logs,
+    COUNT(DISTINCT user_id) AS unique_users,
+    COUNT(DISTINCT table_name) AS affected_tables,
+    MIN(log_date) AS oldest_log,
+    MAX(log_date) AS newest_log
+FROM SystemLogs;
+
+-- Test 10: View top actions
+PRINT '';
+PRINT 'Top 10 actions:';
+SELECT TOP 10
+    action,
+    COUNT(*) AS count
+FROM SystemLogs
+GROUP BY action
+ORDER BY count DESC;
 
 PRINT '';
 PRINT '==========================================';
-PRINT 'AUDIT LOG FEATURE CREATED SUCCESSFULLY!';
+PRINT 'ALL AUDIT LOG FEATURES INSTALLED!';
 PRINT '==========================================';
 PRINT '';
 PRINT 'Available Views:';
@@ -2025,16 +2196,11 @@ PRINT '  - vw_DailyAuditSummary';
 PRINT '  - vw_UserRiskProfile';
 PRINT '';
 PRINT 'Available Stored Procedures:';
-PRINT '  - sp_GetAuditLogs (with pagination and filters)';
+PRINT '  - sp_GetAuditLogs';
 PRINT '  - sp_GetAuditStatistics';
 PRINT '  - sp_ExportAuditReport';
 PRINT '  - sp_DetectSuspiciousActivities';
 PRINT '  - sp_GetUserActionTimeline';
 PRINT '';
-
--- Test views
-SELECT TOP 10 * FROM vw_AuditLogDetails ORDER BY log_date DESC;
-SELECT * FROM vw_DailyAuditSummary ORDER BY log_date DESC;
-SELECT * FROM vw_UserRiskProfile ORDER BY total_actions DESC;
-
+PRINT 'PART 8 COMPLETED!';
 GO

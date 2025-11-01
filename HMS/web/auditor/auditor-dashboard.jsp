@@ -29,7 +29,7 @@
                 min-height: 100vh;
             }
 
-            /* Sidebar styling - changed from purple gradient to white with border */
+            /* Sidebar styling */
             .sidebar {
                 width: 280px;
                 background: white;
@@ -58,35 +58,6 @@
                 border: none;
                 border-top: 1px solid #e5e7eb;
                 margin: 15px 0;
-            }
-
-            /* Removed user-info styling as it's now in header */
-            .user-info {
-                display: none;
-            }
-
-            .user-info small {
-                font-size: 12px;
-                opacity: 0.7;
-                color: #6b7280;
-            }
-
-            .user-info h6 {
-                font-size: 16px;
-                font-weight: 600;
-                margin: 5px 0;
-                color: #1f2937;
-            }
-
-            .user-badge {
-                display: inline-block;
-                background: #ede9fe;
-                color: #7c3aed;
-                padding: 4px 12px;
-                border-radius: 20px;
-                font-size: 12px;
-                font-weight: 600;
-                margin-top: 8px;
             }
 
             .nav-link {
@@ -128,7 +99,6 @@
                 margin-bottom: 30px;
             }
 
-            /* Page header text color changed from white to dark gray */
             .page-header h2 {
                 font-size: 32px;
                 font-weight: 700;
@@ -146,7 +116,6 @@
                 margin-bottom: 30px;
             }
 
-            /* Stat card border color changed from purple to blue */
             .stat-card {
                 background: white;
                 border-radius: 15px;
@@ -253,7 +222,6 @@
                 font-family: inherit;
             }
 
-            /* Action button hover color changed from purple to blue */
             .action-btn:hover {
                 border-color: #3b82f6;
                 background: #f9fafb;
@@ -383,156 +351,182 @@
     
     <body>
         <%@ include file="/admin/header.jsp" %>
-            <div class="dashboard-container">
-                <!-- Sidebar -->
-                <div class="sidebar">
-                    <div class="sidebar-header">
-                        <h4><i class="bi bi-hospital"></i> Auditor</h4>
-                        <hr class="sidebar-divider">
-                        <!-- Removed user-info section from sidebar -->
-                    </div>
-
-                    <nav>
-                        <a class="nav-link active" href="${pageContext.request.contextPath}/auditor-dashboard">
-                            <i class="bi bi-speedometer2"></i> Dashboard
-                        </a>
-                        <a class="nav-link" href="${pageContext.request.contextPath}/purchase-orders">
-                            <i class="bi bi-receipt"></i> Purchase Orders
-                        </a>
-                        <a class="nav-link" href="${pageContext.request.contextPath}/purchase-orders/history">
-                            <i class="bi bi-clock-history"></i> PO History & Trends
-                        </a>
-                    </nav>
+        <div class="dashboard-container">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <h4><i class="bi bi-hospital"></i> Auditor</h4>
+                    <hr class="sidebar-divider">
                 </div>
 
-                <!-- Main Content -->
-                <div class="main-content">
-                    <div class="page-header">
-                        <h2><i class="bi bi-speedometer2"></i> Auditor Dashboard</h2>
-                    </div>
+                <nav>
+                    <a class="nav-link active" href="${pageContext.request.contextPath}/auditor-dashboard">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </a>
+                    <a class="nav-link" href="${pageContext.request.contextPath}/purchase-orders">
+                        <i class="bi bi-receipt"></i> Purchase Orders
+                    </a>
+                    <a class="nav-link" href="${pageContext.request.contextPath}/purchase-orders/history">
+                        <i class="bi bi-clock-history"></i> PO History & Trends
+                    </a>
+                    
+                    <hr class="nav-divider">
+                    
+                    <!-- Audit Log Section -->
+                    <a class="nav-link" href="${pageContext.request.contextPath}/auditlog?action=view">
+                        <i class="bi bi-clipboard-data"></i> Audit Logs
+                    </a>
+                    <a class="nav-link" href="${pageContext.request.contextPath}/auditlog?action=statistics">
+                        <i class="bi bi-graph-up"></i> Statistics
+                    </a>
+                    <a class="nav-link" href="${pageContext.request.contextPath}/auditlog?action=alerts">
+                        <i class="bi bi-exclamation-triangle"></i> Security Alerts
+                    </a>
+                </nav>
+            </div>
 
-                    <!-- Quick Stats -->
-                    <div class="stats-grid">
-                        <div class="stat-card primary">
-                            <div class="stat-content">
-                                <div class="stat-info">
-                                    <h6>Total Orders</h6>
-                                    <h3>156</h3>
-                                </div>
-                                <div class="stat-icon" style="color: #3b82f6;">
-                                    <i class="bi bi-cart"></i>
-                                </div>
+            <!-- Main Content -->
+            <div class="main-content">
+                <div class="page-header">
+                    <h2><i class="bi bi-speedometer2"></i> Auditor Dashboard</h2>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card primary">
+                        <div class="stat-content">
+                            <div class="stat-info">
+                                <h6>Total Orders</h6>
+                                <h3>156</h3>
                             </div>
-                        </div>
-                        <div class="stat-card success">
-                            <div class="stat-content">
-                                <div class="stat-info">
-                                    <h6>Completed</h6>
-                                    <h3>124</h3>
-                                </div>
-                                <div class="stat-icon" style="color: #10b981;">
-                                    <i class="bi bi-check-circle"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="stat-card warning">
-                            <div class="stat-content">
-                                <div class="stat-info">
-                                    <h6>Pending</h6>
-                                    <h3>32</h3>
-                                </div>
-                                <div class="stat-icon" style="color: #f59e0b;">
-                                    <i class="bi bi-clock"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="stat-card info">
-                            <div class="stat-content">
-                                <div class="stat-info">
-                                    <h6>Total Value</h6>
-                                    <h3>$458K</h3>
-                                </div>
-                                <div class="stat-icon" style="color: #3b82f6;">
-                                    <i class="bi bi-cash-stack"></i>
-                                </div>
+                            <div class="stat-icon" style="color: #3b82f6;">
+                                <i class="bi bi-cart"></i>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Quick Actions -->
-                    <div class="dashboard-card">
-                        <div class="card-header">
-                            <h5><i class="bi bi-lightning"></i> Quick Actions</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="quick-actions">
-                                <a href="${pageContext.request.contextPath}/purchase-orders" class="action-btn">
-                                    <i class="bi bi-receipt"></i>
-                                    <strong>View Purchase Orders</strong>
-                                    <small>Check all PO records</small>
-                                </a>
-                                <a href="${pageContext.request.contextPath}/purchase-orders/history" class="action-btn">
-                                    <i class="bi bi-box-seam"></i>
-                                    <strong>PO History & Trends</strong>
-                                    <small>Check purchase order's history</small>
-                                </a>
-                                <a href="#" class="action-btn">
-                                    <i class="bi bi-file-earmark-text"></i>
-                                    <strong>Audit Log</strong>
-                                    <small>Check audit log</small>
-                                </a>
+                    <div class="stat-card success">
+                        <div class="stat-content">
+                            <div class="stat-info">
+                                <h6>Completed</h6>
+                                <h3>124</h3>
+                            </div>
+                            <div class="stat-icon" style="color: #10b981;">
+                                <i class="bi bi-check-circle"></i>
                             </div>
                         </div>
                     </div>
+                    <div class="stat-card warning">
+                        <div class="stat-content">
+                            <div class="stat-info">
+                                <h6>Pending</h6>
+                                <h3>32</h3>
+                            </div>
+                            <div class="stat-icon" style="color: #f59e0b;">
+                                <i class="bi bi-clock"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card info">
+                        <div class="stat-content">
+                            <div class="stat-info">
+                                <h6>Total Value</h6>
+                                <h3>$458K</h3>
+                            </div>
+                            <div class="stat-icon" style="color: #3b82f6;">
+                                <i class="bi bi-cash-stack"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                    <!-- Recent Activity -->
-                    <div class="dashboard-card">
-                        <div class="card-header">
-                            <h5><i class="bi bi-clock-history"></i> Recent Activity</h5>
+                <!-- Quick Actions -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-lightning"></i> Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="quick-actions">
+                            <a href="${pageContext.request.contextPath}/purchase-orders" class="action-btn">
+                                <i class="bi bi-receipt"></i>
+                                <strong>View Purchase Orders</strong>
+                                <small>Check all PO records</small>
+                            </a>
+                            <a href="${pageContext.request.contextPath}/purchase-orders/history" class="action-btn">
+                                <i class="bi bi-box-seam"></i>
+                                <strong>PO History & Trends</strong>
+                                <small>Check purchase order's history</small>
+                            </a>
+                            <a href="${pageContext.request.contextPath}/auditlog?action=view" class="action-btn">
+                                <i class="bi bi-clipboard-data"></i>
+                                <strong>Audit Log</strong>
+                                <small>View system audit logs</small>
+                            </a>
+                            <a href="${pageContext.request.contextPath}/auditlog?action=statistics" class="action-btn">
+                                <i class="bi bi-graph-up"></i>
+                                <strong>Statistics</strong>
+                                <small>View audit statistics</small>
+                            </a>
+                            <a href="${pageContext.request.contextPath}/auditlog?action=alerts" class="action-btn">
+                                <i class="bi bi-exclamation-triangle"></i>
+                                <strong>Security Alerts</strong>
+                                <small>Check suspicious activities</small>
+                            </a>
+                            <a href="${pageContext.request.contextPath}/auditlog?action=export" class="action-btn">
+                                <i class="bi bi-download"></i>
+                                <strong>Export Report</strong>
+                                <small>Generate audit reports</small>
+                            </a>
                         </div>
-                        <div class="card-body">
-                            <ul class="activity-list">
-                                <li class="activity-item">
-                                    <div class="activity-content">
-                                        <div class="activity-icon" style="color: #3b82f6;">
-                                            <i class="bi bi-receipt"></i>
-                                        </div>
-                                        <div class="activity-text">
-                                            <strong>PO #1234</strong> - Reviewed by Admin
-                                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-clock-history"></i> Recent Activity</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="activity-list">
+                            <li class="activity-item">
+                                <div class="activity-content">
+                                    <div class="activity-icon" style="color: #3b82f6;">
+                                        <i class="bi bi-receipt"></i>
                                     </div>
-                                    <div class="activity-time">2 hours ago</div>
-                                </li>
-                                <li class="activity-item">
-                                    <div class="activity-content">
-                                        <div class="activity-icon" style="color: #10b981;">
-                                            <i class="bi bi-box-seam"></i>
-                                        </div>
-                                        <div class="activity-text">
-                                            <strong>Inventory</strong> - Stock updated
-                                        </div>
+                                    <div class="activity-text">
+                                        <strong>PO #1234</strong> - Reviewed by Admin
                                     </div>
-                                    <div class="activity-time">5 hours ago</div>
-                                </li>
-                                <li class="activity-item">
-                                    <div class="activity-content">
-                                        <div class="activity-icon" style="color: #3b82f6;">
-                                            <i class="bi bi-file-earmark-text"></i>
-                                        </div>
-                                        <div class="activity-text">
-                                            <strong>Report</strong> - Monthly audit completed
-                                        </div>
+                                </div>
+                                <div class="activity-time">2 hours ago</div>
+                            </li>
+                            <li class="activity-item">
+                                <div class="activity-content">
+                                    <div class="activity-icon" style="color: #10b981;">
+                                        <i class="bi bi-box-seam"></i>
                                     </div>
-                                    <div class="activity-time">1 day ago</div>
-                                </li>
-                            </ul>
-                        </div>
+                                    <div class="activity-text">
+                                        <strong>Inventory</strong> - Stock updated
+                                    </div>
+                                </div>
+                                <div class="activity-time">5 hours ago</div>
+                            </li>
+                            <li class="activity-item">
+                                <div class="activity-content">
+                                    <div class="activity-icon" style="color: #3b82f6;">
+                                        <i class="bi bi-file-earmark-text"></i>
+                                    </div>
+                                    <div class="activity-text">
+                                        <strong>Report</strong> - Monthly audit completed
+                                    </div>
+                                </div>
+                                <div class="activity-time">1 day ago</div>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>                                
-    <%@ include file="/admin/footer.jsp" %>
-    
+        </div>
+        
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>                                
+        <%@ include file="/admin/footer.jsp" %>
     </body>
-    
 </html>

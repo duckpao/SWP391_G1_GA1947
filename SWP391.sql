@@ -1498,3 +1498,543 @@ ORDER BY c.column_id;
 
 GO
 
+
+USE SWP391;
+GO
+
+-- =====================================================
+-- AUDIT LOG FEATURE FOR AUDITOR ROLE
+-- =====================================================
+
+-- =====================================================
+-- 1. ENHANCED VIEW: Audit Log Details
+-- =====================================================
+IF OBJECT_ID('vw_AuditLogDetails', 'V') IS NOT NULL 
+    DROP VIEW vw_AuditLogDetails;
+GO
+
+CREATE VIEW vw_AuditLogDetails AS
+SELECT 
+    sl.log_id,
+    sl.user_id,
+    u.username,
+    u.email,
+    u.role,
+    sl.action,
+    sl.table_name,
+    sl.record_id,
+    sl.old_value,
+    sl.new_value,
+    sl.details,
+    sl.ip_address,
+    sl.log_date,
+    CASE 
+        WHEN sl.action IN ('DELETE', 'REJECT', 'CANCEL') THEN 'high'
+        WHEN sl.action IN ('UPDATE', 'APPROVE') THEN 'medium'
+        ELSE 'low'
+    END AS risk_level,
+    CASE 
+        WHEN sl.table_name IN ('Users', 'Permissions', 'UserPermissions') THEN 'Security'
+        WHEN sl.table_name IN ('Medicines', 'Batches', 'Transactions') THEN 'Inventory'
+        WHEN sl.table_name IN ('PurchaseOrders', 'Invoices', 'AdvancedShippingNotices') THEN 'Procurement'
+        ELSE 'Other'
+    END AS category
+FROM SystemLogs sl
+LEFT JOIN Users u ON sl.user_id = u.user_id;
+GO
+
+-- =====================================================
+-- 2. VIEW: Daily Audit Summary
+-- =====================================================
+IF OBJECT_ID('vw_DailyAuditSummary', 'V') IS NOT NULL 
+    DROP VIEW vw_DailyAuditSummary;
+GO
+
+CREATE VIEW vw_DailyAuditSummary AS
+SELECT 
+    CAST(log_date AS DATE) AS log_date,
+    COUNT(*) AS total_actions,
+    COUNT(DISTINCT user_id) AS active_users,
+    SUM(CASE WHEN action = 'LOGIN' THEN 1 ELSE 0 END) AS login_count,
+    SUM(CASE WHEN action IN ('CREATE', 'INSERT') THEN 1 ELSE 0 END) AS create_count,
+    SUM(CASE WHEN action = 'UPDATE' THEN 1 ELSE 0 END) AS update_count,
+    SUM(CASE WHEN action = 'DELETE' THEN 1 ELSE 0 END) AS delete_count,
+    SUM(CASE WHEN action IN ('APPROVE', 'REJECT') THEN 1 ELSE 0 END) AS approval_count
+FROM SystemLogs
+GROUP BY CAST(log_date AS DATE);
+GO
+
+-- =====================================================
+-- 3. VIEW: User Risk Profile
+-- =====================================================
+IF OBJECT_ID('vw_UserRiskProfile', 'V') IS NOT NULL 
+    DROP VIEW vw_UserRiskProfile;
+GO
+
+CREATE VIEW vw_UserRiskProfile AS
+SELECT 
+    u.user_id,
+    u.username,
+    u.role,
+    COUNT(sl.log_id) AS total_actions,
+    SUM(CASE WHEN sl.action = 'DELETE' THEN 1 ELSE 0 END) AS delete_actions,
+    SUM(CASE WHEN sl.action IN ('APPROVE', 'REJECT') THEN 1 ELSE 0 END) AS approval_actions,
+    SUM(CASE WHEN sl.table_name = 'Users' THEN 1 ELSE 0 END) AS user_mgmt_actions,
+    MAX(sl.log_date) AS last_action,
+    COUNT(DISTINCT CAST(sl.log_date AS DATE)) AS active_days,
+    CASE 
+        WHEN SUM(CASE WHEN sl.action = 'DELETE' THEN 1 ELSE 0 END) > 10 THEN 'high'
+        WHEN SUM(CASE WHEN sl.action = 'DELETE' THEN 1 ELSE 0 END) > 5 THEN 'medium'
+        ELSE 'low'
+    END AS risk_level
+FROM Users u
+LEFT JOIN SystemLogs sl ON u.user_id = sl.user_id
+GROUP BY u.user_id, u.username, u.role;
+GO
+
+-- =====================================================
+-- 4. STORED PROCEDURE: Get Audit Logs with Filters
+-- =====================================================
+IF OBJECT_ID('sp_GetAuditLogs', 'P') IS NOT NULL 
+    DROP PROCEDURE sp_GetAuditLogs;
+GO
+
+CREATE PROCEDURE sp_GetAuditLogs
+    @StartDate DATETIME = NULL,
+    @EndDate DATETIME = NULL,
+    @UserId INT = NULL,
+    @Username NVARCHAR(50) = NULL,
+    @Role NVARCHAR(50) = NULL,
+    @Action NVARCHAR(100) = NULL,
+    @TableName NVARCHAR(50) = NULL,
+    @RiskLevel NVARCHAR(20) = NULL,
+    @Category NVARCHAR(50) = NULL,
+    @PageNumber INT = 1,
+    @PageSize INT = 50
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    DECLARE @Offset INT = (@PageNumber - 1) * @PageSize;
+    
+    -- Get total count
+    DECLARE @TotalRecords INT;
+    SELECT @TotalRecords = COUNT(*)
+    FROM vw_AuditLogDetails
+    WHERE 
+        (@StartDate IS NULL OR log_date >= @StartDate)
+        AND (@EndDate IS NULL OR log_date <= @EndDate)
+        AND (@UserId IS NULL OR user_id = @UserId)
+        AND (@Username IS NULL OR username LIKE '%' + @Username + '%')
+        AND (@Role IS NULL OR role = @Role)
+        AND (@Action IS NULL OR action = @Action)
+        AND (@TableName IS NULL OR table_name = @TableName)
+        AND (@RiskLevel IS NULL OR risk_level = @RiskLevel)
+        AND (@Category IS NULL OR category = @Category);
+    
+    -- Get paginated results
+    SELECT 
+        *,
+        @TotalRecords AS total_records,
+        CEILING(CAST(@TotalRecords AS FLOAT) / @PageSize) AS total_pages
+    FROM vw_AuditLogDetails
+    WHERE 
+        (@StartDate IS NULL OR log_date >= @StartDate)
+        AND (@EndDate IS NULL OR log_date <= @EndDate)
+        AND (@UserId IS NULL OR user_id = @UserId)
+        AND (@Username IS NULL OR username LIKE '%' + @Username + '%')
+        AND (@Role IS NULL OR role = @Role)
+        AND (@Action IS NULL OR action = @Action)
+        AND (@TableName IS NULL OR table_name = @TableName)
+        AND (@RiskLevel IS NULL OR risk_level = @RiskLevel)
+        AND (@Category IS NULL OR category = @Category)
+    ORDER BY log_date DESC
+    OFFSET @Offset ROWS
+    FETCH NEXT @PageSize ROWS ONLY;
+END;
+GO
+
+-- =====================================================
+-- 5. STORED PROCEDURE: Get Audit Statistics
+-- =====================================================
+IF OBJECT_ID('sp_GetAuditStatistics', 'P') IS NOT NULL 
+    DROP PROCEDURE sp_GetAuditStatistics;
+GO
+
+CREATE PROCEDURE sp_GetAuditStatistics
+    @StartDate DATETIME = NULL,
+    @EndDate DATETIME = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Set default date range if not provided
+    IF @StartDate IS NULL SET @StartDate = DATEADD(DAY, -30, GETDATE());
+    IF @EndDate IS NULL SET @EndDate = GETDATE();
+    
+    -- Overall statistics
+    SELECT 
+        COUNT(*) AS total_actions,
+        COUNT(DISTINCT user_id) AS active_users,
+        COUNT(DISTINCT table_name) AS affected_tables,
+        COUNT(DISTINCT CAST(log_date AS DATE)) AS active_days,
+        SUM(CASE WHEN action = 'LOGIN' THEN 1 ELSE 0 END) AS total_logins,
+        SUM(CASE WHEN action IN ('CREATE', 'INSERT') THEN 1 ELSE 0 END) AS total_creates,
+        SUM(CASE WHEN action = 'UPDATE' THEN 1 ELSE 0 END) AS total_updates,
+        SUM(CASE WHEN action = 'DELETE' THEN 1 ELSE 0 END) AS total_deletes,
+        SUM(CASE WHEN action IN ('APPROVE', 'REJECT') THEN 1 ELSE 0 END) AS total_approvals
+    FROM SystemLogs
+    WHERE log_date BETWEEN @StartDate AND @EndDate;
+    
+    -- Actions by role
+    SELECT 
+        u.role,
+        COUNT(sl.log_id) AS action_count,
+        COUNT(DISTINCT sl.user_id) AS user_count
+    FROM SystemLogs sl
+    LEFT JOIN Users u ON sl.user_id = u.user_id
+    WHERE sl.log_date BETWEEN @StartDate AND @EndDate
+    GROUP BY u.role
+    ORDER BY action_count DESC;
+    
+    -- Actions by category
+    SELECT 
+        CASE 
+            WHEN table_name IN ('Users', 'Permissions', 'UserPermissions') THEN 'Security'
+            WHEN table_name IN ('Medicines', 'Batches', 'Transactions') THEN 'Inventory'
+            WHEN table_name IN ('PurchaseOrders', 'Invoices', 'AdvancedShippingNotices') THEN 'Procurement'
+            ELSE 'Other'
+        END AS category,
+        COUNT(*) AS action_count
+    FROM SystemLogs
+    WHERE log_date BETWEEN @StartDate AND @EndDate
+    GROUP BY 
+        CASE 
+            WHEN table_name IN ('Users', 'Permissions', 'UserPermissions') THEN 'Security'
+            WHEN table_name IN ('Medicines', 'Batches', 'Transactions') THEN 'Inventory'
+            WHEN table_name IN ('PurchaseOrders', 'Invoices', 'AdvancedShippingNotices') THEN 'Procurement'
+            ELSE 'Other'
+        END
+    ORDER BY action_count DESC;
+    
+    -- Top 10 most active users
+    SELECT TOP 10
+        u.username,
+        u.role,
+        COUNT(sl.log_id) AS action_count,
+        MAX(sl.log_date) AS last_action
+    FROM SystemLogs sl
+    LEFT JOIN Users u ON sl.user_id = u.user_id
+    WHERE sl.log_date BETWEEN @StartDate AND @EndDate
+    GROUP BY u.username, u.role
+    ORDER BY action_count DESC;
+    
+    -- Daily activity trend
+    SELECT 
+        CAST(log_date AS DATE) AS log_date,
+        COUNT(*) AS action_count,
+        COUNT(DISTINCT user_id) AS active_users
+    FROM SystemLogs
+    WHERE log_date BETWEEN @StartDate AND @EndDate
+    GROUP BY CAST(log_date AS DATE)
+    ORDER BY log_date DESC;
+END;
+GO
+
+-- =====================================================
+-- 6. STORED PROCEDURE: Export Audit Report
+-- =====================================================
+IF OBJECT_ID('sp_ExportAuditReport', 'P') IS NOT NULL 
+    DROP PROCEDURE sp_ExportAuditReport;
+GO
+
+CREATE PROCEDURE sp_ExportAuditReport
+    @auditor_id INT,
+    @StartDate DATETIME = NULL,
+    @EndDate DATETIME = NULL,
+    @ReportType NVARCHAR(50) = 'ComprehensiveAudit',
+    @ExportFormat NVARCHAR(10) = 'Excel'
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Set default date range
+    IF @StartDate IS NULL SET @StartDate = DATEADD(DAY, -30, GETDATE());
+    IF @EndDate IS NULL SET @EndDate = GETDATE();
+    
+    DECLARE @reportData NVARCHAR(MAX);
+    
+    -- Generate comprehensive report data
+    SET @reportData = (
+        SELECT 
+            'AuditSummary' AS section,
+            (SELECT COUNT(*) FROM SystemLogs WHERE log_date BETWEEN @StartDate AND @EndDate) AS total_actions,
+            (SELECT COUNT(DISTINCT user_id) FROM SystemLogs WHERE log_date BETWEEN @StartDate AND @EndDate) AS active_users,
+            @StartDate AS period_start,
+            @EndDate AS period_end,
+            (
+                SELECT 
+                    role,
+                    COUNT(*) AS action_count
+                FROM SystemLogs sl
+                LEFT JOIN Users u ON sl.user_id = u.user_id
+                WHERE sl.log_date BETWEEN @StartDate AND @EndDate
+                GROUP BY role
+                FOR JSON PATH
+            ) AS actions_by_role,
+            (
+                SELECT 
+                    username,
+                    role,
+                    COUNT(*) AS action_count
+                FROM SystemLogs sl
+                LEFT JOIN Users u ON sl.user_id = u.user_id
+                WHERE sl.log_date BETWEEN @StartDate AND @EndDate
+                GROUP BY username, role
+                ORDER BY COUNT(*) DESC
+                FOR JSON PATH
+            ) AS top_users
+        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+    );
+    
+    -- Insert audit report record
+    INSERT INTO AuditReports (auditor_id, report_type, generated_date, data, exported_format, notes)
+    VALUES (
+        @auditor_id, 
+        @ReportType, 
+        GETDATE(), 
+        @reportData, 
+        @ExportFormat, 
+        CONCAT(N'Audit report from ', FORMAT(@StartDate, 'yyyy-MM-dd'), ' to ', FORMAT(@EndDate, 'yyyy-MM-dd'))
+    );
+    
+    -- Return report ID
+    SELECT 
+        SCOPE_IDENTITY() AS report_id,
+        @ReportType AS report_type,
+        GETDATE() AS generated_date,
+        @ExportFormat AS format;
+END;
+GO
+
+-- =====================================================
+-- 7. STORED PROCEDURE: Detect Suspicious Activities
+-- =====================================================
+IF OBJECT_ID('sp_DetectSuspiciousActivities', 'P') IS NOT NULL 
+    DROP PROCEDURE sp_DetectSuspiciousActivities;
+GO
+
+CREATE PROCEDURE sp_DetectSuspiciousActivities
+    @Hours INT = 24
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    DECLARE @StartTime DATETIME = DATEADD(HOUR, -@Hours, GETDATE());
+    
+    -- Multiple failed login attempts
+    SELECT 
+        'Multiple Failed Logins' AS alert_type,
+        u.username,
+        u.role,
+        COUNT(*) AS attempt_count,
+        MAX(sl.log_date) AS last_attempt,
+        STRING_AGG(sl.ip_address, ', ') AS ip_addresses
+    FROM SystemLogs sl
+    INNER JOIN Users u ON sl.user_id = u.user_id
+    WHERE sl.action = 'FAILED_LOGIN' 
+        AND sl.log_date >= @StartTime
+    GROUP BY u.username, u.role
+    HAVING COUNT(*) >= 3;
+    
+    -- Unusual number of delete operations
+    SELECT 
+        'Excessive Delete Operations' AS alert_type,
+        u.username,
+        u.role,
+        COUNT(*) AS delete_count,
+        MAX(sl.log_date) AS last_delete,
+        STRING_AGG(sl.table_name, ', ') AS affected_tables
+    FROM SystemLogs sl
+    INNER JOIN Users u ON sl.user_id = u.user_id
+    WHERE sl.action = 'DELETE' 
+        AND sl.log_date >= @StartTime
+    GROUP BY u.username, u.role
+    HAVING COUNT(*) >= 10;
+    
+    -- After-hours activities
+    SELECT 
+        'After Hours Activity' AS alert_type,
+        u.username,
+        u.role,
+        COUNT(*) AS action_count,
+        MIN(sl.log_date) AS first_action,
+        MAX(sl.log_date) AS last_action
+    FROM SystemLogs sl
+    INNER JOIN Users u ON sl.user_id = u.user_id
+    WHERE sl.log_date >= @StartTime
+        AND (DATEPART(HOUR, sl.log_date) < 6 OR DATEPART(HOUR, sl.log_date) > 22)
+    GROUP BY u.username, u.role
+    HAVING COUNT(*) >= 5;
+    
+    -- Multiple IP addresses for same user
+    SELECT 
+        'Multiple IP Addresses' AS alert_type,
+        u.username,
+        u.role,
+        COUNT(DISTINCT sl.ip_address) AS ip_count,
+        STRING_AGG(DISTINCT sl.ip_address, ', ') AS ip_addresses,
+        MAX(sl.log_date) AS last_login
+    FROM SystemLogs sl
+    INNER JOIN Users u ON sl.user_id = u.user_id
+    WHERE sl.action = 'LOGIN' 
+        AND sl.log_date >= @StartTime
+    GROUP BY u.username, u.role
+    HAVING COUNT(DISTINCT sl.ip_address) >= 3;
+END;
+GO
+
+-- =====================================================
+-- 8. STORED PROCEDURE: Get User Action Timeline
+-- =====================================================
+IF OBJECT_ID('sp_GetUserActionTimeline', 'P') IS NOT NULL 
+    DROP PROCEDURE sp_GetUserActionTimeline;
+GO
+
+CREATE PROCEDURE sp_GetUserActionTimeline
+    @UserId INT,
+    @StartDate DATETIME = NULL,
+    @EndDate DATETIME = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    IF @StartDate IS NULL SET @StartDate = DATEADD(DAY, -30, GETDATE());
+    IF @EndDate IS NULL SET @EndDate = GETDATE();
+    
+    SELECT 
+        sl.log_id,
+        sl.action,
+        sl.table_name,
+        sl.record_id,
+        sl.details,
+        sl.ip_address,
+        sl.log_date,
+        CASE 
+            WHEN sl.action IN ('DELETE', 'REJECT', 'CANCEL') THEN 'danger'
+            WHEN sl.action IN ('UPDATE', 'APPROVE') THEN 'warning'
+            WHEN sl.action IN ('CREATE', 'INSERT') THEN 'success'
+            ELSE 'info'
+        END AS severity
+    FROM SystemLogs sl
+    WHERE sl.user_id = @UserId
+        AND sl.log_date BETWEEN @StartDate AND @EndDate
+    ORDER BY sl.log_date DESC;
+    
+    -- Get user info
+    SELECT 
+        user_id,
+        username,
+        email,
+        role,
+        last_login,
+        failed_attempts,
+        is_active
+    FROM Users
+    WHERE user_id = @UserId;
+END;
+GO
+
+-- =====================================================
+-- 9. SAMPLE QUERIES FOR AUDITOR DASHBOARD
+-- =====================================================
+
+-- Query 1: Get logs for last 7 days with high risk
+EXEC sp_GetAuditLogs 
+    @StartDate = NULL,  -- Will use last 30 days by default
+    @RiskLevel = 'high',
+    @PageNumber = 1,
+    @PageSize = 20;
+
+-- Query 2: Get audit statistics for last 30 days
+EXEC sp_GetAuditStatistics 
+    @StartDate = NULL,
+    @EndDate = NULL;
+
+-- Query 3: Detect suspicious activities in last 24 hours
+EXEC sp_DetectSuspiciousActivities @Hours = 24;
+
+-- Query 4: Get user action timeline
+DECLARE @test_user_id INT = (SELECT TOP 1 user_id FROM Users WHERE role = 'Doctor');
+EXEC sp_GetUserActionTimeline 
+    @UserId = @test_user_id,
+    @StartDate = NULL,
+    @EndDate = NULL;
+
+-- Query 5: Export audit report
+DECLARE @auditor_id INT = (SELECT TOP 1 user_id FROM Users WHERE role = 'Auditor');
+IF @auditor_id IS NOT NULL
+BEGIN
+    EXEC sp_ExportAuditReport 
+        @auditor_id = @auditor_id,
+        @StartDate = NULL,
+        @EndDate = NULL,
+        @ReportType = 'ComprehensiveAudit',
+        @ExportFormat = 'Excel';
+END
+
+-- =====================================================
+-- 10. CREATE SAMPLE AUDIT LOGS FOR TESTING
+-- =====================================================
+
+-- Insert sample audit logs
+DECLARE @admin_id INT = (SELECT user_id FROM Users WHERE username = 'admin');
+DECLARE @doctor2_id INT = (SELECT user_id FROM Users WHERE username = 'doctor2');
+DECLARE @pharma2_id INT = (SELECT user_id FROM Users WHERE username = 'pharma2');
+DECLARE @manager2_id INT = (SELECT user_id FROM Users WHERE username = 'manager2');
+
+IF @admin_id IS NOT NULL
+BEGIN
+    INSERT INTO SystemLogs (user_id, action, table_name, record_id, details, ip_address, log_date)
+    VALUES
+    (@admin_id, 'LOGIN', 'Users', @admin_id, N'Admin đăng nhập hệ thống', '192.168.1.100', GETDATE()),
+    (@doctor2_id, 'CREATE', 'MedicationRequests', NULL, N'Tạo yêu cầu thuốc mới', '192.168.1.101', GETDATE()-1),
+    (@pharma2_id, 'UPDATE', 'Batches', NULL, N'Cập nhật trạng thái lô thuốc', '192.168.1.102', GETDATE()-2),
+    (@manager2_id, 'APPROVE', 'PurchaseOrders', NULL, N'Phê duyệt đơn hàng', '192.168.1.103', GETDATE()-3),
+    (@admin_id, 'DELETE', 'Users', NULL, N'Xóa tài khoản không hoạt động', '192.168.1.100', GETDATE()-4),
+    (@doctor2_id, 'LOGIN', 'Users', @doctor2_id, N'Đăng nhập thành công', '192.168.1.101', GETDATE()-5),
+    (@pharma2_id, 'CREATE', 'Transactions', NULL, N'Tạo giao dịch xuất kho', '192.168.1.102', GETDATE()-6),
+    (@manager2_id, 'UPDATE', 'Suppliers', NULL, N'Cập nhật thông tin nhà cung cấp', '192.168.1.103', GETDATE()-7),
+    (@admin_id, 'FAILED_LOGIN', 'Users', @admin_id, N'Đăng nhập thất bại - sai mật khẩu', '192.168.1.200', GETDATE()-8),
+    (@doctor2_id, 'REJECT', 'MedicationRequests', NULL, N'Từ chối yêu cầu thuốc', '192.168.1.101', GETDATE()-9);
+END
+GO
+
+-- =====================================================
+-- VERIFICATION QUERIES
+-- =====================================================
+
+PRINT '';
+PRINT '==========================================';
+PRINT 'AUDIT LOG FEATURE CREATED SUCCESSFULLY!';
+PRINT '==========================================';
+PRINT '';
+PRINT 'Available Views:';
+PRINT '  - vw_AuditLogDetails';
+PRINT '  - vw_DailyAuditSummary';
+PRINT '  - vw_UserRiskProfile';
+PRINT '';
+PRINT 'Available Stored Procedures:';
+PRINT '  - sp_GetAuditLogs (with pagination and filters)';
+PRINT '  - sp_GetAuditStatistics';
+PRINT '  - sp_ExportAuditReport';
+PRINT '  - sp_DetectSuspiciousActivities';
+PRINT '  - sp_GetUserActionTimeline';
+PRINT '';
+
+-- Test views
+SELECT TOP 10 * FROM vw_AuditLogDetails ORDER BY log_date DESC;
+SELECT * FROM vw_DailyAuditSummary ORDER BY log_date DESC;
+SELECT * FROM vw_UserRiskProfile ORDER BY total_actions DESC;
+
+GO

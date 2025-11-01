@@ -2465,15 +2465,6 @@ GO
 
 USE SWP391;
 GO
-
--- =====================================================
--- PHẦN 1: CẬP NHẬT VIEWS VỚI ROLE-BASED ACCESS
--- =====================================================
-PRINT '========================================';
-PRINT 'Creating Role-Based Audit Views';
-PRINT '========================================';
-
--- View 1: Audit Log Details với Role-Based Access
 IF OBJECT_ID('vw_AuditLogDetails', 'V') IS NOT NULL 
     DROP VIEW vw_AuditLogDetails;
 GO
@@ -2511,20 +2502,22 @@ GO
 PRINT 'Created view: vw_AuditLogDetails';
 
 -- =====================================================
--- PHẦN 2: STORED PROCEDURE - GET AUDIT LOGS VỚI PHÂN QUYỀN
+-- BƯỚC 2: STORED PROCEDURE - sp_GetAuditLogs
 -- =====================================================
 PRINT '';
-PRINT 'Creating sp_GetAuditLogs with Role-Based Access...';
+PRINT '========================================';
+PRINT 'Step 2: Creating sp_GetAuditLogs';
+PRINT '========================================';
 
 IF OBJECT_ID('sp_GetAuditLogs', 'P') IS NOT NULL 
     DROP PROCEDURE sp_GetAuditLogs;
 GO
 
 CREATE PROCEDURE sp_GetAuditLogs
-    @CurrentUserId INT,              -- ID của user đang đăng nhập
+    @CurrentUserId INT,
     @StartDate DATETIME = NULL,
     @EndDate DATETIME = NULL,
-    @TargetUserId INT = NULL,        -- ID của user muốn xem logs (nếu có)
+    @TargetUserId INT = NULL,
     @Username NVARCHAR(50) = NULL,
     @Role NVARCHAR(50) = NULL,
     @Action NVARCHAR(100) = NULL,
@@ -2548,27 +2541,23 @@ BEGIN
         RETURN;
     END
     
-    -- Nếu là Auditor, chỉ xem được logs của chính họ
-    IF @CurrentUserRole = 'Auditor'
+    -- Chỉ Admin và Auditor được phép
+    IF @CurrentUserRole NOT IN ('Admin', 'Auditor')
     BEGIN
-        SET @TargetUserId = @CurrentUserId;  -- Force chỉ xem logs của chính mình
-    END
-    -- Admin có thể xem tất cả logs
-    ELSE IF @CurrentUserRole != 'Admin'
-    BEGIN
-        -- Các role khác không có quyền xem audit logs
         SELECT 'ERROR' AS status, N'Bạn không có quyền truy cập audit logs' AS message;
         RETURN;
     END
     
     DECLARE @Offset INT = (@PageNumber - 1) * @PageSize;
     
-    -- Get total count với điều kiện phân quyền
+    -- Get total count
     DECLARE @TotalRecords INT;
     SELECT @TotalRecords = COUNT(*)
     FROM vw_AuditLogDetails
     WHERE 
-        (@StartDate IS NULL OR log_date >= @StartDate)
+        -- AUDITOR: Không xem logs của Admin
+        (@CurrentUserRole = 'Admin' OR role != 'Admin')
+        AND (@StartDate IS NULL OR log_date >= @StartDate)
         AND (@EndDate IS NULL OR log_date <= @EndDate)
         AND (@TargetUserId IS NULL OR user_id = @TargetUserId)
         AND (@Username IS NULL OR username LIKE '%' + @Username + '%')
@@ -2600,7 +2589,9 @@ BEGIN
         @CurrentUserRole AS viewer_role
     FROM vw_AuditLogDetails
     WHERE 
-        (@StartDate IS NULL OR log_date >= @StartDate)
+        -- AUDITOR: Không xem logs của Admin
+        (@CurrentUserRole = 'Admin' OR role != 'Admin')
+        AND (@StartDate IS NULL OR log_date >= @StartDate)
         AND (@EndDate IS NULL OR log_date <= @EndDate)
         AND (@TargetUserId IS NULL OR user_id = @TargetUserId)
         AND (@Username IS NULL OR username LIKE '%' + @Username + '%')
@@ -2615,20 +2606,22 @@ BEGIN
 END;
 GO
 
-PRINT 'Created procedure: sp_GetAuditLogs with role-based access';
+PRINT 'Created procedure: sp_GetAuditLogs';
 
 -- =====================================================
--- PHẦN 3: STORED PROCEDURE - GET AUDIT STATISTICS VỚI PHÂN QUYỀN
+-- BƯỚC 3: STORED PROCEDURE - sp_GetAuditStatistics
 -- =====================================================
 PRINT '';
-PRINT 'Creating sp_GetAuditStatistics with Role-Based Access...';
+PRINT '========================================';
+PRINT 'Step 3: Creating sp_GetAuditStatistics';
+PRINT '========================================';
 
 IF OBJECT_ID('sp_GetAuditStatistics', 'P') IS NOT NULL 
     DROP PROCEDURE sp_GetAuditStatistics;
 GO
 
 CREATE PROCEDURE sp_GetAuditStatistics
-    @CurrentUserId INT,              -- ID của user đang đăng nhập
+    @CurrentUserId INT,
     @StartDate DATETIME = NULL,
     @EndDate DATETIME = NULL
 AS
@@ -2646,27 +2639,21 @@ BEGIN
         RETURN;
     END
     
-    -- Nếu không phải Admin hoặc Auditor, từ chối truy cập
     IF @CurrentUserRole NOT IN ('Admin', 'Auditor')
     BEGIN
         SELECT 'ERROR' AS status, N'Bạn không có quyền xem thống kê audit' AS message;
         RETURN;
     END
     
-    -- Set default date range if not provided
+    -- Set default date range
     IF @StartDate IS NULL SET @StartDate = DATEADD(DAY, -30, GETDATE());
     IF @EndDate IS NULL SET @EndDate = GETDATE();
-    
-    -- Nếu là Auditor, chỉ xem thống kê của chính họ
-    DECLARE @FilterUserId INT = NULL;
-    IF @CurrentUserRole = 'Auditor'
-        SET @FilterUserId = @CurrentUserId;
     
     -- Overall statistics
     SELECT 
         COUNT(*) AS total_actions,
-        COUNT(DISTINCT user_id) AS active_users,
-        COUNT(DISTINCT table_name) AS affected_tables,
+        COUNT(DISTINCT u.user_id) AS active_users,
+        COUNT(DISTINCT table_name) AS affected_table,
         COUNT(DISTINCT CAST(log_date AS DATE)) AS active_days,
         SUM(CASE WHEN action = 'LOGIN' THEN 1 ELSE 0 END) AS total_logins,
         SUM(CASE WHEN action IN ('CREATE', 'INSERT') THEN 1 ELSE 0 END) AS total_creates,
@@ -2674,93 +2661,86 @@ BEGIN
         SUM(CASE WHEN action = 'DELETE' THEN 1 ELSE 0 END) AS total_deletes,
         SUM(CASE WHEN action IN ('APPROVE', 'REJECT') THEN 1 ELSE 0 END) AS total_approvals,
         @CurrentUserRole AS viewer_role
-    FROM SystemLogs
-    WHERE log_date BETWEEN @StartDate AND @EndDate
-        AND (@FilterUserId IS NULL OR user_id = @FilterUserId);
+    FROM SystemLogs sl
+    LEFT JOIN Users u ON sl.user_id = u.user_id
+    WHERE sl.log_date BETWEEN @StartDate AND @EndDate
+        -- AUDITOR: Không thống kê logs của Admin
+        AND (@CurrentUserRole = 'Admin' OR u.role != 'Admin');
     
-    -- Actions by role (chỉ cho Admin)
-    IF @CurrentUserRole = 'Admin'
-    BEGIN
-        SELECT 
-            u.role,
-            COUNT(sl.log_id) AS action_count,
-            COUNT(DISTINCT sl.user_id) AS user_count
-        FROM SystemLogs sl
-        LEFT JOIN Users u ON sl.user_id = u.user_id
-        WHERE sl.log_date BETWEEN @StartDate AND @EndDate
-        GROUP BY u.role
-        ORDER BY action_count DESC;
-    END
+    -- Actions by role
+    SELECT 
+        u.role,
+        COUNT(sl.log_id) AS action_count,
+        COUNT(DISTINCT sl.user_id) AS user_count
+    FROM SystemLogs sl
+    LEFT JOIN Users u ON sl.user_id = u.user_id
+    WHERE sl.log_date BETWEEN @StartDate AND @EndDate
+        -- AUDITOR: Không thống kê Admin
+        AND (@CurrentUserRole = 'Admin' OR u.role != 'Admin')
+    GROUP BY u.role
+    ORDER BY action_count DESC;
     
     -- Actions by category
     SELECT 
         CASE 
-            WHEN table_name IN ('Users', 'Permissions', 'UserPermissions') THEN 'Security'
-            WHEN table_name IN ('Medicines', 'Batches', 'Transactions') THEN 'Inventory'
-            WHEN table_name IN ('PurchaseOrders', 'Invoices', 'AdvancedShippingNotices') THEN 'Procurement'
+            WHEN sl.table_name IN ('Users', 'Permissions', 'UserPermissions') THEN 'Security'
+            WHEN sl.table_name IN ('Medicines', 'Batches', 'Transactions') THEN 'Inventory'
+            WHEN sl.table_name IN ('PurchaseOrders', 'Invoices', 'AdvancedShippingNotices') THEN 'Procurement'
             ELSE 'Other'
         END AS category,
         COUNT(*) AS action_count
-    FROM SystemLogs
-    WHERE log_date BETWEEN @StartDate AND @EndDate
-        AND (@FilterUserId IS NULL OR user_id = @FilterUserId)
+    FROM SystemLogs sl
+    LEFT JOIN Users u ON sl.user_id = u.user_id
+    WHERE sl.log_date BETWEEN @StartDate AND @EndDate
+        -- AUDITOR: Không thống kê Admin
+        AND (@CurrentUserRole = 'Admin' OR u.role != 'Admin')
     GROUP BY 
         CASE 
-            WHEN table_name IN ('Users', 'Permissions', 'UserPermissions') THEN 'Security'
-            WHEN table_name IN ('Medicines', 'Batches', 'Transactions') THEN 'Inventory'
-            WHEN table_name IN ('PurchaseOrders', 'Invoices', 'AdvancedShippingNotices') THEN 'Procurement'
+            WHEN sl.table_name IN ('Users', 'Permissions', 'UserPermissions') THEN 'Security'
+            WHEN sl.table_name IN ('Medicines', 'Batches', 'Transactions') THEN 'Inventory'
+            WHEN sl.table_name IN ('PurchaseOrders', 'Invoices', 'AdvancedShippingNotices') THEN 'Procurement'
             ELSE 'Other'
         END
     ORDER BY action_count DESC;
     
-    -- Top users (chỉ cho Admin, Auditor chỉ thấy mình)
-    IF @CurrentUserRole = 'Admin'
-    BEGIN
-        SELECT TOP 10
-            u.username,
-            u.role,
-            COUNT(sl.log_id) AS action_count,
-            MAX(sl.log_date) AS last_action
-        FROM SystemLogs sl
-        LEFT JOIN Users u ON sl.user_id = u.user_id
-        WHERE sl.log_date BETWEEN @StartDate AND @EndDate
-        GROUP BY u.username, u.role
-        ORDER BY action_count DESC;
-    END
-    ELSE
-    BEGIN
-        SELECT 
-            u.username,
-            u.role,
-            COUNT(sl.log_id) AS action_count,
-            MAX(sl.log_date) AS last_action
-        FROM SystemLogs sl
-        LEFT JOIN Users u ON sl.user_id = u.user_id
-        WHERE sl.log_date BETWEEN @StartDate AND @EndDate
-            AND sl.user_id = @CurrentUserId
-        GROUP BY u.username, u.role;
-    END
+    -- Top 10 most active users
+    SELECT TOP 10
+        u.username,
+        u.role,
+        COUNT(sl.log_id) AS action_count,
+        MAX(sl.log_date) AS last_action
+    FROM SystemLogs sl
+    LEFT JOIN Users u ON sl.user_id = u.user_id
+    WHERE sl.log_date BETWEEN @StartDate AND @EndDate
+        -- AUDITOR: Không hiển thị Admin
+        AND (@CurrentUserRole = 'Admin' OR u.role != 'Admin')
+    GROUP BY u.username, u.role
+    ORDER BY action_count DESC;
     
     -- Daily activity trend
     SELECT 
-        CAST(log_date AS DATE) AS log_date,
+        CAST(sl.log_date AS DATE) AS log_date,
         COUNT(*) AS action_count,
-        COUNT(DISTINCT user_id) AS active_users
-    FROM SystemLogs
-    WHERE log_date BETWEEN @StartDate AND @EndDate
-        AND (@FilterUserId IS NULL OR user_id = @FilterUserId)
-    GROUP BY CAST(log_date AS DATE)
+        COUNT(DISTINCT sl.user_id) AS active_users
+    FROM SystemLogs sl
+    LEFT JOIN Users u ON sl.user_id = u.user_id
+    WHERE sl.log_date BETWEEN @StartDate AND @EndDate
+        -- AUDITOR: Không thống kê Admin
+        AND (@CurrentUserRole = 'Admin' OR u.role != 'Admin')
+    GROUP BY CAST(sl.log_date AS DATE)
     ORDER BY log_date DESC;
 END;
 GO
 
-PRINT 'Created procedure: sp_GetAuditStatistics with role-based access';
+PRINT 'Created procedure: sp_GetAuditStatistics';
 
 -- =====================================================
--- PHẦN 4: STORED PROCEDURE - EXPORT AUDIT REPORT VỚI PHÂN QUYỀN
+-- BƯỚC 4: STORED PROCEDURE - sp_ExportAuditReport
 -- =====================================================
 PRINT '';
-PRINT 'Creating sp_ExportAuditReport with Role-Based Access...';
+PRINT '========================================';
+PRINT 'Step 4: Creating sp_ExportAuditReport';
+PRINT '========================================';
 
 IF OBJECT_ID('sp_ExportAuditReport', 'P') IS NOT NULL 
     DROP PROCEDURE sp_ExportAuditReport;
@@ -2791,47 +2771,44 @@ BEGIN
     IF @EndDate IS NULL SET @EndDate = GETDATE();
     
     DECLARE @reportData NVARCHAR(MAX);
-    DECLARE @FilterUserId INT = NULL;
-    
-    -- Auditor chỉ export report của chính mình
-    IF @AuditorRole = 'Auditor'
-        SET @FilterUserId = @auditor_id;
     
     -- Generate report data
     SET @reportData = (
         SELECT 
             'AuditSummary' AS section,
-            (SELECT COUNT(*) FROM SystemLogs 
-             WHERE log_date BETWEEN @StartDate AND @EndDate
-             AND (@FilterUserId IS NULL OR user_id = @FilterUserId)) AS total_actions,
-            (SELECT COUNT(DISTINCT user_id) FROM SystemLogs 
-             WHERE log_date BETWEEN @StartDate AND @EndDate
-             AND (@FilterUserId IS NULL OR user_id = @FilterUserId)) AS active_users,
+            (SELECT COUNT(*) FROM SystemLogs sl
+             LEFT JOIN Users u ON sl.user_id = u.user_id
+             WHERE sl.log_date BETWEEN @StartDate AND @EndDate
+             AND (@AuditorRole = 'Admin' OR u.role != 'Admin')) AS total_actions,
+            (SELECT COUNT(DISTINCT sl.user_id) FROM SystemLogs sl
+             LEFT JOIN Users u ON sl.user_id = u.user_id
+             WHERE sl.log_date BETWEEN @StartDate AND @EndDate
+             AND (@AuditorRole = 'Admin' OR u.role != 'Admin')) AS active_users,
             @StartDate AS period_start,
             @EndDate AS period_end,
             @AuditorRole AS auditor_role,
-            CASE WHEN @FilterUserId IS NOT NULL THEN 'personal' ELSE 'system' END AS report_scope,
+            CASE WHEN @AuditorRole = 'Auditor' THEN 'excluding_admin' ELSE 'full_system' END AS report_scope,
             (
                 SELECT 
-                    role,
+                    u.role,
                     COUNT(*) AS action_count
                 FROM SystemLogs sl
                 LEFT JOIN Users u ON sl.user_id = u.user_id
                 WHERE sl.log_date BETWEEN @StartDate AND @EndDate
-                    AND (@FilterUserId IS NULL OR sl.user_id = @FilterUserId)
-                GROUP BY role
+                    AND (@AuditorRole = 'Admin' OR u.role != 'Admin')
+                GROUP BY u.role
                 FOR JSON PATH
             ) AS actions_by_role,
             (
-                SELECT 
-                    username,
-                    role,
+                SELECT TOP 10
+                    u.username,
+                    u.role,
                     COUNT(*) AS action_count
                 FROM SystemLogs sl
                 LEFT JOIN Users u ON sl.user_id = u.user_id
                 WHERE sl.log_date BETWEEN @StartDate AND @EndDate
-                    AND (@FilterUserId IS NULL OR sl.user_id = @FilterUserId)
-                GROUP BY username, role
+                    AND (@AuditorRole = 'Admin' OR u.role != 'Admin')
+                GROUP BY u.username, u.role
                 ORDER BY COUNT(*) DESC
                 FOR JSON PATH
             ) AS top_users
@@ -2847,7 +2824,7 @@ BEGIN
         @reportData, 
         @ExportFormat, 
         CONCAT(N'Audit report from ', FORMAT(@StartDate, 'yyyy-MM-dd'), ' to ', FORMAT(@EndDate, 'yyyy-MM-dd'),
-               CASE WHEN @FilterUserId IS NOT NULL THEN N' (Personal Report)' ELSE N' (System Report)' END)
+               CASE WHEN @AuditorRole = 'Auditor' THEN N' (Excluding Admin logs)' ELSE N' (Full System)' END)
     );
     
     -- Return report ID
@@ -2857,34 +2834,39 @@ BEGIN
         GETDATE() AS generated_date,
         @ExportFormat AS format,
         @AuditorRole AS auditor_role,
-        CASE WHEN @FilterUserId IS NOT NULL THEN 'personal' ELSE 'system' END AS report_scope;
+        CASE WHEN @AuditorRole = 'Auditor' THEN 'excluding_admin' ELSE 'full_system' END AS report_scope;
 END;
 GO
 
-PRINT 'Created procedure: sp_ExportAuditReport with role-based access';
+PRINT 'Created procedure: sp_ExportAuditReport';
 
 -- =====================================================
--- PHẦN 5: STORED PROCEDURE - GET USER ACTION TIMELINE VỚI PHÂN QUYỀN
+-- BƯỚC 5: STORED PROCEDURE - sp_GetUserActionTimeline
 -- =====================================================
 PRINT '';
-PRINT 'Creating sp_GetUserActionTimeline with Role-Based Access...';
+PRINT '========================================';
+PRINT 'Step 5: Creating sp_GetUserActionTimeline';
+PRINT '========================================';
 
 IF OBJECT_ID('sp_GetUserActionTimeline', 'P') IS NOT NULL 
     DROP PROCEDURE sp_GetUserActionTimeline;
 GO
 
 CREATE PROCEDURE sp_GetUserActionTimeline
-    @CurrentUserId INT,              -- ID của user đang đăng nhập
-    @TargetUserId INT,               -- ID của user muốn xem timeline
+    @CurrentUserId INT,
+    @TargetUserId INT,
     @StartDate DATETIME = NULL,
     @EndDate DATETIME = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
     
-    -- Lấy role của user hiện tại
+    -- Lấy role của user hiện tại và target user
     DECLARE @CurrentUserRole NVARCHAR(50);
+    DECLARE @TargetUserRole NVARCHAR(50);
+    
     SELECT @CurrentUserRole = role FROM Users WHERE user_id = @CurrentUserId;
+    SELECT @TargetUserRole = role FROM Users WHERE user_id = @TargetUserId;
     
     -- Kiểm tra quyền truy cập
     IF @CurrentUserRole IS NULL
@@ -2893,17 +2875,16 @@ BEGIN
         RETURN;
     END
     
-    -- Auditor chỉ xem được timeline của chính mình
-    IF @CurrentUserRole = 'Auditor' AND @TargetUserId != @CurrentUserId
-    BEGIN
-        SELECT 'ERROR' AS status, N'Auditor chỉ có thể xem timeline của chính mình' AS message;
-        RETURN;
-    END
-    
-    -- Các role khác (trừ Admin) không có quyền xem timeline
     IF @CurrentUserRole NOT IN ('Admin', 'Auditor')
     BEGIN
         SELECT 'ERROR' AS status, N'Bạn không có quyền xem user timeline' AS message;
+        RETURN;
+    END
+    
+    -- Auditor không được xem timeline của Admin
+    IF @CurrentUserRole = 'Auditor' AND @TargetUserRole = 'Admin'
+    BEGIN
+        SELECT 'ERROR' AS status, N'Auditor không có quyền xem timeline của Admin' AS message;
         RETURN;
     END
     
@@ -2943,10 +2924,10 @@ BEGIN
 END;
 GO
 
-PRINT 'Created procedure: sp_GetUserActionTimeline with role-based access';
+PRINT 'Created procedure: sp_GetUserActionTimeline';
 
 -- =====================================================
--- PHẦN 6: VERIFICATION (NO DATA OUTPUT)
+-- BƯỚC 6: VERIFICATION
 -- =====================================================
 PRINT '';
 PRINT '========================================';
@@ -2982,19 +2963,25 @@ ELSE
 
 PRINT '';
 PRINT '==========================================';
-PRINT 'ROLE-BASED ACCESS CONTROL COMPLETED!';
+PRINT 'OPTION 2 - ACCESS CONTROL COMPLETED!';
 PRINT '==========================================';
 PRINT '';
 PRINT 'Access Rules:';
-PRINT '  - Admin: Xem tất cả audit logs';
-PRINT '  - Auditor: Chỉ xem audit logs của chính họ';
-PRINT '  - Other roles: Không có quyền truy cập';
+PRINT '  ✓ Admin: Xem TẤT CẢ audit logs (full access)';
+PRINT '  ✓ Auditor: Xem TẤT CẢ TRỪ Admin';
+PRINT '    - Manager logs: ✓';
+PRINT '    - Doctor logs: ✓';
+PRINT '    - Pharmacist logs: ✓';
+PRINT '    - Supplier logs: ✓';
+PRINT '    - Auditor logs (bao gồm auditor khác): ✓';
+PRINT '    - Admin logs: ✗';
+PRINT '  ✗ Other roles: Không có quyền truy cập';
 PRINT '';
 PRINT 'Updated Procedures:';
-PRINT '  - sp_GetAuditLogs (requires @CurrentUserId)';
-PRINT '  - sp_GetAuditStatistics (requires @CurrentUserId)';
-PRINT '  - sp_ExportAuditReport (scope based on role)';
-PRINT '  - sp_GetUserActionTimeline (requires @CurrentUserId)';
+PRINT '  - sp_GetAuditLogs (filters out Admin for Auditors)';
+PRINT '  - sp_GetAuditStatistics (excludes Admin stats for Auditors)';
+PRINT '  - sp_ExportAuditReport (scope adjusted by role)';
+PRINT '  - sp_GetUserActionTimeline (Auditor cannot view Admin timeline)';
 PRINT '';
-PRINT 'Ready to use! No test data will be displayed.';
+PRINT 'Ready to use!';
 GO

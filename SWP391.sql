@@ -1112,3 +1112,389 @@ BEGIN
     (@admin_id, @pharma2_id, N'Vui lòng kiểm tra lô thuốc mới nhập kho', 'notification', 0, DATEADD(DAY, -1, GETDATE()));
 END
 GO
+
+USE SWP391;
+GO
+
+-- =========================================
+-- NOTIFICATIONS TABLE
+-- =========================================
+IF OBJECT_ID('Notifications', 'U') IS NOT NULL DROP TABLE Notifications;
+GO
+
+CREATE TABLE Notifications (
+    notification_id INT IDENTITY(1,1) PRIMARY KEY,
+    sender_id INT,
+    receiver_id INT NULL, -- NULL means broadcast to all users
+    title NVARCHAR(200) NOT NULL,
+    message NVARCHAR(MAX) NOT NULL,
+    notification_type NVARCHAR(50) DEFAULT 'info' CHECK (notification_type IN ('info','warning','success','error','alert')),
+    is_read BIT DEFAULT 0,
+    is_broadcast BIT DEFAULT 0, -- TRUE if sent to all users
+    priority NVARCHAR(20) DEFAULT 'normal' CHECK (priority IN ('low','normal','high','urgent')),
+    created_at DATETIME DEFAULT GETDATE(),
+    read_at DATETIME NULL,
+    expires_at DATETIME NULL,
+    link_url NVARCHAR(500) NULL, -- Optional link to related page
+    
+    CONSTRAINT FK_Notifications_Sender FOREIGN KEY (sender_id) 
+        REFERENCES Users(user_id) ON DELETE NO ACTION,
+    CONSTRAINT FK_Notifications_Receiver FOREIGN KEY (receiver_id) 
+        REFERENCES Users(user_id) ON DELETE CASCADE
+);
+GO
+
+-- Create indexes for better performance
+CREATE INDEX idx_notifications_receiver ON Notifications(receiver_id);
+CREATE INDEX idx_notifications_created ON Notifications(created_at DESC);
+CREATE INDEX idx_notifications_unread ON Notifications(receiver_id, is_read) WHERE is_read = 0;
+CREATE INDEX idx_notifications_broadcast ON Notifications(is_broadcast) WHERE is_broadcast = 1;
+GO
+
+-- =========================================
+-- STORED PROCEDURE: Send Notification to All Users
+-- =========================================
+IF OBJECT_ID('sp_SendBroadcastNotification', 'P') IS NOT NULL 
+    DROP PROCEDURE sp_SendBroadcastNotification;
+GO
+
+CREATE PROCEDURE sp_SendBroadcastNotification
+    @sender_id INT,
+    @title NVARCHAR(200),
+    @message NVARCHAR(MAX),
+    @notification_type NVARCHAR(50) = 'info',
+    @priority NVARCHAR(20) = 'normal',
+    @link_url NVARCHAR(500) = NULL,
+    @expires_at DATETIME = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Insert notification for each active user (except sender)
+    INSERT INTO Notifications (sender_id, receiver_id, title, message, notification_type, is_broadcast, priority, link_url, expires_at)
+    SELECT 
+        @sender_id,
+        user_id,
+        @title,
+        @message,
+        @notification_type,
+        1,
+        @priority,
+        @link_url,
+        @expires_at
+    FROM Users
+    WHERE is_active = 1 AND user_id != @sender_id;
+    
+    SELECT @@ROWCOUNT AS notifications_sent;
+END;
+GO
+
+-- =========================================
+-- STORED PROCEDURE: Get Unread Count for User
+-- =========================================
+IF OBJECT_ID('sp_GetUnreadNotificationCount', 'P') IS NOT NULL 
+    DROP PROCEDURE sp_GetUnreadNotificationCount;
+GO
+
+CREATE PROCEDURE sp_GetUnreadNotificationCount
+    @user_id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    SELECT COUNT(*) AS unread_count
+    FROM Notifications
+    WHERE receiver_id = @user_id 
+        AND is_read = 0
+        AND (expires_at IS NULL OR expires_at > GETDATE());
+END;
+GO
+
+-- =========================================
+-- STORED PROCEDURE: Mark Notification as Read
+-- =========================================
+IF OBJECT_ID('sp_MarkNotificationAsRead', 'P') IS NOT NULL 
+    DROP PROCEDURE sp_MarkNotificationAsRead;
+GO
+
+CREATE PROCEDURE sp_MarkNotificationAsRead
+    @notification_id INT,
+    @user_id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    UPDATE Notifications
+    SET is_read = 1, read_at = GETDATE()
+    WHERE notification_id = @notification_id 
+        AND receiver_id = @user_id
+        AND is_read = 0;
+    
+    SELECT @@ROWCOUNT AS updated;
+END;
+GO
+
+-- =========================================
+-- STORED PROCEDURE: Mark All Notifications as Read
+-- =========================================
+IF OBJECT_ID('sp_MarkAllNotificationsAsRead', 'P') IS NOT NULL 
+    DROP PROCEDURE sp_MarkAllNotificationsAsRead;
+GO
+
+CREATE PROCEDURE sp_MarkAllNotificationsAsRead
+    @user_id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    UPDATE Notifications
+    SET is_read = 1, read_at = GETDATE()
+    WHERE receiver_id = @user_id AND is_read = 0;
+    
+    SELECT @@ROWCOUNT AS updated;
+END;
+GO
+
+-- =========================================
+-- SAMPLE DATA (Optional - for testing)
+-- =========================================
+DECLARE @admin_id INT = (SELECT user_id FROM Users WHERE username = 'admin');
+DECLARE @doctor2_id INT = (SELECT user_id FROM Users WHERE username = 'doctor2');
+DECLARE @pharma2_id INT = (SELECT user_id FROM Users WHERE username = 'pharma2');
+
+IF @admin_id IS NOT NULL
+BEGIN
+    -- Individual notification
+    INSERT INTO Notifications (sender_id, receiver_id, title, message, notification_type, priority)
+    VALUES 
+    (@admin_id, @doctor2_id, N'Yêu cầu thuốc mới', N'Có 3 yêu cầu thuốc đang chờ duyệt', 'warning', 'high'),
+    (@admin_id, @pharma2_id, N'Kiểm tra kho', N'Vui lòng kiểm tra lô thuốc mới nhập', 'info', 'normal');
+    
+    -- Broadcast notification using stored procedure
+    EXEC sp_SendBroadcastNotification 
+        @sender_id = @admin_id,
+        @title = N'Bảo trì hệ thống',
+        @message = N'Hệ thống sẽ bảo trì từ 22:00 - 23:00 tối nay',
+        @notification_type = 'alert',
+        @priority = 'urgent';
+END
+GO
+
+-- =========================================
+-- VALIDATION QUERIES
+-- =========================================
+SELECT * FROM Notifications ORDER BY created_at DESC;
+SELECT * FROM Notifications WHERE is_broadcast = 1;
+GO
+
+USE SWP391;
+GO
+
+-- =====================================================
+-- CẬP NHẬT BẢNG AdvancedShippingNotices
+-- =====================================================
+
+-- 1. Thêm các cột mới nếu chưa có
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('AdvancedShippingNotices') AND name = 'submitted_by')
+BEGIN
+    ALTER TABLE AdvancedShippingNotices ADD submitted_by NVARCHAR(100);
+    PRINT 'Added column: submitted_by';
+END
+
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('AdvancedShippingNotices') AND name = 'submitted_at')
+BEGIN
+    ALTER TABLE AdvancedShippingNotices ADD submitted_at DATETIME;
+    PRINT 'Added column: submitted_at';
+END
+
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('AdvancedShippingNotices') AND name = 'approved_by')
+BEGIN
+    ALTER TABLE AdvancedShippingNotices ADD approved_by NVARCHAR(100);
+    PRINT 'Added column: approved_by';
+END
+
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('AdvancedShippingNotices') AND name = 'approved_at')
+BEGIN
+    ALTER TABLE AdvancedShippingNotices ADD approved_at DATETIME;
+    PRINT 'Added column: approved_at';
+END
+
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('AdvancedShippingNotices') AND name = 'rejection_reason')
+BEGIN
+    ALTER TABLE AdvancedShippingNotices ADD rejection_reason NVARCHAR(500);
+    PRINT 'Added column: rejection_reason';
+END
+
+-- 2. Tìm và xóa constraint CHECK cũ của status
+DECLARE @CheckConstraintName NVARCHAR(200);
+SELECT @CheckConstraintName = cc.name 
+FROM sys.check_constraints cc
+INNER JOIN sys.columns c ON cc.parent_object_id = c.object_id 
+    AND cc.parent_column_id = c.column_id
+WHERE cc.parent_object_id = OBJECT_ID('AdvancedShippingNotices') 
+  AND c.name = 'status';
+
+IF @CheckConstraintName IS NOT NULL
+BEGIN
+    DECLARE @DropCheckSQL NVARCHAR(500) = 'ALTER TABLE AdvancedShippingNotices DROP CONSTRAINT ' + QUOTENAME(@CheckConstraintName);
+    EXEC sp_executesql @DropCheckSQL;
+    PRINT 'Dropped old CHECK constraint: ' + @CheckConstraintName;
+END
+
+-- 3. Thêm constraint CHECK mới
+IF NOT EXISTS (SELECT * FROM sys.check_constraints WHERE name = 'CK_ASN_Status')
+BEGIN
+    ALTER TABLE AdvancedShippingNotices ADD CONSTRAINT CK_ASN_Status 
+        CHECK (status IN ('Pending','Sent','InTransit','Delivered','Rejected','Cancelled'));
+    PRINT 'Added new CHECK constraint for status';
+END
+
+-- 4. Tìm và xóa constraint DEFAULT cũ của status
+DECLARE @DefaultConstraintName NVARCHAR(200);
+SELECT @DefaultConstraintName = dc.name
+FROM sys.default_constraints dc
+INNER JOIN sys.columns c ON dc.parent_object_id = c.object_id AND dc.parent_column_id = c.column_id
+WHERE dc.parent_object_id = OBJECT_ID('AdvancedShippingNotices') 
+  AND c.name = 'status';
+
+IF @DefaultConstraintName IS NOT NULL
+BEGIN
+    DECLARE @DropDefaultSQL NVARCHAR(500) = 'ALTER TABLE AdvancedShippingNotices DROP CONSTRAINT ' + QUOTENAME(@DefaultConstraintName);
+    EXEC sp_executesql @DropDefaultSQL;
+    PRINT 'Dropped old DEFAULT constraint: ' + @DefaultConstraintName;
+END
+
+-- 5. Thêm constraint DEFAULT mới
+IF NOT EXISTS (SELECT * FROM sys.default_constraints WHERE name = 'DF_ASN_Status')
+BEGIN
+    ALTER TABLE AdvancedShippingNotices ADD CONSTRAINT DF_ASN_Status DEFAULT 'Pending' FOR status;
+    PRINT 'Added new DEFAULT constraint for status = Pending';
+END
+
+-- =====================================================
+-- CẬP NHẬT BẢNG ASNItems
+-- =====================================================
+
+-- Kiểm tra xem có cần đổi medicine_id thành medicine_code không
+IF EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('ASNItems') AND name = 'medicine_id')
+BEGIN
+    -- Kiểm tra xem có dữ liệu không
+    DECLARE @RowCount INT;
+    SELECT @RowCount = COUNT(*) FROM ASNItems;
+    
+    IF @RowCount > 0
+    BEGIN
+        PRINT 'WARNING: ASNItems contains ' + CAST(@RowCount AS VARCHAR) + ' rows.';
+        PRINT 'Cannot automatically migrate medicine_id to medicine_code.';
+        PRINT 'Please backup data and migrate manually!';
+    END
+    ELSE
+    BEGIN
+        -- Không có dữ liệu, có thể migrate an toàn
+        PRINT 'Migrating ASNItems from medicine_id to medicine_code...';
+        
+        -- Drop FK constraint cũ
+        DECLARE @FKName NVARCHAR(200);
+        SELECT @FKName = fk.name
+        FROM sys.foreign_keys fk
+        INNER JOIN sys.foreign_key_columns fkc ON fk.object_id = fkc.constraint_object_id
+        WHERE fk.parent_object_id = OBJECT_ID('ASNItems')
+          AND COL_NAME(fk.parent_object_id, fkc.parent_column_id) = 'medicine_id';
+        
+        IF @FKName IS NOT NULL
+        BEGIN
+            DECLARE @DropFKSQL NVARCHAR(500) = 'ALTER TABLE ASNItems DROP CONSTRAINT ' + QUOTENAME(@FKName);
+            EXEC sp_executesql @DropFKSQL;
+            PRINT 'Dropped FK constraint: ' + @FKName;
+        END
+        
+        -- Drop column
+        ALTER TABLE ASNItems DROP COLUMN medicine_id;
+        PRINT 'Dropped column: medicine_id';
+        
+        -- Add new column
+        ALTER TABLE ASNItems ADD medicine_code NVARCHAR(50) NOT NULL;
+        PRINT 'Added column: medicine_code';
+        
+        -- Add FK constraint
+        ALTER TABLE ASNItems ADD CONSTRAINT FK_ASNItems_Medicine 
+            FOREIGN KEY (medicine_code) REFERENCES Medicines(medicine_code) ON DELETE CASCADE;
+        PRINT 'Added FK constraint for medicine_code';
+    END
+END
+ELSE
+BEGIN
+    PRINT 'ASNItems already uses medicine_code - no migration needed';
+END
+
+-- =====================================================
+-- TẠO INDEX ĐỂ TỐI ƯU PERFORMANCE
+-- =====================================================
+
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'idx_asn_supplier_status' AND object_id = OBJECT_ID('AdvancedShippingNotices'))
+BEGIN
+    CREATE INDEX idx_asn_supplier_status ON AdvancedShippingNotices(supplier_id, status);
+    PRINT 'Created index: idx_asn_supplier_status';
+END
+
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'idx_asn_created_at' AND object_id = OBJECT_ID('AdvancedShippingNotices'))
+BEGIN
+    CREATE INDEX idx_asn_created_at ON AdvancedShippingNotices(created_at DESC);
+    PRINT 'Created index: idx_asn_created_at';
+END
+
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'idx_asnitem_medicine' AND object_id = OBJECT_ID('ASNItems'))
+BEGIN
+    CREATE INDEX idx_asnitem_medicine ON ASNItems(medicine_code);
+    PRINT 'Created index: idx_asnitem_medicine';
+END
+
+-- =====================================================
+-- CẬP NHẬT DỮ LIỆU CŨ
+-- =====================================================
+
+-- Cập nhật các ASN hiện có
+UPDATE AdvancedShippingNotices 
+SET status = 'InTransit', 
+    submitted_at = COALESCE(submitted_at, created_at),
+    updated_at = GETDATE()
+WHERE status = 'Sent' AND submitted_at IS NULL;
+
+DECLARE @UpdatedRows INT = @@ROWCOUNT;
+PRINT 'Updated ' + CAST(@UpdatedRows AS VARCHAR) + ' ASN records from Sent to InTransit';
+
+-- =====================================================
+-- VERIFICATION
+-- =====================================================
+
+PRINT '';
+PRINT '==========================================';
+PRINT 'DATABASE UPDATE COMPLETED SUCCESSFULLY!';
+PRINT '==========================================';
+PRINT '';
+PRINT 'ASN Status Workflow:';
+PRINT '  1. Pending    -> ASN được tạo bởi Supplier';
+PRINT '  2. Sent       -> Supplier xác nhận đã gửi hàng';
+PRINT '  3. InTransit  -> Đang vận chuyển';
+PRINT '  4. Delivered  -> Đã giao hàng thành công';
+PRINT '';
+PRINT 'Alternative flows:';
+PRINT '  - Pending -> Cancelled (Hủy trước khi gửi)';
+PRINT '  - Sent -> Rejected (Manager từ chối)';
+PRINT '';
+
+-- Kiểm tra cấu trúc bảng
+SELECT 
+    c.name AS ColumnName,
+    t.name AS DataType,
+    c.max_length AS MaxLength,
+    c.is_nullable AS IsNullable,
+    dc.definition AS DefaultValue
+FROM sys.columns c
+INNER JOIN sys.types t ON c.user_type_id = t.user_type_id
+LEFT JOIN sys.default_constraints dc ON c.default_object_id = dc.object_id
+WHERE c.object_id = OBJECT_ID('AdvancedShippingNotices')
+ORDER BY c.column_id;
+
+GO
+

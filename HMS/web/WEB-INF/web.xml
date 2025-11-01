@@ -371,7 +371,7 @@
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>SupplierDashboardServlet</servlet-name>
-        <url-pattern>/supplierDashboard</url-pattern>
+        <url-pattern>/supplier-dashboard</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>SupplierConfirmOrderServlet</servlet-name>

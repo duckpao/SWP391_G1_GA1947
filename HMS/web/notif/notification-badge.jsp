@@ -8,7 +8,7 @@
         align-items: center;
         z-index: 1000;
     }
-    
+
     .notification-bell {
         position: relative;
         display: flex;
@@ -25,14 +25,14 @@
         cursor: pointer;
         text-decoration: none;
     }
-    
+
     .notification-bell:hover {
         background: #e9ecef;
         border-color: #adb5bd;
         color: #0d6efd;
         transform: translateY(-1px);
     }
-    
+
     .notification-count {
         position: absolute;
         top: -6px;
@@ -51,7 +51,7 @@
         box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
         animation: pulse 2s infinite;
     }
-    
+
     @keyframes pulse {
         0%, 100% {
             transform: scale(1);
@@ -60,527 +60,264 @@
             transform: scale(1.15);
         }
     }
-    
-    .notification-dropdown {
+
+    /* WebSocket status indicator */
+    .ws-status {
         position: absolute;
-        top: calc(100% + 8px);
-        right: 0;
-        width: 380px;
-        max-height: 450px;
-        overflow: hidden;
-        border: 1px solid #dee2e6;
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-        border-radius: 8px;
-        background: white;
-        display: none;
-        z-index: 1050;
-        opacity: 0;
-        transform: translateY(-10px);
-        transition: opacity 0.2s ease, transform 0.2s ease;
-    }
-    
-    .notification-dropdown.show {
-        display: block;
-        opacity: 1;
-        transform: translateY(0);
-    }
-    
-    .notification-dropdown-header {
-        background: #f8f9fa;
-        padding: 16px 20px;
-        border-bottom: 1px solid #dee2e6;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    
-    .notification-dropdown-header h6 {
-        margin: 0;
-        font-size: 15px;
-        font-weight: 700;
-        color: #2c3e50;
-    }
-    
-    .mark-all-read-btn {
-        padding: 6px 12px;
-        font-size: 12px;
-        font-weight: 600;
-        color: #0d6efd;
-        background: transparent;
-        border: 1px solid #0d6efd;
-        border-radius: 6px;
-        transition: all 0.3s;
-        cursor: pointer;
-    }
-    
-    .mark-all-read-btn:hover {
-        background: #0d6efd;
-        color: white;
-    }
-    
-    .notification-list {
-        max-height: 350px;
-        overflow-y: auto;
-        overflow-x: hidden;
-    }
-    
-    .notification-item-mini {
-        padding: 14px 20px;
-        border-bottom: 1px solid #f1f3f5;
-        transition: all 0.2s;
-        cursor: pointer;
-        display: flex;
-        gap: 12px;
-        align-items: flex-start;
-        background: white;
-    }
-    
-    .notification-item-mini:last-child {
-        border-bottom: none;
-    }
-    
-    .notification-item-mini:hover {
-        background-color: #f8f9fa;
-    }
-    
-    .notification-item-mini.unread {
-        background-color: #e7f3ff !important;
-        border-left: 3px solid #0d6efd;
-        padding-left: 17px;
-    }
-    
-    .notification-item-mini.unread:hover {
-        background-color: #d7ebff;
-    }
-    
-    .notification-icon {
-        width: 36px;
-        height: 36px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        bottom: -2px;
+        right: -2px;
+        width: 8px;
+        height: 8px;
         border-radius: 50%;
-        font-size: 14px;
-        flex-shrink: 0;
+        background: #6c757d;
+        border: 2px solid white;
     }
-    
-    .notification-icon.info {
-        background: #d1ecf1;
-        color: #0c5460;
+
+    .ws-status.connected {
+        background: #28a745;
     }
-    
-    .notification-icon.warning {
-        background: #fff3cd;
-        color: #856404;
+
+    .ws-status.connecting {
+        background: #ffc107;
+        animation: blink 1s infinite;
     }
-    
-    .notification-icon.success {
-        background: #d4edda;
-        color: #155724;
-    }
-    
-    .notification-icon.error {
-        background: #f8d7da;
-        color: #721c24;
-    }
-    
-    .notification-icon.alert {
-        background: #e2e3e5;
-        color: #383d41;
-    }
-    
-    .notification-content {
-        flex: 1;
-        min-width: 0;
-        overflow: hidden;
-    }
-    
-    .notification-title {
-        font-size: 13px;
-        font-weight: 600;
-        color: #2c3e50;
-        margin: 0 0 4px 0;
-        line-height: 1.3;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-    
-    .notification-message {
-        font-size: 12px;
-        color: #6c757d;
-        margin: 0 0 6px 0;
-        line-height: 1.4;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        word-break: break-word;
-    }
-    
-    .notification-time {
-        font-size: 11px;
-        color: #adb5bd;
-        font-weight: 500;
-    }
-    
-    .notification-empty {
-        text-align: center;
-        padding: 40px 20px;
-        color: #adb5bd;
-    }
-    
-    .notification-empty i {
-        font-size: 48px;
-        margin-bottom: 12px;
-        opacity: 0.5;
-    }
-    
-    .notification-empty p {
-        margin: 0;
-        font-size: 14px;
-        font-weight: 500;
-    }
-    
-    .notification-footer {
-        text-align: center;
-        padding: 12px;
-        border-top: 1px solid #dee2e6;
-        background: #f8f9fa;
-    }
-    
-    .notification-footer a {
-        font-size: 13px;
-        font-weight: 600;
-        color: #0d6efd;
-        text-decoration: none;
-        transition: color 0.3s;
-    }
-    
-    .notification-footer a:hover {
-        color: #0a58ca;
-        text-decoration: none;
-    }
-    
-    .notification-list::-webkit-scrollbar {
-        width: 6px;
-    }
-    
-    .notification-list::-webkit-scrollbar-track {
-        background: #f1f3f5;
-    }
-    
-    .notification-list::-webkit-scrollbar-thumb {
-        background: #adb5bd;
-        border-radius: 3px;
-    }
-    
-    .notification-list::-webkit-scrollbar-thumb:hover {
-        background: #868e96;
-    }
-    
-    @media (max-width: 768px) {
-        .notification-dropdown {
-            width: calc(100vw - 32px);
-            max-width: 380px;
-            position: fixed;
-            right: 16px;
-            left: auto;
-        }
+
+    @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.3; }
     }
 </style>
 
-<!-- Notification Bell Dropdown -->
+<!-- Notification Bell - Direct Link -->
 <div class="notification-bell-wrapper">
-    <a href="javascript:void(0);" class="notification-bell" id="notificationDropdown" onclick="toggleNotificationDropdown()">
+    <a href="${pageContext.request.contextPath}/notifications" class="notification-bell">
         <i class="fas fa-bell"></i>
         <span class="notification-count" id="notifCount">0</span>
+        <span class="ws-status" id="wsStatus" title="WebSocket disconnected"></span>
     </a>
-
-    <div class="notification-dropdown" id="notificationDropdownMenu">
-        <div class="notification-dropdown-header">
-            <h6>Notifications</h6>
-            <button class="mark-all-read-btn" onclick="markAllAsReadQuick()">
-                Mark all as read
-            </button>
-        </div>
-
-        <div class="notification-list" id="notificationDropdownList">
-            <div class="notification-empty">
-                <i class="fas fa-bell-slash"></i>
-                <p>No new notifications</p>
-            </div>
-        </div>
-
-        <div class="notification-footer">
-            <a href="${pageContext.request.contextPath}/notifications">
-                View all notifications
-            </a>
-        </div>
-    </div>
 </div>
 
 <script>
-    let lastNotificationCheck = new Date().getTime();
-    let isDropdownOpen = false;
+    let notificationWs = null;
+    let reconnectAttempts = 0;
+    let maxReconnectAttempts = 5;
+    let reconnectTimeout = null;
+    const contextPath = '${pageContext.request.contextPath}';
+    const userId = ${sessionScope.user != null ? sessionScope.user.userId : 0};
 
-    // Toggle notification dropdown
-    function toggleNotificationDropdown() {
-        const dropdown = document.getElementById('notificationDropdownMenu');
-        isDropdownOpen = !isDropdownOpen;
-        
-        if (isDropdownOpen) {
-            dropdown.classList.add('show');
-            loadNotificationList();
-        } else {
-            dropdown.classList.remove('show');
+    // Initialize WebSocket connection
+    function initNotificationWebSocket() {
+        if (userId === 0) {
+            console.log('? No user logged in, skipping WebSocket connection');
+            return;
         }
-    }
 
-    // Close dropdown when clicking outside
-    document.addEventListener('click', function(event) {
-        const wrapper = document.querySelector('.notification-bell-wrapper');
-        const dropdown = document.getElementById('notificationDropdownMenu');
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = protocol + '//' + window.location.host + contextPath + '/notifications';
+
         
-        if (!wrapper.contains(event.target) && isDropdownOpen) {
-            dropdown.classList.remove('show');
-            isDropdownOpen = false;
-        }
-    });
+        console.log('Connecting to WebSocket:', wsUrl);
+        updateWsStatus('connecting');
 
-    // Prevent dropdown from closing when clicking inside
-    document.getElementById('notificationDropdownMenu')?.addEventListener('click', function(event) {
-        event.stopPropagation();
-    });
+        try {
+            notificationWs = new WebSocket(wsUrl);
 
-    // Load notification count
-    function loadNotifications() {
-        fetch('${pageContext.request.contextPath}/notifications?action=getUnreadCount')
-            .then(response => {
-                if (!response.ok) throw new Error('Network response was not ok');
-                return response.json();
-            })
-            .then(data => {
-                console.log('Unread count data:', data); // ? Debug log
-                const countBadge = document.getElementById('notifCount');
-                if (data.unreadCount > 0) {
-                    countBadge.textContent = data.unreadCount > 99 ? '99+' : data.unreadCount;
-                    countBadge.style.display = 'flex';
-                } else {
-                    countBadge.style.display = 'none';
-                }
-            })
-            .catch(error => {
-                console.error('Error loading notifications:', error);
-            });
-    }
-
-    // ? Helper function to safely get nested property
-    function getProperty(obj, path, defaultValue = '') {
-        return path.split('.').reduce((acc, part) => acc && acc[part], obj) || defaultValue;
-    }
-
-    // Load notification list
-    function loadNotificationList() {
-        const list = document.getElementById('notificationDropdownList');
-        list.innerHTML = '<div class="notification-empty"><i class="fas fa-spinner fa-spin"></i><p>Loading...</p></div>';
-        
-        fetch('${pageContext.request.contextPath}/notifications?action=getLatest&since=' + (lastNotificationCheck - 86400000))
-            .then(response => {
-                if (!response.ok) throw new Error('Network response was not ok');
-                return response.json();
-            })
-            .then(notifications => {
-                console.log('Raw notifications data:', notifications); // ? Debug log
+            notificationWs.onopen = function() {
+                console.log('? WebSocket connected');
+                reconnectAttempts = 0;
+                updateWsStatus('connected');
                 
-                if (!Array.isArray(notifications) || notifications.length === 0) {
-                    list.innerHTML = `
-                        <div class="notification-empty">
-                            <i class="fas fa-bell-slash"></i>
-                            <p>No new notifications</p>
-                        </div>`;
+                // Register user
+                const registerMsg = {
+                    action: 'register',
+                    userId: userId
+                };
+                notificationWs.send(JSON.stringify(registerMsg));
+            };
+
+            notificationWs.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    console.log('WebSocket message:', data);
+
+                    switch(data.type) {
+                        case 'registered':
+                            console.log('? Registered for notifications');
+                            break;
+
+                        case 'unreadCount':
+                            updateNotificationCount(data.count);
+                            break;
+
+                        case 'newNotification':
+                            handleNewNotification(data);
+                            break;
+
+                        case 'error':
+                            console.error('WebSocket error:', data.message);
+                            break;
+
+                        default:
+                            console.log('Unknown message type:', data.type);
+                    }
+                } catch (e) {
+                    console.error('Error parsing WebSocket message:', e);
+                }
+            };
+
+            notificationWs.onerror = function(error) {
+                console.error('? WebSocket error:', error);
+                updateWsStatus('disconnected');
+            };
+
+            notificationWs.onclose = function() {
+                console.log('WebSocket closed');
+                updateWsStatus('disconnected');
+                
+                // Try to reconnect
+                if (reconnectAttempts < maxReconnectAttempts) {
+                    reconnectAttempts++;
+                    const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000);
+                    console.log(`Reconnecting in ${delay}ms (attempt ${reconnectAttempts}/${maxReconnectAttempts})`);
+                    
+                    reconnectTimeout = setTimeout(initNotificationWebSocket, delay);
                 } else {
-                    list.innerHTML = notifications.slice(0, 5).map(notif => {
-                        // ? Handle both camelCase and snake_case
-                        const notifType = notif.notificationType || notif.notification_type || 'info';
-                        const isRead = notif.isRead !== undefined ? notif.isRead : 
-                                      (notif.is_read !== undefined ? notif.is_read : false);
-                        const notifId = notif.notificationId || notif.notification_id || 0;
-                        const title = notif.title || 'Notification';
-                        const message = notif.message || '';
-                        const createdAt = notif.createdAt || notif.created_at || new Date().getTime();
-                        
-                        console.log('Processing notification:', { // ? Debug log
-                            id: notifId,
-                            type: notifType,
-                            isRead: isRead,
-                            title: title
-                        });
-                        
-                        const iconClass = getNotificationIconClass(notifType);
-                        const icon = getNotificationIcon(notifType);
-                        const safeTitle = escapeHtml(title);
-                        const safeMessage = escapeHtml(truncate(message, 80));
-                        const formattedTime = formatTime(createdAt);
-
-                        return `
-                            <div class="notification-item-mini ${isRead ? '' : 'unread'}" 
-                                 onclick="viewNotification(${notifId})"
-                                 data-read="${isRead}">
-                                <div class="notification-icon ${iconClass}">
-                                    <i class="fas fa-${icon}"></i>
-                                </div>
-                                <div class="notification-content">
-                                    <div class="notification-title">${safeTitle}</div>
-                                    <div class="notification-message">${safeMessage}</div>
-                                    <div class="notification-time">${formattedTime}</div>
-                                </div>
-                            </div>`;
-                    }).join('');
+                    console.log('Max reconnect attempts reached. Falling back to polling.');
+                    startPolling();
                 }
-            })
-            .catch(error => {
-                console.error('Error loading notification list:', error);
-                list.innerHTML = `
-                    <div class="notification-empty">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <p>Error loading notifications</p>
-                    </div>`;
-            });
-    }
+            };
 
-    function getNotificationIcon(type) {
-        const icons = {
-            'info': 'info-circle',
-            'warning': 'exclamation-triangle',
-            'success': 'check-circle',
-            'error': 'times-circle',
-            'alert': 'bell'
-        };
-        return icons[type] || 'info-circle';
-    }
-
-    function getNotificationIconClass(type) {
-        const classes = {
-            'info': 'info',
-            'warning': 'warning',
-            'success': 'success',
-            'error': 'error',
-            'alert': 'alert'
-        };
-        return classes[type] || 'info';
-    }
-
-    function viewNotification(id) {
-        window.location.href = '${pageContext.request.contextPath}/notifications?id=' + id;
-    }
-
-    function markAllAsReadQuick() {
-        fetch('${pageContext.request.contextPath}/notifications?action=markAllAsRead', {
-            method: 'POST'
-        })
-            .then(response => {
-                if (!response.ok) throw new Error('Network response was not ok');
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    loadNotifications();
-                    loadNotificationList();
-                }
-            })
-            .catch(error => console.error('Error marking as read:', error));
-    }
-
-    function truncate(str, length) {
-        if (!str) return '';
-        return str.length > length ? str.substring(0, length) + '...' : str;
-    }
-
-    function escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
-    function formatTime(timestamp) {
-        if (!timestamp) return '';
-        
-        // Handle both timestamp (number) and Date string
-        let date;
-        if (typeof timestamp === 'number') {
-            date = new Date(timestamp);
-        } else if (typeof timestamp === 'string') {
-            date = new Date(timestamp);
-        } else {
-            date = new Date();
+        } catch (e) {
+            console.error('Failed to create WebSocket:', e);
+            updateWsStatus('disconnected');
+            startPolling();
         }
-        
-        const now = new Date();
-        const diff = Math.floor((now - date) / 1000);
-
-        if (diff < 60) return 'Just now';
-        if (diff < 3600) return Math.floor(diff / 60) + ' min ago';
-        if (diff < 86400) return Math.floor(diff / 3600) + ' hr ago';
-        if (diff < 2592000) return Math.floor(diff / 86400) + ' days ago';
-        return date.toLocaleDateString();
     }
 
-    function checkNewNotifications() {
-        fetch('${pageContext.request.contextPath}/notifications?action=getLatest&since=' + lastNotificationCheck)
-            .then(response => {
-                if (!response.ok) throw new Error('Network response was not ok');
-                return response.json();
-            })
-            .then(notifications => {
-                if (Array.isArray(notifications) && notifications.length > 0) {
-                    showNotificationToast(notifications[0]);
-                    loadNotifications();
-                }
-                lastNotificationCheck = new Date().getTime();
-            })
-            .catch(error => console.error('Error checking notifications:', error));
+    // Update WebSocket status indicator
+    function updateWsStatus(status) {
+        const statusEl = document.getElementById('wsStatus');
+        if (statusEl) {
+            statusEl.className = 'ws-status ' + status;
+            const titles = {
+                'connected': 'WebSocket connected - Real-time updates enabled',
+                'connecting': 'Connecting to WebSocket...',
+                'disconnected': 'WebSocket disconnected - Using fallback polling'
+            };
+            statusEl.title = titles[status] || 'Unknown status';
+        }
     }
 
-    function showNotificationToast(notif) {
-        if (!notif) return;
+    // Update notification count
+    function updateNotificationCount(count) {
+        const countBadge = document.getElementById('notifCount');
+        if (countBadge) {
+            if (count > 0) {
+                countBadge.textContent = count > 99 ? '99+' : count;
+                countBadge.style.display = 'flex';
+            } else {
+                countBadge.style.display = 'none';
+            }
+            console.log('Updated notification count:', count);
+        }
+    }
+
+    // Handle new notification
+    function handleNewNotification(data) {
+        console.log('New notification received:', data);
         
-        const title = notif.title || notif.Title || 'Notification';
-        const message = notif.message || notif.Message || '';
-        
+        // Update count immediately
+        const countBadge = document.getElementById('notifCount');
+        if (countBadge) {
+            const currentCount = parseInt(countBadge.textContent) || 0;
+            updateNotificationCount(currentCount + 1);
+        }
+
+        // Show browser notification if permission granted
         if (Notification.permission === "granted") {
             try {
-                new Notification(title, {
-                    body: message,
-                    icon: '${pageContext.request.contextPath}/images/notification-icon.png',
-                    tag: 'notification-' + (notif.notificationId || notif.notification_id || Math.random())
+                new Notification(data.title, {
+                    body: data.message,
+                    icon: contextPath + '/images/notification-icon.png',
+                    tag: 'notification-' + Date.now()
                 });
             } catch (error) {
                 console.error('Error showing notification:', error);
             }
         }
+
+        // Shake the bell icon
+        const bell = document.querySelector('.notification-bell i');
+        if (bell) {
+            bell.style.animation = 'none';
+            setTimeout(() => {
+                bell.style.animation = 'shake 0.5s';
+            }, 10);
+        }
+    }
+
+    // Fallback polling if WebSocket fails
+    function startPolling() {
+        setInterval(function() {
+            if (!notificationWs || notificationWs.readyState !== WebSocket.OPEN) {
+                fetch(contextPath + '/notifications?action=getUnreadCount')
+                    .then(response => response.json())
+                    .then(data => {
+                        updateNotificationCount(data.unreadCount);
+                    })
+                    .catch(error => console.error('Polling error:', error));
+            }
+        }, 30000); // Poll every 30 seconds
     }
 
     // Request notification permission
-    if (Notification.permission === "default") {
-        Notification.requestPermission();
+    if (typeof Notification !== 'undefined' && Notification.permission === "default") {
+        Notification.requestPermission().then(permission => {
+            console.log('Notification permission:', permission);
+        });
     }
 
-    // Initialize
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('Notification bell initialized'); // ? Debug log
-        loadNotifications();
-        setInterval(checkNewNotifications, 10000);
+    // Load initial notification count
+    function loadInitialCount() {
+        if (userId === 0) return;
+        
+        fetch(contextPath + '/notifications?action=getUnreadCount')
+            .then(response => response.json())
+            .then(data => {
+                updateNotificationCount(data.unreadCount);
+            })
+            .catch(error => console.error('Error loading count:', error));
+    }
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', function() {
+        if (notificationWs) {
+            notificationWs.close();
+        }
+        if (reconnectTimeout) {
+            clearTimeout(reconnectTimeout);
+        }
     });
 
-    // Fallback if DOMContentLoaded already fired
+    // Initialize when page loads
     if (document.readyState === 'loading') {
-        // Already added listener above
+        document.addEventListener('DOMContentLoaded', function() {
+            loadInitialCount();
+            initNotificationWebSocket();
+        });
     } else {
-        console.log('Notification bell initialized (fallback)'); // ? Debug log
-        loadNotifications();
-        setInterval(checkNewNotifications, 10000);
+        loadInitialCount();
+        initNotificationWebSocket();
     }
+
+    // Add shake animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes shake {
+            0%, 100% { transform: rotate(0deg); }
+            10%, 30%, 50%, 70%, 90% { transform: rotate(-10deg); }
+            20%, 40%, 60%, 80% { transform: rotate(10deg); }
+        }
+    `;
+    document.head.appendChild(style);
 </script>

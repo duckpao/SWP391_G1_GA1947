@@ -175,7 +175,7 @@
                     dashboardUrl = 'admin-dashboard';
                     break;
                 case 'supplier':
-                    dashboardUrl = 'supplierDashboard';
+                    dashboardUrl = 'supplier-dashboard';
                     break;
                 case 'auditor':
                     dashboardUrl = 'auditor-dashboard';

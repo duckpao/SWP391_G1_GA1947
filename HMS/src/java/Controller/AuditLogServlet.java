@@ -64,7 +64,6 @@ public class AuditLogServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // Check if user is Auditor or Admin
         User user = LoggingUtil.getUserFromSession(request);
         if (user == null || (!user.getRole().equals("Auditor") && !user.getRole().equals("Admin"))) {
             response.sendRedirect("login.jsp");
@@ -78,19 +77,19 @@ public class AuditLogServlet extends HttpServlet {
 
         switch (action) {
             case "view":
-                viewAuditLogs(request, response);
+                viewAuditLogs(request, response, user);
                 break;
             case "statistics":
-                viewStatistics(request, response);
+                viewStatistics(request, response, user);
                 break;
             case "export":
-                exportReport(request, response);
+                exportReport(request, response, user);
                 break;
             case "alerts":
-                viewAlerts(request, response);
+                viewAlerts(request, response, user);
                 break;
             default:
-                viewAuditLogs(request, response);
+                viewAuditLogs(request, response, user);
         }
     }
 
@@ -100,7 +99,7 @@ public class AuditLogServlet extends HttpServlet {
         doGet(request, response);
     }
 
-    private void viewAuditLogs(HttpServletRequest request, HttpServletResponse response)
+    private void viewAuditLogs(HttpServletRequest request, HttpServletResponse response, User user)
             throws ServletException, IOException {
 
         // Get filter parameters
@@ -128,18 +127,40 @@ public class AuditLogServlet extends HttpServlet {
             pageNumber = 1;
         }
 
-        // Get logs
-        List<AuditLog> logs = auditLogDAO.getAuditLogs(startDate, endDate, username, role,
-                actionFilter, tableName, riskLevel, category, pageNumber, pageSize);
+        // UPDATED: Pass currentUserId to DAO
+        List<AuditLog> logs = auditLogDAO.getAuditLogs(
+                user.getUserId(), // <-- Pass current user ID
+                startDate,
+                endDate,
+                username,
+                role,
+                actionFilter,
+                tableName,
+                riskLevel,
+                category,
+                pageNumber,
+                pageSize
+        );
 
-        // Get total count for pagination
-        int totalRecords = auditLogDAO.getTotalLogsCount(startDate, endDate, username, role,
-                actionFilter, tableName, riskLevel, category);
+        // UPDATED: Pass currentUserId and role to getTotalLogsCount
+        int totalRecords = auditLogDAO.getTotalLogsCount(
+                user.getUserId(), // <-- Pass current user ID
+                user.getRole(), // <-- Pass current user role
+                startDate,
+                endDate,
+                username,
+                role,
+                actionFilter,
+                tableName,
+                riskLevel,
+                category
+        );
+
         int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
 
-        // Get filter options
-        List<String> actions = auditLogDAO.getDistinctActions();
-        List<String> tables = auditLogDAO.getDistinctTableNames();
+        // UPDATED: Pass currentUserId and role to filter options
+        List<String> actions = auditLogDAO.getDistinctActions(user.getUserId(), user.getRole());
+        List<String> tables = auditLogDAO.getDistinctTableNames(user.getUserId(), user.getRole());
         List<String> roles = auditLogDAO.getDistinctRoles();
 
         // Set attributes
@@ -152,6 +173,10 @@ public class AuditLogServlet extends HttpServlet {
         request.setAttribute("tables", tables);
         request.setAttribute("roles", roles);
 
+        // NEW: Add user info for display
+        request.setAttribute("currentUser", user);
+        request.setAttribute("isAuditor", user.getRole().equals("Auditor"));
+
         // Preserve filters
         request.setAttribute("startDate", startDate);
         request.setAttribute("endDate", endDate);
@@ -161,39 +186,40 @@ public class AuditLogServlet extends HttpServlet {
         request.setAttribute("tableName", tableName);
         request.setAttribute("riskLevel", riskLevel);
         request.setAttribute("category", category);
-        System.out.println("🔥 DEBUG viewAuditLogs:");
-System.out.println("  → Filters: startDate=" + startDate + " | username=" + username + " | action=" + actionFilter);
-System.out.println("  → Page: " + pageNumber + "/" + totalPages + " | TotalRecords: " + totalRecords);
-System.out.println("  → LOGS SIZE: " + logs.size());
-System.out.println("  → Distinct Actions: " + actions.size() + " | Tables: " + tables.size() + " | Roles: " + roles.size());
-System.out.println("═════════════════════════════════════════════");
+
         // Log this view action
         LoggingUtil.logView(request, "AUDIT_LOGS");
 
         request.getRequestDispatcher("auditor/auditLog.jsp").forward(request, response);
     }
 
-    private void viewStatistics(HttpServletRequest request, HttpServletResponse response)
+    private void viewStatistics(HttpServletRequest request, HttpServletResponse response, User user)
             throws ServletException, IOException {
 
         String startDate = request.getParameter("startDate");
         String endDate = request.getParameter("endDate");
 
-        AuditStatistics stats = auditLogDAO.getAuditStatistics(startDate, endDate);
+        // UPDATED: Pass currentUserId
+        AuditStatistics stats = auditLogDAO.getAuditStatistics(
+                user.getUserId(), // <-- Pass current user ID
+                startDate,
+                endDate
+        );
 
         request.setAttribute("statistics", stats);
         request.setAttribute("startDate", startDate);
         request.setAttribute("endDate", endDate);
+        request.setAttribute("currentUser", user);
+        request.setAttribute("isAuditor", user.getRole().equals("Auditor"));
 
         LoggingUtil.logView(request, "AUDIT_STATISTICS");
 
         request.getRequestDispatcher("auditor/auditStatistics.jsp").forward(request, response);
     }
 
-    private void exportReport(HttpServletRequest request, HttpServletResponse response)
+    private void exportReport(HttpServletRequest request, HttpServletResponse response, User user)
             throws ServletException, IOException {
 
-        User user = LoggingUtil.getUserFromSession(request);
         String startDate = request.getParameter("startDate");
         String endDate = request.getParameter("endDate");
         String reportType = request.getParameter("reportType");
@@ -206,17 +232,24 @@ System.out.println("════════════════════
             format = "Excel";
         }
 
-        int reportId = auditLogDAO.exportAuditReport(user.getUserId(), startDate, endDate, reportType, format);
+        // This method already uses auditorId correctly
+        int reportId = auditLogDAO.exportAuditReport(
+                user.getUserId(),
+                startDate,
+                endDate,
+                reportType,
+                format
+        );
 
         LoggingUtil.logExport(request, "Audit Report", format);
 
         request.setAttribute("message", "Report generated successfully! Report ID: " + reportId);
         request.setAttribute("messageType", "success");
 
-        viewAuditLogs(request, response);
+        viewAuditLogs(request, response, user);
     }
 
-    private void viewAlerts(HttpServletRequest request, HttpServletResponse response)
+    private void viewAlerts(HttpServletRequest request, HttpServletResponse response, User user)
             throws ServletException, IOException {
 
         int hours = 24;
@@ -232,6 +265,7 @@ System.out.println("════════════════════
 
         request.setAttribute("alerts", alerts);
         request.setAttribute("hours", hours);
+        request.setAttribute("currentUser", user);
 
         LoggingUtil.logView(request, "SUSPICIOUS_ACTIVITIES");
 

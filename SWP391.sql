@@ -2207,14 +2207,6 @@ GO
 
 
 
--- Supplier cho Công ty Dược B
-IF NOT EXISTS (SELECT 1 FROM Users WHERE username = 'supplier_duocb')
-BEGIN
-    INSERT INTO Users (username, password_hash, email, phone, role, is_active)
-    VALUES ('supplier_duocb', '$2a$12$AfoWp3rMoA9hMUNmTSFZOOsW0CQXp56TjuapkN8OwRDkziBqhL4Qi', 
-            'supplier@duocb.vn', '0905555556', 'Supplier', 1);
-    PRINT 'Created user: supplier_duocb';
-END
 
 -- Supplier cho Công ty Dược C
 IF NOT EXISTS (SELECT 1 FROM Users WHERE username = 'supplier_duocc')

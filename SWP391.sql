@@ -1498,3 +1498,961 @@ ORDER BY c.column_id;
 
 GO
 
+USE SWP391;
+GO
+
+-- =====================================================
+-- PART 1: FIX AUDITREPORTS CHECK CONSTRAINT
+-- =====================================================
+PRINT '========================================';
+PRINT 'PART 1: Fixing AuditReports Constraint';
+PRINT '========================================';
+
+-- Drop old constraint
+DECLARE @ConstraintName NVARCHAR(200);
+SELECT @ConstraintName = cc.name 
+FROM sys.check_constraints cc
+WHERE cc.parent_object_id = OBJECT_ID('AuditReports')
+  AND cc.definition LIKE '%report_type%';
+
+IF @ConstraintName IS NOT NULL
+BEGIN
+    DECLARE @DropSQL NVARCHAR(500) = 'ALTER TABLE AuditReports DROP CONSTRAINT ' + QUOTENAME(@ConstraintName);
+    EXEC sp_executesql @DropSQL;
+    PRINT 'Dropped old CHECK constraint: ' + @ConstraintName;
+END
+
+-- Add new constraint
+ALTER TABLE AuditReports ADD CONSTRAINT CK_AuditReports_Type 
+    CHECK (report_type IN ('SupplierPerformance','PurchaseHistory','InventoryAudit','UserActivity','ComprehensiveAudit','SecurityAudit'));
+
+PRINT 'Added new CHECK constraint with ComprehensiveAudit';
+PRINT 'PART 1 COMPLETED!';
+PRINT '';
+GO
+
+USE SWP391;
+GO
+
+-- =====================================================
+-- PART 2: CREATE AUDIT VIEWS
+-- =====================================================
+PRINT '========================================';
+PRINT 'PART 2: Creating Audit Views';
+PRINT '========================================';
+
+-- View 1: Audit Log Details
+IF OBJECT_ID('vw_AuditLogDetails', 'V') IS NOT NULL 
+    DROP VIEW vw_AuditLogDetails;
+GO
+
+CREATE VIEW vw_AuditLogDetails AS
+SELECT 
+    sl.log_id,
+    sl.user_id,
+    u.username,
+    u.email,
+    u.role,
+    sl.action,
+    sl.table_name,
+    sl.record_id,
+    sl.old_value,
+    sl.new_value,
+    sl.details,
+    sl.ip_address,
+    sl.log_date,
+    CASE 
+        WHEN sl.action IN ('DELETE', 'REJECT', 'CANCEL') THEN 'high'
+        WHEN sl.action IN ('UPDATE', 'APPROVE') THEN 'medium'
+        ELSE 'low'
+    END AS risk_level,
+    CASE 
+        WHEN sl.table_name IN ('Users', 'Permissions', 'UserPermissions') THEN 'Security'
+        WHEN sl.table_name IN ('Medicines', 'Batches', 'Transactions') THEN 'Inventory'
+        WHEN sl.table_name IN ('PurchaseOrders', 'Invoices', 'AdvancedShippingNotices') THEN 'Procurement'
+        ELSE 'Other'
+    END AS category
+FROM SystemLogs sl
+LEFT JOIN Users u ON sl.user_id = u.user_id;
+GO
+
+PRINT 'Created view: vw_AuditLogDetails';
+
+-- View 2: Daily Audit Summary
+IF OBJECT_ID('vw_DailyAuditSummary', 'V') IS NOT NULL 
+    DROP VIEW vw_DailyAuditSummary;
+GO
+
+CREATE VIEW vw_DailyAuditSummary AS
+SELECT 
+    CAST(log_date AS DATE) AS log_date,
+    COUNT(*) AS total_actions,
+    COUNT(DISTINCT user_id) AS active_users,
+    SUM(CASE WHEN action = 'LOGIN' THEN 1 ELSE 0 END) AS login_count,
+    SUM(CASE WHEN action IN ('CREATE', 'INSERT') THEN 1 ELSE 0 END) AS create_count,
+    SUM(CASE WHEN action = 'UPDATE' THEN 1 ELSE 0 END) AS update_count,
+    SUM(CASE WHEN action = 'DELETE' THEN 1 ELSE 0 END) AS delete_count,
+    SUM(CASE WHEN action IN ('APPROVE', 'REJECT') THEN 1 ELSE 0 END) AS approval_count
+FROM SystemLogs
+GROUP BY CAST(log_date AS DATE);
+GO
+
+PRINT 'Created view: vw_DailyAuditSummary';
+
+-- View 3: User Risk Profile
+IF OBJECT_ID('vw_UserRiskProfile', 'V') IS NOT NULL 
+    DROP VIEW vw_UserRiskProfile;
+GO
+
+CREATE VIEW vw_UserRiskProfile AS
+SELECT 
+    u.user_id,
+    u.username,
+    u.role,
+    COUNT(sl.log_id) AS total_actions,
+    SUM(CASE WHEN sl.action = 'DELETE' THEN 1 ELSE 0 END) AS delete_actions,
+    SUM(CASE WHEN sl.action IN ('APPROVE', 'REJECT') THEN 1 ELSE 0 END) AS approval_actions,
+    SUM(CASE WHEN sl.table_name = 'Users' THEN 1 ELSE 0 END) AS user_mgmt_actions,
+    MAX(sl.log_date) AS last_action,
+    COUNT(DISTINCT CAST(sl.log_date AS DATE)) AS active_days,
+    CASE 
+        WHEN SUM(CASE WHEN sl.action = 'DELETE' THEN 1 ELSE 0 END) > 10 THEN 'high'
+        WHEN SUM(CASE WHEN sl.action = 'DELETE' THEN 1 ELSE 0 END) > 5 THEN 'medium'
+        ELSE 'low'
+    END AS risk_level
+FROM Users u
+LEFT JOIN SystemLogs sl ON u.user_id = sl.user_id
+GROUP BY u.user_id, u.username, u.role;
+GO
+
+PRINT 'Created view: vw_UserRiskProfile';
+PRINT 'PART 2 COMPLETED!';
+PRINT '';
+GO
+
+USE SWP391;
+GO
+
+-- =====================================================
+-- PART 3: STORED PROCEDURE - GET AUDIT LOGS
+-- =====================================================
+PRINT '========================================';
+PRINT 'PART 3: Creating sp_GetAuditLogs';
+PRINT '========================================';
+
+IF OBJECT_ID('sp_GetAuditLogs', 'P') IS NOT NULL 
+    DROP PROCEDURE sp_GetAuditLogs;
+GO
+
+CREATE PROCEDURE sp_GetAuditLogs
+    @StartDate DATETIME = NULL,
+    @EndDate DATETIME = NULL,
+    @UserId INT = NULL,
+    @Username NVARCHAR(50) = NULL,
+    @Role NVARCHAR(50) = NULL,
+    @Action NVARCHAR(100) = NULL,
+    @TableName NVARCHAR(50) = NULL,
+    @RiskLevel NVARCHAR(20) = NULL,
+    @Category NVARCHAR(50) = NULL,
+    @PageNumber INT = 1,
+    @PageSize INT = 50
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    DECLARE @Offset INT = (@PageNumber - 1) * @PageSize;
+    
+    -- Get total count
+    DECLARE @TotalRecords INT;
+    SELECT @TotalRecords = COUNT(*)
+    FROM vw_AuditLogDetails
+    WHERE 
+        (@StartDate IS NULL OR log_date >= @StartDate)
+        AND (@EndDate IS NULL OR log_date <= @EndDate)
+        AND (@UserId IS NULL OR user_id = @UserId)
+        AND (@Username IS NULL OR username LIKE '%' + @Username + '%')
+        AND (@Role IS NULL OR role = @Role)
+        AND (@Action IS NULL OR action = @Action)
+        AND (@TableName IS NULL OR table_name = @TableName)
+        AND (@RiskLevel IS NULL OR risk_level = @RiskLevel)
+        AND (@Category IS NULL OR category = @Category);
+    
+    -- Get paginated results
+    SELECT 
+        *,
+        @TotalRecords AS total_records,
+        CEILING(CAST(@TotalRecords AS FLOAT) / @PageSize) AS total_pages
+    FROM vw_AuditLogDetails
+    WHERE 
+        (@StartDate IS NULL OR log_date >= @StartDate)
+        AND (@EndDate IS NULL OR log_date <= @EndDate)
+        AND (@UserId IS NULL OR user_id = @UserId)
+        AND (@Username IS NULL OR username LIKE '%' + @Username + '%')
+        AND (@Role IS NULL OR role = @Role)
+        AND (@Action IS NULL OR action = @Action)
+        AND (@TableName IS NULL OR table_name = @TableName)
+        AND (@RiskLevel IS NULL OR risk_level = @RiskLevel)
+        AND (@Category IS NULL OR category = @Category)
+    ORDER BY log_date DESC
+    OFFSET @Offset ROWS
+    FETCH NEXT @PageSize ROWS ONLY;
+END;
+GO
+
+PRINT 'Created procedure: sp_GetAuditLogs';
+PRINT 'PART 3 COMPLETED!';
+PRINT '';
+GO
+
+USE SWP391;
+GO
+
+-- =====================================================
+-- PART 4: STORED PROCEDURE - GET AUDIT STATISTICS
+-- =====================================================
+PRINT '========================================';
+PRINT 'PART 4: Creating sp_GetAuditStatistics';
+PRINT '========================================';
+
+IF OBJECT_ID('sp_GetAuditStatistics', 'P') IS NOT NULL 
+    DROP PROCEDURE sp_GetAuditStatistics;
+GO
+
+CREATE PROCEDURE sp_GetAuditStatistics
+    @StartDate DATETIME = NULL,
+    @EndDate DATETIME = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Set default date range if not provided
+    IF @StartDate IS NULL SET @StartDate = DATEADD(DAY, -30, GETDATE());
+    IF @EndDate IS NULL SET @EndDate = GETDATE();
+    
+    -- Overall statistics
+    SELECT 
+        COUNT(*) AS total_actions,
+        COUNT(DISTINCT user_id) AS active_users,
+        COUNT(DISTINCT table_name) AS affected_tables,
+        COUNT(DISTINCT CAST(log_date AS DATE)) AS active_days,
+        SUM(CASE WHEN action = 'LOGIN' THEN 1 ELSE 0 END) AS total_logins,
+        SUM(CASE WHEN action IN ('CREATE', 'INSERT') THEN 1 ELSE 0 END) AS total_creates,
+        SUM(CASE WHEN action = 'UPDATE' THEN 1 ELSE 0 END) AS total_updates,
+        SUM(CASE WHEN action = 'DELETE' THEN 1 ELSE 0 END) AS total_deletes,
+        SUM(CASE WHEN action IN ('APPROVE', 'REJECT') THEN 1 ELSE 0 END) AS total_approvals
+    FROM SystemLogs
+    WHERE log_date BETWEEN @StartDate AND @EndDate;
+    
+    -- Actions by role
+    SELECT 
+        u.role,
+        COUNT(sl.log_id) AS action_count,
+        COUNT(DISTINCT sl.user_id) AS user_count
+    FROM SystemLogs sl
+    LEFT JOIN Users u ON sl.user_id = u.user_id
+    WHERE sl.log_date BETWEEN @StartDate AND @EndDate
+    GROUP BY u.role
+    ORDER BY action_count DESC;
+    
+    -- Actions by category
+    SELECT 
+        CASE 
+            WHEN table_name IN ('Users', 'Permissions', 'UserPermissions') THEN 'Security'
+            WHEN table_name IN ('Medicines', 'Batches', 'Transactions') THEN 'Inventory'
+            WHEN table_name IN ('PurchaseOrders', 'Invoices', 'AdvancedShippingNotices') THEN 'Procurement'
+            ELSE 'Other'
+        END AS category,
+        COUNT(*) AS action_count
+    FROM SystemLogs
+    WHERE log_date BETWEEN @StartDate AND @EndDate
+    GROUP BY 
+        CASE 
+            WHEN table_name IN ('Users', 'Permissions', 'UserPermissions') THEN 'Security'
+            WHEN table_name IN ('Medicines', 'Batches', 'Transactions') THEN 'Inventory'
+            WHEN table_name IN ('PurchaseOrders', 'Invoices', 'AdvancedShippingNotices') THEN 'Procurement'
+            ELSE 'Other'
+        END
+    ORDER BY action_count DESC;
+    
+    -- Top 10 most active users
+    SELECT TOP 10
+        u.username,
+        u.role,
+        COUNT(sl.log_id) AS action_count,
+        MAX(sl.log_date) AS last_action
+    FROM SystemLogs sl
+    LEFT JOIN Users u ON sl.user_id = u.user_id
+    WHERE sl.log_date BETWEEN @StartDate AND @EndDate
+    GROUP BY u.username, u.role
+    ORDER BY action_count DESC;
+    
+    -- Daily activity trend
+    SELECT 
+        CAST(log_date AS DATE) AS log_date,
+        COUNT(*) AS action_count,
+        COUNT(DISTINCT user_id) AS active_users
+    FROM SystemLogs
+    WHERE log_date BETWEEN @StartDate AND @EndDate
+    GROUP BY CAST(log_date AS DATE)
+    ORDER BY log_date DESC;
+END;
+GO
+
+PRINT 'Created procedure: sp_GetAuditStatistics';
+PRINT 'PART 4 COMPLETED!';
+PRINT '';
+GO
+
+USE SWP391;
+GO
+
+-- =====================================================
+-- PART 5: STORED PROCEDURE - EXPORT AUDIT REPORT
+-- =====================================================
+PRINT '========================================';
+PRINT 'PART 5: Creating sp_ExportAuditReport';
+PRINT '========================================';
+
+IF OBJECT_ID('sp_ExportAuditReport', 'P') IS NOT NULL 
+    DROP PROCEDURE sp_ExportAuditReport;
+GO
+
+CREATE PROCEDURE sp_ExportAuditReport
+    @auditor_id INT,
+    @StartDate DATETIME = NULL,
+    @EndDate DATETIME = NULL,
+    @ReportType NVARCHAR(50) = 'ComprehensiveAudit',
+    @ExportFormat NVARCHAR(10) = 'Excel'
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Set default date range
+    IF @StartDate IS NULL SET @StartDate = DATEADD(DAY, -30, GETDATE());
+    IF @EndDate IS NULL SET @EndDate = GETDATE();
+    
+    DECLARE @reportData NVARCHAR(MAX);
+    
+    -- Generate comprehensive report data
+    SET @reportData = (
+        SELECT 
+            'AuditSummary' AS section,
+            (SELECT COUNT(*) FROM SystemLogs WHERE log_date BETWEEN @StartDate AND @EndDate) AS total_actions,
+            (SELECT COUNT(DISTINCT user_id) FROM SystemLogs WHERE log_date BETWEEN @StartDate AND @EndDate) AS active_users,
+            @StartDate AS period_start,
+            @EndDate AS period_end,
+            (
+                SELECT 
+                    role,
+                    COUNT(*) AS action_count
+                FROM SystemLogs sl
+                LEFT JOIN Users u ON sl.user_id = u.user_id
+                WHERE sl.log_date BETWEEN @StartDate AND @EndDate
+                GROUP BY role
+                FOR JSON PATH
+            ) AS actions_by_role,
+            (
+                SELECT 
+                    username,
+                    role,
+                    COUNT(*) AS action_count
+                FROM SystemLogs sl
+                LEFT JOIN Users u ON sl.user_id = u.user_id
+                WHERE sl.log_date BETWEEN @StartDate AND @EndDate
+                GROUP BY username, role
+                ORDER BY COUNT(*) DESC
+                FOR JSON PATH
+            ) AS top_users
+        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+    );
+    
+    -- Insert audit report record
+    INSERT INTO AuditReports (auditor_id, report_type, generated_date, data, exported_format, notes)
+    VALUES (
+        @auditor_id, 
+        @ReportType, 
+        GETDATE(), 
+        @reportData, 
+        @ExportFormat, 
+        CONCAT(N'Audit report from ', FORMAT(@StartDate, 'yyyy-MM-dd'), ' to ', FORMAT(@EndDate, 'yyyy-MM-dd'))
+    );
+    
+    -- Return report ID
+    SELECT 
+        SCOPE_IDENTITY() AS report_id,
+        @ReportType AS report_type,
+        GETDATE() AS generated_date,
+        @ExportFormat AS format;
+END;
+GO
+
+PRINT 'Created procedure: sp_ExportAuditReport';
+PRINT 'PART 5 COMPLETED!';
+PRINT '';
+GO
+
+USE SWP391;
+GO
+
+-- =====================================================
+-- PART 6: STORED PROCEDURE - DETECT SUSPICIOUS ACTIVITIES
+-- =====================================================
+PRINT '========================================';
+PRINT 'PART 6: Creating sp_DetectSuspiciousActivities';
+PRINT '========================================';
+
+IF OBJECT_ID('sp_DetectSuspiciousActivities', 'P') IS NOT NULL 
+    DROP PROCEDURE sp_DetectSuspiciousActivities;
+GO
+
+CREATE PROCEDURE sp_DetectSuspiciousActivities
+    @Hours INT = 24
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    DECLARE @StartTime DATETIME = DATEADD(HOUR, -@Hours, GETDATE());
+    
+    -- Multiple failed login attempts
+    SELECT 
+        'Multiple Failed Logins' AS alert_type,
+        u.username,
+        u.role,
+        COUNT(*) AS attempt_count,
+        MAX(sl.log_date) AS last_attempt,
+        STUFF((
+            SELECT DISTINCT ', ' + CAST(ip_address AS VARCHAR(50))
+            FROM SystemLogs sl2
+            WHERE sl2.user_id = sl.user_id 
+              AND sl2.action = 'FAILED_LOGIN'
+              AND sl2.log_date >= @StartTime
+            FOR XML PATH('')
+        ), 1, 2, '') AS ip_addresses
+    FROM SystemLogs sl
+    INNER JOIN Users u ON sl.user_id = u.user_id
+    WHERE sl.action = 'FAILED_LOGIN' 
+        AND sl.log_date >= @StartTime
+    GROUP BY u.username, u.role, sl.user_id
+    HAVING COUNT(*) >= 3;
+    
+    -- Unusual number of delete operations
+    SELECT 
+        'Excessive Delete Operations' AS alert_type,
+        u.username,
+        u.role,
+        COUNT(*) AS delete_count,
+        MAX(sl.log_date) AS last_delete,
+        STUFF((
+            SELECT DISTINCT ', ' + CAST(table_name AS VARCHAR(50))
+            FROM SystemLogs sl2
+            WHERE sl2.user_id = sl.user_id 
+              AND sl2.action = 'DELETE'
+              AND sl2.log_date >= @StartTime
+            FOR XML PATH('')
+        ), 1, 2, '') AS affected_tables
+    FROM SystemLogs sl
+    INNER JOIN Users u ON sl.user_id = u.user_id
+    WHERE sl.action = 'DELETE' 
+        AND sl.log_date >= @StartTime
+    GROUP BY u.username, u.role, sl.user_id
+    HAVING COUNT(*) >= 10;
+    
+    -- After-hours activities
+    SELECT 
+        'After Hours Activity' AS alert_type,
+        u.username,
+        u.role,
+        COUNT(*) AS action_count,
+        MIN(sl.log_date) AS first_action,
+        MAX(sl.log_date) AS last_action
+    FROM SystemLogs sl
+    INNER JOIN Users u ON sl.user_id = u.user_id
+    WHERE sl.log_date >= @StartTime
+        AND (DATEPART(HOUR, sl.log_date) < 6 OR DATEPART(HOUR, sl.log_date) > 22)
+    GROUP BY u.username, u.role
+    HAVING COUNT(*) >= 5;
+    
+    -- Multiple IP addresses for same user
+    SELECT 
+        'Multiple IP Addresses' AS alert_type,
+        u.username,
+        u.role,
+        COUNT(DISTINCT sl.ip_address) AS ip_count,
+        STUFF((
+            SELECT DISTINCT ', ' + CAST(ip_address AS VARCHAR(50))
+            FROM SystemLogs sl2
+            WHERE sl2.user_id = sl.user_id 
+              AND sl2.action = 'LOGIN'
+              AND sl2.log_date >= @StartTime
+            FOR XML PATH('')
+        ), 1, 2, '') AS ip_addresses,
+        MAX(sl.log_date) AS last_login
+    FROM SystemLogs sl
+    INNER JOIN Users u ON sl.user_id = u.user_id
+    WHERE sl.action = 'LOGIN' 
+        AND sl.log_date >= @StartTime
+    GROUP BY u.username, u.role, sl.user_id
+    HAVING COUNT(DISTINCT sl.ip_address) >= 3;
+END;
+GO
+
+PRINT 'Created procedure: sp_DetectSuspiciousActivities';
+PRINT 'PART 6 COMPLETED!';
+PRINT '';
+GO
+
+USE SWP391;
+GO
+
+-- =====================================================
+-- PART 7: STORED PROCEDURE - GET USER ACTION TIMELINE
+-- =====================================================
+PRINT '========================================';
+PRINT 'PART 7: Creating sp_GetUserActionTimeline';
+PRINT '========================================';
+
+IF OBJECT_ID('sp_GetUserActionTimeline', 'P') IS NOT NULL 
+    DROP PROCEDURE sp_GetUserActionTimeline;
+GO
+
+CREATE PROCEDURE sp_GetUserActionTimeline
+    @UserId INT,
+    @StartDate DATETIME = NULL,
+    @EndDate DATETIME = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    IF @StartDate IS NULL SET @StartDate = DATEADD(DAY, -30, GETDATE());
+    IF @EndDate IS NULL SET @EndDate = GETDATE();
+    
+    SELECT 
+        sl.log_id,
+        sl.action,
+        sl.table_name,
+        sl.record_id,
+        sl.details,
+        sl.ip_address,
+        sl.log_date,
+        CASE 
+            WHEN sl.action IN ('DELETE', 'REJECT', 'CANCEL') THEN 'danger'
+            WHEN sl.action IN ('UPDATE', 'APPROVE') THEN 'warning'
+            WHEN sl.action IN ('CREATE', 'INSERT') THEN 'success'
+            ELSE 'info'
+        END AS severity
+    FROM SystemLogs sl
+    WHERE sl.user_id = @UserId
+        AND sl.log_date BETWEEN @StartDate AND @EndDate
+    ORDER BY sl.log_date DESC;
+    
+    -- Get user info
+    SELECT 
+        user_id,
+        username,
+        email,
+        role,
+        last_login,
+        failed_attempts,
+        is_active
+    FROM Users
+    WHERE user_id = @UserId;
+END;
+GO
+
+PRINT 'Created procedure: sp_GetUserActionTimeline';
+PRINT 'PART 7 COMPLETED!';
+PRINT '';
+GO
+
+USE SWP391;
+GO
+
+-- =====================================================
+-- PART 8: TEST & VERIFICATION
+-- =====================================================
+PRINT '========================================';
+PRINT 'PART 8: Testing All Audit Components';
+PRINT '========================================';
+
+-- Test 1: Check all views exist
+PRINT 'Checking views...';
+SELECT 
+    TABLE_NAME AS ViewName,
+    'Exists' AS Status
+FROM INFORMATION_SCHEMA.VIEWS
+WHERE TABLE_NAME LIKE '%Audit%'
+ORDER BY TABLE_NAME;
+
+-- Test 2: Check all stored procedures exist
+PRINT '';
+PRINT 'Checking stored procedures...';
+SELECT 
+    name AS ProcedureName,
+    create_date AS CreatedDate,
+    modify_date AS LastModified
+FROM sys.procedures
+WHERE name LIKE '%Audit%' OR name LIKE '%Suspicious%' OR name LIKE '%UserActionTimeline%'
+ORDER BY name;
+
+-- Test 3: Check AuditReports constraint
+PRINT '';
+PRINT 'Checking AuditReports constraint...';
+SELECT 
+    cc.name AS ConstraintName,
+    cc.definition AS AllowedValues
+FROM sys.check_constraints cc
+WHERE cc.parent_object_id = OBJECT_ID('AuditReports')
+  AND cc.definition LIKE '%report_type%';
+
+-- Test 4: Test sp_GetAuditLogs (last 7 days)
+PRINT '';
+PRINT 'Testing sp_GetAuditLogs...';
+EXEC sp_GetAuditLogs 
+    @StartDate = NULL,
+    @EndDate = NULL,
+    @PageNumber = 1,
+    @PageSize = 10;
+
+-- Test 5: Test sp_GetAuditStatistics
+PRINT '';
+PRINT 'Testing sp_GetAuditStatistics...';
+EXEC sp_GetAuditStatistics 
+    @StartDate = NULL,
+    @EndDate = NULL;
+
+-- Test 6: Test sp_DetectSuspiciousActivities
+PRINT '';
+PRINT 'Testing sp_DetectSuspiciousActivities...';
+EXEC sp_DetectSuspiciousActivities @Hours = 24;
+
+-- Test 7: Test sp_ExportAuditReport
+PRINT '';
+PRINT 'Testing sp_ExportAuditReport...';
+DECLARE @auditor_id INT;
+DECLARE @start_date DATETIME;
+DECLARE @end_date DATETIME;
+
+SET @auditor_id = (SELECT TOP 1 user_id FROM Users WHERE role = 'Auditor');
+SET @start_date = DATEADD(DAY, -7, GETDATE());
+SET @end_date = GETDATE();
+
+IF @auditor_id IS NOT NULL
+BEGIN
+    EXEC sp_ExportAuditReport 
+        @auditor_id = @auditor_id,
+        @StartDate = @start_date,
+        @EndDate = @end_date,
+        @ReportType = 'ComprehensiveAudit',
+        @ExportFormat = 'Excel';
+    
+    PRINT 'Export report test successful!';
+END
+ELSE
+BEGIN
+    PRINT 'WARNING: No auditor found for testing export report';
+END
+
+-- Test 8: View recent audit reports
+PRINT '';
+PRINT 'Recent audit reports:';
+SELECT TOP 5 
+    report_id,
+    report_type,
+    generated_date,
+    exported_format,
+    notes
+FROM AuditReports
+ORDER BY generated_date DESC;
+
+-- Test 9: View audit log statistics
+PRINT '';
+PRINT 'Audit log statistics:';
+SELECT 
+    COUNT(*) AS total_logs,
+    COUNT(DISTINCT user_id) AS unique_users,
+    COUNT(DISTINCT table_name) AS affected_tables,
+    MIN(log_date) AS oldest_log,
+    MAX(log_date) AS newest_log
+FROM SystemLogs;
+
+-- Test 10: View top actions
+PRINT '';
+PRINT 'Top 10 actions:';
+SELECT TOP 10
+    action,
+    COUNT(*) AS count
+FROM SystemLogs
+GROUP BY action
+ORDER BY count DESC;
+
+PRINT '';
+PRINT '==========================================';
+PRINT 'ALL AUDIT LOG FEATURES INSTALLED!';
+PRINT '==========================================';
+PRINT '';
+PRINT 'Available Views:';
+PRINT '  - vw_AuditLogDetails';
+PRINT '  - vw_DailyAuditSummary';
+PRINT '  - vw_UserRiskProfile';
+PRINT '';
+PRINT 'Available Stored Procedures:';
+PRINT '  - sp_GetAuditLogs';
+PRINT '  - sp_GetAuditStatistics';
+PRINT '  - sp_ExportAuditReport';
+PRINT '  - sp_DetectSuspiciousActivities';
+PRINT '  - sp_GetUserActionTimeline';
+PRINT '';
+PRINT 'PART 8 COMPLETED!';
+GO
+
+
+
+
+-- Supplier cho Công ty Dược C
+IF NOT EXISTS (SELECT 1 FROM Users WHERE username = 'supplier_duocc')
+BEGIN
+    INSERT INTO Users (username, password_hash, email, phone, role, is_active)
+    VALUES ('supplier_duocc', '$2a$12$AfoWp3rMoA9hMUNmTSFZOOsW0CQXp56TjuapkN8OwRDkziBqhL4Qi', 
+            'supplier@duocc.vn', '0907777777', 'Supplier', 1);
+    PRINT 'Created user: supplier_duocc';
+END
+
+-- Supplier cho Công ty Dược D
+IF NOT EXISTS (SELECT 1 FROM Users WHERE username = 'supplier_duocd')
+BEGIN
+    INSERT INTO Users (username, password_hash, email, phone, role, is_active)
+    VALUES ('supplier_duocd', '$2a$12$AfoWp3rMoA9hMUNmTSFZOOsW0CQXp56TjuapkN8OwRDkziBqhL4Qi', 
+            'supplier@duocd.vn', '0908888888', 'Supplier', 1);
+    PRINT 'Created user: supplier_duocd';
+END
+
+-- Supplier cho Công ty Dược E
+IF NOT EXISTS (SELECT 1 FROM Users WHERE username = 'supplier_duoce')
+BEGIN
+    INSERT INTO Users (username, password_hash, email, phone, role, is_active)
+    VALUES ('supplier_duoce', '$2a$12$AfoWp3rMoA9hMUNmTSFZOOsW0CQXp56TjuapkN8OwRDkziBqhL4Qi', 
+            'supplier@duoce.vn', '0909999999', 'Supplier', 1);
+    PRINT 'Created user: supplier_duoce';
+END
+
+-- Supplier cho Công ty Dược F
+IF NOT EXISTS (SELECT 1 FROM Users WHERE username = 'supplier_duocf')
+BEGIN
+    INSERT INTO Users (username, password_hash, email, phone, role, is_active)
+    VALUES ('supplier_duocf', '$2a$12$AfoWp3rMoA9hMUNmTSFZOOsW0CQXp56TjuapkN8OwRDkziBqhL4Qi', 
+            'supplier@duocf.vn', '0900000000', 'Supplier', 1);
+    PRINT 'Created user: supplier_duocf';
+END
+GO
+
+-- =====================================================
+-- 2. Cập nhật bảng Suppliers với user_id
+-- =====================================================
+PRINT '';
+PRINT 'Step 2: Linking supplier users to companies...';
+
+-- Công ty Dược B
+DECLARE @userB INT = (SELECT user_id FROM Users WHERE username = 'supplier_duocb');
+DECLARE @suppB INT = (SELECT supplier_id FROM Suppliers WHERE name = N'Công ty Dược B');
+
+IF @userB IS NOT NULL AND @suppB IS NOT NULL
+BEGIN
+    UPDATE Suppliers 
+    SET user_id = @userB,
+        contact_email = 'supplier@duocb.vn',
+        contact_phone = '0905555556',
+        updated_at = GETDATE()
+    WHERE supplier_id = @suppB;
+    PRINT 'Linked supplier_duocb to Công ty Dược B';
+END
+
+-- Công ty Dược C
+DECLARE @userC INT = (SELECT user_id FROM Users WHERE username = 'supplier_duocc');
+DECLARE @suppC INT = (SELECT supplier_id FROM Suppliers WHERE name = N'Công ty Dược C');
+
+IF @userC IS NOT NULL AND @suppC IS NOT NULL
+BEGIN
+    UPDATE Suppliers 
+    SET user_id = @userC,
+        contact_email = 'supplier@duocc.vn',
+        contact_phone = '0907777777',
+        updated_at = GETDATE()
+    WHERE supplier_id = @suppC;
+    PRINT 'Linked supplier_duocc to Công ty Dược C';
+END
+
+-- Công ty Dược D
+DECLARE @userD INT = (SELECT user_id FROM Users WHERE username = 'supplier_duocd');
+DECLARE @suppD INT = (SELECT supplier_id FROM Suppliers WHERE name = N'Công ty Dược D');
+
+IF @userD IS NOT NULL AND @suppD IS NOT NULL
+BEGIN
+    UPDATE Suppliers 
+    SET user_id = @userD,
+        contact_email = 'supplier@duocd.vn',
+        contact_phone = '0908888888',
+        updated_at = GETDATE()
+    WHERE supplier_id = @suppD;
+    PRINT 'Linked supplier_duocd to Công ty Dược D';
+END
+
+-- Công ty Dược E
+DECLARE @userE INT = (SELECT user_id FROM Users WHERE username = 'supplier_duoce');
+DECLARE @suppE INT = (SELECT supplier_id FROM Suppliers WHERE name = N'Công ty Dược E');
+
+IF @userE IS NOT NULL AND @suppE IS NOT NULL
+BEGIN
+    UPDATE Suppliers 
+    SET user_id = @userE,
+        contact_email = 'supplier@duoce.vn',
+        contact_phone = '0909999999',
+        updated_at = GETDATE()
+    WHERE supplier_id = @suppE;
+    PRINT 'Linked supplier_duoce to Công ty Dược E';
+END
+
+-- Công ty Dược F
+DECLARE @userF INT = (SELECT user_id FROM Users WHERE username = 'supplier_duocf');
+DECLARE @suppF INT = (SELECT supplier_id FROM Suppliers WHERE name = N'Công ty Dược F');
+
+IF @userF IS NOT NULL AND @suppF IS NOT NULL
+BEGIN
+    UPDATE Suppliers 
+    SET user_id = @userF,
+        contact_email = 'supplier@duocf.vn',
+        contact_phone = '0900000000',
+        updated_at = GETDATE()
+    WHERE supplier_id = @suppF;
+    PRINT 'Linked supplier_duocf to Công ty Dược F';
+END
+GO
+
+-- =====================================================
+-- 3. Cấp quyền cho các Supplier mới
+-- =====================================================
+PRINT '';
+PRINT 'Step 3: Assigning permissions to supplier users...';
+
+DECLARE @permissionId INT = (SELECT permission_id FROM Permissions WHERE permission_name = 'create_asn');
+
+-- Supplier Dược B
+DECLARE @userB INT = (SELECT user_id FROM Users WHERE username = 'supplier_duocb');
+IF @userB IS NOT NULL AND @permissionId IS NOT NULL AND NOT EXISTS (SELECT 1 FROM UserPermissions WHERE user_id = @userB)
+BEGIN
+    INSERT INTO UserPermissions (user_id, permission_id) VALUES (@userB, @permissionId);
+    PRINT 'Granted create_asn permission to supplier_duocb';
+END
+
+-- Supplier Dược C
+DECLARE @userC INT = (SELECT user_id FROM Users WHERE username = 'supplier_duocc');
+IF @userC IS NOT NULL AND @permissionId IS NOT NULL AND NOT EXISTS (SELECT 1 FROM UserPermissions WHERE user_id = @userC)
+BEGIN
+    INSERT INTO UserPermissions (user_id, permission_id) VALUES (@userC, @permissionId);
+    PRINT 'Granted create_asn permission to supplier_duocc';
+END
+
+-- Supplier Dược D
+DECLARE @userD INT = (SELECT user_id FROM Users WHERE username = 'supplier_duocd');
+IF @userD IS NOT NULL AND @permissionId IS NOT NULL AND NOT EXISTS (SELECT 1 FROM UserPermissions WHERE user_id = @userD)
+BEGIN
+    INSERT INTO UserPermissions (user_id, permission_id) VALUES (@userD, @permissionId);
+    PRINT 'Granted create_asn permission to supplier_duocd';
+END
+
+-- Supplier Dược E
+DECLARE @userE INT = (SELECT user_id FROM Users WHERE username = 'supplier_duoce');
+IF @userE IS NOT NULL AND @permissionId IS NOT NULL AND NOT EXISTS (SELECT 1 FROM UserPermissions WHERE user_id = @userE)
+BEGIN
+    INSERT INTO UserPermissions (user_id, permission_id) VALUES (@userE, @permissionId);
+    PRINT 'Granted create_asn permission to supplier_duoce';
+END
+
+-- Supplier Dược F
+DECLARE @userF INT = (SELECT user_id FROM Users WHERE username = 'supplier_duocf');
+IF @userF IS NOT NULL AND @permissionId IS NOT NULL AND NOT EXISTS (SELECT 1 FROM UserPermissions WHERE user_id = @userF)
+BEGIN
+    INSERT INTO UserPermissions (user_id, permission_id) VALUES (@userF, @permissionId);
+    PRINT 'Granted create_asn permission to supplier_duocf';
+END
+GO
+
+-- =====================================================
+-- 4. VERIFICATION - Kiểm tra kết quả
+-- =====================================================
+PRINT '';
+PRINT '========================================';
+PRINT 'VERIFICATION RESULTS';
+PRINT '========================================';
+PRINT '';
+
+-- Kiểm tra Users
+PRINT 'Supplier Users Created:';
+SELECT 
+    user_id,
+    username,
+    email,
+    phone,
+    role,
+    is_active,
+    created_at
+FROM Users
+WHERE role = 'Supplier'
+ORDER BY user_id;
+
+-- Kiểm tra Suppliers với user_id
+PRINT '';
+PRINT 'Suppliers Linked to Users:';
+SELECT 
+    s.supplier_id,
+    s.name,
+    s.user_id,
+    u.username,
+    s.contact_email,
+    s.contact_phone,
+    s.performance_rating
+FROM Suppliers s
+LEFT JOIN Users u ON s.user_id = u.user_id
+ORDER BY s.supplier_id;
+
+-- Kiểm tra Permissions
+PRINT '';
+PRINT 'Supplier Permissions:';
+SELECT 
+    u.username,
+    u.email,
+    p.permission_name,
+    p.description
+FROM UserPermissions up
+INNER JOIN Users u ON up.user_id = u.user_id
+INNER JOIN Permissions p ON up.permission_id = p.permission_id
+WHERE u.role = 'Supplier'
+ORDER BY u.username;
+
+-- Thống kê
+PRINT '';
+PRINT '========================================';
+PRINT 'SUMMARY';
+PRINT '========================================';
+SELECT 
+    COUNT(DISTINCT u.user_id) AS total_supplier_users,
+    COUNT(DISTINCT s.supplier_id) AS total_suppliers,
+    COUNT(DISTINCT CASE WHEN s.user_id IS NOT NULL THEN s.supplier_id END) AS suppliers_with_users
+FROM Users u
+FULL OUTER JOIN Suppliers s ON u.user_id = s.user_id
+WHERE u.role = 'Supplier' OR s.supplier_id IS NOT NULL;
+
+PRINT '';
+PRINT '==========================================';
+PRINT 'COMPLETED SUCCESSFULLY!';
+PRINT '==========================================';
+PRINT '';
+PRINT 'Created Supplier Accounts:';
+PRINT '  - supplier_duocb (Công ty Dược B)';
+PRINT '  - supplier_duocc (Công ty Dược C)';
+PRINT '  - supplier_duocd (Công ty Dược D)';
+PRINT '  - supplier_duoce (Công ty Dược E)';
+PRINT '  - supplier_duocf (Công ty Dược F)';
+PRINT '';
+PRINT 'All suppliers have been granted "create_asn" permission';
+PRINT 'Default password for all: 123456 (hashed)';
+GO

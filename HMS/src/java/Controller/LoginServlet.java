@@ -30,7 +30,22 @@ public class LoginServlet extends HttpServlet {
         try {
             User user = userDAO.findByEmailOrUsername(emailOrUsername);
 
-            if (user != null && PasswordUtils.verify(password, user.getPasswordHash())) {
+            if (user == null) {
+                // ❌ LOGIN THẤT BẠI - Không tìm thấy user
+                LoggingUtil.logFailedLogin(request, emailOrUsername);
+                request.setAttribute("error", "Sai email/username hoặc mật khẩu!");
+                request.getRequestDispatcher("login.jsp").forward(request, response);
+            } else if (!user.getIsActive()) {
+                // ❌ TÀI KHOẢN BỊ KHÓA
+                LoggingUtil.logFailedLogin(request, emailOrUsername); // Có thể log với lý do locked nếu cần tùy chỉnh LoggingUtil
+                request.setAttribute("error", "Tài khoản của bạn đã bị khóa do vi phạm chính sách, vui lòng liên hệ admin nếu bạn tin rằng đây là sai xót.");
+                request.getRequestDispatcher("login.jsp").forward(request, response);
+            } else if (!PasswordUtils.verify(password, user.getPasswordHash())) {
+                // ❌ LOGIN THẤT BẠI - Sai mật khẩu
+                LoggingUtil.logFailedLogin(request, emailOrUsername);
+                request.setAttribute("error", "Sai email/username hoặc mật khẩu!");
+                request.getRequestDispatcher("login.jsp").forward(request, response);
+            } else {
                 // ✅ LOGIN THÀNH CÔNG
                 UserDAO.updateLastLogin(user.getUserId());
                 
@@ -68,15 +83,6 @@ public class LoginServlet extends HttpServlet {
                         response.sendRedirect(request.getContextPath() + "/home.jsp");
                         break;
                 }
-
-            } else {
-                // ❌ LOGIN THẤT BẠI - Sai tài khoản hoặc mật khẩu
-
-                // 🔹 GHI LOG LOGIN FAILED
-                LoggingUtil.logFailedLogin(request, emailOrUsername);
-
-                request.setAttribute("error", "Sai email/username hoặc mật khẩu!");
-                request.getRequestDispatcher("login.jsp").forward(request, response);
             }
 
         } catch (Exception e) {

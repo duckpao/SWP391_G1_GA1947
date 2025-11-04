@@ -274,6 +274,10 @@
             </div>
 
             <div class="login-footer">
+                <a href="${pageContext.request.contextPath}/home.jsp">
+                    <i class="fas fa-home"></i> Trang chủ
+                </a>
+                <span class="divider">|</span>
                 <a href="${pageContext.request.contextPath}/register">Đăng ký tài khoản</a>
                 <span class="divider">|</span>
                 <a href="${pageContext.request.contextPath}/forgot-password">Quên mật khẩu?</a>

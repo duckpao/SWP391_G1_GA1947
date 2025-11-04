@@ -2,6 +2,13 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group/>
+        <group>
+            <file>file:/C:/App/SWP/dev%204-11/SWP391_G1_GA1947/HMS/src/java/Controller/LoginServlet.java</file>
+            <file>file:/C:/App/SWP/dev%204-11/SWP391_G1_GA1947/HMS/src/java/Controller/TicketController.java</file>
+            <file>file:/C:/App/SWP/dev%204-11/SWP391_G1_GA1947/HMS/src/java/model/Ticket.java</file>
+            <file>file:/C:/App/SWP/dev%204-11/SWP391_G1_GA1947/HMS/src/java/DAO/TicketDAO.java</file>
+            <file>file:/C:/App/SWP/dev%204-11/SWP391_G1_GA1947/HMS/src/java/DAO/UserDAO.java</file>
+            <file>file:/C:/App/SWP/dev%204-11/SWP391_G1_GA1947/HMS/web/admin/dashboard.jsp</file>
+        </group>
     </open-files>
 </project-private>

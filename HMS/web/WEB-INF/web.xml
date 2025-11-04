@@ -221,6 +221,14 @@
         <servlet-name>AuditLogServlet</servlet-name>
         <servlet-class>Controller.AuditLogServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>TicketController</servlet-name>
+        <servlet-class>Controller.TicketController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>TicketCountServlet</servlet-name>
+        <servlet-class>Controller.TicketCountServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>UserServlet</servlet-name>
         <url-pattern>/admin-dashboard</url-pattern>
@@ -481,7 +489,15 @@
         <servlet-name>AuditLogServlet</servlet-name>
         <url-pattern>/auditlog</url-pattern>
     </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>TicketController</servlet-name>
+        <url-pattern>/ticket</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>TicketCountServlet</servlet-name>
+        <url-pattern>/ticket-count</url-pattern>
+    </servlet-mapping>
     <welcome-file-list>
-        <welcome-file>login.jsp</welcome-file>
+        <welcome-file>home.jsp</welcome-file>
     </welcome-file-list>
 </web-app>

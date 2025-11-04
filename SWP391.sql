@@ -2986,3 +2986,39 @@ PRINT '';
 PRINT 'Ready to use!';
 GO
 
+USE SWP391;
+GO
+
+-- =====================================================
+-- TICKETS TABLE
+-- =====================================================
+IF OBJECT_ID('Tickets', 'U') IS NOT NULL DROP TABLE Tickets;
+GO
+
+CREATE TABLE Tickets (
+    ticket_id INT IDENTITY(1,1) PRIMARY KEY,
+    user_id INT NOT NULL,
+    subject NVARCHAR(200) NOT NULL,
+    message NVARCHAR(MAX) NOT NULL,
+    status NVARCHAR(20) DEFAULT 'Open' CHECK (status IN ('Open','InProgress','Resolved','Closed')),
+    priority NVARCHAR(20) DEFAULT 'Normal' CHECK (priority IN ('Low','Normal','High','Urgent')),
+    category NVARCHAR(50),
+    admin_response NVARCHAR(MAX),
+    responded_by INT,
+    responded_at DATETIME,
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE(),
+    
+    CONSTRAINT FK_Tickets_User FOREIGN KEY (user_id) 
+        REFERENCES Users(user_id) ON DELETE NO ACTION,
+    CONSTRAINT FK_Tickets_Admin FOREIGN KEY (responded_by) 
+        REFERENCES Users(user_id) ON DELETE NO ACTION
+);
+GO
+
+CREATE INDEX idx_tickets_user ON Tickets(user_id);
+CREATE INDEX idx_tickets_status ON Tickets(status);
+CREATE INDEX idx_tickets_created ON Tickets(created_at DESC);
+GO
+
+PRINT 'Tickets table created successfully!';

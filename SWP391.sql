@@ -56,7 +56,7 @@ CREATE TABLE Users (
     password_hash NVARCHAR(255) NOT NULL,
     email NVARCHAR(255),
     phone NVARCHAR(50),
-    role NVARCHAR(50) NOT NULL CHECK (role IN ('Doctor', 'Pharmacist', 'Manager', 'Auditor', 'Admin', 'ProcurementOfficer', 'Supplier')),
+    role NVARCHAR(50) NOT NULL CHECK (role IN ('Doctor', 'Pharmacist', 'Manager', 'Auditor', 'Admin', 'none', 'ProcurementOfficer', 'Supplier')),
     is_active BIT DEFAULT 1,
     failed_attempts INT DEFAULT 0 CHECK (failed_attempts <= 5),
     last_login DATETIME NULL,
@@ -2985,3 +2985,4 @@ PRINT '  - sp_GetUserActionTimeline (Auditor cannot view Admin timeline)';
 PRINT '';
 PRINT 'Ready to use!';
 GO
+

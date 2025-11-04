@@ -367,7 +367,7 @@
         </div>
     </div>
 
-    <jsp:include page="footer.jsp" />
+    <jsp:include page="/admin/footer.jsp" />
 
     <%
         // Get user from session using scriptlet

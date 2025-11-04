@@ -961,6 +961,22 @@
         </div>
     </div>
 
+     <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px;">
+    <h6 style="font-weight: 600; margin-bottom: 8px;">
+        <i class="bi bi-truck"></i> Transit Orders Management
+    </h6>
+    <p style="font-size: 13px; color: #6b7280; margin-bottom: 12px;">
+        Manage in-transit orders and confirm deliveries
+    </p>
+    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <a href="${pageContext.request.contextPath}/manage/transit" 
+           class="btn btn-info" 
+           style="font-size: 12px; padding: 6px 12px;">
+            <i class="bi bi-truck"></i> View Transit Orders
+        </a>
+    </div>
+</div>
+
     <script>
         function toggleDetails(poId) {
             const detailsRow = document.getElementById('details-' + poId);

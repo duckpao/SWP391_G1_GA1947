@@ -222,13 +222,10 @@
         <servlet-class>Controller.AuditLogServlet</servlet-class>
     </servlet>
     <servlet>
-<<<<<<< HEAD
         <servlet-name>ManageTransitServlet</servlet-name>
         <servlet-class>Controller.ManageTransitServlet</servlet-class>
     </servlet>
     <servlet>
-=======
->>>>>>> 012783a06023e8877d24cfcff2df349c9ece4bd1
         <servlet-name>TicketController</servlet-name>
         <servlet-class>Controller.TicketController</servlet-class>
     </servlet>
@@ -497,13 +494,11 @@
         <url-pattern>/auditlog</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-<<<<<<< HEAD
         <servlet-name>ManageTransitServlet</servlet-name>
         <url-pattern>/manage/transit</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-=======
->>>>>>> 012783a06023e8877d24cfcff2df349c9ece4bd1
+
         <servlet-name>TicketController</servlet-name>
         <url-pattern>/ticket</url-pattern>
     </servlet-mapping>

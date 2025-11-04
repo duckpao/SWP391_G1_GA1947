@@ -148,7 +148,7 @@ public class UserDAO extends DBContext {
     }
     // Login user by email or username
     public User findByEmailOrUsername(String emailOrUsername) {
-        String sql = "SELECT * FROM Users WHERE (email = ? OR username = ?) AND is_active = 1";
+        String sql = "SELECT * FROM Users WHERE email = ? OR username = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, emailOrUsername);
             ps.setString(2, emailOrUsername);

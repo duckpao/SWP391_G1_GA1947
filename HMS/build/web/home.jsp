@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trang chủ - Hệ thống quản lý kho bệnh viện</title>
+    <title>Trang chủ - PWMS</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -18,545 +18,369 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f9fafb;
+            background: #f5f5f5;
+            color: #1a1a1a;
             min-height: 100vh;
-            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .content-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 900px;
+            width: 100%;
             margin: 0 auto;
-            background: #fff;
+        }
+
+        .hero-card {
+            background: #ffffff;
             border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
+            padding: 60px 50px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            text-align: center;
         }
 
-        .header {
-            background: white;
-            color: #1f2937;
-            padding: 30px 40px;
+        .hero-icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+            border-radius: 50%;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            border-bottom: 3px solid #3b82f6;
+            justify-content: center;
+            font-size: 48px;
+            margin: 0 auto 30px;
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.3);
         }
 
-        .header h1 {
-            font-size: 28px;
+        .hero-title {
+            font-size: 36px;
             font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 16px;
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .guide-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 40px;
+            margin-top: 30px;
+            text-align: left;
+            border: 2px solid #e9ecef;
+        }
+
+        .guide-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 24px;
             display: flex;
             align-items: center;
             gap: 12px;
         }
 
-        .header-icon {
+        .guide-title i {
+            color: #2563eb;
+        }
+
+        .steps-container {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .step-card {
+            background: #ffffff;
+            padding: 24px;
+            border-radius: 10px;
+            border-left: 4px solid #2563eb;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .step-card:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+
+        .step-number {
             width: 40px;
             height: 40px;
-            background: #ede9fe;
-            border-radius: 10px;
+            background: #2563eb;
+            color: #ffffff;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-weight: 700;
+            font-size: 18px;
+            flex-shrink: 0;
         }
 
-        .user-info {
-            display: flex;
+        .step-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .step-description {
+            font-size: 15px;
+            color: #555;
+            line-height: 1.6;
+            margin-left: 56px;
+        }
+
+        .step-link {
+            display: inline-flex;
             align-items: center;
-            gap: 20px;
+            gap: 8px;
+            margin-left: 56px;
+            margin-top: 12px;
+            color: #2563eb;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
         }
 
-        .user-info span {
-            font-size: 14px;
-            font-weight: 500;
-            color: #1f2937;
+        .step-link:hover {
+            color: #1d4ed8;
+            gap: 12px;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 40px;
         }
 
         .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
+            padding: 14px 32px;
+            border-radius: 10px;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-        }
-
-        .btn-logout {
-            background: #e5e7eb;
-            color: #1f2937;
-            border: 1px solid #d1d5db;
-        }
-
-        .btn-logout:hover {
-            background: #d1d5db;
-            transform: translateY(-2px);
-        }
-
-        .btn-login {
-            background: #3b82f6;
-            color: white;
-        }
-
-        .btn-login:hover {
-            background: #2563eb;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-        }
-
-        .content {
-            padding: 40px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 24px;
-            margin-bottom: 40px;
-        }
-
-        .stat-card {
-            background: white;
-            color: #1f2937;
-            padding: 28px;
-            border-radius: 16px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            border-left: 5px solid #3b82f6;
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 70%);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
-        }
-
-        .stat-card:hover::before {
-            opacity: 1;
-        }
-
-        .stat-icon {
-            font-size: 36px;
-            margin-bottom: 12px;
-            display: block;
-        }
-
-        .stat-label {
-            font-size: 14px;
-            font-weight: 500;
-            color: #6b7280;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .stat-value {
-            font-size: 42px;
-            font-weight: 700;
-            line-height: 1;
-            color: #1f2937;
-        }
-
-        .section-card {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            margin-bottom: 28px;
-            overflow: hidden;
-            border: 1px solid #e5e7eb;
-        }
-
-        .section-header {
-            padding: 24px 28px;
-            background: white;
-            border-bottom: 3px solid #3b82f6;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .section-header h2 {
-            font-size: 20px;
-            font-weight: 700;
-            color: #1f2937;
-            display: flex;
-            align-items: center;
             gap: 10px;
+            border: none;
         }
 
-        .section-icon {
+        .btn-primary {
+            background: #2563eb;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-secondary {
+            background: #ffffff;
+            color: #2563eb;
+            border: 2px solid #2563eb;
+        }
+
+        .btn-secondary:hover {
+            background: #eff6ff;
+            transform: translateY(-2px);
+        }
+
+        .info-box {
+            background: #eff6ff;
+            border: 2px solid #bfdbfe;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+            display: flex;
+            align-items: start;
+            gap: 16px;
+        }
+
+        .info-icon {
+            color: #2563eb;
             font-size: 24px;
+            flex-shrink: 0;
+            margin-top: 2px;
         }
 
-        .table-container {
-            overflow-x: auto;
+        .info-content {
+            flex: 1;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        thead {
-            background: #f9fafb;
-        }
-
-        th {
-            padding: 16px 20px;
-            text-align: left;
+        .info-title {
             font-weight: 600;
-            font-size: 13px;
-            color: #374151;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-bottom: 2px solid #e5e7eb;
-        }
-
-        td {
-            padding: 18px 20px;
-            border-bottom: 1px solid #f3f4f6;
-            font-size: 14px;
-            color: #1f2937;
-        }
-
-        tbody tr {
-            transition: all 0.2s ease;
-        }
-
-        tbody tr:hover {
-            background: #f9fafb;
-            transform: scale(1.01);
-        }
-
-        .badge {
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            display: inline-block;
-        }
-
-        .badge-warning {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .badge-success {
-            background: #d1fae5;
-            color: #065f46;
-        }
-
-        .badge-info {
-            background: #dbeafe;
             color: #1e40af;
-        }
-
-        .badge-danger {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #6b7280;
-        }
-
-        .empty-icon {
-            font-size: 64px;
-            margin-bottom: 16px;
-            opacity: 0.5;
-        }
-
-        .empty-state h3 {
-            font-size: 18px;
-            font-weight: 600;
             margin-bottom: 8px;
-            color: #374151;
+            font-size: 16px;
         }
 
-        .empty-state p {
+        .info-text {
+            color: #1e40af;
             font-size: 14px;
-            color: #6b7280;
+            line-height: 1.6;
         }
 
-        .row-number {
-            font-weight: 600;
-            color: #6b7280;
-        }
+        @media (max-width: 768px) {
+            .hero-card {
+                padding: 40px 30px;
+            }
 
-        .medicine-name {
-            font-weight: 600;
-            color: #1f2937;
-        }
+            .hero-title {
+                font-size: 28px;
+            }
 
-        .lot-number {
-            font-family: 'Courier New', monospace;
-            background: #f3f4f6;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 13px;
-        }
+            .guide-section {
+                padding: 30px 24px;
+            }
 
-        .quantity-low {
-            color: #dc2626;
-            font-weight: 600;
-        }
+            .cta-buttons {
+                flex-direction: column;
+            }
 
-        .quantity-medium {
-            color: #f59e0b;
-            font-weight: 600;
-        }
-
-        .quantity-high {
-            color: #059669;
-            font-weight: 600;
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>
-                <span class="header-icon">🏥</span>
-                Quản lý kho bệnh viện
-            </h1>
-            <div class="user-info">
-                <c:choose>
-                    <c:when test="${not empty sessionScope.user}">
-                        <span>👤 Xin chào, <strong>${sessionScope.user.username}</strong></span>
-                        <a href="javascript:void(0)" onclick="confirmLogout()" class="btn btn-logout">
-                            🚪 Đăng xuất
-                        </a>
-                    </c:when>
-                    <c:otherwise>
-                        <a href="${pageContext.request.contextPath}/login" class="btn btn-login">
-                            🔐 Đăng nhập
-                        </a>
-                        <a href="${pageContext.request.contextPath}/register" class="btn btn-login">
-                            📝 Đăng ký
-                        </a>
-                    </c:otherwise>
-                </c:choose>
-            </div>
-        </div>
-
-        <div class="content">
-            <!-- Thống kê -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <span class="stat-icon">💊</span>
-                    <div class="stat-label">Thuốc</div>
-                    <div class="stat-value">${stats.totalMedicines}</div>
+    <%@ include file="/admin/header.jsp" %>
+    
+    <div class="content-wrapper">
+        <div class="container">
+            <div class="hero-card">
+                <div class="hero-icon">
+                    <i class="fas fa-hospital" style="color: white;"></i>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-icon">📦</span>
-                    <div class="stat-label">Lô thuốc</div>
-                    <div class="stat-value">${stats.totalBatches}</div>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-icon">🧾</span>
-                    <div class="stat-label">Hóa đơn</div>
-                    <div class="stat-value">${stats.totalInvoices}</div>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-icon">💳</span>
-                    <div class="stat-label">Giao dịch</div>
-                    <div class="stat-value">${stats.totalTransactions}</div>
-                </div>
-            </div>
-
-            <!-- Lô thuốc sắp hết hạn -->
-            <div class="section-card">
-                <div class="section-header">
-                    <h2>
-                        <span class="section-icon">⚠️</span>
-                        Lô thuốc sắp hết hạn (≤ 60 ngày)
+                
+                <h1 class="hero-title">Welcome to PWMS</h1>
+                <p class="hero-subtitle">Pharmacy Warehouse Management System - Hệ thống quản lý kho dược phẩm</p>
+                
+                <div class="guide-section">
+                    <h2 class="guide-title">
+                        <i class="fas fa-rocket"></i>
+                        Getting Started Guide
                     </h2>
-                </div>
-                <div class="table-container">
-                    <c:choose>
-                        <c:when test="${empty expiringBatches}">
-                            <div class="empty-state">
-                                <div class="empty-icon">✅</div>
-                                <h3>Tuyệt vời!</h3>
-                                <p>Không có lô thuốc nào sắp hết hạn</p>
+                    
+                    <div class="steps-container">
+                        <div class="step-card">
+                            <div class="step-header">
+                                <div class="step-number">1</div>
+                                <div class="step-title">Create Your Account</div>
                             </div>
+                            <p class="step-description">
+                                If you don't have an account yet, please register to access the system. Fill in your information and create your credentials.
+                            </p>
+                            <c:if test="${empty sessionScope.user}">
+                                <a href="${pageContext.request.contextPath}/register" class="step-link">
+                                    Register Now <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </c:if>
+                        </div>
+                        
+                        <div class="step-card">
+                            <div class="step-header">
+                                <div class="step-number">2</div>
+                                <div class="step-title">Submit a Support Ticket</div>
+                            </div>
+                            <p class="step-description">
+                                After registration, go to the Support section and submit a ticket to request role assignment from the administrator. Include your desired role in the ticket.
+                            </p>
+                            <a href="${pageContext.request.contextPath}/ticket?action=create" class="step-link">
+                                Create Support Ticket <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        
+                        <div class="step-card">
+                            <div class="step-header">
+                                <div class="step-number">3</div>
+                                <div class="step-title">Wait for Admin Confirmation</div>
+                            </div>
+                            <p class="step-description">
+                                The administrator will review your request and assign the appropriate role. You'll receive a response through the ticket system once your role is confirmed.
+                            </p>
+                        </div>
+                        
+                        <div class="step-card">
+                            <div class="step-header">
+                                <div class="step-number">4</div>
+                                <div class="step-title">Start Using the System</div>
+                            </div>
+                            <p class="step-description">
+                                Once your role is assigned, you can log in and access all features available for your role. Explore the dashboard and manage your tasks efficiently.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="info-box">
+                    <i class="fas fa-info-circle info-icon"></i>
+                    <div class="info-content">
+                        <div class="info-title">Need Help?</div>
+                        <p class="info-text">
+                            If you have any questions or encounter any issues, please don't hesitate to contact us through the Support section. Our team is ready to assist you!
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="cta-buttons">
+                    <c:choose>
+                        <c:when test="${not empty sessionScope.user}">
+                            <a href="${pageContext.request.contextPath}/ticket?action=create" class="btn btn-primary">
+                                <i class="fas fa-ticket-alt"></i>
+                                Create Support Ticket
+                            </a>
+                            <a href="${pageContext.request.contextPath}/ticket?action=list" class="btn btn-secondary">
+                                <i class="fas fa-list"></i>
+                                View My Tickets
+                            </a>
                         </c:when>
                         <c:otherwise>
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th style="width: 60px;">#</th>
-                                        <th>Tên thuốc</th>
-                                        <th>Số lô</th>
-                                        <th>Hạn sử dụng</th>
-                                        <th>Số lượng còn</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <c:forEach var="b" items="${expiringBatches}" varStatus="loop">
-                                        <tr>
-                                            <td><span class="row-number">${loop.index + 1}</span></td>
-                                            <td><span class="medicine-name">${b.medicineName}</span></td>
-                                            <td><span class="lot-number">${b.lotNumber}</span></td>
-                                            <td>
-                                                <span class="badge badge-warning">
-                                                    📅 ${b.expiryDate}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span class="${b.currentQuantity < 50 ? 'quantity-low' : b.currentQuantity < 100 ? 'quantity-medium' : 'quantity-high'}">
-                                                    ${b.currentQuantity}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    </c:forEach>
-                                </tbody>
-                            </table>
-                        </c:otherwise>
-                    </c:choose>
-                </div>
-            </div>
-
-            <!-- Đơn hàng gần đây -->
-            <div class="section-card">
-                <div class="section-header">
-                    <h2>
-                        <span class="section-icon">📋</span>
-                        Đơn hàng gần đây
-                    </h2>
-                </div>
-                <div class="table-container">
-                    <c:choose>
-                        <c:when test="${empty recentOrders}">
-                            <div class="empty-state">
-                                <div class="empty-icon">📭</div>
-                                <h3>Chưa có đơn hàng</h3>
-                                <p>Không có đơn hàng nào gần đây</p>
-                            </div>
-                        </c:when>
-                        <c:otherwise>
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th style="width: 60px;">#</th>
-                                        <th>Mã đơn hàng</th>
-                                        <th>Nhà cung cấp</th>
-                                        <th>Ngày đặt</th>
-                                        <th>Trạng thái</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <c:forEach var="po" items="${recentOrders}" varStatus="loop">
-                                        <tr>
-                                            <td><span class="row-number">${loop.index + 1}</span></td>
-                                            <td>
-                                                <strong style="color: #3b82f6;">PO-${po.poId}</strong>
-                                            </td>
-                                            <td>${po.supplierName}</td>
-                                            <td>
-                                                <span class="badge badge-info">
-                                                    📅 ${po.orderDate}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span class="badge ${po.status == 'Completed' ? 'badge-success' : po.status == 'Pending' ? 'badge-warning' : 'badge-info'}">
-                                                    ${po.status}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    </c:forEach>
-                                </tbody>
-                            </table>
-                        </c:otherwise>
-                    </c:choose>
-                </div>
-            </div>
-
-            <!-- Giao dịch gần đây -->
-            <div class="section-card">
-                <div class="section-header">
-                    <h2>
-                        <span class="section-icon">💰</span>
-                        Giao dịch gần đây
-                    </h2>
-                </div>
-                <div class="table-container">
-                    <c:choose>
-                        <c:when test="${empty recentTransactions}">
-                            <div class="empty-state">
-                                <div class="empty-icon">💤</div>
-                                <h3>Chưa có giao dịch</h3>
-                                <p>Không có giao dịch nào gần đây</p>
-                            </div>
-                        </c:when>
-                        <c:otherwise>
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th style="width: 60px;">#</th>
-                                        <th>Loại</th>
-                                        <th>Tên thuốc</th>
-                                        <th>Số lượng</th>
-                                        <th>Ngày giao dịch</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <c:forEach var="t" items="${recentTransactions}" varStatus="loop">
-                                        <tr>
-                                            <td><span class="row-number">${loop.index + 1}</span></td>
-                                            <td>
-                                                <span class="badge ${t.type == 'IN' ? 'badge-success' : 'badge-danger'}">
-                                                    ${t.type == 'IN' ? '➕ Nhập' : '➖ Xuất'}
-                                                </span>
-                                            </td>
-                                            <td><span class="medicine-name">${t.medicineName}</span></td>
-                                            <td>
-                                                <strong style="color: ${t.type == 'IN' ? '#059669' : '#dc2626'};">
-                                                    ${t.type == 'IN' ? '+' : '-'}${t.quantity}
-                                                </strong>
-                                            </td>
-                                            <td>
-                                                <span class="badge badge-info">
-                                                    📅 ${t.transactionDate}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    </c:forEach>
-                                </tbody>
-                            </table>
+                            <a href="${pageContext.request.contextPath}/register" class="btn btn-primary">
+                                <i class="fas fa-user-plus"></i>
+                                Register Now
+                            </a>
+                            <a href="${pageContext.request.contextPath}/login" class="btn btn-secondary">
+                                <i class="fas fa-sign-in-alt"></i>
+                                Login
+                            </a>
                         </c:otherwise>
                     </c:choose>
                 </div>
             </div>
         </div>
     </div>
-
-    <script>
-        function confirmLogout() {
-            if (confirm("Bạn có chắc chắn muốn đăng xuất không?")) {
-                window.location.href = 'logout';
-            }
-        }
-    </script>
+    
+    <%@ include file="/admin/footer.jsp" %>
 </body>
 </html>

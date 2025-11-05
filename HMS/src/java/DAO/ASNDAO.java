@@ -505,4 +505,25 @@ public class ASNDAO extends DBContext {
         }
         return -1;
     }
+    public boolean updatePOStatus(int poId, String status) {
+    String sql = "UPDATE PurchaseOrders SET status = ?, updated_at = GETDATE() WHERE po_id = ?";
+    
+    try (Connection conn = DBContext.getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        
+        pstmt.setString(1, status);
+        pstmt.setInt(2, poId);
+        
+        int affected = pstmt.executeUpdate();
+        System.out.println("✅ Updated PO #" + poId + " to status: " + status);
+        
+        return affected > 0;
+        
+    } catch (SQLException e) {
+        System.err.println("Error updating PO status: " + e.getMessage());
+        e.printStackTrace();
+    }
+    
+    return false;
+}
 }

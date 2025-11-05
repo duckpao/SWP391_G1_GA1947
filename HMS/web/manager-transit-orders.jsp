@@ -410,33 +410,6 @@
         </div>
 
         <!-- ==================== PAYMENT MODAL ==================== -->
-        <div id="paymentModal" class="modal">
-            <div class="modal-content payment-modal">
-                <div class="modal-header">
-                    <span class="close" onclick="closePaymentModal()">&times;</span>
-                    <h2>💰 Thanh Toán Đơn Hàng</h2>
-                </div>
-                <div class="modal-body">
-                    <div class="payment-icon">💰</div>
-                    <p id="paymentMessage" style="font-size: 18px; text-align: center; font-weight: bold;"></p>
-                    <div class="payment-details" id="paymentDetails"></div>
-                    <p style="color: #666; text-align: center; margin-top: 20px;">
-                        Bạn có muốn thanh toán ngay bây giờ?
-                    </p>
-                </div>
-                <div class="modal-footer">
-                    <button onclick="closePaymentModal()" 
-                            style="background-color: #6c757d; color: white; padding: 10px 20px; margin-right: 10px;">
-                        ⏰ Pay Later
-                    </button>
-                    <button onclick="submitPayment()" 
-                            id="paymentBtn" 
-                            style="background-color: #28a745; color: white; padding: 10px 25px; font-weight: bold;">
-                        💳 Pay Now
-                    </button>
-                </div>
-            </div>
-        </div>
 
         <script>
             let currentAsnId = null;
@@ -550,122 +523,68 @@
                 document.getElementById('confirmModal').style.display = 'none';
             }
 
-            function submitConfirmDelivery() {
-                console.log('📤 Submitting confirm delivery for ASN #' + currentAsnId);
+function submitConfirmDelivery() {
+    console.log('📤 Submitting confirm delivery for ASN #' + currentAsnId);
 
-                const btn = document.getElementById('confirmBtn');
-                btn.disabled = true;
-                btn.innerHTML = '<span style="display: inline-block; width: 15px; height: 15px; border: 2px solid white; border-top-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite;"></span> Processing...';
+    const btn = document.getElementById('confirmBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span style="display: inline-block; width: 15px; height: 15px; border: 2px solid white; border-top-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite;"></span> Processing...';
 
-                const formData = new FormData();
-                formData.append('action', 'confirmDelivery');
-                formData.append('asnId', currentAsnId);
+    const formData = new FormData();
+    formData.append('action', 'confirmDelivery');
+    formData.append('asnId', currentAsnId);
 
-                fetch('${pageContext.request.contextPath}/manage/transit', {
-                    method: 'POST',
-                    body: formData
-                })
-                        .then(async response => {
-                            console.log('Confirm response status:', response.status);
+    fetch('${pageContext.request.contextPath}/manage/transit', {
+        method: 'POST',
+        body: formData
+    })
+    .then(async response => {
+        const text = await response.text();
+        let data;
+        
+        try {
+            data = JSON.parse(text);
+        } catch (e) {
+            console.error("⚠️ Response không phải JSON:", text);
+            throw new Error("Server returned invalid response");
+        }
+        
+        if (!response.ok) {
+            throw new Error(data.message || 'Server error');
+        }
+        
+        return data;
+    })
+    .then(data => {
+        console.log('✅ Confirm response:', data);
+        
+        if (data.success && data.invoiceId) {
+            // ✅ REDIRECT ĐẾN TRANG THANH TOÁN MOMO
+            alert('✅ Delivery confirmed!\n\nDelivery Note: #' + data.dnId + '\nInvoice: #' + data.invoiceId + '\n\n→ Redirecting to payment page...');
+            
+            // Redirect đến CreatePaymentServlet với invoiceId
+            window.location.href = '${pageContext.request.contextPath}/create-payment?invoiceId=' + data.invoiceId;
+            
+        } else {
+            alert('❌ Error: ' + (data.message || 'Unknown error'));
+            btn.disabled = false;
+            btn.innerHTML = '✅ Confirm Delivery';
+        }
+    })
+    .catch(err => {
+        console.error("❌ Error:", err);
+        alert("❌ Connection Error: " + err.message);
+        btn.disabled = false;
+        btn.innerHTML = "✅ Confirm Delivery";
+    });
+}
 
-                            const text = await response.text(); // nhận raw response
-                            let data;
-
-                            try {
-                                data = JSON.parse(text); // thử parse JSON
-                            } catch (e) {
-                                console.error("⚠️ Response không phải JSON, nội dung nhận được:", text);
-                                throw new Error("Server returned invalid JSON or HTML error page");
-                            }
-
-                            if (!response.ok) {
-                                throw new Error(data.message || `Server error ${response.status}`);
-                            }
-
-                            return data;
-                        })
-                        .then(data => {
-                            console.log('Confirm response:', data);
-                            if (data.success) {
-                                alert('✅ Delivery confirmed successfully!\n\nDelivery Note ID: #' + data.dnId);
-                                closeConfirmModal();
-                                setTimeout(showPaymentModal, 500);
-                            } else {
-                                alert('❌ Error: ' + data.message);
-                            }
-                        })
-                        .catch(err => {
-                            console.error("❌ Error confirming delivery:", err);
-                            alert("❌ Connection Error: " + err.message);
-                            const btn = document.getElementById("confirmBtn");
-                            btn.disabled = false;
-                            btn.innerHTML = "✅ Confirm Delivery";
-                        });
-            }
+// ✅ XÓA MODAL PAYMENT (không cần nữa)
+// function showPaymentModal() { ... }
+// function submitPayment() { ... }
 
             // ==================== PAYMENT ====================
-            function showPaymentModal() {
-                console.log('💰 Opening payment modal for ASN #' + currentAsnId);
 
-                document.getElementById('paymentMessage').innerHTML =
-                        'Đơn hàng <strong style="color: #007bff;">ASN #' + currentAsnId + '</strong> từ <strong style="color: #28a745;">' + currentSupplierName + '</strong> đã được xác nhận.';
-
-                let detailsHtml = '<div class="info-row"><div class="info-label">ASN ID:</div><div class="info-value"><strong>#' + currentAsnId + '</strong></div></div>';
-                detailsHtml += '<div class="info-row"><div class="info-label">PO ID:</div><div class="info-value"><strong>#' + currentPoId + '</strong></div></div>';
-                detailsHtml += '<div class="info-row"><div class="info-label">Supplier:</div><div class="info-value"><strong>' + currentSupplierName + '</strong></div></div>';
-                detailsHtml += '<div class="info-row"><div class="info-label">Total Quantity:</div><div class="info-value"><strong style="color: #28a745; font-size: 18px;">' + currentTotalQuantity + '</strong> units</div></div>';
-                detailsHtml += '<div style="margin-top: 15px; padding: 10px; background-color: #fff3cd; border-radius: 5px; text-align: center;">';
-                detailsHtml += '<strong>⚠️ Vui lòng thanh toán cho nhà cung cấp</strong>';
-                detailsHtml += '</div>';
-
-                document.getElementById('paymentDetails').innerHTML = detailsHtml;
-                document.getElementById('paymentModal').style.display = 'block';
-            }
-
-            function closePaymentModal() {
-                document.getElementById('paymentModal').style.display = 'none';
-                // Reload page to see updated list
-                location.reload();
-            }
-
-            function submitPayment() {
-                console.log('💳 Processing payment for ASN #' + currentAsnId);
-
-                const btn = document.getElementById('paymentBtn');
-                btn.disabled = true;
-                btn.innerHTML = '<span style="display: inline-block; width: 15px; height: 15px; border: 2px solid white; border-top-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite;"></span> Processing Payment...';
-
-                const formData = new FormData();
-                formData.append('action', 'processPayment');
-                formData.append('asnId', currentAsnId);
-                formData.append('poId', currentPoId);
-
-                fetch('${pageContext.request.contextPath}/manage/transit', {
-                    method: 'POST',
-                    body: formData
-                })
-                        .then(response => {
-                            console.log('Payment response status:', response.status);
-                            return response.json();
-                        })
-                        .then(data => {
-                            console.log('Payment response:', data);
-                            if (data.success) {
-                                alert('✅ Payment processed successfully!\n\nPO #' + currentPoId + ' has been completed.');
-                                location.reload();
-                            } else {
-                                alert('❌ Error: ' + data.message);
-                                btn.disabled = false;
-                                btn.innerHTML = '💳 Pay Now';
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error processing payment:', error);
-                            alert('❌ Connection Error: ' + error.message);
-                            btn.disabled = false;
-                            btn.innerHTML = '💳 Pay Now';
-                        });
-            }
 
             // Close modal when clicking outside
             window.onclick = function (event) {

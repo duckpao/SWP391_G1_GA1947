@@ -233,6 +233,22 @@
         <servlet-name>TicketCountServlet</servlet-name>
         <servlet-class>Controller.TicketCountServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>InvoiceServlet</servlet-name>
+        <servlet-class>Controller.InvoiceServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>CreatePaymentServlet</servlet-name>
+        <servlet-class>Controller.CreatePaymentServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>PaymentCallbackServlet</servlet-name>
+        <servlet-class>Controller.PaymentCallbackServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>PaymentLogServlet</servlet-name>
+        <servlet-class>Controller.PaymentLogServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>UserServlet</servlet-name>
         <url-pattern>/admin-dashboard</url-pattern>
@@ -498,7 +514,6 @@
         <url-pattern>/manage/transit</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-
         <servlet-name>TicketController</servlet-name>
         <url-pattern>/ticket</url-pattern>
     </servlet-mapping>
@@ -506,7 +521,24 @@
         <servlet-name>TicketCountServlet</servlet-name>
         <url-pattern>/ticket-count</url-pattern>
     </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>InvoiceServlet</servlet-name>
+        <url-pattern>/invoices</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CreatePaymentServlet</servlet-name>
+        <url-pattern>/create-payment</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>PaymentCallbackServlet</servlet-name>
+        <url-pattern>/payment-callback</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>PaymentLogServlet</servlet-name>
+        <url-pattern>/payment-logs</url-pattern>
+    </servlet-mapping>
     <welcome-file-list>
         <welcome-file>home.jsp</welcome-file>
+        <url-pattern>/home</url-pattern>
     </welcome-file-list>
 </web-app>

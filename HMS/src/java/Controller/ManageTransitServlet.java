@@ -7,6 +7,7 @@ package Controller;
 
 import DAO.ASNDAO;
 import com.google.gson.Gson;
+import DAO.InvoiceDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -231,61 +232,75 @@ public class ManageTransitServlet extends HttpServlet {
     /**
      * Confirm delivery
      */
-    private void confirmDelivery(HttpServletRequest request, HttpServletResponse response, User user)
-            throws ServletException, IOException {
+private void confirmDelivery(HttpServletRequest request, HttpServletResponse response, User user)
+        throws ServletException, IOException {
+    
+    response.setContentType("application/json");
+    response.setCharacterEncoding("UTF-8");
+    PrintWriter out = response.getWriter();
+    
+    String asnIdStr = request.getParameter("asnId");
+    
+    if (asnIdStr == null) {
+        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        out.print("{\"success\": false, \"message\": \"ASN ID is required\"}");
+        return;
+    }
+    
+    try {
+        int asnId = Integer.parseInt(asnIdStr);
+        ASNDAO asnDao = new ASNDAO();
         
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        PrintWriter out = response.getWriter();
+        // 1. Get ASN info
+        AdvancedShippingNotice asn = asnDao.getASNById(asnId);
         
-        String asnIdStr = request.getParameter("asnId");
-        
-        if (asnIdStr == null) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            out.print("{\"success\": false, \"message\": \"ASN ID is required\"}");
+        if (asn == null) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            out.print("{\"success\": false, \"message\": \"ASN not found\"}");
             return;
         }
         
-        try {
-            int asnId = Integer.parseInt(asnIdStr);
-            ASNDAO asnDao = new ASNDAO();
-            
-            // Get ASN info first
-            AdvancedShippingNotice asn = asnDao.getASNById(asnId);
-            
-            if (asn == null) {
-                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                out.print("{\"success\": false, \"message\": \"ASN not found\"}");
-                return;
-            }
-            
-            // Confirm delivery
-            boolean confirmed = asnDao.confirmDelivery(asnId, user.getUserId());
-            
-            if (!confirmed) {
-                out.print("{\"success\": false, \"message\": \"Failed to confirm delivery\"}");
-                return;
-            }
-            
-            // Create Delivery Note
-            int dnId = asnDao.createDeliveryNote(asnId, asn.getPoId(), user.getUserId(), "Confirmed by Manager");
-            
-            if (dnId > 0) {
-                out.print("{\"success\": true, \"message\": \"Delivery confirmed successfully\", \"dnId\": " + dnId + ", \"poId\": " + asn.getPoId() + "}");
-            } else {
-                out.print("{\"success\": false, \"message\": \"Delivery confirmed but failed to create delivery note\"}");
-            }
-            
-        } catch (NumberFormatException e) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            out.print("{\"success\": false, \"message\": \"Invalid ASN ID\"}");
-        } catch (Exception e) {
-            System.err.println("Error in confirmDelivery: " + e.getMessage());
-            e.printStackTrace();
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            out.print("{\"success\": false, \"message\": \"" + e.getMessage() + "\"}");
+        // 2. Confirm delivery
+        boolean confirmed = asnDao.confirmDelivery(asnId, user.getUserId());
+        
+        if (!confirmed) {
+            out.print("{\"success\": false, \"message\": \"Failed to confirm delivery\"}");
+            return;
         }
+        
+        // 3. Create Delivery Note
+        int dnId = asnDao.createDeliveryNote(asnId, asn.getPoId(), user.getUserId(), "Confirmed by Manager");
+        
+        if (dnId <= 0) {
+            out.print("{\"success\": false, \"message\": \"Failed to create delivery note\"}");
+            return;
+        }
+        
+        // 4. ✅ TẠO INVOICE TỰ ĐỘNG
+        InvoiceDAO invoiceDAO = new InvoiceDAO();
+        int invoiceId = invoiceDAO.createInvoiceForASN(asn, asnId, user.getUserId());
+        
+        if (invoiceId <= 0) {
+            out.print("{\"success\": false, \"message\": \"Delivery confirmed but failed to create invoice\"}");
+            return;
+        }
+        
+        System.out.println("✅ Created Invoice #" + invoiceId + " for ASN #" + asnId);
+        
+        // 5. ✅ TRẢ VỀ INVOICE ID ĐỂ REDIRECT ĐẾN TRANG THANH TOÁN
+        out.print("{\"success\": true, \"message\": \"Delivery confirmed\", \"dnId\": " + dnId + 
+                  ", \"invoiceId\": " + invoiceId + ", \"poId\": " + asn.getPoId() + "}");
+        
+    } catch (NumberFormatException e) {
+        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        out.print("{\"success\": false, \"message\": \"Invalid ASN ID\"}");
+    } catch (Exception e) {
+        System.err.println("Error in confirmDelivery: " + e.getMessage());
+        e.printStackTrace();
+        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        out.print("{\"success\": false, \"message\": \"" + e.getMessage() + "\"}");
     }
+}
 
     /**
      * Process payment

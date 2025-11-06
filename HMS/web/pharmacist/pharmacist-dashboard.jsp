@@ -329,31 +329,9 @@
                     🏠 Dashboard
                 </a>
                 
-                <c:if test="${sessionScope.role eq 'Pharmacist' || sessionScope.role eq 'Doctor'}">
-                    <a href="${pageContext.request.contextPath}/view-medicine">
-                        💊 Kho thuốc
-                    </a>
-                </c:if>
-                
-                <c:if test="${sessionScope.role eq 'Doctor'}">
-                    <a href="${pageContext.request.contextPath}/prescriptions">
-                        📋 Kê đơn thuốc
-                    </a>
-                </c:if>
-                
-                <c:if test="${sessionScope.role eq 'Admin'}">
-                    <a href="${pageContext.request.contextPath}/manage-users">
-                        👥 Quản lý người dùng
-                    </a>
-                    <a href="${pageContext.request.contextPath}/reports">
-                        📊 Báo cáo thống kê
-                    </a>
-                </c:if>
-                
-                <a href="${pageContext.request.contextPath}/help">
-                    ❓ Trợ giúp
+                <a href="${pageContext.request.contextPath}/view-medicine">
+                    💊 Kho thuốc
                 </a>
-                
             </div>
         </div>
 

@@ -305,16 +305,8 @@
                     </a>
                 </c:when>
                 
-                <%-- Users with 'None' role: show only support, logout, and profile --%>
+                <%-- Users with 'None' role: show only logout --%>
                 <c:when test="${isNoneRole}">
-                    <%-- Ticket/Support button with badge --%>
-                    <a href="/HMS/ticket?action=list" class="nav-btn nav-btn-ticket">
-                        <i class="fas fa-ticket-alt"></i>
-                        <span>Support</span>
-                        <%-- Include ticket badge --%>
-                        <%@ include file="/ticket-badge-ajax.jsp" %>
-                    </a>
-                    
                     <%-- Logout Button --%>
                     <a href="/HMS/logout" class="nav-btn nav-btn-logout">
                         <i class="fas fa-sign-out-alt"></i>
@@ -322,16 +314,8 @@
                     </a>
                 </c:when>
                 
-                <%-- Guest users (not logged in): show support, register and login button --%>
+                <%-- Guest users (not logged in): show register and login button only --%>
                 <c:otherwise>
-                    <%-- Ticket/Support button (always visible) --%>
-                    <a href="/HMS/ticket?action=list" class="nav-btn nav-btn-ticket">
-                        <i class="fas fa-ticket-alt"></i>
-                        <span>Support</span>
-                        <%-- Include ticket badge --%>
-                        <%@ include file="/ticket-badge-ajax.jsp" %>
-                    </a>
-                    
                     <a href="/HMS/register" class="nav-btn nav-btn-register">
                         <i class="fas fa-user-plus"></i>
                         <span>Register</span>

@@ -359,7 +359,7 @@
                     </a>
                 </c:if>
                 
-                <c:if test="${sessionScope.role eq 'Pharmacist'}">
+                <c:if test="${sessionScope.role eq 'Pharmacist' || sessionScope.role eq 'Admin'}">
                     <a href="${pageContext.request.contextPath}/pharmacist/View_MedicineRequest">
                         <i class="bi bi-file-earmark-plus"></i> Yêu cầu thuốc
                     </a>
@@ -420,7 +420,7 @@
                         <i class="bi bi-file-earmark-plus"></i> Create Request
                     </a>
                 </c:if>
-                <c:if test="${sessionScope.role eq 'Pharmacist'}">
+                <c:if test="${sessionScope.role eq 'Pharmacist' || sessionScope.role eq 'Admin'}">
                     <button class="btn btn-success ms-auto" data-bs-toggle="modal" data-bs-target="#addMedicineModal">
                         <i class="bi bi-plus-circle"></i> Add New Medicine
                     </button>
@@ -448,7 +448,7 @@
                                     <th>Loại thuốc</th>
                                     <th>Tồn kho</th>
                                     <th>Hạn sử dụng</th>
-                                    <c:if test="${sessionScope.role eq 'Pharmacist'}">
+                                    <c:if test="${sessionScope.role eq 'Pharmacist' || sessionScope.role eq 'Admin'}">
                                         <th>Chỉnh sửa</th>
                                         <th>Xóa</th>
                                     </c:if>
@@ -487,7 +487,7 @@
                                             </c:choose>
                                         </td>
 
-                                        <c:if test="${sessionScope.role eq 'Pharmacist'}">
+                                        <c:if test="${sessionScope.role eq 'Pharmacist' || sessionScope.role eq 'Admin'}">
                                             <td>
                                                 <button class="btn btn-warning btn-sm edit-btn"
                                                         data-bs-toggle="modal"
@@ -732,3 +732,4 @@
     </script>
 </body>
 </html>
+```

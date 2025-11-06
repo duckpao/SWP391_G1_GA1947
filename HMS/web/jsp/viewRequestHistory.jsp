@@ -24,7 +24,7 @@
 
         .container {
             width: 100%;
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
         }
 
@@ -86,7 +86,7 @@
 
         .search-form {
             display: grid;
-            grid-template-columns: 1fr 1fr auto auto;
+            grid-template-columns: 1fr 1fr 1fr auto auto;
             gap: 16px;
             align-items: flex-end;
         }
@@ -118,6 +118,15 @@
             border-color: #6c757d;
             background: white;
             box-shadow: 0 0 0 4px rgba(108, 117, 125, 0.1);
+        }
+
+        select.form-control {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M10.293 3.293L6 7.586 1.707 3.293A1 1 0 00.293 4.707l5 5a1 1 0 001.414 0l5-5a1 1 0 10-1.414-1.414z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 40px;
         }
 
         .btn {
@@ -232,6 +241,16 @@
             color: #991b1b;
         }
 
+        .status-fulfilled {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-canceled {
+            background: #f3f4f6;
+            color: #4b5563;
+        }
+
         .request-notes {
             font-size: 14px;
             color: #6b7280;
@@ -295,6 +314,12 @@
             text-decoration: underline;
         }
 
+        @media (max-width: 1024px) {
+            .search-form {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
         @media (max-width: 768px) {
             .search-form {
                 grid-template-columns: 1fr;
@@ -346,6 +371,21 @@
                             class="form-control">
                     </div>
 
+                    <div class="form-group">
+                        <label for="status">Trạng thái</label>
+                        <select 
+                            id="status" 
+                            name="status" 
+                            class="form-control">
+                            <option value="all" ${param.status == 'all' || empty param.status ? 'selected' : ''}>Tất cả</option>
+                            <option value="Pending" ${param.status == 'Pending' ? 'selected' : ''}>Pending</option>
+                            <option value="Approved" ${param.status == 'Approved' ? 'selected' : ''}>Approved</option>
+                            <option value="Fulfilled" ${param.status == 'Fulfilled' ? 'selected' : ''}>Fulfilled</option>
+                            <option value="Rejected" ${param.status == 'Rejected' ? 'selected' : ''}>Rejected</option>
+                            <option value="Canceled" ${param.status == 'Canceled' ? 'selected' : ''}>Canceled</option>
+                        </select>
+                    </div>
+
                     <button type="submit" class="btn btn-search">🔍 Tìm kiếm</button>
                     <a href="view-request-history" style="text-decoration: none;">
                         <button type="button" class="btn btn-clear">✕ Xóa bộ lọc</button>
@@ -382,8 +422,14 @@
                                         <c:when test="${req.status == 'Approved'}">
                                             <span class="status-badge status-approved">${req.status}</span>
                                         </c:when>
+                                        <c:when test="${req.status == 'Fulfilled'}">
+                                            <span class="status-badge status-fulfilled">${req.status}</span>
+                                        </c:when>
                                         <c:when test="${req.status == 'Rejected'}">
                                             <span class="status-badge status-rejected">${req.status}</span>
+                                        </c:when>
+                                        <c:when test="${req.status == 'Canceled'}">
+                                            <span class="status-badge status-canceled">${req.status}</span>
                                         </c:when>
                                         <c:otherwise>
                                             <span class="status-badge">${req.status}</span>
@@ -418,5 +464,4 @@
     </div>
 </body>
 <%@ include file="/admin/footer.jsp" %>
-
 </html>

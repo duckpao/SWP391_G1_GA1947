@@ -180,20 +180,6 @@
                     Modern pharmacy warehouse management system, helping to optimize 
                     medicine and medical supply management processes efficiently and safely.
                 </p>
-                <div class="social-links">
-                    <a href="#" class="social-btn" title="Facebook">
-                        <i class="fab fa-facebook-f"></i>
-                    </a>
-                    <a href="#" class="social-btn" title="Twitter">
-                        <i class="fab fa-twitter"></i>
-                    </a>
-                    <a href="#" class="social-btn" title="LinkedIn">
-                        <i class="fab fa-linkedin-in"></i>
-                    </a>
-                    <a href="#" class="social-btn" title="Instagram">
-                        <i class="fab fa-instagram"></i>
-                    </a>
-                </div>
             </div>
             
             <!-- Quick Links Section -->
@@ -202,8 +188,8 @@
                 <ul>
                     <li><a href="profile"><i class="fas fa-user"></i> My Profile</a></li>
                     <li><a href="chat"><i class="fas fa-comments"></i> Chat Support</a></li>
-                    <li><a href="#"><i class="fas fa-file-alt"></i> User Guide</a></li>
-                    <li><a href="#"><i class="fas fa-question-circle"></i> FAQ</a></li>
+                    <li><a href="home"><i class="fas fa-file-alt"></i> User Guide</a></li>
+                    <li><a href="home"><i class="fas fa-question-circle"></i> FAQ</a></li>
                 </ul>
             </div>
             

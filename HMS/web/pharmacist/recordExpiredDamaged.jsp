@@ -274,7 +274,7 @@
         <!-- Sidebar -->
         <div class="sidebar">
             <div class="menu">
-                <a href="${pageContext.request.contextPath}/view-medicine">
+                <a href="${pageContext.request.contextPath}/view-medicine?dashboard=pharmacist">
                     <i class="bi bi-capsule"></i> Quản lý thuốc
                 </a>
                 <a href="${pageContext.request.contextPath}/pharmacist/View_MedicineRequest">

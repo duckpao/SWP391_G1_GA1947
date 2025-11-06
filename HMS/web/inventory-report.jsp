@@ -413,6 +413,7 @@
         }
     </style>
 </head>
+<%@ include file="/admin/header.jsp" %>
 <body>
     <div class="container-fluid">
         <!-- Header -->
@@ -718,4 +719,5 @@
         }
     </script>
 </body>
+<%@ include file="/admin/footer.jsp" %>
 </html>

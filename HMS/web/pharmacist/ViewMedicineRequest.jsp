@@ -299,7 +299,7 @@
         <!-- Sidebar -->
         <div class="sidebar">
             <div class="menu">
-                <a href="${pageContext.request.contextPath}/view-medicine">
+                <a href="${pageContext.request.contextPath}/view-medicine?dashboard=pharmacist">
                     <i class="fa fa-pills"></i> Quản lý thuốc
                 </a>
                 <a href="${pageContext.request.contextPath}/pharmacist/View_MedicineRequest" class="active">

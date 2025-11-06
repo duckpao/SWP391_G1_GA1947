@@ -18,11 +18,39 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f5f5f5;
             color: #1a1a1a;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            position: relative;
+        }
+
+        /* Background Image với overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('${pageContext.request.contextPath}/img/anhphongkhamtranghome.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            z-index: -2;
+        }
+
+        /* Overlay tối để text dễ đọc hơn */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.5) 100%);
+            z-index: -1;
         }
 
         .content-wrapper {
@@ -40,11 +68,12 @@
         }
 
         .hero-card {
-            background: #ffffff;
-            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
             padding: 60px 50px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         .hero-icon {
@@ -57,7 +86,17 @@
             justify-content: center;
             font-size: 48px;
             margin: 0 auto 30px;
-            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.3);
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.4);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
         }
 
         .hero-title {
@@ -66,22 +105,25 @@
             color: #1a1a1a;
             margin-bottom: 16px;
             line-height: 1.2;
+            text-align: center;
         }
 
         .hero-subtitle {
             font-size: 18px;
-            color: #666;
+            color: #555;
             margin-bottom: 40px;
             line-height: 1.6;
+            text-align: center;
         }
 
         .guide-section {
-            background: #f8f9fa;
-            border-radius: 12px;
+            background: rgba(248, 249, 250, 0.7);
+            backdrop-filter: blur(8px);
+            border-radius: 16px;
             padding: 40px;
             margin-top: 30px;
             text-align: left;
-            border: 2px solid #e9ecef;
+            border: 2px solid rgba(233, 236, 239, 0.4);
         }
 
         .guide-title {
@@ -105,17 +147,18 @@
         }
 
         .step-card {
-            background: #ffffff;
+            background: rgba(255, 255, 255, 0.85);
             padding: 24px;
-            border-radius: 10px;
+            border-radius: 12px;
             border-left: 4px solid #2563eb;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             transition: all 0.3s ease;
         }
 
         .step-card:hover {
             transform: translateX(4px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+            background: rgba(255, 255, 255, 0.95);
         }
 
         .step-header {
@@ -200,7 +243,7 @@
         .btn-primary:hover {
             background: #1d4ed8;
             transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.5);
         }
 
         .btn-secondary {
@@ -215,9 +258,9 @@
         }
 
         .info-box {
-            background: #eff6ff;
-            border: 2px solid #bfdbfe;
-            border-radius: 10px;
+            background: rgba(239, 246, 255, 0.85);
+            border: 2px solid rgba(191, 219, 254, 0.4);
+            border-radius: 12px;
             padding: 20px;
             margin-top: 30px;
             display: flex;
@@ -269,6 +312,14 @@
             .btn {
                 width: 100%;
                 justify-content: center;
+            }
+
+            .step-description {
+                margin-left: 0;
+            }
+
+            .step-link {
+                margin-left: 0;
             }
         }
     </style>

@@ -18,7 +18,14 @@ public class CreateMedicationRequestServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("role") == null || !"Doctor".equals(session.getAttribute("role"))) {
+        if (session == null || session.getAttribute("role") == null) {
+            response.sendRedirect("login");
+            return;
+        }
+        
+        // ✅ Cho phép cả Doctor và Admin
+        String role = (String) session.getAttribute("role");
+        if (!"Doctor".equals(role) && !"Admin".equals(role)) {
             response.sendRedirect("login");
             return;
         }
@@ -38,13 +45,21 @@ public class CreateMedicationRequestServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("userId") == null) {
+        if (session == null || session.getAttribute("userId") == null || session.getAttribute("role") == null) {
             response.sendRedirect("login");
             return;
         }
+        
+        // ✅ Kiểm tra role trước khi tạo request
+        String role = (String) session.getAttribute("role");
+        if (!"Doctor".equals(role) && !"Admin".equals(role)) {
+            response.sendRedirect("login");
+            return;
+        }
+        
         int doctorId = (Integer) session.getAttribute("userId");
         System.out.println("=== START CREATE REQUEST ===");
-        System.out.println("Doctor ID: " + doctorId);
+        System.out.println("User ID: " + doctorId + " (Role: " + role + ")");
 
         String notes = request.getParameter("notes");
         System.out.println("Notes: " + notes);
@@ -54,7 +69,7 @@ public class CreateMedicationRequestServlet extends HttpServlet {
         req.setNotes(notes != null ? notes : "");
 
         List<MedicationRequestItem> items = new ArrayList<>();
-        String[] medicineCodes = request.getParameterValues("medicine_code");  // ĐỔI sang medicine_code
+        String[] medicineCodes = request.getParameterValues("medicine_code");
         String[] quantities = request.getParameterValues("quantity");
 
         System.out.println("Medicine Codes: " + (medicineCodes != null ? String.join(",", medicineCodes) : "NULL"));
@@ -69,7 +84,7 @@ public class CreateMedicationRequestServlet extends HttpServlet {
 
         try {
             for (int i = 0; i < medicineCodes.length; i++) {
-                String medicineCode = medicineCodes[i];  // ĐỔI sang String
+                String medicineCode = medicineCodes[i];
                 int quantity = Integer.parseInt(quantities[i]);
                 System.out.println("Item " + i + ": Medicine Code=" + medicineCode + ", Quantity=" + quantity);
 
@@ -80,7 +95,7 @@ public class CreateMedicationRequestServlet extends HttpServlet {
                     return;
                 }
                 MedicationRequestItem item = new MedicationRequestItem();
-                item.setMedicineCode(medicineCode);  // ĐỔI
+                item.setMedicineCode(medicineCode);
                 item.setQuantity(quantity);
                 items.add(item);
             }

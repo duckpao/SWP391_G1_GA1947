@@ -268,6 +268,10 @@
         <servlet-name>VNPayReturnServlet</servlet-name>
         <servlet-class>Controller.VNPayReturnServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>CancelStockRequestServlet</servlet-name>
+        <servlet-class>Controller.CancelStockRequestServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>UserServlet</servlet-name>
         <url-pattern>/admin-dashboard</url-pattern>
@@ -555,6 +559,10 @@
     <servlet-mapping>
         <servlet-name>vnpayRefund</servlet-name>
         <url-pattern>/vnpayrefund/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CancelStockRequestServlet</servlet-name>
+        <url-pattern>/cancel-stock-request</url-pattern>
     </servlet-mapping>
     <welcome-file-list>
         <welcome-file>home.jsp</welcome-file>

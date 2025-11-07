@@ -10,7 +10,6 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-@WebServlet(name = "TicketCountServlet", urlPatterns = {"/ticket-count"})
 public class TicketCountServlet extends HttpServlet {
     
     private TicketDAO ticketDAO;

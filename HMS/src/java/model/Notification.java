@@ -158,6 +158,22 @@ public class Notification {
         this.receiverUsername = receiverUsername;
     }
 
+    public boolean isIsRead() {
+        return isRead;
+    }
+
+    public void setIsRead(boolean isRead) {
+        this.isRead = isRead;
+    }
+
+    public boolean isIsBroadcast() {
+        return isBroadcast;
+    }
+
+    public void setIsBroadcast(boolean isBroadcast) {
+        this.isBroadcast = isBroadcast;
+    }
+
     @Override
     public String toString() {
         return "Notification{" +

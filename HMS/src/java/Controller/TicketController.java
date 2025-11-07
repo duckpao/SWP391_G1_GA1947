@@ -11,7 +11,6 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
 
-@WebServlet(name = "TicketController", urlPatterns = {"/ticket"})
 public class TicketController extends HttpServlet {
     
     private TicketDAO ticketDAO;

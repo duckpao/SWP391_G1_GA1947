@@ -497,6 +497,7 @@
                 document.getElementById('detailsModal').style.display = 'none';
             }
 
+<<<<<<< Updated upstream
             // ==================== CONFIRM DELIVERY ====================
             function confirmDelivery(asnId, poId, supplierName, trackingNumber, totalQuantity) {
                 console.log('✅ Opening confirm modal for ASN #' + asnId);
@@ -525,6 +526,10 @@
 
 function submitConfirmDelivery() {
     console.log('📤 Submitting confirm delivery for ASN #' + currentAsnId);
+=======
+            function submitConfirmDelivery() {
+                console.log('📤 Submitting confirm delivery for ASN #' + currentAsnId);
+>>>>>>> Stashed changes
 
     const btn = document.getElementById('confirmBtn');
     btn.disabled = true;
@@ -534,6 +539,7 @@ function submitConfirmDelivery() {
     formData.append('action', 'confirmDelivery');
     formData.append('asnId', currentAsnId);
 
+<<<<<<< Updated upstream
     fetch('${pageContext.request.contextPath}/manage/transit', {
         method: 'POST',
         body: formData
@@ -585,6 +591,147 @@ function submitConfirmDelivery() {
 
             // ==================== PAYMENT ====================
 
+=======
+                fetch('${pageContext.request.contextPath}/manage/transit', {
+                    method: 'POST',
+                    body: formData
+                })
+                        .then(async response => {
+                            const text = await response.text();
+                            let data;
+                            try {
+                                data = JSON.parse(text);
+                            } catch (e) {
+                                console.error("⚠️ Response không phải JSON:", text);
+                                throw new Error("Server error");
+                            }
+                            if (!response.ok) {
+                                throw new Error(data.message || 'Server error');
+                            }
+                            return data;
+                        })
+                        .then(data => {
+                            console.log('Confirm response:', data);
+                            if (data.success) {
+                                alert('✅ Delivery confirmed!\n\nDelivery Note ID: #' + data.dnId);
+                                closeConfirmModal();
+
+                                // REDIRECT TO VNPAY
+                                setTimeout(() => redirectToVNPay(data.poId), 500);
+                            } else {
+                                alert('❌ Error: ' + data.message);
+                                btn.disabled = false;
+                                btn.innerHTML = '✅ Confirm Delivery';
+                            }
+                        })
+                        .catch(err => {
+                            console.error("❌ Error:", err);
+                            alert("❌ Error: " + err.message);
+                            btn.disabled = false;
+                            btn.innerHTML = "✅ Confirm Delivery";
+                        });
+            }
+
+            function redirectToVNPay(poId) {
+                console.log('💰 Redirecting to VNPay for ASN #' + currentAsnId);
+
+                // Show loading overlay
+                const overlay = document.createElement('div');
+                overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; align-items: center; justify-content: center;';
+                overlay.innerHTML = `
+        <div style="background: white; padding: 40px; border-radius: 10px; text-align: center;">
+            <div style="font-size: 48px; margin-bottom: 20px;">💳</div>
+            <h2 style="margin: 0 0 15px 0;">Chuyển đến VNPay</h2>
+            <p style="color: #666;">Vui lòng đợi...</p>
+            <div class="spinner" style="margin: 20px auto;"></div>
+        </div>
+    `;
+                document.body.appendChild(overlay);
+
+                // Create form to submit
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '${pageContext.request.contextPath}/vnpay-payment';
+
+                const asnInput = document.createElement('input');
+                asnInput.type = 'hidden';
+                asnInput.name = 'asnId';
+                asnInput.value = currentAsnId;
+                form.appendChild(asnInput);
+
+                const poInput = document.createElement('input');
+                poInput.type = 'hidden';
+                poInput.name = 'poId';
+                poInput.value = poId;
+                form.appendChild(poInput);
+
+                document.body.appendChild(form);
+                setTimeout(() => form.submit(), 1000);
+            }
+            
+            // ==================== CONFIRM DELIVERY ====================
+function confirmDelivery(asnId, poId, supplierName, trackingNumber, totalQuantity) {
+    console.log('⚠️ Opening confirm for ASN #' + asnId);
+    currentAsnId = asnId;
+    currentPoId = poId;
+    currentSupplierName = supplierName;
+    currentTrackingNumber = trackingNumber; // Not used in modal, but storing for potential future use
+    currentTotalQuantity = totalQuantity;
+
+    // Set modal message
+    document.getElementById('confirmMessage').innerHTML = 
+        'Bạn có chắc chắn muốn xác nhận đã nhận hàng cho đơn hàng này không? ' +
+        'Hành động này không thể hoàn tác và sẽ yêu cầu thanh toán.';
+
+    // Populate confirm details
+    let detailsHtml = '';
+    detailsHtml += '<div class="info-row"><div class="info-label">ASN ID:</div><div class="info-value"><strong>#' + asnId + '</strong></div></div>';
+    detailsHtml += '<div class="info-row"><div class="info-label">PO ID:</div><div class="info-value"><strong>#' + poId + '</strong></div></div>';
+    detailsHtml += '<div class="info-row"><div class="info-label">Supplier:</div><div class="info-value"><strong>' + supplierName + '</strong></div></div>';
+    detailsHtml += '<div class="info-row"><div class="info-label">Tracking Number:</div><div class="info-value"><code>' + trackingNumber + '</code></div></div>';
+    detailsHtml += '<div class="info-row"><div class="info-label">Total Quantity:</div><div class="info-value"><strong style="color: #007bff;">' + totalQuantity + '</strong> units</div></div>';
+    document.getElementById('confirmDetails').innerHTML = detailsHtml;
+
+    // Show modal
+    document.getElementById('confirmModal').style.display = 'block';
+}
+
+function closeConfirmModal() {
+    document.getElementById('confirmModal').style.display = 'none';
+    // Reset button state if needed
+    const btn = document.getElementById('confirmBtn');
+    btn.disabled = false;
+    btn.innerHTML = '✅ Confirm Delivery';
+}
+
+// ==================== PAYMENT ====================
+// These are defined since they're referenced in the payment modal HTML, even if not currently called.
+// You may need to implement an opener function (e.g., openPaymentModal) if you plan to use this modal.
+function closePaymentModal() {
+    document.getElementById('paymentModal').style.display = 'none';
+    // Reset button state if needed
+    const btn = document.getElementById('paymentBtn');
+    btn.disabled = false;
+    btn.innerHTML = '💳 Pay Now';
+}
+
+function submitPayment() {
+    // Placeholder: Implement actual payment submission logic here.
+    // For now, it could redirect to VNPay or alert success.
+    // Example: Similar to submitConfirmDelivery, but for payment.
+    const btn = document.getElementById('paymentBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span style="display: inline-block; width: 15px; height: 15px; border: 2px solid white; border-top-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite;"></span> Processing...';
+
+    // Simulate API call or redirect
+    setTimeout(() => {
+        alert('💳 Payment submitted successfully!');
+        closePaymentModal();
+        // Optionally redirect: window.location.href = '/path/to/payment';
+    }, 1500); // Replace with real fetch/POST to your backend
+}
+
+>>>>>>> Stashed changes
 
             // Close modal when clicking outside
             window.onclick = function (event) {

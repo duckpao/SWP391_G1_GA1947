@@ -3,12 +3,20 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+            <!-- Files from your work (HEAD) -->
             <file>file:/C:/Users/ADMIN/Documents/SWP391_G1_GA1947/HMS/src/java/DAO/ManagerDAO.java</file>
             <file>file:/C:/Users/ADMIN/Documents/SWP391_G1_GA1947/HMS/web/manager-dashboard.jsp</file>
             <file>file:/C:/Users/ADMIN/Documents/SWP391_G1_GA1947/HMS/web/WEB-INF/web.xml</file>
             <file>file:/C:/Users/ADMIN/Documents/SWP391_G1_GA1947/HMS/src/java/Controller/ManagerDashboardServlet.java</file>
             <file>file:/C:/Users/ADMIN/Documents/SWP391_G1_GA1947/HMS/src/java/Controller/AssignTasksServlet.java</file>
             <file>file:/C:/Users/ADMIN/Documents/SWP391_G1_GA1947/HMS/src/java/Controller/CancelStockRequestServlet.java</file>
+            
+            <!-- Files from teammate's work -->
+            <file>file:/C:/App/SWP/dev%206-11/SWP391_G1_GA1947/HMS/web/admin/dashboard.jsp</file>
+            <file>file:/C:/App/SWP/dev%206-11/SWP391_G1_GA1947/HMS/src/java/DAO/ASNDAO.java</file>
+            <file>file:/C:/App/SWP/dev%206-11/SWP391_G1_GA1947/HMS/web/jsp/updateRequest.jsp</file>
+            <file>file:/C:/App/SWP/dev%206-11/SWP391_G1_GA1947/HMS/web/notif/notifications.jsp</file>
+            <file>file:/C:/App/SWP/dev%206-11/SWP391_G1_GA1947/HMS/src/java/Controller/GetChatHistoryServlet.java</file>
         </group>
     </open-files>
 </project-private>

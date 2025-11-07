@@ -241,13 +241,36 @@
         <servlet-name>CreatePaymentServlet</servlet-name>
         <servlet-class>Controller.CreatePaymentServlet</servlet-class>
     </servlet>
+    <servlet-mapping>
+        <servlet-name>VNPaymentServlet</servlet-name>
+        <url-pattern>/vnpay-payment</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>VNPayReturnServlet</servlet-name>
+        <url-pattern>/vnpay-return</url-pattern>
+    </servlet-mapping>
+    <session-config>
+        <session-timeout> 30 </session-timeout>
+    </session-config>
     <servlet>
-        <servlet-name>PaymentCallbackServlet</servlet-name>
-        <servlet-class>Controller.PaymentCallbackServlet</servlet-class>
+        <servlet-name>ajaxServlet</servlet-name>
+        <servlet-class>com.vnpay.common.ajaxServlet</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>PaymentLogServlet</servlet-name>
-        <servlet-class>Controller.PaymentLogServlet</servlet-class>
+        <servlet-name>vnpayQuery</servlet-name>
+        <servlet-class>com.vnpay.common.vnpayQuery</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>vnpayRefund</servlet-name>
+        <servlet-class>com.vnpay.common.vnpayRefund</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>VNPaymentServlet</servlet-name>
+        <servlet-class>Controller.VNPaymentServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>VNPayReturnServlet</servlet-name>
+        <servlet-class>Controller.VNPayReturnServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>CancelStockRequestServlet</servlet-name>
@@ -534,12 +557,16 @@
         <url-pattern>/create-payment</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>PaymentCallbackServlet</servlet-name>
-        <url-pattern>/payment-callback</url-pattern>
+        <servlet-name>ajaxServlet</servlet-name>
+        <url-pattern>/vnpayajax/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>PaymentLogServlet</servlet-name>
-        <url-pattern>/payment-logs</url-pattern>
+        <servlet-name>vnpayQuery</servlet-name>
+        <url-pattern>/vnpayquery/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>vnpayRefund</servlet-name>
+        <url-pattern>/vnpayrefund/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>CancelStockRequestServlet</servlet-name>

@@ -526,4 +526,196 @@ public class ASNDAO extends DBContext {
     
     return false;
 }
+
+
+    // Thêm các methods này vào class ASNDAO của bạn
+    /**
+     * Get invoice amount for payment
+     */
+    public double getInvoiceAmount(int asnId, int poId) {
+        String sql = "SELECT ISNULL(SUM(poi.quantity * poi.unit_price), 0) AS total_amount "
+                + "FROM PurchaseOrderItems poi WHERE poi.po_id = ?";
+
+        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, poId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                double amount = rs.getDouble("total_amount");
+                System.out.println("Invoice amount for PO #" + poId + ": " + amount);
+                return amount;
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error getting invoice amount: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return 0.0;
+    }
+
+    /**
+     * Update payment status after VNPay payment
+     */
+    public boolean updatePaymentStatus(Integer asnId, Integer poId, String transactionNo,
+            String txnRef, int userId) {
+        if (asnId == null || poId == null) {
+            System.err.println("ASN ID or PO ID is null!");
+            return false;
+        }
+
+        Connection conn = null;
+        try {
+            conn = getConnection();
+            conn.setAutoCommit(false);
+
+            // 1. Check if Invoice exists, if not create it
+            String checkInvoiceSql = "SELECT invoice_id FROM Invoices "
+                    + "WHERE asn_id = ? AND po_id = ?";
+            int invoiceId = 0;
+
+            try (PreparedStatement ps = conn.prepareStatement(checkInvoiceSql)) {
+                ps.setInt(1, asnId);
+                ps.setInt(2, poId);
+                ResultSet rs = ps.executeQuery();
+
+                if (rs.next()) {
+                    invoiceId = rs.getInt("invoice_id");
+                    System.out.println("Found existing invoice: #" + invoiceId);
+                } else {
+                    // Create invoice if not exists
+                    invoiceId = createInvoiceForPayment(conn, asnId, poId);
+                    System.out.println("Created new invoice: #" + invoiceId);
+                }
+            }
+
+            if (invoiceId == 0) {
+                System.err.println("Failed to get or create invoice!");
+                conn.rollback();
+                return false;
+            }
+
+            // 2. Update Invoice to Paid
+            String updateInvoiceSql = "UPDATE Invoices SET status = 'Paid', "
+                    + "notes = CONCAT(ISNULL(notes, ''), ' | VNPay: ', ?, ' | Ref: ', ?), "
+                    + "updated_at = GETDATE() WHERE invoice_id = ?";
+
+            try (PreparedStatement ps = conn.prepareStatement(updateInvoiceSql)) {
+                ps.setString(1, transactionNo);
+                ps.setString(2, txnRef);
+                ps.setInt(3, invoiceId);
+                int rows = ps.executeUpdate();
+                System.out.println("Updated Invoice: " + rows + " row(s)");
+            }
+
+            // 3. Update PurchaseOrder to Completed
+            String updatePoSql = "UPDATE PurchaseOrders SET status = 'Completed', "
+                    + "updated_at = GETDATE() WHERE po_id = ?";
+
+            try (PreparedStatement ps = conn.prepareStatement(updatePoSql)) {
+                ps.setInt(1, poId);
+                int rows = ps.executeUpdate();
+                System.out.println("Updated PurchaseOrder: " + rows + " row(s)");
+            }
+
+            // 4. Log to SystemLogs
+            String logSql = "INSERT INTO SystemLogs (user_id, action, table_name, record_id, "
+                    + "details, ip_address, log_date) "
+                    + "VALUES (?, 'PAYMENT', 'Invoices', ?, ?, '127.0.0.1', GETDATE())";
+
+            try (PreparedStatement ps = conn.prepareStatement(logSql)) {
+                ps.setInt(1, userId);
+                ps.setInt(2, invoiceId);
+                ps.setString(3, String.format("VNPay payment. TxnNo: %s, Ref: %s, PO: %d",
+                        transactionNo, txnRef, poId));
+                ps.executeUpdate();
+            }
+
+            conn.commit();
+            System.out.println("✅ Payment update committed successfully!");
+            return true;
+
+        } catch (SQLException e) {
+            System.err.println("❌ Error updating payment status:");
+            e.printStackTrace();
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            return false;
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    /**
+     * Create invoice for payment if not exists
+     */
+    private int createInvoiceForPayment(Connection conn, int asnId, int poId)
+            throws SQLException {
+
+        // Get supplier ID
+        String getSupplierSql = "SELECT supplier_id FROM AdvancedShippingNotices WHERE asn_id = ?";
+        int supplierId = 0;
+
+        try (PreparedStatement ps = conn.prepareStatement(getSupplierSql)) {
+            ps.setInt(1, asnId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                supplierId = rs.getInt("supplier_id");
+            }
+        }
+
+        // Calculate total amount
+        String calcSql = "SELECT ISNULL(SUM(quantity * unit_price), 0) AS total "
+                + "FROM PurchaseOrderItems WHERE po_id = ?";
+        double amount = 0.0;
+
+        try (PreparedStatement ps = conn.prepareStatement(calcSql)) {
+            ps.setInt(1, poId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                amount = rs.getDouble("total");
+            }
+        }
+
+        // Insert invoice
+        String insertSql = "INSERT INTO Invoices "
+                + "(po_id, asn_id, supplier_id, invoice_number, invoice_date, "
+                + "amount, status, notes) "
+                + "VALUES (?, ?, ?, ?, GETDATE(), ?, 'Pending', ?)";
+
+        String invoiceNumber = "INV" + System.currentTimeMillis();
+
+        try (PreparedStatement ps = conn.prepareStatement(insertSql,
+                PreparedStatement.RETURN_GENERATED_KEYS)) {
+            ps.setInt(1, poId);
+            ps.setInt(2, asnId);
+            ps.setInt(3, supplierId);
+            ps.setString(4, invoiceNumber);
+            ps.setDouble(5, amount);
+            ps.setString(6, "Auto-created for VNPay payment");
+
+            int rows = ps.executeUpdate();
+            if (rows > 0) {
+                ResultSet rs = ps.getGeneratedKeys();
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        }
+
+        return 0;
+    }
 }

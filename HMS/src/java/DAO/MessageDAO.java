@@ -146,4 +146,43 @@ public class MessageDAO extends DBContext {
         }
         return conversations;
     }
+    
+    public int getUnreadCountFromUser(int receiverId, int senderId) {
+    String sql = "SELECT COUNT(*) FROM Messages " +
+                 "WHERE receiver_id = ? AND sender_id = ? AND is_read = 0";
+    try (Connection conn = getConnection(); 
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, receiverId);
+        ps.setInt(2, senderId);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            int count = rs.getInt(1);
+            System.out.println("Unread count from user " + senderId + " to " + receiverId + ": " + count);
+            return count;
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    return 0;
+}
+
+/**
+ * Đánh dấu tất cả tin nhắn từ một user cụ thể là đã đọc
+ */
+public boolean markMessagesAsReadFromUser(int receiverId, int senderId) {
+    String sql = "UPDATE Messages SET is_read = 1 " +
+                 "WHERE receiver_id = ? AND sender_id = ? AND is_read = 0";
+    try (Connection conn = getConnection(); 
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, receiverId);
+        ps.setInt(2, senderId);
+        int updated = ps.executeUpdate();
+        System.out.println("Marked " + updated + " messages as read from user " + senderId + " to user " + receiverId);
+        return updated >= 0; // Trả về true ngay cả khi không có tin nhắn nào cần update
+    } catch (Exception e) {
+        e.printStackTrace();
+        return false;
+    }
+}
+    
 }

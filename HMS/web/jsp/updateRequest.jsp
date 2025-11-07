@@ -283,6 +283,7 @@
         }
     </style>
 </head>
+<%@ include file="/admin/header.jsp" %>
 <body>
     <div class="container">
         <div class="header">
@@ -362,4 +363,6 @@
         </div>
     </div>
 </body>
+<%@ include file="/admin/footer.jsp" %>
+
 </html>

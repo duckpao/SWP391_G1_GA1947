@@ -23,7 +23,75 @@
             color: #374151;
         }
 
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar styling */
+        .sidebar {
+            width: 280px;
+            background: white;
+            color: #1f2937;
+            padding: 30px 20px;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.08);
+            overflow-y: auto;
+            border-right: 1px solid #e5e7eb;
+        }
+
+        .sidebar-header {
+            margin-bottom: 30px;
+        }
+
+        .sidebar-header h4 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #1f2937;
+        }
+
+        .sidebar-header hr {
+            border: none;
+            border-top: 1px solid #e5e7eb;
+            margin: 15px 0;
+        }
+
+        .nav-link {
+            color: #6b7280;
+            text-decoration: none;
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin: 6px 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .nav-link:hover {
+            background: #f3f4f6;
+            color: #3b82f6;
+            transform: translateX(4px);
+        }
+
+        .nav-link.active {
+            background: #f3f4f6;
+            color: #3b82f6;
+        }
+
+        .nav-divider {
+            border: none;
+            border-top: 1px solid #e5e7eb;
+            margin: 15px 0;
+        }
+
         .main-content {
+            flex: 1;
             padding: 40px;
             overflow-y: auto;
             background: #f9fafb;
@@ -49,10 +117,6 @@
             margin: 0;
         }
 
-        .page-header h2 i {
-            color: #3b82f6;
-        }
-
         .header-actions {
             display: flex;
             gap: 12px;
@@ -60,7 +124,7 @@
         }
 
         .btn {
-            padding: 10px 20px;
+            padding: 10px 16px;
             border: none;
             border-radius: 8px;
             font-weight: 600;
@@ -69,7 +133,7 @@
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             font-size: 14px;
         }
 
@@ -80,8 +144,6 @@
 
         .btn-success:hover {
             background: #059669;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
         }
 
         .btn-secondary {
@@ -91,7 +153,15 @@
 
         .btn-secondary:hover {
             background: #4b5563;
-            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
         }
 
         .btn-sm {
@@ -203,10 +273,10 @@
         }
 
         .badge {
-            background: #3b82f6;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
+            background: #e5e7eb;
+            color: #374151;
+            padding: 6px 12px;
+            border-radius: 6px;
             font-size: 12px;
             font-weight: 600;
         }
@@ -217,12 +287,13 @@
 
         /* Alert Info Box */
         .alert-info-box {
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            background: #dbeafe;
             border-left: 5px solid #3b82f6;
             border-radius: 12px;
             padding: 20px;
             margin-bottom: 30px;
             box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+            color: #1e40af;
         }
 
         .alert-info-box strong {
@@ -230,7 +301,7 @@
         }
 
         .alert-info-box small {
-            color: #6b7280;
+            color: #1e40af;
             display: block;
             margin-top: 8px;
         }
@@ -269,9 +340,6 @@
             text-align: left;
             font-weight: 600;
             color: #374151;
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
 
         table td {
@@ -334,8 +402,8 @@
         .badge-secondary {
             background: #6b7280;
             color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
+            padding: 6px 12px;
+            border-radius: 6px;
             font-size: 12px;
             font-weight: 600;
         }
@@ -386,8 +454,35 @@
             color: #9ca3af;
         }
 
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
+            .dashboard-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                padding: 20px;
+            }
+
             .main-content {
                 padding: 20px;
             }
@@ -414,15 +509,6 @@
                 grid-template-columns: 1fr;
             }
 
-            .stat-card {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .stat-icon {
-                margin-top: 12px;
-            }
-
             table {
                 font-size: 12px;
             }
@@ -440,238 +526,281 @@
 <body>
     <%@ include file="/admin/header.jsp" %>
     
-    <div class="main-content">
-        <!-- Page Header -->
-        <div class="page-header">
-            <h2>
-                <i class="bi bi-exclamation-triangle"></i> 
-                Stock Alerts & Inventory Status
-            </h2>
-            <div class="header-actions">
-                <a href="${pageContext.request.contextPath}/create-stock" class="btn btn-success">
-                    <i class="bi bi-plus-circle"></i> Create Stock Request
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h4><i class="bi bi-hospital"></i> Manager</h4>
+                <hr class="sidebar-divider">
+            </div>
+
+            <nav>
+                <a class="nav-link" href="${pageContext.request.contextPath}/manager-dashboard">
+                    <i class="bi bi-speedometer2"></i> Dashboard
                 </a>
-                <a href="${pageContext.request.contextPath}/manager-dashboard" class="btn btn-secondary">
-                    <i class="bi bi-arrow-left"></i> Back to Dashboard
+                <a class="nav-link" href="${pageContext.request.contextPath}/create-stock">
+                    <i class="bi bi-plus-circle"></i> New Stock Request
                 </a>
-            </div>
+                <a class="nav-link" href="${pageContext.request.contextPath}/cancelled-tasks">
+                    <i class="bi bi-ban"></i> Cancelled Orders
+                </a>
+                
+                <hr class="nav-divider">
+                
+                <!-- Reports Section -->
+                <a class="nav-link" href="${pageContext.request.contextPath}/inventory-report">
+                    <i class="bi bi-boxes"></i> Inventory Report
+                </a>
+                <a class="nav-link" href="${pageContext.request.contextPath}/expiry-report?days=30">
+                    <i class="bi bi-calendar-times"></i> Expiry Report
+                </a>
+                <a class="nav-link active" href="${pageContext.request.contextPath}/stock-alerts">
+                    <i class="bi bi-exclamation-triangle"></i> Stock Alerts
+                </a>
+                
+                <hr class="nav-divider">
+                
+                <!-- Management Section -->
+                <a class="nav-link" href="${pageContext.request.contextPath}/tasks/assign">
+                    <i class="bi bi-pencil"></i> Assign Tasks
+                </a>
+                <a class="nav-link" href="${pageContext.request.contextPath}/manage/transit">
+                    <i class="bi bi-truck"></i> Transit Orders
+                </a>
+            </nav>
         </div>
 
-        <!-- Statistics Cards -->
-        <div class="stats-grid">
-            <div class="stat-card stat-critical">
-                <div class="stat-content">
-                    <div class="stat-info">
-                        <h6>Critical (Out of Stock)</h6>
-                        <h3>
-                            <c:set var="criticalCount" value="0"/>
-                            <c:forEach items="${alerts}" var="alert">
-                                <c:if test="${alert.alertLevel == 'Critical'}">
-                                    <c:set var="criticalCount" value="${criticalCount + 1}"/>
-                                </c:if>
-                            </c:forEach>
-                            ${criticalCount}
-                        </h3>
-                    </div>
-                    <div class="stat-icon">
-                        <i class="bi bi-x-circle"></i>
-                    </div>
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h2>
+                    <i class="bi bi-exclamation-triangle"></i> 
+                    Stock Alerts & Inventory Status
+                </h2>
+                <div class="header-actions">
+                    <a href="${pageContext.request.contextPath}/create-stock" class="btn btn-success">
+                        <i class="bi bi-plus-circle"></i> Create Stock Request
+                    </a>
                 </div>
             </div>
-            
-            <div class="stat-card stat-high">
-                <div class="stat-content">
-                    <div class="stat-info">
-                        <h6>High Alert</h6>
-                        <h3>
-                            <c:set var="highCount" value="0"/>
-                            <c:forEach items="${alerts}" var="alert">
-                                <c:if test="${alert.alertLevel == 'High'}">
-                                    <c:set var="highCount" value="${highCount + 1}"/>
-                                </c:if>
-                            </c:forEach>
-                            ${highCount}
-                        </h3>
-                    </div>
-                    <div class="stat-icon">
-                        <i class="bi bi-exclamation-circle"></i>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="stat-card stat-medium">
-                <div class="stat-content">
-                    <div class="stat-info">
-                        <h6>Medium Alert</h6>
-                        <h3>
-                            <c:set var="mediumCount" value="0"/>
-                            <c:forEach items="${alerts}" var="alert">
-                                <c:if test="${alert.alertLevel == 'Medium'}">
-                                    <c:set var="mediumCount" value="${mediumCount + 1}"/>
-                                </c:if>
-                            </c:forEach>
-                            ${mediumCount}
-                        </h3>
-                    </div>
-                    <div class="stat-icon">
-                        <i class="bi bi-info-circle"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Alert Threshold Info -->
-        <div class="alert-info-box">
-            <i class="bi bi-info-circle"></i>
-            <strong>Alert Threshold:</strong> Medicines with quantity ≤ <strong>${threshold}</strong> units
-            <br>
-            <small>
-                <i class="bi bi-circle-fill text-danger"></i> <strong>Critical:</strong> Out of stock (0 units) | 
-                <i class="bi bi-circle-fill text-warning"></i> <strong>High:</strong> Below ${threshold / 2} units | 
-                <i class="bi bi-circle-fill" style="color: #fbbf24;"></i> <strong>Medium:</strong> Below ${threshold} units
-            </small>
-        </div>
-
-        <!-- Stock Alerts Table -->
-        <div class="dashboard-card">
-            <div class="card-header">
-                <h5>
-                    <i class="bi bi-list"></i> Low Stock Medicines 
-                    <span class="badge">${alerts.size()}</span>
-                </h5>
-            </div>
-            <div class="card-body">
-                <c:if test="${empty alerts}">
-                    <div class="alert-success">
-                        <i class="bi bi-check-circle"></i> 
-                        <div>
-                            <strong>All Good!</strong> No stock alerts at this time. All medicines are above the threshold.
+            <!-- Statistics Cards -->
+            <div class="stats-grid">
+                <div class="stat-card stat-critical">
+                    <div class="stat-content">
+                        <div class="stat-info">
+                            <h6>Critical (Out of Stock)</h6>
+                            <h3>
+                                <c:set var="criticalCount" value="0"/>
+                                <c:forEach items="${alerts}" var="alert">
+                                    <c:if test="${alert.alertLevel == 'Critical'}">
+                                        <c:set var="criticalCount" value="${criticalCount + 1}"/>
+                                    </c:if>
+                                </c:forEach>
+                                ${criticalCount}
+                            </h3>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="bi bi-x-circle"></i>
                         </div>
                     </div>
-                </c:if>
-
-                <c:if test="${not empty alerts}">
-                    <div class="table-responsive">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Medicine Code</th>
-                                    <th>Medicine Name</th>
-                                    <th>Category</th>
-                                    <th>Current Quantity</th>
-                                    <th>Threshold</th>
-                                    <th>Alert Level</th>
-                                    <th>Nearest Expiry</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
+                </div>
+                
+                <div class="stat-card stat-high">
+                    <div class="stat-content">
+                        <div class="stat-info">
+                            <h6>High Alert</h6>
+                            <h3>
+                                <c:set var="highCount" value="0"/>
                                 <c:forEach items="${alerts}" var="alert">
-                                    <tr class="${alert.alertLevel == 'Critical' ? 'critical-row' : 
-                                                 alert.alertLevel == 'High' ? 'highlight-row' : ''}">
-                                        <td><strong>${alert.medicineCode}</strong></td>
-                                        <td>
-                                            <strong>${alert.medicineName}</strong>
-                                            <c:if test="${alert.currentQuantity == 0}">
-                                                <br><small class="text-danger">⚠️ OUT OF STOCK</small>
-                                            </c:if>
-                                        </td>
-                                        <td>
-                                            <span class="badge-secondary">${alert.category}</span>
-                                        </td>
-                                        <td>
-                                            <span class="${alert.currentQuantity == 0 ? 'quantity-critical' : 
-                                                           alert.currentQuantity < threshold / 2 ? 'quantity-low' : 'quantity-warning'}">
-                                                ${alert.currentQuantity} units
-                                            </span>
-                                        </td>
-                                        <td>${alert.threshold} units</td>
-                                        <td>
-                                            <span class="alert-badge ${
-                                                  alert.alertLevel == 'Critical' ? 'alert-critical' : 
-                                                  alert.alertLevel == 'High' ? 'alert-high' : 'alert-medium'}">
-                                                ${alert.alertLevel}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <c:choose>
-                                                <c:when test="${not empty alert.nearestExpiry}">
-                                                    <i class="bi bi-calendar-alt"></i> ${alert.nearestExpiry}
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <span class="text-muted">No batches</span>
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </td>
-                                        <td>
-                                            <a href="${pageContext.request.contextPath}/create-stock?medicineCode=${alert.medicineCode}" 
-                                               class="btn btn-success btn-sm">
-                                                <i class="bi bi-plus"></i> Order Now
-                                            </a>
-                                        </td>
-                                    </tr>
+                                    <c:if test="${alert.alertLevel == 'High'}">
+                                        <c:set var="highCount" value="${highCount + 1}"/>
+                                    </c:if>
                                 </c:forEach>
-                            </tbody>
-                        </table>
+                                ${highCount}
+                            </h3>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="bi bi-exclamation-circle"></i>
+                        </div>
                     </div>
-
-                    <!-- Quick Actions -->
-                    <div class="quick-actions">
-                        <a href="${pageContext.request.contextPath}/create-stock" class="btn btn-success">
-                            <i class="bi bi-cart-plus"></i> Create Bulk Stock Request
-                        </a>
-                        <a href="${pageContext.request.contextPath}/manager-dashboard" class="btn btn-secondary">
-                            <i class="bi bi-boxes"></i> View All Purchase Orders
-                        </a>
+                </div>
+                
+                <div class="stat-card stat-medium">
+                    <div class="stat-content">
+                        <div class="stat-info">
+                            <h6>Medium Alert</h6>
+                            <h3>
+                                <c:set var="mediumCount" value="0"/>
+                                <c:forEach items="${alerts}" var="alert">
+                                    <c:if test="${alert.alertLevel == 'Medium'}">
+                                        <c:set var="mediumCount" value="${mediumCount + 1}"/>
+                                    </c:if>
+                                </c:forEach>
+                                ${mediumCount}
+                            </h3>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="bi bi-info-circle"></i>
+                        </div>
                     </div>
-                </c:if>
+                </div>
             </div>
-        </div>
 
-        <!-- Recommendations Card -->
-        <div class="dashboard-card">
-            <div class="card-header">
-                <h5><i class="bi bi-lightbulb"></i> Recommendations & Actions</h5>
+            <!-- Alert Threshold Info -->
+            <div class="alert-info-box">
+                <i class="bi bi-info-circle"></i>
+                <strong>Alert Threshold:</strong> Medicines with quantity ≤ <strong>${threshold}</strong> units
+                <br>
+                <small>
+                    <i class="bi bi-circle-fill text-danger"></i> <strong>Critical:</strong> Out of stock (0 units) | 
+                    <i class="bi bi-circle-fill text-warning"></i> <strong>High:</strong> Below ${threshold / 2} units | 
+                    <i class="bi bi-circle-fill" style="color: #fbbf24;"></i> <strong>Medium:</strong> Below ${threshold} units
+                </small>
             </div>
-            <div class="card-body">
-                <ul class="recommendations-list">
-                    <c:if test="${criticalCount > 0}">
-                        <li class="text-danger">
-                            <i class="bi bi-exclamation-triangle-fill"></i>
-                            <div>
-                                <strong>Urgent:</strong> ${criticalCount} medicine(s) are completely out of stock. 
-                                Create purchase orders immediately to prevent service disruption.
-                            </div>
-                        </li>
-                    </c:if>
-                    <c:if test="${highCount > 0}">
-                        <li class="text-warning">
-                            <i class="bi bi-exclamation-circle-fill"></i>
-                            <div>
-                                <strong>High Priority:</strong> ${highCount} medicine(s) are critically low. 
-                                Consider expedited ordering.
-                            </div>
-                        </li>
-                    </c:if>
-                    <c:if test="${mediumCount > 0}">
-                        <li style="color: #92400e;">
-                            <i class="bi bi-info-circle-fill"></i>
-                            <div>
-                                <strong>Monitor:</strong> ${mediumCount} medicine(s) are below threshold. 
-                                Plan restocking in the near future.
-                            </div>
-                        </li>
-                    </c:if>
+
+            <!-- Stock Alerts Table -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h5>
+                        <i class="bi bi-list"></i> Low Stock Medicines 
+                        <span class="badge">${alerts.size()}</span>
+                    </h5>
+                </div>
+                <div class="card-body">
                     <c:if test="${empty alerts}">
-                        <li class="text-success">
-                            <i class="bi bi-check-circle-fill"></i>
+                        <div class="alert-success">
+                            <i class="bi bi-check-circle"></i> 
                             <div>
-                                <strong>Status:</strong> All medicines are adequately stocked. 
-                                Continue regular monitoring.
+                                <strong>All Good!</strong> No stock alerts at this time. All medicines are above the threshold.
                             </div>
-                        </li>
+                        </div>
                     </c:if>
-                </ul>
+
+                    <c:if test="${not empty alerts}">
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Medicine Code</th>
+                                        <th>Medicine Name</th>
+                                        <th>Category</th>
+                                        <th>Current Quantity</th>
+                                        <th>Threshold</th>
+                                        <th>Alert Level</th>
+                                        <th>Nearest Expiry</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <c:forEach items="${alerts}" var="alert">
+                                        <tr class="${alert.alertLevel == 'Critical' ? 'critical-row' : 
+                                                     alert.alertLevel == 'High' ? 'highlight-row' : ''}">
+                                            <td><strong>${alert.medicineCode}</strong></td>
+                                            <td>
+                                                <strong>${alert.medicineName}</strong>
+                                                <c:if test="${alert.currentQuantity == 0}">
+                                                    <br><small class="text-danger">⚠️ OUT OF STOCK</small>
+                                                </c:if>
+                                            </td>
+                                            <td>
+                                                <span class="badge-secondary">${alert.category}</span>
+                                            </td>
+                                            <td>
+                                                <span class="${alert.currentQuantity == 0 ? 'quantity-critical' : 
+                                                               alert.currentQuantity < threshold / 2 ? 'quantity-low' : 'quantity-warning'}">
+                                                    ${alert.currentQuantity} units
+                                                </span>
+                                            </td>
+                                            <td>${alert.threshold} units</td>
+                                            <td>
+                                                <span class="alert-badge ${
+                                                      alert.alertLevel == 'Critical' ? 'alert-critical' : 
+                                                      alert.alertLevel == 'High' ? 'alert-high' : 'alert-medium'}">
+                                                    ${alert.alertLevel}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <c:choose>
+                                                    <c:when test="${not empty alert.nearestExpiry}">
+                                                        <i class="bi bi-calendar"></i> ${alert.nearestExpiry}
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <span class="text-muted">No batches</span>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </td>
+                                            <td>
+                                                <a href="${pageContext.request.contextPath}/create-stock?medicineCode=${alert.medicineCode}" 
+                                                   class="btn btn-success btn-sm">
+                                                    <i class="bi bi-plus"></i> Order Now
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </c:forEach>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="quick-actions">
+                            <a href="${pageContext.request.contextPath}/create-stock" class="btn btn-success">
+                                <i class="bi bi-cart-plus"></i> Create Bulk Stock Request
+                            </a>
+                            <a href="${pageContext.request.contextPath}/manager-dashboard" class="btn btn-secondary">
+                                <i class="bi bi-boxes"></i> View All Purchase Orders
+                            </a>
+                        </div>
+                    </c:if>
+                </div>
+            </div>
+
+            <!-- Recommendations Card -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h5><i class="bi bi-lightbulb"></i> Recommendations & Actions</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="recommendations-list">
+                        <c:if test="${criticalCount > 0}">
+                            <li class="text-danger">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                <div>
+                                    <strong>Urgent:</strong> ${criticalCount} medicine(s) are completely out of stock. 
+                                    Create purchase orders immediately to prevent service disruption.
+                                </div>
+                            </li>
+                        </c:if>
+                        <c:if test="${highCount > 0}">
+                            <li class="text-warning">
+                                <i class="bi bi-exclamation-circle-fill"></i>
+                                <div>
+                                    <strong>High Priority:</strong> ${highCount} medicine(s) are critically low. 
+                                    Consider expedited ordering.
+                                </div>
+                            </li>
+                        </c:if>
+                        <c:if test="${mediumCount > 0}">
+                            <li style="color: #92400e;">
+                                <i class="bi bi-info-circle-fill"></i>
+                                <div>
+                                    <strong>Monitor:</strong> ${mediumCount} medicine(s) are below threshold. 
+                                    Plan restocking in the near future.
+                                </div>
+                            </li>
+                        </c:if>
+                        <c:if test="${empty alerts}">
+                            <li class="text-success">
+                                <i class="bi bi-check-circle-fill"></i>
+                                <div>
+                                    <strong>Status:</strong> All medicines are adequately stocked. 
+                                    Continue regular monitoring.
+                                </div>
+                            </li>
+                        </c:if>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>

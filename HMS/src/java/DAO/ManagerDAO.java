@@ -850,4 +850,64 @@ public List<PurchaseOrderItem> getPurchaseOrderItems(int poId) {
     }
     return items;
 }
+public List<PurchaseOrder> getAllPurchaseOrders() {
+    List<PurchaseOrder> orders = new ArrayList<>();
+    String query = "SELECT po.po_id, po.manager_id, po.supplier_id, po.status, " +
+                  "po.order_date, po.expected_delivery_date, po.notes, " +
+                  "s.name as supplier_name, u.username as manager_name " +
+                  "FROM PurchaseOrders po " +
+                  "LEFT JOIN Suppliers s ON po.supplier_id = s.supplier_id " +
+                  "LEFT JOIN Users u ON po.manager_id = u.user_id " +
+                  "ORDER BY po.order_date DESC";
+    
+    try (PreparedStatement ps = connection.prepareStatement(query);
+         ResultSet rs = ps.executeQuery()) {
+        while (rs.next()) {
+            PurchaseOrder po = new PurchaseOrder();
+            po.setPoId(rs.getInt("po_id"));
+            po.setManagerId(rs.getInt("manager_id"));
+            po.setSupplierId(rs.getInt("supplier_id"));
+            po.setStatus(rs.getString("status"));
+            po.setOrderDate(rs.getTimestamp("order_date"));
+            po.setExpectedDeliveryDate(rs.getDate("expected_delivery_date"));
+            po.setNotes(rs.getString("notes"));
+            po.setSupplierName(rs.getString("supplier_name"));
+            po.setManagerName(rs.getString("manager_name"));
+            orders.add(po);
+        }
+        System.out.println("Loaded " + orders.size() + " purchase orders (all statuses).");
+    } catch (SQLException e) {
+        System.err.println("Error getting all purchase orders: " + e.getMessage());
+        e.printStackTrace();
+    }
+    return orders;
+}
+
+/**
+ * Lấy tất cả Staff (Auditor + Pharmacist) để assign tasks
+ * Thay thế getAllAuditors() - bây giờ bao gồm cả Pharmacist
+ */
+public List<Manager> getAllStaff() {
+    List<Manager> staffList = new ArrayList<>();
+    String query = "SELECT * FROM Users " +
+                  "WHERE role IN ('Auditor', 'Pharmacist') AND is_active = 1 " +
+                  "ORDER BY role, username";
+    try (PreparedStatement ps = connection.prepareStatement(query);
+         ResultSet rs = ps.executeQuery()) {
+        while (rs.next()) {
+            Manager staff = new Manager();
+            staff.setUserId(rs.getInt("user_id"));
+            staff.setUsername(rs.getString("username"));
+            staff.setEmail(rs.getString("email"));
+            staff.setPhone(rs.getString("phone"));
+            staff.setRole(rs.getString("role")); // "Auditor" hoặc "Pharmacist"
+            staffList.add(staff);
+        }
+        System.out.println("Loaded " + staffList.size() + " staff members (Auditor + Pharmacist).");
+    } catch (SQLException e) {
+        System.err.println("Error getting staff list: " + e.getMessage());
+        e.printStackTrace();
+    }
+    return staffList;
+}
 }

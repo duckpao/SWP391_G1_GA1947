@@ -5,10 +5,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Assign Auditor Tasks - Hospital System</title>
+    <title>Assign Staff Tasks - Hospital System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .dashboard-card {
             border-radius: 10px;
@@ -37,6 +36,15 @@
             display: inline-block;
             width: 180px;
         }
+        .role-badge {
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.75rem;
+            margin-left: 5px;
+            font-weight: 600;
+        }
+        .role-auditor { background-color: #0dcaf0; color: white; }
+        .role-pharmacist { background-color: #198754; color: white; }
     </style>
 </head>
 <body>
@@ -51,7 +59,7 @@
         </c:if>
 
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2><i class="fas fa-tasks"></i> Assign Auditor Tasks</h2>
+            <h2><i class="fas fa-tasks"></i> Assign Staff Tasks</h2>
             <a href="${pageContext.request.contextPath}/manager-dashboard" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Back to Dashboard
             </a>
@@ -80,12 +88,14 @@
                                             data-notes="${po.notes}">
                                         PO #${po.poId} - ${po.supplierName} | 
                                         Order: ${po.orderDate} | 
-                                        Delivery: ${po.expectedDeliveryDate} | 
                                         Status: ${po.status}
-                                        <c:if test="${not empty po.notes}"> | Notes: ${po.notes}</c:if>
+                                        <c:if test="${not empty po.notes}"> | ${po.notes}</c:if>
                                     </option>
                                 </c:forEach>
                             </select>
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle"></i> Hiển thị tất cả Purchase Orders (mọi trạng thái)
+                            </small>
                         </div>
                     </div>
 
@@ -121,16 +131,28 @@
                     <div class="row g-3 mt-2">
                         <div class="col-md-4">
                             <label class="form-label fw-bold">
-                                <i class="fas fa-user-shield"></i> Auditor *
+                                <i class="fas fa-users"></i> Assign to Staff *
                             </label>
                             <select class="form-select" name="auditorId" required>
-                                <option value="">-- Select Auditor --</option>
-                                <c:forEach items="${auditors}" var="a">
-                                    <option value="${a.userId}">
-                                        ${a.username} - ${a.email}
+                                <option value="">-- Select Staff Member --</option>
+                                <c:forEach items="${auditors}" var="staff">
+                                    <option value="${staff.userId}">
+                                        ${staff.username} - ${staff.email}
+                                        <c:choose>
+                                            <c:when test="${staff.role == 'Auditor'}">
+                                                [Auditor]
+                                            </c:when>
+                                            <c:when test="${staff.role == 'Pharmacist'}">
+                                                [Pharmacist]
+                                            </c:when>
+                                        </c:choose>
                                     </option>
                                 </c:forEach>
                             </select>
+                            <small class="text-muted">
+                                <i class="fas fa-user-shield"></i> Auditor | 
+                                <i class="fas fa-pills"></i> Pharmacist
+                            </small>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label fw-bold">
@@ -184,7 +206,7 @@
                                 <tr>
                                     <th>Task ID</th>
                                     <th>Purchase Order</th>
-                                    <th>Auditor</th>
+                                    <th>Staff Member</th>
                                     <th>Task Type</th>
                                     <th>Deadline</th>
                                     <th>Status</th>
@@ -208,7 +230,9 @@
                                                 </c:otherwise>
                                             </c:choose>
                                         </td>
-                                        <td><i class="fas fa-user-shield"></i> ${task.staffName}</td>
+                                        <td>
+                                            <i class="fas fa-user"></i> ${task.staffName}
+                                        </td>
                                         <td>
                                             <c:choose>
                                                 <c:when test="${task.taskType == 'stock_in'}">📦 Stock In</c:when>
@@ -370,13 +394,15 @@
                     if (viewTask) {
                         document.getElementById('viewModalBody').innerHTML = viewTask.innerHTML;
                     } else {
+                        console.error('View task element not found');
                         document.getElementById('viewModalBody').innerHTML = 
-                            '<div class="alert alert-danger">Error loading task details.</div>';
+                            '<div class="alert alert-danger">Error loading task details. Please try again.</div>';
                     }
                 })
                 .catch(error => {
+                    console.error('Error:', error);
                     document.getElementById('viewModalBody').innerHTML = 
-                        '<div class="alert alert-danger">Error loading task details.</div>';
+                        '<div class="alert alert-danger">Network error. Please check your connection.</div>';
                 });
         }
 
@@ -395,13 +421,15 @@
                     if (editForm) {
                         document.getElementById('editModalBody').innerHTML = editForm.innerHTML;
                     } else {
+                        console.error('Edit form element not found');
                         document.getElementById('editModalBody').innerHTML = 
                             '<div class="alert alert-danger">Error loading task for editing.</div>';
                     }
                 })
                 .catch(error => {
+                    console.error('Error:', error);
                     document.getElementById('editModalBody').innerHTML = 
-                        '<div class="alert alert-danger">Error loading task details.</div>';
+                        '<div class="alert alert-danger">Network error. Please try again.</div>';
                 });
         }
 
@@ -456,8 +484,8 @@
                 </div>
                 <div class="col-md-6">
                     <div class="info-row">
-                        <span class="info-label">Assigned Auditor:</span>
-                        <span><i class="fas fa-user-shield"></i> ${viewTask.staffName}</span>
+                        <span class="info-label">Assigned Staff:</span>
+                        <span><i class="fas fa-user"></i> ${viewTask.staffName}</span>
                     </div>
                     <div class="info-row">
                         <span class="info-label">Deadline:</span>
@@ -490,8 +518,10 @@
                         <table class="table table-sm table-bordered">
                             <thead class="table-light">
                                 <tr>
-                                    <th>Medicine ID</th>
+                                    <th>Medicine Code</th>
+                                    <th>Medicine Name</th>
                                     <th>Quantity</th>
+                                    <th>Unit Price</th>
                                     <th>Priority</th>
                                     <th>Notes</th>
                                 </tr>
@@ -499,18 +529,42 @@
                             <tbody>
                                 <c:forEach items="${poItems}" var="item">
                                     <tr>
-                                        <td>#${item.medicineId}</td>
-                                        <td>${item.quantity} units</td>
+                                        <td><code>${item.medicineCode}</code></td>
+                                        <td>
+                                            <strong>${item.medicineName}</strong>
+                                            <c:if test="${not empty item.medicineStrength}">
+                                                <br><small class="text-muted">
+                                                    ${item.medicineStrength}
+                                                    <c:if test="${not empty item.medicineDosageForm}">
+                                                        - ${item.medicineDosageForm}
+                                                    </c:if>
+                                                </small>
+                                            </c:if>
+                                            <c:if test="${not empty item.medicineManufacturer}">
+                                                <br><small class="text-muted">Manufacturer: ${item.medicineManufacturer}</small>
+                                            </c:if>
+                                        </td>
+                                        <td>${item.quantity} <c:if test="${not empty item.unit}">${item.unit}</c:if></td>
                                         <td>
                                             <c:choose>
-                                                <c:when test="${item.priority == 'High'}">
-                                                    <span class="badge bg-danger">High</span>
-                                                </c:when>
-                                                <c:when test="${item.priority == 'Medium'}">
-                                                    <span class="badge bg-warning text-dark">Medium</span>
+                                                <c:when test="${item.unitPrice > 0}">
+                                                    ${item.unitPrice} VNĐ
                                                 </c:when>
                                                 <c:otherwise>
-                                                    <span class="badge bg-success">Low</span>
+                                                    <span class="text-muted">N/A</span>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </td>
+                                        <td>
+                                            <c:choose>
+                                                <c:when test="${item.priority == 'High' || item.priority == 'Critical'}">
+                                                    <span class="badge bg-danger">${item.priority}</span>
+                                                </c:when>
+                                                <c:when test="${item.priority == 'Medium'}">
+                                                    <span class="badge bg-warning text-dark">${item.priority}</span>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span class="badge bg-success">${item.priority}</span>
                                                 </c:otherwise>
                                             </c:choose>
                                         </td>
@@ -529,11 +583,15 @@
             <input type="hidden" name="taskId" value="${viewTask.taskId}">
             
             <div class="mb-3">
-                <label class="form-label fw-bold">Auditor</label>
+                <label class="form-label fw-bold">Staff Member</label>
                 <select class="form-select" name="auditorId" required>
-                    <c:forEach items="${auditors}" var="a">
-                        <option value="${a.userId}" ${a.userId == viewTask.staffId ? 'selected' : ''}>
-                            ${a.username} - ${a.email}
+                    <c:forEach items="${auditors}" var="staff">
+                        <option value="${staff.userId}" ${staff.userId == viewTask.staffId ? 'selected' : ''}>
+                            ${staff.username} - ${staff.email}
+                            <c:choose>
+                                <c:when test="${staff.role == 'Auditor'}">[Auditor]</c:when>
+                                <c:when test="${staff.role == 'Pharmacist'}">[Pharmacist]</c:when>
+                            </c:choose>
                         </option>
                     </c:forEach>
                 </select>

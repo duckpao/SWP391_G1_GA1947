@@ -131,7 +131,7 @@
             padding: 20px;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
-            overflow: hidden;
+            overflow: visible;
             animation: fadeInUp 0.4s ease-out backwards;
         }
 
@@ -145,6 +145,8 @@
             background: linear-gradient(90deg, transparent 0%, rgba(44, 95, 141, 0.02) 100%);
             opacity: 0;
             transition: opacity 0.3s ease;
+            pointer-events: none;
+            z-index: 0;
         }
 
         .notification-item:hover::before {
@@ -278,10 +280,12 @@
         
         /* Action Buttons */
         .notification-actions {
-            opacity: 0;
+            opacity: 1;
             transition: opacity 0.3s ease;
             display: flex;
             gap: 6px;
+            position: relative;
+            z-index: 10;
         }
         
         .notification-item:hover .notification-actions {
@@ -297,6 +301,8 @@
             font-size: 0.9rem;
             transition: all 0.2s ease;
             cursor: pointer;
+            position: relative;
+            z-index: 10;
         }
 
         .action-btn:hover {
@@ -308,6 +314,7 @@
         .action-btn.btn-check {
             color: var(--success);
             border-color: #bbf7d0;
+            pointer-events: auto !important;
         }
 
         .action-btn.btn-check:hover {
@@ -318,6 +325,7 @@
         .action-btn.btn-delete {
             color: var(--danger);
             border-color: #fecaca;
+            pointer-events: auto !important;
         }
 
         .action-btn.btn-delete:hover {
@@ -547,6 +555,8 @@
         }
     </style>
 </head>
+<%@ include file="/admin/header.jsp" %>
+
 <body>
     <div class="container mt-4 notification-container">
         <div class="notification-header">
@@ -558,10 +568,6 @@
                         <span class="unread-count-badge" id="unreadBadge">${unreadCount}</span>
                     </c:if>
                 </h2>
-                <div class="ws-indicator" id="wsIndicator">
-                    <span class="dot"></span>
-                    <span class="text">Đang kết nối...</span>
-                </div>
             </div>
             <div class="d-flex justify-content-end gap-2 flex-wrap">
                 <c:if test="${unreadCount > 0}">
@@ -629,25 +635,25 @@
             <c:otherwise>
                 <div id="notificationList">
                     <c:forEach var="notif" items="${notifications}">
-                        <div class="notification-item ${notif.isRead() ? '' : 'unread'} priority-${notif.getPriority()}" 
-                             data-id="${notif.getNotificationId()}" 
-                             data-read="${notif.isRead()}">
+                        <div class="notification-item ${notif.read ? '' : 'unread'} priority-${notif.priority}" 
+                             data-id="${notif.notificationId}" 
+                             data-read="${notif.read}">
                             <div class="d-flex align-items-start gap-3">
-                                <div class="notification-icon type-${notif.getNotificationType()}">
+                                <div class="notification-icon type-${notif.notificationType}">
                                     <c:choose>
-                                        <c:when test="${notif.getNotificationType() == 'info'}">
+                                        <c:when test="${notif.notificationType == 'info'}">
                                             <i class="fas fa-info-circle"></i>
                                         </c:when>
-                                        <c:when test="${notif.getNotificationType() == 'warning'}">
+                                        <c:when test="${notif.notificationType == 'warning'}">
                                             <i class="fas fa-exclamation-triangle"></i>
                                         </c:when>
-                                        <c:when test="${notif.getNotificationType() == 'success'}">
+                                        <c:when test="${notif.notificationType == 'success'}">
                                             <i class="fas fa-check-circle"></i>
                                         </c:when>
-                                        <c:when test="${notif.getNotificationType() == 'error'}">
+                                        <c:when test="${notif.notificationType == 'error'}">
                                             <i class="fas fa-times-circle"></i>
                                         </c:when>
-                                        <c:when test="${notif.getNotificationType() == 'alert'}">
+                                        <c:when test="${notif.notificationType == 'alert'}">
                                             <i class="fas fa-bell"></i>
                                         </c:when>
                                         <c:otherwise>
@@ -656,50 +662,52 @@
                                     </c:choose>
                                 </div>
                                 
-                                <div class="flex-grow-1">
+                                <div class="flex-grow-1" style="position: relative; z-index: 1;">
                                     <div class="d-flex justify-content-between align-items-start mb-2">
                                         <div>
                                             <h5 class="notification-title">
-                                                ${notif.getTitle()}
-                                                <c:if test="${!notif.isRead()}">
+                                                ${notif.title}
+                                                <c:if test="${!notif.read}">
                                                     <span class="badge-unread ms-2">Mới</span>
                                                 </c:if>
-                                                <c:if test="${notif.getPriority() == 'urgent'}">
+                                                <c:if test="${notif.priority == 'urgent'}">
                                                     <span class="badge-priority badge-urgent ms-2">Khẩn cấp</span>
                                                 </c:if>
-                                                <c:if test="${notif.getPriority() == 'high'}">
+                                                <c:if test="${notif.priority == 'high'}">
                                                     <span class="badge-priority badge-high ms-2">Ưu tiên cao</span>
                                                 </c:if>
                                             </h5>
                                         </div>
                                         <div class="notification-actions">
-                                            <c:if test="${!notif.isRead()}">
+                                            <c:if test="${!notif.read}">
                                                 <button class="action-btn btn-check" 
-                                                        onclick="markAsRead(${notif.getNotificationId()})"
-                                                        title="Đánh dấu đã đọc">
+                                                        onclick="markAsRead(${notif.notificationId})"
+                                                        title="Đánh dấu đã đọc"
+                                                        type="button">
                                                     <i class="fas fa-check"></i>
                                                 </button>
                                             </c:if>
                                             <button class="action-btn btn-delete" 
-                                                    onclick="deleteNotification(${notif.getNotificationId()})"
-                                                    title="Xóa thông báo">
+                                                    onclick="deleteNotification(${notif.notificationId})"
+                                                    title="Xóa thông báo"
+                                                    type="button">
                                                 <i class="fas fa-trash-alt"></i>
                                             </button>
                                         </div>
                                     </div>
                                     
-                                    <p class="notification-message">${notif.getMessage()}</p>
+                                    <p class="notification-message">${notif.message}</p>
                                     
                                     <div class="d-flex justify-content-between align-items-center">
                                         <small class="notification-meta">
                                             <i class="fas fa-user-md me-1"></i>
-                                            <strong>${notif.getSenderUsername()}</strong>
+                                            <strong>${notif.senderUsername}</strong>
                                             <i class="fas fa-clock ms-3 me-1"></i>
-                                            <fmt:formatDate value="${notif.getCreatedAt()}" 
+                                            <fmt:formatDate value="${notif.createdAt}" 
                                                           pattern="dd/MM/yyyy HH:mm"/>
                                         </small>
-                                        <c:if test="${not empty notif.getLinkUrl()}">
-                                            <a href="${notif.getLinkUrl()}" class="link-btn">
+                                        <c:if test="${not empty notif.linkUrl}">
+                                            <a href="${notif.linkUrl}" class="link-btn">
                                                 <i class="fas fa-external-link-alt"></i>
                                                 <span>Xem chi tiết</span>
                                             </a>
@@ -1069,6 +1077,76 @@
             initPageWebSocket();
         }
         </c:if>
+
+        // ============== DEBUG CODE ==============
+        console.log('=== DEBUG NOTIFICATION PAGE ===');
+        console.log('Total notifications:', ${notifications.size()});
+        
+        <c:forEach var="notif" items="${notifications}" varStatus="status">
+        console.log('Notification ${status.index + 1}:', {
+            id: ${notif.notificationId},
+            title: '${notif.title}',
+            isRead: ${notif.read},
+            priority: '${notif.priority}',
+            type: '${notif.notificationType}'
+        });
+        </c:forEach>
+
+        // Check if buttons exist
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkButtons = document.querySelectorAll('.action-btn.btn-check');
+            const deleteButtons = document.querySelectorAll('.action-btn.btn-delete');
+            
+            console.log('Check buttons found:', checkButtons.length);
+            console.log('Delete buttons found:', deleteButtons.length);
+            
+            deleteButtons.forEach((btn, index) => {
+                console.log(`Delete button ${index + 1}:`, {
+                    exists: !!btn,
+                    onclick: btn.getAttribute('onclick'),
+                    disabled: btn.disabled,
+                    visible: window.getComputedStyle(btn).display !== 'none',
+                    pointerEvents: window.getComputedStyle(btn).pointerEvents,
+                    zIndex: window.getComputedStyle(btn).zIndex
+                });
+                
+                // Add manual click listener for testing
+                btn.addEventListener('click', function(e) {
+                    console.log('BUTTON CLICKED!', e);
+                }, true);
+            });
+
+            checkButtons.forEach((btn, index) => {
+                console.log(`Check button ${index + 1}:`, {
+                    exists: !!btn,
+                    onclick: btn.getAttribute('onclick'),
+                    disabled: btn.disabled,
+                    visible: window.getComputedStyle(btn).display !== 'none',
+                    pointerEvents: window.getComputedStyle(btn).pointerEvents,
+                    zIndex: window.getComputedStyle(btn).zIndex
+                });
+                
+                // Add manual click listener for testing
+                btn.addEventListener('click', function(e) {
+                    console.log('CHECK BUTTON CLICKED!', e);
+                }, true);
+            });
+
+            // Test if onclick works
+            if (deleteButtons.length > 0) {
+                console.log('Testing first delete button click handler...');
+                const firstBtn = deleteButtons[0];
+                const onclickAttr = firstBtn.getAttribute('onclick');
+                console.log('onclick attribute:', onclickAttr);
+                
+                // Check what's blocking the button
+                const rect = firstBtn.getBoundingClientRect();
+                const elementAtPoint = document.elementFromPoint(rect.left + rect.width/2, rect.top + rect.height/2);
+                console.log('Element at button center:', elementAtPoint);
+                console.log('Is button?', elementAtPoint === firstBtn || firstBtn.contains(elementAtPoint));
+            }
+        });
     </script>
 </body>
+<%@ include file="/admin/footer.jsp" %>
 </html>

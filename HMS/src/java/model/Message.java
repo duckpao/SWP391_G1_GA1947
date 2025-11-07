@@ -36,6 +36,10 @@ public class Message {
     public String getMessageContent() { return messageContent; }
     public void setMessageContent(String messageContent) { this.messageContent = messageContent; }
 
+    public boolean isIsRead() {
+        return isRead;
+    }
+
     public boolean isRead() { return isRead; }
     public void setRead(boolean read) { isRead = read; }
 

@@ -39,6 +39,9 @@ public class ChatWebSocket {
                 case "typing":
                     sendTypingIndicator(json, session);
                     break;
+                case "markAsRead":
+                    handleMarkAsRead(json, session);
+                    break;
                 default:
                     sendError(session, "Unknown action");
             }
@@ -67,6 +70,8 @@ public class ChatWebSocket {
         response.addProperty("type", "registered");
         response.addProperty("userId", userId);
         sendToSession(session, response.toString());
+        
+        System.out.println("User registered: " + userId);
     }
 
     private void sendMessage(JsonObject json, Session session) {
@@ -81,6 +86,8 @@ public class ChatWebSocket {
             boolean saved = messageDAO.insertMessage(msg);
 
             if (saved) {
+                long timestamp = System.currentTimeMillis();
+                
                 // Prepare response
                 JsonObject response = new JsonObject();
                 response.addProperty("type", "message");
@@ -88,21 +95,61 @@ public class ChatWebSocket {
                 response.addProperty("receiverId", receiverId);
                 response.addProperty("content", content);
                 response.addProperty("messageType", type);
-                response.addProperty("timestamp", System.currentTimeMillis());
+                response.addProperty("timestamp", timestamp);
+                response.addProperty("isRead", false);
 
                 // Send to receiver if online
                 Session receiverSession = sessions.get(String.valueOf(receiverId));
                 if (receiverSession != null && receiverSession.isOpen()) {
                     sendToSession(receiverSession, response.toString());
+                    System.out.println("Message sent to receiver: " + receiverId);
                 }
 
                 // Send confirmation to sender
-                response.addProperty("type", "sent");
-                sendToSession(session, response.toString());
+                JsonObject confirmation = new JsonObject();
+                confirmation.addProperty("type", "sent");
+                confirmation.addProperty("senderId", senderId);
+                confirmation.addProperty("receiverId", receiverId);
+                confirmation.addProperty("timestamp", timestamp);
+                sendToSession(session, confirmation.toString());
             }
         } catch (Exception e) {
             e.printStackTrace();
             sendError(session, "Failed to send message");
+        }
+    }
+
+    private void handleMarkAsRead(JsonObject json, Session session) {
+        try {
+            int receiverId = json.get("receiverId").getAsInt();
+            int senderId = json.get("senderId").getAsInt();
+            
+            System.out.println("Marking messages as read: receiver=" + receiverId + ", sender=" + senderId);
+            
+            // Đánh dấu tin nhắn là đã đọc trong database
+            boolean success = messageDAO.markMessagesAsReadFromUser(receiverId, senderId);
+            
+            if (success) {
+                // Gửi thông báo cho người gửi (senderId) rằng tin nhắn đã được đọc
+                Session senderSession = sessions.get(String.valueOf(senderId));
+                if (senderSession != null && senderSession.isOpen()) {
+                    JsonObject notification = new JsonObject();
+                    notification.addProperty("type", "messagesRead");
+                    notification.addProperty("readBy", receiverId);
+                    notification.addProperty("messagesFrom", senderId);
+                    sendToSession(senderSession, notification.toString());
+                    System.out.println("Sent read notification to sender: " + senderId);
+                }
+                
+                // Gửi xác nhận cho người đọc
+                JsonObject confirmation = new JsonObject();
+                confirmation.addProperty("type", "markReadSuccess");
+                confirmation.addProperty("senderId", senderId);
+                sendToSession(session, confirmation.toString());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            sendError(session, "Failed to mark messages as read");
         }
     }
 

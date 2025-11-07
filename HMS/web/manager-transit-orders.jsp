@@ -497,7 +497,6 @@
                 document.getElementById('detailsModal').style.display = 'none';
             }
 
-<<<<<<< Updated upstream
             // ==================== CONFIRM DELIVERY ====================
             function confirmDelivery(asnId, poId, supplierName, trackingNumber, totalQuantity) {
                 console.log('✅ Opening confirm modal for ASN #' + asnId);
@@ -526,10 +525,6 @@
 
 function submitConfirmDelivery() {
     console.log('📤 Submitting confirm delivery for ASN #' + currentAsnId);
-=======
-            function submitConfirmDelivery() {
-                console.log('📤 Submitting confirm delivery for ASN #' + currentAsnId);
->>>>>>> Stashed changes
 
     const btn = document.getElementById('confirmBtn');
     btn.disabled = true;
@@ -539,7 +534,6 @@ function submitConfirmDelivery() {
     formData.append('action', 'confirmDelivery');
     formData.append('asnId', currentAsnId);
 
-<<<<<<< Updated upstream
     fetch('${pageContext.request.contextPath}/manage/transit', {
         method: 'POST',
         body: formData
@@ -547,98 +541,46 @@ function submitConfirmDelivery() {
     .then(async response => {
         const text = await response.text();
         let data;
-        
         try {
             data = JSON.parse(text);
         } catch (e) {
             console.error("⚠️ Response không phải JSON:", text);
-            throw new Error("Server returned invalid response");
+            throw new Error("Server error");
         }
-        
         if (!response.ok) {
             throw new Error(data.message || 'Server error');
         }
-        
         return data;
     })
     .then(data => {
-        console.log('✅ Confirm response:', data);
-        
-        if (data.success && data.invoiceId) {
-            // ✅ REDIRECT ĐẾN TRANG THANH TOÁN MOMO
-            alert('✅ Delivery confirmed!\n\nDelivery Note: #' + data.dnId + '\nInvoice: #' + data.invoiceId + '\n\n→ Redirecting to payment page...');
+        console.log('Confirm response:', data);
+        if (data.success) {
+            alert('✅ Delivery confirmed!\n\nDelivery Note ID: #' + data.dnId);
+            closeConfirmModal();
             
-            // Redirect đến CreatePaymentServlet với invoiceId
-            window.location.href = '${pageContext.request.contextPath}/create-payment?invoiceId=' + data.invoiceId;
-            
+            // REDIRECT TO VNPAY
+            setTimeout(() => redirectToVNPay(data.poId), 500);
         } else {
-            alert('❌ Error: ' + (data.message || 'Unknown error'));
+            alert('❌ Error: ' + data.message);
             btn.disabled = false;
             btn.innerHTML = '✅ Confirm Delivery';
         }
     })
     .catch(err => {
         console.error("❌ Error:", err);
-        alert("❌ Connection Error: " + err.message);
+        alert("❌ Error: " + err.message);
         btn.disabled = false;
         btn.innerHTML = "✅ Confirm Delivery";
     });
 }
 
-// ✅ XÓA MODAL PAYMENT (không cần nữa)
-// function showPaymentModal() { ... }
-// function submitPayment() { ... }
-
-            // ==================== PAYMENT ====================
-
-=======
-                fetch('${pageContext.request.contextPath}/manage/transit', {
-                    method: 'POST',
-                    body: formData
-                })
-                        .then(async response => {
-                            const text = await response.text();
-                            let data;
-                            try {
-                                data = JSON.parse(text);
-                            } catch (e) {
-                                console.error("⚠️ Response không phải JSON:", text);
-                                throw new Error("Server error");
-                            }
-                            if (!response.ok) {
-                                throw new Error(data.message || 'Server error');
-                            }
-                            return data;
-                        })
-                        .then(data => {
-                            console.log('Confirm response:', data);
-                            if (data.success) {
-                                alert('✅ Delivery confirmed!\n\nDelivery Note ID: #' + data.dnId);
-                                closeConfirmModal();
-
-                                // REDIRECT TO VNPAY
-                                setTimeout(() => redirectToVNPay(data.poId), 500);
-                            } else {
-                                alert('❌ Error: ' + data.message);
-                                btn.disabled = false;
-                                btn.innerHTML = '✅ Confirm Delivery';
-                            }
-                        })
-                        .catch(err => {
-                            console.error("❌ Error:", err);
-                            alert("❌ Error: " + err.message);
-                            btn.disabled = false;
-                            btn.innerHTML = "✅ Confirm Delivery";
-                        });
-            }
-
-            function redirectToVNPay(poId) {
-                console.log('💰 Redirecting to VNPay for ASN #' + currentAsnId);
-
-                // Show loading overlay
-                const overlay = document.createElement('div');
-                overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; align-items: center; justify-content: center;';
-                overlay.innerHTML = `
+function redirectToVNPay(poId) {
+    console.log('💰 Redirecting to VNPay for ASN #' + currentAsnId);
+    
+    // Show loading overlay
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; align-items: center; justify-content: center;';
+    overlay.innerHTML = `
         <div style="background: white; padding: 40px; border-radius: 10px; text-align: center;">
             <div style="font-size: 48px; margin-bottom: 20px;">💳</div>
             <h2 style="margin: 0 0 15px 0;">Chuyển đến VNPay</h2>
@@ -646,30 +588,30 @@ function submitConfirmDelivery() {
             <div class="spinner" style="margin: 20px auto;"></div>
         </div>
     `;
-                document.body.appendChild(overlay);
-
-                // Create form to submit
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = '${pageContext.request.contextPath}/vnpay-payment';
-
-                const asnInput = document.createElement('input');
-                asnInput.type = 'hidden';
-                asnInput.name = 'asnId';
-                asnInput.value = currentAsnId;
-                form.appendChild(asnInput);
-
-                const poInput = document.createElement('input');
-                poInput.type = 'hidden';
-                poInput.name = 'poId';
-                poInput.value = poId;
-                form.appendChild(poInput);
-
-                document.body.appendChild(form);
-                setTimeout(() => form.submit(), 1000);
-            }
+    document.body.appendChild(overlay);
+    
+    // Create form to submit
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '${pageContext.request.contextPath}/vnpay-payment';
+    
+    const asnInput = document.createElement('input');
+    asnInput.type = 'hidden';
+    asnInput.name = 'asnId';
+    asnInput.value = currentAsnId;
+    form.appendChild(asnInput);
+    
+    const poInput = document.createElement('input');
+    poInput.type = 'hidden';
+    poInput.name = 'poId';
+    poInput.value = poId;
+    form.appendChild(poInput);
+    
+    document.body.appendChild(form);
+    setTimeout(() => form.submit(), 1000);
+}
             
-            // ==================== CONFIRM DELIVERY ====================
+// ==================== CONFIRM DELIVERY ====================
 function confirmDelivery(asnId, poId, supplierName, trackingNumber, totalQuantity) {
     console.log('⚠️ Opening confirm for ASN #' + asnId);
     currentAsnId = asnId;
@@ -731,7 +673,6 @@ function submitPayment() {
     }, 1500); // Replace with real fetch/POST to your backend
 }
 
->>>>>>> Stashed changes
 
             // Close modal when clicking outside
             window.onclick = function (event) {

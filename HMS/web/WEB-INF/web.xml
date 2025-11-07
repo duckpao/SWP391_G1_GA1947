@@ -237,18 +237,6 @@
         <servlet-name>InvoiceServlet</servlet-name>
         <servlet-class>Controller.InvoiceServlet</servlet-class>
     </servlet>
-    <servlet>
-        <servlet-name>CreatePaymentServlet</servlet-name>
-        <servlet-class>Controller.CreatePaymentServlet</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>PaymentCallbackServlet</servlet-name>
-        <servlet-class>Controller.PaymentCallbackServlet</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>PaymentLogServlet</servlet-name>
-        <servlet-class>Controller.PaymentLogServlet</servlet-class>
-    </servlet>
     <servlet-mapping>
         <servlet-name>VNPaymentServlet</servlet-name>
         <url-pattern>/vnpay-payment</url-pattern>
@@ -553,22 +541,10 @@
         <url-pattern>/ticket-count</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-<<<<<<< Updated upstream
         <servlet-name>InvoiceServlet</servlet-name>
         <url-pattern>/invoices</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>CreatePaymentServlet</servlet-name>
-        <url-pattern>/create-payment</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>PaymentCallbackServlet</servlet-name>
-        <url-pattern>/payment-callback</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>PaymentLogServlet</servlet-name>
-        <url-pattern>/payment-logs</url-pattern>
-=======
         <servlet-name>ajaxServlet</servlet-name>
         <url-pattern>/vnpayajax/*</url-pattern>
     </servlet-mapping>
@@ -579,7 +555,6 @@
     <servlet-mapping>
         <servlet-name>vnpayRefund</servlet-name>
         <url-pattern>/vnpayrefund/*</url-pattern>
->>>>>>> Stashed changes
     </servlet-mapping>
     <welcome-file-list>
         <welcome-file>home.jsp</welcome-file>

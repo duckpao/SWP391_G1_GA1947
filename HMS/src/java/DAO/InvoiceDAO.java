@@ -2,13 +2,11 @@ package DAO;
 
 import DAO.DBContext;
 import model.Invoice;
-import DAO.DBContext;
+import model.AdvancedShippingNotice;
 import java.math.BigDecimal;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import model.AdvancedShippingNotice;
 
 public class InvoiceDAO {
     
@@ -79,7 +77,7 @@ public class InvoiceDAO {
     
     // Cập nhật payment URL
     public boolean updatePaymentUrl(int invoiceId, String paymentUrl) {
-        String sql = "UPDATE Invoices SET payment_url = ?, payment_method = 'MoMo' WHERE invoice_id = ?";
+        String sql = "UPDATE Invoices SET payment_url = ? WHERE invoice_id = ?";
         
         try (Connection conn = DBContext.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -136,37 +134,133 @@ public class InvoiceDAO {
         }
         return invoices;
     }
-        public int createInvoiceForASN(AdvancedShippingNotice asn, int asnId, int userId) {
-        String sql = "INSERT INTO Invoices (po_id, asn_id, supplier_id, invoice_number, invoice_date, amount, status, notes, payment_method) " +
-                     "VALUES (?, ?, ?, ?, GETDATE(), ?, 'Pending', ?, 'MoMo')";
+    
+    /**
+     * Tạo Invoice cho ASN - FIXED VERSION
+     */
+    public int createInvoiceForASN(AdvancedShippingNotice asn, int asnId, int userId) {
+        // SQL không có payment_method nữa (nếu column không tồn tại)
+        String sql = "INSERT INTO Invoices (po_id, asn_id, supplier_id, invoice_number, invoice_date, amount, status, notes) " +
+                     "VALUES (?, ?, ?, ?, GETDATE(), ?, 'Pending', ?)";
+       
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
         
-        try (Connection conn = DBContext.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try {
+            conn = DBContext.getConnection();
             
-            // 1. Tính tổng tiền từ PO Items
-            BigDecimal totalAmount = calculateTotalAmount(asn.getPoId());
+            System.out.println("=================================================");
+            System.out.println("📝 CREATING INVOICE FOR ASN #" + asnId);
+            System.out.println("=================================================");
             
-            // 2. Tạo Invoice Number tự động
-            String invoiceNumber = "INV-" + asn.getPoId() + "-" + System.currentTimeMillis();
+            // 1. Validate ASN
+            if (asn == null) {
+                System.err.println("❌ ASN object is NULL!");
+                return -1;
+            }
             
-            pstmt.setInt(1, asn.getPoId());
+            int poId = asn.getPoId();
+            int supplierId = asn.getSupplierId();
+            
+            System.out.println("PO ID: " + poId);
+            System.out.println("Supplier ID: " + supplierId);
+            System.out.println("User ID: " + userId);
+            
+            // 2. Validate Supplier ID
+            if (supplierId <= 0) {
+                System.err.println("❌ Invalid supplier ID: " + supplierId);
+                System.err.println("⚠️  ASN may not have been loaded with supplier info!");
+                
+                // TRY TO GET SUPPLIER ID FROM PO
+                supplierId = getSupplierIdFromPO(poId);
+                if (supplierId <= 0) {
+                    System.err.println("❌ Could not retrieve supplier ID from PO either!");
+                    return -1;
+                }
+                System.out.println("✅ Retrieved supplier ID from PO: " + supplierId);
+            }
+            
+            // 3. Calculate Total Amount
+            BigDecimal totalAmount = calculateTotalAmount(poId);
+            System.out.println("Calculated Amount: " + totalAmount);
+            
+            if (totalAmount == null || totalAmount.compareTo(BigDecimal.ZERO) <= 0) {
+                System.err.println("❌ Invalid total amount: " + totalAmount);
+                System.err.println("⚠️  PurchaseOrderItems may be empty or have invalid prices!");
+                return -1;
+            }
+            
+            // 4. Generate Invoice Number
+            String invoiceNumber = "INV-" + poId + "-" + System.currentTimeMillis();
+            System.out.println("Invoice Number: " + invoiceNumber);
+            
+            // 5. Execute Insert
+            pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            pstmt.setInt(1, poId);
             pstmt.setInt(2, asnId);
-            pstmt.setInt(3, asn.getSupplierId());
+            pstmt.setInt(3, supplierId);
             pstmt.setString(4, invoiceNumber);
             pstmt.setBigDecimal(5, totalAmount);
-            pstmt.setString(6, "Invoice for PO #" + asn.getPoId() + ", confirmed by Manager");
+            pstmt.setString(6, "Invoice for PO #" + poId + ", confirmed by Manager ID: " + userId);
             
             int affected = pstmt.executeUpdate();
+            System.out.println("Rows affected: " + affected);
             
             if (affected > 0) {
-                ResultSet rs = pstmt.getGeneratedKeys();
+                rs = pstmt.getGeneratedKeys();
                 if (rs.next()) {
-                    return rs.getInt(1); // Return invoice_id
+                    int invoiceId = rs.getInt(1);
+                    System.out.println("✅ Invoice created successfully! ID: " + invoiceId);
+                    System.out.println("=================================================");
+                    return invoiceId;
+                } else {
+                    System.err.println("❌ No generated keys returned from INSERT!");
                 }
+            } else {
+                System.err.println("❌ No rows inserted!");
+            }
+           
+        } catch (SQLException e) {
+            System.err.println("❌ SQLException: " + e.getMessage());
+            System.err.println("SQL State: " + e.getSQLState());
+            System.err.println("Error Code: " + e.getErrorCode());
+            e.printStackTrace();
+        } catch (Exception e) {
+            System.err.println("❌ Unexpected error: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (pstmt != null) pstmt.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        
+        System.out.println("=================================================");
+        return -1;
+    }
+    
+    /**
+     * Lấy Supplier ID từ Purchase Order (backup method)
+     */
+    private int getSupplierIdFromPO(int poId) {
+        String sql = "SELECT supplier_id FROM PurchaseOrders WHERE po_id = ?";
+        
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setInt(1, poId);
+            ResultSet rs = pstmt.executeQuery();
+            
+            if (rs.next()) {
+                return rs.getInt("supplier_id");
             }
             
         } catch (SQLException e) {
-            System.err.println("Error creating invoice: " + e.getMessage());
+            System.err.println("Error getting supplier ID from PO: " + e.getMessage());
             e.printStackTrace();
         }
         
@@ -187,6 +281,7 @@ public class InvoiceDAO {
             
             if (rs.next()) {
                 BigDecimal total = rs.getBigDecimal("total");
+                System.out.println("💰 Total from PurchaseOrderItems: " + total);
                 return total != null ? total : BigDecimal.ZERO;
             }
             

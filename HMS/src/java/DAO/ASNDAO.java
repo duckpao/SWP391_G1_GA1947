@@ -505,7 +505,6 @@ public class ASNDAO extends DBContext {
         }
         return -1;
     }
-<<<<<<< Updated upstream
     public boolean updatePOStatus(int poId, String status) {
     String sql = "UPDATE PurchaseOrders SET status = ?, updated_at = GETDATE() WHERE po_id = ?";
     
@@ -527,7 +526,7 @@ public class ASNDAO extends DBContext {
     
     return false;
 }
-=======
+
 
     // Thêm các methods này vào class ASNDAO của bạn
     /**
@@ -719,5 +718,4 @@ public class ASNDAO extends DBContext {
 
         return 0;
     }
->>>>>>> Stashed changes
 }

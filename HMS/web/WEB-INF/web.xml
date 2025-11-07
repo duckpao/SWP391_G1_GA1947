@@ -237,10 +237,6 @@
         <servlet-name>InvoiceServlet</servlet-name>
         <servlet-class>Controller.InvoiceServlet</servlet-class>
     </servlet>
-    <servlet>
-        <servlet-name>CreatePaymentServlet</servlet-name>
-        <servlet-class>Controller.CreatePaymentServlet</servlet-class>
-    </servlet>
     <servlet-mapping>
         <servlet-name>VNPaymentServlet</servlet-name>
         <url-pattern>/vnpay-payment</url-pattern>
@@ -551,10 +547,6 @@
     <servlet-mapping>
         <servlet-name>InvoiceServlet</servlet-name>
         <url-pattern>/invoices</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>CreatePaymentServlet</servlet-name>
-        <url-pattern>/create-payment</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>ajaxServlet</servlet-name>

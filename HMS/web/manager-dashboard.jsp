@@ -624,6 +624,13 @@
                                                     <button class="btn btn-success" onclick="approveOrder(${order.poId})">
                                                         <i class="bi bi-send"></i> Send
                                                     </button>
+                                                            <c:if test="${order.status == 'Sent'}">
+                                                                <button class="btn btn-danger btn-sm" 
+                                                                        onclick="confirmCancel(${order.poId})" 
+                                                                        title="Cancel Order">
+                                                                    <i class="fas fa-times"></i> Cancel
+                                                                </button>
+                                                            </c:if>
                                                     <a href="${pageContext.request.contextPath}/edit-stock?poId=${order.poId}" class="btn btn-warning">
                                                         <i class="bi bi-pencil"></i> Edit
                                                     </a>
@@ -1038,6 +1045,38 @@
                 cancelModal.classList.remove('show');
             }
         }
+        function confirmCancel(poId) {
+    // Hiển thị modal hoặc prompt để nhập lý do
+    const reason = prompt("Please provide cancellation reason:\n\n(This action cannot be undone)");
+    
+    // Nếu user nhấn Cancel hoặc không nhập gì
+    if (reason === null || reason.trim() === '') {
+        return; // Hủy operation
+    }
+    
+    // ✅ Tạo form động và submit
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = 'cancel-stock-request';
+    
+    // Hidden input cho PO ID
+    const poIdInput = document.createElement('input');
+    poIdInput.type = 'hidden';
+    poIdInput.name = 'poId';
+    poIdInput.value = poId;
+    
+    // Hidden input cho reason
+    const reasonInput = document.createElement('input');
+    reasonInput.type = 'hidden';
+    reasonInput.name = 'reason';
+    reasonInput.value = reason;
+    
+    form.appendChild(poIdInput);
+    form.appendChild(reasonInput);
+    
+    document.body.appendChild(form);
+    form.submit();
+}
     </script>
 </body>
 <%@ include file="/admin/footer.jsp" %>

@@ -23,7 +23,6 @@ import java.util.List;
  * Handles report generation and filtering
  * Maps to: /user-reports/generate
  */
-@WebServlet(name = "UserReportServlet", urlPatterns = {"/user-reports/generate"})
 public class UserReportServlet extends HttpServlet {
     
     private final SystemLogsDAO logsDAO = new SystemLogsDAO();

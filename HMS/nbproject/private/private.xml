@@ -2,16 +2,12 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-
         <group>
-            <file>file:/C:/Users/ADMIN/java/backup/SWP391_G1_GA1947/HMS/src/java/com/vnpay/common/ajaxServlet.java</file>
-            <file>file:/C:/Users/ADMIN/java/backup/SWP391_G1_GA1947/HMS/web/WEB-INF/web.xml</file>
-            <file>file:/C:/Users/ADMIN/java/backup/SWP391_G1_GA1947/HMS/src/java/com/vnpay/common/vnpayRefund.java</file>
-            <file>file:/C:/Users/ADMIN/java/backup/SWP391_G1_GA1947/HMS/web/vnpay_jsp/index.jsp</file>
-            <file>file:/C:/Users/ADMIN/java/backup/SWP391_G1_GA1947/HMS/src/java/com/vnpay/common/Config.java</file>
-            <file>file:/C:/Users/ADMIN/java/backup/SWP391_G1_GA1947/HMS/src/java/com/vnpay/common/vnpayQuery.java</file>
-            <file>file:/C:/Users/ADMIN/java/backup/SWP391_G1_GA1947/HMS/web/vnpay_jsp/vnpay_pay.jsp</file>
+            <file>file:/C:/App/SWP/dev%206-11/SWP391_G1_GA1947/HMS/web/admin/dashboard.jsp</file>
+            <file>file:/C:/App/SWP/dev%206-11/SWP391_G1_GA1947/HMS/src/java/DAO/ASNDAO.java</file>
+            <file>file:/C:/App/SWP/dev%206-11/SWP391_G1_GA1947/HMS/web/jsp/updateRequest.jsp</file>
+            <file>file:/C:/App/SWP/dev%206-11/SWP391_G1_GA1947/HMS/web/notif/notifications.jsp</file>
+            <file>file:/C:/App/SWP/dev%206-11/SWP391_G1_GA1947/HMS/src/java/Controller/GetChatHistoryServlet.java</file>
         </group>
-
     </open-files>
 </project-private>

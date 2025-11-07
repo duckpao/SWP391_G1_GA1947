@@ -9,10 +9,10 @@ public class PurchaseOrder {
     private int managerId;
     private int supplierId;
     private String status;
-    private Timestamp orderDate;  // Changed from Date to Timestamp
+    private Timestamp orderDate;
     private Date expectedDeliveryDate;
     private String notes;
-    private Timestamp updatedAt;  // Changed from Date to Timestamp
+    private Timestamp updatedAt;
     
     // Additional fields for display
     private String supplierName;
@@ -27,7 +27,10 @@ public class PurchaseOrder {
     private String asnStatus;
     private boolean hasAsn;
     
-    // IMPORTANT: Add list of items
+    // NEW: Combined display status from view
+    private String displayStatus;
+    private String statusBadgeClass;
+    
     private List<PurchaseOrderItem> items;
     
     public PurchaseOrder() {
@@ -46,7 +49,7 @@ public class PurchaseOrder {
         this.updatedAt = updatedAt;
     }
     
-    // Getters and Setters
+    // Basic Getters and Setters
     public int getPoId() {
         return poId;
     }
@@ -143,7 +146,6 @@ public class PurchaseOrder {
         this.itemCount = itemCount;
     }
     
-    // NEW: Getter/Setter for items list
     public List<PurchaseOrderItem> getItems() {
         return items;
     }
@@ -153,7 +155,65 @@ public class PurchaseOrder {
         this.itemCount = items != null ? items.size() : 0;
     }
     
+    // ASN Getters and Setters
+    public int getAsnId() {
+        return asnId;
+    }
+
+    public void setAsnId(int asnId) {
+        this.asnId = asnId;
+    }
+
+    public String getTrackingNumber() {
+        return trackingNumber;
+    }
+
+    public void setTrackingNumber(String trackingNumber) {
+        this.trackingNumber = trackingNumber;
+    }
+
+    public String getCarrier() {
+        return carrier;
+    }
+
+    public void setCarrier(String carrier) {
+        this.carrier = carrier;
+    }
+
+    public String getAsnStatus() {
+        return asnStatus;
+    }
+
+    public void setAsnStatus(String asnStatus) {
+        this.asnStatus = asnStatus;
+    }
+
+    public boolean isHasAsn() {
+        return hasAsn;
+    }
+
+    public void setHasAsn(boolean hasAsn) {
+        this.hasAsn = hasAsn;
+    }
+
+    // NEW: Display Status Getters/Setters
+    public String getDisplayStatus() {
+        return displayStatus;
+    }
+
+    public void setDisplayStatus(String displayStatus) {
+        this.displayStatus = displayStatus;
+    }
+
     public String getStatusBadgeClass() {
+        // If statusBadgeClass is set from database view, use it
+        if (statusBadgeClass != null && !statusBadgeClass.isEmpty()) {
+            return statusBadgeClass;
+        }
+        
+        // Fallback: generate based on status
+        if (status == null) return "badge bg-secondary";
+        
         switch (status) {
             case "Draft":
                 return "badge bg-secondary";
@@ -171,76 +231,96 @@ public class PurchaseOrder {
                 return "badge bg-secondary";
         }
     }
-    // ASN Getters and Setters
-public int getAsnId() {
-    return asnId;
-}
 
-public void setAsnId(int asnId) {
-    this.asnId = asnId;
-}
-
-public String getTrackingNumber() {
-    return trackingNumber;
-}
-
-public void setTrackingNumber(String trackingNumber) {
-    this.trackingNumber = trackingNumber;
-}
-
-public String getCarrier() {
-    return carrier;
-}
-
-public void setCarrier(String carrier) {
-    this.carrier = carrier;
-}
-
-public String getAsnStatus() {
-    return asnStatus;
-}
-
-public void setAsnStatus(String asnStatus) {
-    this.asnStatus = asnStatus;
-}
-
-public boolean isHasAsn() {
-    return hasAsn;
-}
-
-public void setHasAsn(boolean hasAsn) {
-    this.hasAsn = hasAsn;
-}
-
-// Helper methods for JSP display
-public String getAsnStatusDisplay() {
-    if (asnStatus == null) return "N/A";
-    switch (asnStatus) {
-        case "Sent":
-            return "Shipped";
-        case "In Transit":
-            return "In Transit";
-        case "Delivered":
-            return "Delivered";
-        case "Received":
-            return "Received";
-        default:
-            return asnStatus;
+    public void setStatusBadgeClass(String statusBadgeClass) {
+        this.statusBadgeClass = statusBadgeClass;
     }
-}
 
-public String getAsnStatusBadgeClass() {
-    if (asnStatus == null) return "status-badge";
-    switch (asnStatus) {
-        case "Sent":
-            return "sent";
-        case "In Transit":
-            return "approved";
-        case "Delivered":
-        case "Received":
-            return "completed";
-        default:
-            return "sent";
+    // Helper methods for JSP display
+    public String getAsnStatusDisplay() {
+        if (asnStatus == null) return "N/A";
+        switch (asnStatus) {
+            case "Pending":
+                return "Awaiting Shipment";
+            case "Sent":
+                return "Shipped";
+            case "InTransit":
+                return "In Transit";
+            case "Delivered":
+                return "Delivered";
+            default:
+                return asnStatus;
+        }
     }
-}
+
+    public String getAsnStatusBadgeClass() {
+        if (asnStatus == null) return "badge bg-secondary";
+        switch (asnStatus) {
+            case "Pending":
+                return "badge bg-warning";
+            case "Sent":
+                return "badge bg-info";
+            case "InTransit":
+                return "badge bg-primary";
+            case "Delivered":
+                return "badge bg-success";
+            default:
+                return "badge bg-secondary";
+        }
+    }
+    
+    /**
+     * Get the most relevant status to display
+     * Priority: ASN status > PO status
+     */
+    public String getFinalDisplayStatus() {
+        if (displayStatus != null && !displayStatus.isEmpty()) {
+            return displayStatus;
+        }
+        
+        // Fallback logic
+        if (asnStatus != null && !asnStatus.isEmpty()) {
+            switch (asnStatus) {
+                case "Delivered":
+                    return "Delivered";
+                case "InTransit":
+                    return "In Transit";
+                case "Sent":
+                    return "Shipped";
+                case "Pending":
+                    return "Awaiting Shipment";
+            }
+        }
+        
+        return status != null ? status : "Unknown";
+    }
+    
+    /**
+     * Get CSS class for final display status
+     */
+    public String getFinalStatusBadgeClass() {
+        if (statusBadgeClass != null && !statusBadgeClass.isEmpty()) {
+            return statusBadgeClass;
+        }
+        
+        String finalStatus = getFinalDisplayStatus();
+        switch (finalStatus) {
+            case "Delivered":
+            case "Completed":
+                return "badge bg-success";
+            case "In Transit":
+                return "badge bg-primary";
+            case "Shipped":
+                return "badge bg-info";
+            case "Awaiting Shipment":
+            case "Approved":
+                return "badge bg-warning";
+            case "Draft":
+                return "badge bg-secondary";
+            case "Rejected":
+                return "badge bg-danger";
+            default:
+                return "badge bg-secondary";
+        }
+    }
 }

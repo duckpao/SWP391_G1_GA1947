@@ -975,6 +975,9 @@
             <i class="bi bi-truck"></i> View Transit Orders
         </a>
     </div>
+                                                               <a href="${pageContext.request.contextPath}/tasks/assign" class="btn btn-warning">
+                                                        <i class="bi bi-pencil"></i> Assign Task
+                                                    </a>
 </div>
 
     <script>

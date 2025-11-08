@@ -366,7 +366,7 @@
             </div>
             <div class="sidebar-menu">
                 <a class="sidebar-item" href="${pageContext.request.contextPath}/admin-dashboard">
-                    Dashboard
+                    ← Quay lại Dashboard
                 </a>
                 <a class="sidebar-item" href="${pageContext.request.contextPath}/user-reports/generate">
                     📊 Báo cáo
@@ -376,9 +376,6 @@
                 </a>
                 <a class="sidebar-item sidebar-item-primary" href="${pageContext.request.contextPath}/admin-dashboard/notifications">
                     🛎️ Gửi Thông báo
-                </a>
-                <a class="sidebar-item" href="${pageContext.request.contextPath}/admin/permissions">
-                    🔐 Phân quyền
                 </a>
                 <a class="sidebar-item" href="${pageContext.request.contextPath}/admin-dashboard/create">
                     ➕ Tạo tài khoản

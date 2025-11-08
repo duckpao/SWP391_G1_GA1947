@@ -632,9 +632,6 @@
                         <a class="sidebar-item" href="${pageContext.request.contextPath}/admin-dashboard/notifications">
                         🛎 ️Gửi Thông báo
                     </a>
-                    <a class="sidebar-item" href="${pageContext.request.contextPath}/admin/permissions">
-                        🔐 Phân quyền
-                    </a>
                     <a class="sidebar-item" href="${pageContext.request.contextPath}/admin-dashboard/create">
                         ➕ Tạo tài khoản
                     </a>
@@ -688,7 +685,7 @@
                             <h3>📋 Thông tin quan trọng</h3>
                             <p>
                                 Trang này cho phép bạn cấu hình các tham số hệ thống như ngưỡng tồn kho thấp, 
-                                số lần đăng nhập sai tối đa, thời gian cách ly, v.v. 
+                                số lần đăng nhập sai tối đa, v.v. 
                                 <strong>Vui lòng cẩn thận khi thay đổi các cấu hình này.</strong>
                             </p>
                         </div>
@@ -708,8 +705,7 @@
                                             <div class="config-key">
                                                 <div>${config.configKey}</div>
                                                 <c:if test="${config.configKey == 'low_stock_threshold' || 
-                                                              config.configKey == 'max_failed_attempts' || 
-                                                              config.configKey == 'quarantine_period_days'}">
+                                                              config.configKey == 'max_failed_attempts'}">
                                                       <span class="critical-badge">🛡️ Quan trọng</span>
                                                 </c:if>
                                                 <div class="timestamp">
@@ -725,8 +721,7 @@
 
                                             <div class="config-actions">
                                                 <c:if test="${config.configKey != 'low_stock_threshold' && 
-                                                              config.configKey != 'max_failed_attempts' && 
-                                                              config.configKey != 'quarantine_period_days'}">
+                                                              config.configKey != 'max_failed_attempts'}">
                                                       <button type="button" class="btn btn-danger" 
                                                               onclick="confirmDelete('${config.configKey}')">
                                                           🗑️ Xóa

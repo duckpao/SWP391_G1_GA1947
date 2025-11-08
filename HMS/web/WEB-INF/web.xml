@@ -237,6 +237,10 @@
         <servlet-name>InvoiceServlet</servlet-name>
         <servlet-class>Controller.InvoiceServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>CaptchaServlet</servlet-name>
+        <servlet-class>Controller.CaptchaServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>VNPaymentServlet</servlet-name>
         <url-pattern>/vnpay-payment</url-pattern>
@@ -244,6 +248,10 @@
     <servlet-mapping>
         <servlet-name>VNPayReturnServlet</servlet-name>
         <url-pattern>/vnpay-return</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CaptchaServlet</servlet-name>
+        <url-pattern>/refresh-captcha</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout> 30 </session-timeout>

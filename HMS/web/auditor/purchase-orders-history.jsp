@@ -13,6 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -22,247 +23,201 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f5f7fa;
-            color: #2d3748;
-            overflow-x: hidden;
+            background: #f9fafb;
+            min-height: 100vh;
+            color: #374151;
         }
 
-        /* Header */
-        .top-header {
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar styling - matching auditor dashboard */
+        .sidebar {
+            width: 280px;
             background: white;
-            padding: 1rem 2rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
+            color: #1f2937;
+            padding: 30px 20px;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.08);
+            overflow-y: auto;
+            border-right: 1px solid #e5e7eb;
         }
 
-        .logo-section h4 {
+        .sidebar-header {
+            margin-bottom: 30px;
+        }
+
+        .sidebar-header h4 {
+            font-size: 20px;
             font-weight: 700;
-            color: #2d3748;
-            margin: 0;
-        }
-
-        .logo-section small {
-            color: #718096;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .header-actions {
+            margin-bottom: 15px;
             display: flex;
-            gap: 0.75rem;
             align-items: center;
+            gap: 10px;
+            color: #1f2937;
         }
 
-        .header-actions .btn {
-            border-radius: 8px;
-            padding: 0.5rem 1rem;
-            font-size: 0.875rem;
+        .sidebar-header hr {
+            border: none;
+            border-top: 1px solid #e5e7eb;
+            margin: 15px 0;
+        }
+
+        .nav-link {
+            color: #6b7280;
+            text-decoration: none;
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin: 6px 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+            font-size: 14px;
             font-weight: 500;
         }
 
-        /* Sidebar */
-        .sidebar {
-            position: fixed;
-            left: 0;
-            top: 70px;
-            width: 240px;
-            height: calc(100vh - 70px);
-            background: white;
-            border-right: 1px solid #e2e8f0;
-            padding: 1.5rem 0;
-            overflow-y: auto;
+        .nav-link:hover,
+        .nav-link.active {
+            background: #f3f4f6;
+            color: #3b82f6;
+            transform: translateX(4px);
         }
 
-        .sidebar-section {
-            margin-bottom: 1.5rem;
+        .nav-divider {
+            border: none;
+            border-top: 1px solid #e5e7eb;
+            margin: 15px 0;
         }
 
-        .sidebar-title {
-            padding: 0 1.5rem;
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: #a0aec0;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 0.5rem;
-        }
-
-        .nav-item {
-            padding: 0.75rem 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            color: #4a5568;
-            text-decoration: none;
-            transition: all 0.2s;
-            cursor: pointer;
-            font-size: 0.875rem;
-        }
-
-        .nav-item:hover {
-            background: #f7fafc;
-            color: #2b6cb0;
-        }
-
-        .nav-item.active {
-            background: #ebf8ff;
-            color: #2b6cb0;
-            border-right: 3px solid #3182ce;
-            font-weight: 600;
-        }
-
-        .nav-item i {
-            font-size: 1.125rem;
-            width: 20px;
-        }
-
-        /* Main Content */
+        /* Main content area */
         .main-content {
-            margin-left: 240px;
-            padding: 2rem;
-            min-height: calc(100vh - 70px);
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            background: #f9fafb;
         }
 
         .page-header {
-            margin-bottom: 1.5rem;
+            margin-bottom: 30px;
         }
 
         .page-header h2 {
-            font-size: 1.75rem;
+            font-size: 32px;
             font-weight: 700;
-            color: #2d3748;
+            color: #1f2937;
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            margin-bottom: 0.25rem;
+            gap: 12px;
+            margin-bottom: 8px;
         }
 
         .page-header .subtitle {
-            color: #718096;
-            font-size: 0.875rem;
+            color: #9ca3af;
+            font-size: 14px;
         }
 
         /* Statistics Cards */
-        .stats-row {
+        .stats-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1.25rem;
-            margin-bottom: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
         }
 
         .stat-card {
             background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            border: 1px solid #e2e8f0;
-            position: relative;
-            transition: all 0.3s;
+            border-radius: 15px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border-left: 5px solid #3b82f6;
         }
 
         .stat-card:hover {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            transform: translateY(-2px);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
         }
 
-        .stat-header {
+        .stat-card.primary {
+            border-left-color: #3b82f6;
+        }
+
+        .stat-card.success {
+            border-left-color: #10b981;
+        }
+
+        .stat-card.warning {
+            border-left-color: #f59e0b;
+        }
+
+        .stat-card.info {
+            border-left-color: #3b82f6;
+        }
+
+        .stat-content {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 0.75rem;
         }
 
-        .stat-label {
-            font-size: 0.8125rem;
-            color: #718096;
-            font-weight: 500;
+        .stat-info h6 {
+            font-size: 13px;
+            font-weight: 600;
+            color: #9ca3af;
+            margin-bottom: 8px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
+        .stat-info h3 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0;
+        }
+
         .stat-icon {
-            width: 42px;
-            height: 42px;
-            border-radius: 10px;
+            font-size: 32px;
+            opacity: 0.8;
+        }
+
+        /* Dashboard Card */
+        .dashboard-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: white;
+            padding: 24px;
+            border-bottom: 1px solid #e5e7eb;
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
+            gap: 10px;
         }
 
-        .stat-icon.blue {
-            background: #ebf8ff;
-            color: #3182ce;
-        }
-
-        .stat-icon.green {
-            background: #f0fff4;
-            color: #38a169;
-        }
-
-        .stat-icon.orange {
-            background: #fffaf0;
-            color: #dd6b20;
-        }
-
-        .stat-icon.purple {
-            background: #faf5ff;
-            color: #805ad5;
-        }
-
-        .stat-value {
-            font-size: 1.875rem;
+        .card-header h5 {
+            font-size: 18px;
             font-weight: 700;
-            color: #2d3748;
-            margin-bottom: 0.25rem;
+            color: #1f2937;
+            margin: 0;
         }
 
-        .stat-subtitle {
-            font-size: 0.75rem;
-            color: #a0aec0;
+        .card-body {
+            padding: 24px;
         }
 
         /* Charts Section */
         .charts-grid {
             display: grid;
             grid-template-columns: 2fr 1fr;
-            gap: 1.25rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .card {
-            background: white;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
-            overflow: hidden;
-        }
-
-        .card-header {
-            background: white;
-            border-bottom: 1px solid #e2e8f0;
-            padding: 1.25rem 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.625rem;
-        }
-
-        .card-header h5 {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #2d3748;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .card-body {
-            padding: 1.5rem;
+            gap: 20px;
+            margin-bottom: 30px;
         }
 
         .chart-container {
@@ -277,38 +232,33 @@
         }
 
         .supplier-item {
-            padding: 1rem;
-            border-bottom: 1px solid #f7fafc;
-            transition: background 0.2s;
+            padding: 16px 0;
+            border-bottom: 1px solid #e5e7eb;
         }
 
         .supplier-item:last-child {
             border-bottom: none;
         }
 
-        .supplier-item:hover {
-            background: #f7fafc;
-        }
-
         .supplier-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 0.5rem;
+            margin-bottom: 8px;
         }
 
         .supplier-name {
             font-weight: 600;
-            color: #2d3748;
-            font-size: 0.875rem;
+            color: #1f2937;
+            font-size: 14px;
         }
 
         .rank-badge {
-            background: #edf2f7;
-            color: #4a5568;
-            padding: 0.25rem 0.625rem;
+            background: #f3f4f6;
+            color: #4b5563;
+            padding: 4px 10px;
             border-radius: 6px;
-            font-size: 0.75rem;
+            font-size: 12px;
             font-weight: 600;
         }
 
@@ -328,137 +278,106 @@
         }
 
         .supplier-meta {
-            font-size: 0.75rem;
-            color: #718096;
-            margin-bottom: 0.5rem;
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 8px;
         }
 
         .progress-bar-wrapper {
             height: 6px;
-            background: #edf2f7;
+            background: #f3f4f6;
             border-radius: 3px;
             overflow: hidden;
-            margin-bottom: 0.375rem;
+            margin-bottom: 6px;
         }
 
         .progress-bar-fill {
             height: 100%;
-            background: linear-gradient(90deg, #3182ce, #38a169);
+            background: linear-gradient(90deg, #3b82f6, #10b981);
             transition: width 0.6s ease;
         }
 
         .completion-text {
-            font-size: 0.6875rem;
-            color: #a0aec0;
+            font-size: 12px;
+            color: #9ca3af;
         }
 
         /* Filter Section */
         .filter-section {
             background: white;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            padding: 24px;
+            margin-bottom: 30px;
         }
 
         .filter-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 1rem;
-            margin-bottom: 1rem;
+            gap: 16px;
+            margin-bottom: 16px;
         }
 
         .form-group label {
-            font-size: 0.8125rem;
+            font-size: 13px;
             font-weight: 600;
-            color: #4a5568;
-            margin-bottom: 0.5rem;
+            color: #4b5563;
+            margin-bottom: 8px;
             display: block;
         }
 
         .form-control, .form-select {
-            border: 1px solid #e2e8f0;
+            border: 1px solid #e5e7eb;
             border-radius: 8px;
-            padding: 0.625rem 0.875rem;
-            font-size: 0.875rem;
+            padding: 10px 14px;
+            font-size: 14px;
             transition: all 0.2s;
+            width: 100%;
         }
 
         .form-control:focus, .form-select:focus {
-            border-color: #3182ce;
-            box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
             outline: none;
         }
 
         .btn-group {
             display: flex;
-            gap: 0.75rem;
+            gap: 12px;
         }
 
         .btn {
-            padding: 0.625rem 1.25rem;
+            padding: 10px 20px;
             border-radius: 8px;
-            font-size: 0.875rem;
+            font-size: 14px;
             font-weight: 500;
             border: none;
             cursor: pointer;
             transition: all 0.2s;
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 8px;
         }
 
         .btn-primary {
-            background: #3182ce;
+            background: #3b82f6;
             color: white;
         }
 
         .btn-primary:hover {
-            background: #2c5282;
+            background: #2563eb;
         }
 
         .btn-secondary {
-            background: #edf2f7;
-            color: #4a5568;
+            background: #f3f4f6;
+            color: #4b5563;
         }
 
         .btn-secondary:hover {
-            background: #e2e8f0;
-        }
-
-        .btn-success {
-            background: #38a169;
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #2f855a;
+            background: #e5e7eb;
         }
 
         /* Table */
-        .table-container {
-            background: white;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
-            overflow: hidden;
-        }
-
-        .table-header {
-            background: white;
-            border-bottom: 1px solid #e2e8f0;
-            padding: 1.25rem 1.5rem;
-        }
-
-        .table-header h5 {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #2d3748;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
         .table-responsive {
             overflow-x: auto;
         }
@@ -469,36 +388,36 @@
         }
 
         thead {
-            background: #f7fafc;
+            background: #f9fafb;
         }
 
         th {
-            padding: 1rem 1.25rem;
+            padding: 16px 20px;
             text-align: left;
-            font-size: 0.75rem;
+            font-size: 12px;
             font-weight: 700;
-            color: #4a5568;
+            color: #6b7280;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid #e5e7eb;
         }
 
         td {
-            padding: 1rem 1.25rem;
-            font-size: 0.875rem;
-            color: #4a5568;
-            border-bottom: 1px solid #f7fafc;
+            padding: 16px 20px;
+            font-size: 14px;
+            color: #4b5563;
+            border-bottom: 1px solid #f3f4f6;
         }
 
         tbody tr:hover {
-            background: #f7fafc;
+            background: #f9fafb;
         }
 
         /* Status Badges */
         .badge {
-            padding: 0.375rem 0.75rem;
+            padding: 6px 12px;
             border-radius: 6px;
-            font-size: 0.75rem;
+            font-size: 12px;
             font-weight: 600;
             display: inline-block;
         }
@@ -518,28 +437,23 @@
             color: #92400e;
         }
 
-        .badge-info {
-            background: #e0e7ff;
-            color: #3730a3;
-        }
-
         /* Action Button */
         .action-btn {
-            background: #3182ce;
+            background: #3b82f6;
             color: white;
-            padding: 0.5rem 1rem;
+            padding: 8px 16px;
             border-radius: 6px;
             text-decoration: none;
-            font-size: 0.8125rem;
+            font-size: 13px;
             font-weight: 500;
             display: inline-flex;
             align-items: center;
-            gap: 0.375rem;
+            gap: 6px;
             transition: all 0.2s;
         }
 
         .action-btn:hover {
-            background: #2c5282;
+            background: #2563eb;
             color: white;
             transform: translateY(-1px);
         }
@@ -547,29 +461,48 @@
         /* Empty State */
         .empty-state {
             text-align: center;
-            padding: 4rem 2rem;
+            padding: 60px 30px;
         }
 
         .empty-state-icon {
-            font-size: 3rem;
-            color: #cbd5e0;
-            margin-bottom: 1rem;
+            font-size: 48px;
+            color: #d1d5db;
+            margin-bottom: 16px;
         }
 
         .empty-state h5 {
             font-weight: 600;
-            color: #4a5568;
-            margin-bottom: 0.5rem;
+            color: #4b5563;
+            margin-bottom: 8px;
         }
 
         .empty-state p {
-            color: #a0aec0;
-            font-size: 0.875rem;
+            color: #9ca3af;
+            font-size: 14px;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.3);
         }
 
         /* Responsive */
         @media (max-width: 1200px) {
-            .stats-row {
+            .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
 
@@ -583,15 +516,24 @@
         }
 
         @media (max-width: 768px) {
+            .dashboard-container {
+                flex-direction: column;
+            }
+
             .sidebar {
-                transform: translateX(-100%);
+                width: 100%;
+                padding: 20px;
             }
 
             .main-content {
-                margin-left: 0;
+                padding: 20px;
             }
 
-            .stats-row {
+            .page-header h2 {
+                font-size: 24px;
+            }
+
+            .stats-grid {
                 grid-template-columns: 1fr;
             }
 
@@ -599,343 +541,295 @@
                 grid-template-columns: 1fr;
             }
         }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f7fafc;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e0;
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #a0aec0;
-        }
     </style>
 </head>
 <body>
-    <!-- Top Header -->
-    <div class="top-header">
-        <div class="logo-section">
-            <h4>PWMS</h4>
-            <small>Pharmacy Warehouse Management</small>
-        </div>
-        <div class="header-actions">
-            <button class="btn btn-secondary">
-                <i class="bi bi-chat-dots"></i> Chat
-            </button>
-            <button class="btn btn-primary">
-                <i class="bi bi-headset"></i> Support
-            </button>
-            <button class="btn btn-danger">
-                <i class="bi bi-box-arrow-right"></i> Logout
-            </button>
-            <div class="d-flex align-items-center gap-2">
-                <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center" 
-                     style="width: 36px; height: 36px;">
-                    <strong>A</strong>
-                </div>
-                <div>
-                    <div style="font-size: 0.875rem; font-weight: 600;">auditor2</div>
-                    <div style="font-size: 0.75rem; color: #718096;">Auditor</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <div class="sidebar-section">
-            <div class="sidebar-title"><i class="bi bi-hospital"></i> Auditor</div>
-            <a href="${pageContext.request.contextPath}/auditor/auditor-dashboard.jsp" class="nav-item">
-                <i class="bi bi-speedometer2"></i>
-                <span>Dashboard</span>
-            </a>
-            <a href="${pageContext.request.contextPath}/purchase-orders" class="nav-item">
-                <i class="bi bi-receipt"></i>
-                <span>Purchase Orders</span>
-            </a>
-            <a href="${pageContext.request.contextPath}/purchase-orders/history" class="nav-item active">
-                <i class="bi bi-clock-history"></i>
-                <span>PO History & Trends</span>
-            </a>
-        </div>
-
-        <div class="sidebar-section">
-            <div class="sidebar-title">Audit Tools</div>
-            <a href="${pageContext.request.contextPath}/auditlog?action=view" class="nav-item">
-                <i class="bi bi-clipboard-data"></i>
-                <span>Audit Logs</span>
-            </a>
-            <a href="${pageContext.request.contextPath}/auditlog?action=statistics" class="nav-item">
-                <i class="bi bi-graph-up"></i>
-                <span>Statistics</span>
-            </a>
-            <a href="${pageContext.request.contextPath}/auditlog?action=alerts" class="nav-item">
-                <i class="bi bi-exclamation-triangle"></i>
-                <span>Security Alerts</span>
-            </a>
-        </div>
-    </div>
-
-    <!-- Main Content -->
-    <div class="main-content">
-        <!-- Page Header -->
-        <div class="page-header">
-            <h2>
-                <i class="bi bi-clock-history"></i>
-                Purchase Orders History & Trends
-            </h2>
-            <div class="subtitle">Historical analysis and performance metrics</div>
-        </div>
-
-        <!-- Statistics Cards -->
-        <div class="stats-row">
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div>
-                        <div class="stat-label">Total Orders</div>
-                        <div class="stat-value">${totalHistoricalOrders}</div>
-                        <div class="stat-subtitle">Historical records</div>
-                    </div>
-                    <div class="stat-icon blue">
-                        <i class="bi bi-cart-check"></i>
-                    </div>
-                </div>
+    <%@ include file="/admin/header.jsp" %>
+    
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h4><i class="bi bi-hospital"></i> Auditor</h4>
+                <hr class="sidebar-divider">
             </div>
 
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div>
-                        <div class="stat-label">Total Amount</div>
-                        <div class="stat-value">
-                            <fmt:formatNumber value="${totalHistoricalAmount}" pattern="#,###" /> đ
+            <nav>
+                <a class="nav-link" href="${pageContext.request.contextPath}/auditor-dashboard">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a class="nav-link" href="${pageContext.request.contextPath}/purchase-orders">
+                    <i class="bi bi-receipt"></i> Purchase Orders
+                </a>
+                <a class="nav-link active" href="${pageContext.request.contextPath}/purchase-orders/history">
+                    <i class="bi bi-clock-history"></i> PO History & Trends
+                </a>
+                
+                <hr class="nav-divider">
+                
+                <!-- Audit Log Section -->
+                <a class="nav-link" href="${pageContext.request.contextPath}/auditlog?action=view">
+                    <i class="bi bi-clipboard-data"></i> Audit Logs
+                </a>
+                <a class="nav-link" href="${pageContext.request.contextPath}/auditlog?action=statistics">
+                    <i class="bi bi-graph-up"></i> Statistics
+                </a>
+                <a class="nav-link" href="${pageContext.request.contextPath}/auditlog?action=alerts">
+                    <i class="bi bi-exclamation-triangle"></i> Security Alerts
+                </a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h2>
+                    <i class="bi bi-clock-history"></i>
+                    Purchase Orders History & Trends
+                </h2>
+                <div class="subtitle">Historical analysis and performance metrics</div>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="stats-grid">
+                <div class="stat-card primary">
+                    <div class="stat-content">
+                        <div class="stat-info">
+                            <h6>Total Orders</h6>
+                            <h3>${totalHistoricalOrders}</h3>
                         </div>
-                        <div class="stat-subtitle">All transactions</div>
-                    </div>
-                    <div class="stat-icon green">
-                        <i class="bi bi-cash-stack"></i>
-                    </div>
-                </div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div>
-                        <div class="stat-label">Avg Order Value</div>
-                        <div class="stat-value">
-                            <fmt:formatNumber value="${avgOrderValue}" pattern="#,###" /> đ
+                        <div class="stat-icon" style="color: #3b82f6;">
+                            <i class="bi bi-cart-check"></i>
                         </div>
-                        <div class="stat-subtitle">Per order</div>
                     </div>
-                    <div class="stat-icon purple">
-                        <i class="bi bi-calculator"></i>
+                </div>
+
+                <div class="stat-card success">
+                    <div class="stat-content">
+                        <div class="stat-info">
+                            <h6>Total Amount</h6>
+                            <h3>
+                                <fmt:formatNumber value="${totalHistoricalAmount}" pattern="#,###" /> đ
+                            </h3>
+                        </div>
+                        <div class="stat-icon" style="color: #10b981;">
+                            <i class="bi bi-cash-stack"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card warning">
+                    <div class="stat-content">
+                        <div class="stat-info">
+                            <h6>Avg Order Value</h6>
+                            <h3>
+                                <fmt:formatNumber value="${avgOrderValue}" pattern="#,###" /> đ
+                            </h3>
+                        </div>
+                        <div class="stat-icon" style="color: #f59e0b;">
+                            <i class="bi bi-calculator"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card info">
+                    <div class="stat-content">
+                        <div class="stat-info">
+                            <h6>Suppliers</h6>
+                            <h3>${supplierPerformance.size()}</h3>
+                        </div>
+                        <div class="stat-icon" style="color: #3b82f6;">
+                            <i class="bi bi-building"></i>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div>
-                        <div class="stat-label">Suppliers</div>
-                        <div class="stat-value">${supplierPerformance.size()}</div>
-                        <div class="stat-subtitle">Active suppliers</div>
+            <!-- Charts Section -->
+            <div class="charts-grid">
+                <!-- Trend Chart -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h5>
+                            <i class="bi bi-graph-up-arrow"></i>
+                            Order Trends Over Time
+                        </h5>
                     </div>
-                    <div class="stat-icon orange">
-                        <i class="bi bi-building"></i>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="trendChart"></canvas>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Charts Section -->
-        <div class="charts-grid">
-            <!-- Trend Chart -->
-            <div class="card">
-                <div class="card-header">
-                    <h5>
-                        <i class="bi bi-graph-up-arrow"></i>
-                        Order Trends Over Time
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="chart-container">
-                        <canvas id="trendChart"></canvas>
+                <!-- Top Suppliers -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h5>
+                            <i class="bi bi-trophy"></i>
+                            Top Suppliers
+                        </h5>
                     </div>
-                </div>
-            </div>
-
-            <!-- Top Suppliers -->
-            <div class="card">
-                <div class="card-header">
-                    <h5>
-                        <i class="bi bi-trophy"></i>
-                        Top Suppliers
-                    </h5>
-                </div>
-                <div class="card-body p-0">
-                    <div class="supplier-list">
-                        <c:choose>
-                            <c:when test="${empty supplierPerformance}">
-                                <div class="empty-state" style="padding: 2rem;">
-                                    <div class="empty-state-icon">
-                                        <i class="bi bi-inbox"></i>
+                    <div class="card-body" style="padding: 0;">
+                        <div class="supplier-list">
+                            <c:choose>
+                                <c:when test="${empty supplierPerformance}">
+                                    <div class="empty-state" style="padding: 30px;">
+                                        <div class="empty-state-icon">
+                                            <i class="bi bi-inbox"></i>
+                                        </div>
+                                        <p>No supplier data</p>
                                     </div>
-                                    <p>No supplier data</p>
-                                </div>
-                            </c:when>
-                            <c:otherwise>
-                                <c:forEach var="perf" items="${supplierPerformance}" varStatus="status">
-                                    <c:if test="${status.index < 5}">
-                                        <div class="supplier-item">
-                                            <div class="supplier-header">
-                                                <span class="supplier-name">${perf.supplierName}</span>
-                                                <span class="rank-badge rank-${status.index + 1}">
-                                                    #${status.index + 1}
-                                                </span>
-                                            </div>
-                                            <div class="supplier-meta">
-                                                ${perf.totalOrders} orders • 
-                                                <fmt:formatNumber value="${perf.totalAmount}" pattern="#,###"/> đ
-                                            </div>
-                                            <div class="progress-bar-wrapper">
-                                                <div class="progress-bar-fill" 
-                                                     style="width: ${(perf.completedOrders * 100.0 / perf.totalOrders)}%">
+                                </c:when>
+                                <c:otherwise>
+                                    <c:forEach var="perf" items="${supplierPerformance}" varStatus="status">
+                                        <c:if test="${status.index < 5}">
+                                            <div class="supplier-item" style="padding: 16px 24px;">
+                                                <div class="supplier-header">
+                                                    <span class="supplier-name">${perf.supplierName}</span>
+                                                    <span class="rank-badge rank-${status.index + 1}">
+                                                        #${status.index + 1}
+                                                    </span>
+                                                </div>
+                                                <div class="supplier-meta">
+                                                    ${perf.totalOrders} orders • 
+                                                    <fmt:formatNumber value="${perf.totalAmount}" pattern="#,###"/> đ
+                                                </div>
+                                                <div class="progress-bar-wrapper">
+                                                    <div class="progress-bar-fill" 
+                                                         style="width: ${(perf.completedOrders * 100.0 / perf.totalOrders)}%">
+                                                    </div>
+                                                </div>
+                                                <div class="completion-text">
+                                                    ${perf.completedOrders}/${perf.totalOrders} completed 
+                                                    (${String.format("%.0f", (perf.completedOrders * 100.0 / perf.totalOrders))}%)
                                                 </div>
                                             </div>
-                                            <div class="completion-text">
-                                                ${perf.completedOrders}/${perf.totalOrders} completed 
-                                                (${String.format("%.0f", (perf.completedOrders * 100.0 / perf.totalOrders))}%)
-                                            </div>
-                                        </div>
-                                    </c:if>
-                                </c:forEach>
-                            </c:otherwise>
-                        </c:choose>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Filter Section -->
-        <div class="filter-section">
-            <form method="get" action="${pageContext.request.contextPath}/purchase-orders/history">
-                <div class="filter-grid">
-                    <div class="form-group">
-                        <label>Supplier</label>
-                        <select name="supplierId" class="form-select">
-                            <option value="">All Suppliers</option>
-                            <c:forEach var="supplier" items="${suppliers}">
-                                <option value="${supplier.supplierId}" 
-                                        ${selectedSupplierId == supplier.supplierId ? 'selected' : ''}>
-                                    ${supplier.name}
-                                </option>
-                            </c:forEach>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>From Date</label>
-                        <input type="date" name="fromDate" class="form-control" value="${fromDate}">
-                    </div>
-                    <div class="form-group">
-                        <label>To Date</label>
-                        <input type="date" name="toDate" class="form-control" value="${toDate}">
-                    </div>
-                    <div class="form-group">
-                        <label>Search</label>
-                        <input type="text" name="search" class="form-control" 
-                               placeholder="PO ID, Supplier..." value="${searchKeyword}">
-                    </div>
-                    <div class="form-group" style="display: flex; align-items: flex-end;">
-                        <div class="btn-group" style="width: 100%;">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-funnel"></i> Filter
-                            </button>
-                            <button type="button" class="btn btn-secondary" onclick="clearFilters()">
-                                <i class="bi bi-x-circle"></i> Clear
-                            </button>
+                                        </c:if>
+                                    </c:forEach>
+                                </c:otherwise>
+                            </c:choose>
                         </div>
                     </div>
                 </div>
-            </form>
-        </div>
-
-        <!-- Table -->
-        <div class="table-container">
-            <div class="table-header">
-                <h5>
-                    <i class="bi bi-list-ul"></i>
-                    Purchase Orders List
-                </h5>
             </div>
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>PO ID</th>
-                            <th>Order Date</th>
-                            <th>Supplier</th>
-                            <th>Manager</th>
-                            <th>Status</th>
-                            <th>Items</th>
-                            <th>Total Amount</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <c:choose>
-                            <c:when test="${empty historicalOrders}">
-                                <tr>
-                                    <td colspan="8">
-                                        <div class="empty-state">
-                                            <div class="empty-state-icon">
-                                                <i class="bi bi-inbox"></i>
-                                            </div>
-                                            <h5>No Historical Orders Found</h5>
-                                            <p>Try adjusting your filters or check back later</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </c:when>
-                            <c:otherwise>
-                                <c:forEach var="po" items="${historicalOrders}">
-                                    <tr>
-                                        <td><strong>#${po.poId}</strong></td>
-                                        <td>
-                                            <fmt:formatDate value="${po.orderDate}" pattern="dd/MM/yyyy"/>
-                                        </td>
-                                        <td>${po.supplierName}</td>
-                                        <td>${po.managerName}</td>
-                                        <td>
-                                            <span class="badge badge-success">${po.status}</span>
-                                        </td>
-                                        <td>
-                                            <span class="badge badge-primary">${po.itemCount} items</span>
-                                        </td>
-                                        <td>
-                                            <strong>
-                                                <fmt:formatNumber value="${po.totalAmount}" pattern="#,###"/> đ
-                                            </strong>
-                                        </td>
-                                        <td>
-                                            <a href="${pageContext.request.contextPath}/purchase-orders?action=view&id=${po.poId}" 
-                                               class="action-btn">
-                                                <i class="bi bi-eye"></i> View
-                                            </a>
-                                        </td>
-                                    </tr>
+
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <form method="get" action="${pageContext.request.contextPath}/purchase-orders/history">
+                    <div class="filter-grid">
+                        <div class="form-group">
+                            <label>Supplier</label>
+                            <select name="supplierId" class="form-select">
+                                <option value="">All Suppliers</option>
+                                <c:forEach var="supplier" items="${suppliers}">
+                                    <option value="${supplier.supplierId}" 
+                                            ${selectedSupplierId == supplier.supplierId ? 'selected' : ''}>
+                                        ${supplier.name}
+                                    </option>
                                 </c:forEach>
-                            </c:otherwise>
-                        </c:choose>
-                    </tbody>
-                </table>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>From Date</label>
+                            <input type="date" name="fromDate" class="form-control" value="${fromDate}">
+                        </div>
+                        <div class="form-group">
+                            <label>To Date</label>
+                            <input type="date" name="toDate" class="form-control" value="${toDate}">
+                        </div>
+                        <div class="form-group">
+                            <label>Search</label>
+                            <input type="text" name="search" class="form-control" 
+                                   placeholder="PO ID, Supplier..." value="${searchKeyword}">
+                        </div>
+                        <div class="form-group" style="display: flex; align-items: flex-end;">
+                            <div class="btn-group" style="width: 100%;">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-funnel"></i> Filter
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="clearFilters()">
+                                    <i class="bi bi-x-circle"></i> Clear
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Table -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h5>
+                        <i class="bi bi-list-ul"></i>
+                        Purchase Orders List
+                    </h5>
+                </div>
+                <div class="card-body" style="padding: 0;">
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>PO ID</th>
+                                    <th>Order Date</th>
+                                    <th>Supplier</th>
+                                    <th>Manager</th>
+                                    <th>Status</th>
+                                    <th>Items</th>
+                                    <th>Total Amount</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <c:choose>
+                                    <c:when test="${empty historicalOrders}">
+                                        <tr>
+                                            <td colspan="8">
+                                                <div class="empty-state">
+                                                    <div class="empty-state-icon">
+                                                        <i class="bi bi-inbox"></i>
+                                                    </div>
+                                                    <h5>No Historical Orders Found</h5>
+                                                    <p>Try adjusting your filters or check back later</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <c:forEach var="po" items="${historicalOrders}">
+                                            <tr>
+                                                <td><strong>#${po.poId}</strong></td>
+                                                <td>
+                                                    <fmt:formatDate value="${po.orderDate}" pattern="dd/MM/yyyy"/>
+                                                </td>
+                                                <td>${po.supplierName}</td>
+                                                <td>${po.managerName}</td>
+                                                <td>
+                                                    <span class="badge badge-success">${po.status}</span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge badge-primary">${po.itemCount} items</span>
+                                                </td>
+                                                <td>
+                                                    <strong>
+                                                        <fmt:formatNumber value="${po.totalAmount}" pattern="#,###"/> đ
+                                                    </strong>
+                                                </td>
+                                                <td>
+                                                    <a href="${pageContext.request.contextPath}/purchase-orders?action=view&id=${po.poId}" 
+                                                       class="action-btn">
+                                                        <i class="bi bi-eye"></i> View
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </c:forEach>
+                                    </c:otherwise>
+                                </c:choose>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -960,30 +854,30 @@
                             {
                                 label: 'Number of Orders',
                                 data: orderCounts,
-                                borderColor: '#3182ce',
-                                backgroundColor: 'rgba(49, 130, 206, 0.1)',
+                                borderColor: '#3b82f6',
+                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
                                 borderWidth: 2,
                                 fill: true,
                                 yAxisID: 'y',
                                 tension: 0.4,
                                 pointRadius: 4,
                                 pointHoverRadius: 6,
-                                pointBackgroundColor: '#3182ce',
+                                pointBackgroundColor: '#3b82f6',
                                 pointBorderColor: '#fff',
                                 pointBorderWidth: 2
                             },
                             {
                                 label: 'Total Amount (đ)',
                                 data: amounts,
-                                borderColor: '#38a169',
-                                backgroundColor: 'rgba(56, 161, 105, 0.1)',
+                                borderColor: '#10b981',
+                                backgroundColor: 'rgba(16, 185, 129, 0.1)',
                                 borderWidth: 2,
                                 fill: true,
                                 yAxisID: 'y1',
                                 tension: 0.4,
                                 pointRadius: 4,
                                 pointHoverRadius: 6,
-                                pointBackgroundColor: '#38a169',
+                                pointBackgroundColor: '#10b981',
                                 pointBorderColor: '#fff',
                                 pointBorderWidth: 2
                             }
@@ -1053,7 +947,7 @@
                                         weight: '600',
                                         family: "'Inter', sans-serif"
                                     },
-                                    color: '#3182ce'
+                                    color: '#3b82f6'
                                 },
                                 grid: {
                                     color: 'rgba(0, 0, 0, 0.05)',
@@ -1064,7 +958,7 @@
                                         size: 10,
                                         family: "'Inter', sans-serif"
                                     },
-                                    color: '#718096'
+                                    color: '#6b7280'
                                 }
                             },
                             y1: {
@@ -1079,7 +973,7 @@
                                         weight: '600',
                                         family: "'Inter', sans-serif"
                                     },
-                                    color: '#38a169'
+                                    color: '#10b981'
                                 },
                                 grid: {
                                     drawOnChartArea: false,
@@ -1090,7 +984,7 @@
                                         size: 10,
                                         family: "'Inter', sans-serif"
                                     },
-                                    color: '#718096',
+                                    color: '#6b7280',
                                     callback: function(value) {
                                         return new Intl.NumberFormat('vi-VN', {
                                             notation: 'compact',
@@ -1109,7 +1003,7 @@
                                         size: 10,
                                         family: "'Inter', sans-serif"
                                     },
-                                    color: '#718096'
+                                    color: '#6b7280'
                                 }
                             }
                         }
@@ -1141,27 +1035,12 @@
             this.form.submit();
         });
 
-        // Format numbers
-        document.querySelectorAll('.stat-value').forEach(element => {
-            const text = element.textContent.trim();
-            const number = parseInt(text.replace(/[^\d]/g, ''));
-            if (!isNaN(number) && text.indexOf('đ') === -1) {
-                element.textContent = new Intl.NumberFormat('vi-VN').format(number);
-            }
-        });
-
-        // Add active state to current nav item
-        const currentPath = window.location.pathname;
-        document.querySelectorAll('.nav-item').forEach(item => {
-            if (item.getAttribute('href') === currentPath) {
-                item.classList.add('active');
-            }
-        });
-
         // Console log
         console.log('PO History Page Loaded');
         console.log('Total Orders:', ${totalHistoricalOrders});
         console.log('Trend Data:', trendData ? trendData.length + ' points' : 'No data');
     </script>
+    
+    <%@ include file="/admin/footer.jsp" %>
 </body>
 </html>

@@ -698,9 +698,6 @@
                     <a class="sidebar-item" href="${pageContext.request.contextPath}/admin-dashboard/notifications">
                         🛎 ️Gửi Thông báo
                     </a>
-                    <a class="sidebar-item" href="${pageContext.request.contextPath}/admin/permissions">
-                        🔐 Phân quyền
-                    </a>
                     <a class="sidebar-item" href="${pageContext.request.contextPath}/admin-dashboard/create">
                         ➕ Tạo tài khoản
                     </a>

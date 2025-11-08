@@ -210,12 +210,128 @@
             .password-toggle:hover {
                 color: #6c757d;
             }
+
+            /* CAPTCHA Styles */
+            .captcha-container {
+                background: #f8f9fa;
+                border: 2px solid #e9ecef;
+                border-radius: 12px;
+                padding: 20px;
+                margin-top: 20px;
+                animation: fadeIn 0.3s ease;
+            }
+
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: scale(0.95);
+                }
+                to {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+            }
+
+            .captcha-header {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 16px;
+                font-size: 14px;
+                font-weight: 600;
+                color: #dc3545;
+            }
+
+            .captcha-image-wrapper {
+                position: relative;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                margin-bottom: 16px;
+            }
+
+            .captcha-image {
+                flex: 1;
+                border: 2px solid #dee2e6;
+                border-radius: 8px;
+                background: white;
+                overflow: hidden;
+            }
+
+            .captcha-image img {
+                width: 100%;
+                height: auto;
+                display: block;
+            }
+
+            .captcha-refresh {
+                background: #6c757d;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                width: 48px;
+                height: 48px;
+                cursor: pointer;
+                font-size: 20px;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .captcha-refresh:hover {
+                background: #5a6268;
+                transform: rotate(180deg);
+            }
+
+            .captcha-input {
+                width: 100%;
+                padding: 12px 16px;
+                border: 2px solid #ced4da;
+                border-radius: 8px;
+                font-size: 16px;
+                text-align: center;
+                font-weight: 600;
+                transition: all 0.3s ease;
+            }
+
+            .captcha-input:focus {
+                outline: none;
+                border-color: #6c757d;
+                box-shadow: 0 0 0 4px rgba(108, 117, 125, 0.1);
+            }
+
+            .captcha-hint {
+                text-align: center;
+                font-size: 13px;
+                color: #6c757d;
+                margin-top: 8px;
+            }
+
+            .loading {
+                pointer-events: none;
+                opacity: 0.6;
+            }
+
+            .spinner {
+                display: inline-block;
+                width: 14px;
+                height: 14px;
+                border: 2px solid rgba(255,255,255,0.3);
+                border-radius: 50%;
+                border-top-color: white;
+                animation: spin 0.6s linear infinite;
+            }
+
+            @keyframes spin {
+                to { transform: rotate(360deg); }
+            }
         </style>
     </head>
     <body>
         <div class="login-container">
             <div class="login-header">
-                <div class="login-icon"></div>
+                <div class="login-icon">🏥</div>
                 <h1>Đăng nhập</h1>
                 <p>Hệ thống quản lý kho bệnh viện</p>
             </div>
@@ -223,19 +339,19 @@
             <div class="login-body">
                 <% if (request.getAttribute("error") != null) { %>
                 <div class="alert alert-danger">
-                    <span>Lỗi</span>
+                    <span>⚠️</span>
                     <span>${error}</span>
                 </div>
                 <% } %>
 
                 <% if (request.getAttribute("message") != null) { %>
                 <div class="alert alert-success">
-                    <span>Thành công</span>
+                    <span>✅</span>
                     <span>${message}</span>
                 </div>
                 <% } %>
 
-                <form action="login" method="post">
+                <form action="login" method="post" id="loginForm">
                     <div class="form-group">
                         <label for="emailOrUsername">Email hoặc Username</label>
                         <div class="input-wrapper">
@@ -247,7 +363,8 @@
                                 class="form-control" 
                                 placeholder="Nhập email hoặc username"
                                 required
-                                autofocus>
+                                autofocus
+                                value="${param.emailOrUsername}">
                         </div>
                     </div>
 
@@ -266,11 +383,43 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="btn-login">
+                    <%-- CAPTCHA Section (hiển thị sau 3 lần sai) --%>
+                    <% if (request.getAttribute("needCaptcha") != null && (Boolean)request.getAttribute("needCaptcha")) { %>
+                    <div class="captcha-container">
+                        <div class="captcha-header">
+                            <span>🔒</span>
+                            <span>Vui lòng giải phép tính để tiếp tục</span>
+                        </div>
+                        
+                        <div class="captcha-image-wrapper">
+                            <div class="captcha-image">
+                                <img id="captchaImg" src="${captchaImage}" alt="CAPTCHA">
+                            </div>
+                            <button type="button" class="captcha-refresh" onclick="refreshCaptcha()" title="Làm mới CAPTCHA">
+                                🔄
+                            </button>
+                        </div>
+
+                        <input 
+                            type="text" 
+                            name="captcha" 
+                            class="captcha-input" 
+                            placeholder="Nhập đáp án" 
+                            required
+                            autocomplete="off"
+                            pattern="[0-9]*"
+                            inputmode="numeric">
+                        
+                        <div class="captcha-hint">
+                            💡 Nhập kết quả của phép tính trên
+                        </div>
+                    </div>
+                    <% } %>
+
+                    <button type="submit" class="btn-login" id="loginBtn">
                         Đăng nhập
                     </button>
                 </form>
-
             </div>
 
             <div class="login-footer">
@@ -297,6 +446,51 @@
                     toggle.textContent = '👁️';
                 }
             }
+
+            function refreshCaptcha() {
+                const btn = document.querySelector('.captcha-refresh');
+                const img = document.getElementById('captchaImg');
+                
+                btn.disabled = true;
+                btn.innerHTML = '<div class="spinner"></div>';
+                
+                fetch('${pageContext.request.contextPath}/refresh-captcha')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            img.src = data.image;
+                            document.querySelector('.captcha-input').value = '';
+                            document.querySelector('.captcha-input').focus();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error refreshing CAPTCHA:', error);
+                        alert('Không thể làm mới CAPTCHA. Vui lòng tải lại trang.');
+                    })
+                    .finally(() => {
+                        btn.disabled = false;
+                        btn.innerHTML = '🔄';
+                    });
+            }
+
+            // Auto focus vào CAPTCHA input nếu có
+            window.addEventListener('DOMContentLoaded', function() {
+                const captchaInput = document.querySelector('.captcha-input');
+                if (captchaInput) {
+                    captchaInput.focus();
+                }
+            });
+
+            // Prevent multiple submissions
+            document.getElementById('loginForm').addEventListener('submit', function(e) {
+                const btn = document.getElementById('loginBtn');
+                if (btn.classList.contains('loading')) {
+                    e.preventDefault();
+                    return;
+                }
+                btn.classList.add('loading');
+                btn.innerHTML = '<span class="spinner"></span> Đang xử lý...';
+            });
         </script>
     </body>
 </html>

@@ -3,15 +3,7 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/ADMIN/java/backup/SWP391_G1_GA1947/HMS/web/auditor/purchase-orders.jsp</file>
-            <file>file:/C:/Users/ADMIN/java/backup/SWP391_G1_GA1947/HMS/src/java/Controller/PurchaseOrderServlet.java</file>
-            <file>file:/C:/Users/ADMIN/java/backup/SWP391_G1_GA1947/HMS/src/java/Controller/AuditLogServlet.java</file>
-            <file>file:/C:/Users/ADMIN/java/backup/SWP391_G1_GA1947/HMS/src/java/DAO/AudtitLogDAO.java</file>
-            <file>file:/C:/Users/ADMIN/java/backup/SWP391_G1_GA1947/HMS/src/java/Controller/PurchaseOrderHistoryServlet.java</file>
-            <file>file:/C:/Users/ADMIN/java/backup/SWP391_G1_GA1947/HMS/src/java/model/PurchaseOrder.java</file>
-            <file>file:/C:/Users/ADMIN/java/backup/SWP391_G1_GA1947/HMS/web/auditor/purchase-orders-history.jsp</file>
-            <file>file:/C:/Users/ADMIN/java/backup/SWP391_G1_GA1947/HMS/src/java/DAO/PurchaseOrderDAO.java</file>
-            <file>file:/C:/Users/ADMIN/java/backup/SWP391_G1_GA1947/HMS/web/auditor/auditStatistics.jsp</file>
+            <file>file:/C:/App/SWP/dev%208-11/SWP391_G1_GA1947/HMS/web/WEB-INF/web.xml</file>
         </group>
     </open-files>
 </project-private>

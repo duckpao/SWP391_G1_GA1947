@@ -4095,4 +4095,129 @@ BEGIN
     PRINT 'No Auditor found for testing';
 END
 
+-- =====================================================
+-- BƯỚC 1: Kiểm tra Constraint hiện tại
+-- =====================================================
+PRINT 'Step 1: Checking current constraints...';
+SELECT 
+    cc.name AS ConstraintName,
+    cc.definition AS ConstraintDefinition
+FROM sys.check_constraints cc
+WHERE cc.parent_object_id = OBJECT_ID('PurchaseOrders')
+  AND cc.definition LIKE '%status%';
 
+-- =====================================================
+-- BƯỚC 2: Drop Constraint CHECK cũ
+-- =====================================================
+PRINT '';
+PRINT 'Step 2: Dropping old status constraint...';
+
+DECLARE @ConstraintName NVARCHAR(200);
+SELECT @ConstraintName = cc.name 
+FROM sys.check_constraints cc
+WHERE cc.parent_object_id = OBJECT_ID('PurchaseOrders')
+  AND cc.definition LIKE '%status%';
+
+IF @ConstraintName IS NOT NULL
+BEGIN
+    DECLARE @DropSQL NVARCHAR(500) = 'ALTER TABLE PurchaseOrders DROP CONSTRAINT ' + QUOTENAME(@ConstraintName);
+    EXEC sp_executesql @DropSQL;
+    PRINT 'Dropped constraint: ' + @ConstraintName;
+END
+ELSE
+BEGIN
+    PRINT 'No status constraint found';
+END
+
+-- =====================================================
+-- BƯỚC 3: Thêm Constraint mới với 'Cancelled'
+-- =====================================================
+PRINT '';
+PRINT 'Step 3: Adding new constraint with Cancelled status...';
+
+ALTER TABLE PurchaseOrders 
+ADD CONSTRAINT CK_PurchaseOrders_Status 
+CHECK (status IN ('Draft','Sent','Approved','Received','Rejected','Completed','Cancelled'));
+
+PRINT 'New constraint added successfully!';
+
+-- =====================================================
+-- BƯỚC 4: Kiểm tra lại
+-- =====================================================
+PRINT '';
+PRINT 'Step 4: Verification...';
+
+SELECT 
+    cc.name AS ConstraintName,
+    cc.definition AS AllowedStatuses
+FROM sys.check_constraints cc
+WHERE cc.parent_object_id = OBJECT_ID('PurchaseOrders')
+  AND cc.definition LIKE '%status%';
+
+-- =====================================================
+-- BƯỚC 5: Test Cancel một PO (nếu có)
+-- =====================================================
+PRINT '';
+PRINT 'Step 5: Testing cancel operation...';
+
+-- Tìm một PO có status = 'Sent' để test
+DECLARE @TestPoId INT;
+SELECT TOP 1 @TestPoId = po_id 
+FROM PurchaseOrders 
+WHERE status = 'Sent';
+
+IF @TestPoId IS NOT NULL
+BEGIN
+    PRINT 'Found test PO: #' + CAST(@TestPoId AS VARCHAR);
+    
+    -- Test update (rollback sau)
+    BEGIN TRANSACTION;
+    
+    UPDATE PurchaseOrders 
+    SET status = 'Cancelled', 
+        notes = CONCAT(COALESCE(notes, ''), CHAR(13) + CHAR(10) + 'Cancellation Reason: Test cancel'),
+        updated_at = GETDATE()
+    WHERE po_id = @TestPoId;
+    
+    IF @@ROWCOUNT > 0
+    BEGIN
+        PRINT 'Test cancel successful! Rolling back...';
+        ROLLBACK TRANSACTION;
+    END
+    ELSE
+    BEGIN
+        PRINT 'Test cancel failed!';
+        ROLLBACK TRANSACTION;
+    END
+END
+ELSE
+BEGIN
+    PRINT 'No PO with Sent status found for testing';
+END
+
+-- =====================================================
+-- BƯỚC 6: Kiểm tra các PO đã bị cancel (nếu có)
+-- =====================================================
+PRINT '';
+PRINT 'Step 6: Checking existing cancelled orders...';
+
+SELECT 
+    po_id,
+    status,
+    order_date,
+    updated_at,
+    notes
+FROM PurchaseOrders
+WHERE status = 'Cancelled'
+ORDER BY updated_at DESC;
+
+IF @@ROWCOUNT = 0
+BEGIN
+    PRINT 'No cancelled orders found in database';
+END
+
+PRINT '';
+PRINT '==========================================';
+PRINT 'FIX COMPLETED!';
+PRINT '==========================================';
+GO

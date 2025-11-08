@@ -3620,4 +3620,511 @@ ELSE
 BEGIN
     PRINT 'No Auditor found for testing';
 END
+USE SWP391;
+GO
+
+-- =====================================================
+-- RESTRICTED AUDITOR ACCESS
+-- Auditor chỉ xem được logs liên quan đến:
+-- - Purchase Orders (đặt hàng)
+-- - Invoices (thanh toán)
+-- - Advanced Shipping Notices (vận chuyển)
+-- - Delivery Notes (giao hàng)
+-- - Transactions (giao dịch kho)
+-- Của Manager và Supplier
+-- =====================================================
+
+PRINT '========================================';
+PRINT 'Updating Auditor Access Control';
+PRINT '========================================';
+
+-- =====================================================
+-- VIEW: Audit Logs - Procurement Only
+-- =====================================================
+IF OBJECT_ID('vw_AuditLogDetails', 'V') IS NOT NULL 
+    DROP VIEW vw_AuditLogDetails;
+GO
+
+CREATE VIEW vw_AuditLogDetails AS
+SELECT 
+    sl.log_id,
+    sl.user_id,
+    u.username,
+    u.email,
+    u.role,
+    sl.action,
+    sl.table_name,
+    sl.record_id,
+    sl.old_value,
+    sl.new_value,
+    sl.details,
+    sl.ip_address,
+    sl.log_date,
+    CASE 
+        WHEN sl.action IN ('DELETE', 'REJECT', 'CANCEL') THEN 'high'
+        WHEN sl.action IN ('UPDATE', 'APPROVE') THEN 'medium'
+        ELSE 'low'
+    END AS risk_level,
+    CASE 
+        WHEN sl.table_name IN ('Users', 'Permissions', 'UserPermissions') THEN 'Security'
+        WHEN sl.table_name IN ('Medicines', 'Batches', 'Transactions') THEN 'Inventory'
+        WHEN sl.table_name IN ('PurchaseOrders', 'Invoices', 'AdvancedShippingNotices', 'DeliveryNotes') THEN 'Procurement'
+        ELSE 'Other'
+    END AS category,
+    -- Flag for procurement-related logs
+    CASE 
+        WHEN sl.table_name IN ('PurchaseOrders', 'PurchaseOrderItems', 'Invoices', 
+                               'AdvancedShippingNotices', 'ASNItems', 'DeliveryNotes', 
+                               'Transactions', 'Suppliers')
+        AND u.role IN ('Manager', 'Supplier', 'Admin')
+        THEN 1
+        ELSE 0
+    END AS is_procurement_log
+FROM SystemLogs sl
+LEFT JOIN Users u ON sl.user_id = u.user_id;
+GO
+
+PRINT 'Created view: vw_AuditLogDetails';
+
+-- =====================================================
+-- STORED PROCEDURE: Get Audit Logs (Updated)
+-- =====================================================
+IF OBJECT_ID('sp_GetAuditLogs', 'P') IS NOT NULL 
+    DROP PROCEDURE sp_GetAuditLogs;
+GO
+
+CREATE PROCEDURE sp_GetAuditLogs
+    @CurrentUserId INT,
+    @StartDate DATETIME = NULL,
+    @EndDate DATETIME = NULL,
+    @TargetUserId INT = NULL,
+    @Username NVARCHAR(50) = NULL,
+    @Role NVARCHAR(50) = NULL,
+    @Action NVARCHAR(100) = NULL,
+    @TableName NVARCHAR(50) = NULL,
+    @RiskLevel NVARCHAR(20) = NULL,
+    @Category NVARCHAR(50) = NULL,
+    @PageNumber INT = 1,
+    @PageSize INT = 50
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Lấy role của user hiện tại
+    DECLARE @CurrentUserRole NVARCHAR(50);
+    SELECT @CurrentUserRole = role FROM Users WHERE user_id = @CurrentUserId;
+    
+    -- Kiểm tra quyền truy cập
+    IF @CurrentUserRole IS NULL
+    BEGIN
+        SELECT 'ERROR' AS status, N'User không tồn tại' AS message;
+        RETURN;
+    END
+    
+    -- Chỉ Admin và Auditor được phép
+    IF @CurrentUserRole NOT IN ('Admin', 'Auditor')
+    BEGIN
+        SELECT 'ERROR' AS status, N'Bạn không có quyền truy cập audit logs' AS message;
+        RETURN;
+    END
+    
+    DECLARE @Offset INT = (@PageNumber - 1) * @PageSize;
+    
+    -- Get total count
+    DECLARE @TotalRecords INT;
+    SELECT @TotalRecords = COUNT(*)
+    FROM vw_AuditLogDetails
+    WHERE 
+        -- ADMIN: Xem tất cả
+        -- AUDITOR: Chỉ xem logs liên quan procurement (Manager, Supplier, Admin)
+        (@CurrentUserRole = 'Admin' OR is_procurement_log = 1)
+        AND (@StartDate IS NULL OR log_date >= @StartDate)
+        AND (@EndDate IS NULL OR log_date <= @EndDate)
+        AND (@TargetUserId IS NULL OR user_id = @TargetUserId)
+        AND (@Username IS NULL OR username LIKE '%' + @Username + '%')
+        AND (@Role IS NULL OR role = @Role)
+        AND (@Action IS NULL OR action = @Action)
+        AND (@TableName IS NULL OR table_name = @TableName)
+        AND (@RiskLevel IS NULL OR risk_level = @RiskLevel)
+        AND (@Category IS NULL OR category = @Category);
+    
+    -- Get paginated results
+    SELECT 
+        log_id,
+        user_id,
+        username,
+        email,
+        role,
+        action,
+        table_name,
+        record_id,
+        old_value,
+        new_value,
+        details,
+        ip_address,
+        log_date,
+        risk_level,
+        category,
+        @TotalRecords AS total_records,
+        CEILING(CAST(@TotalRecords AS FLOAT) / @PageSize) AS total_pages,
+        @CurrentUserRole AS viewer_role,
+        CASE WHEN @CurrentUserRole = 'Auditor' THEN 'Procurement Only' ELSE 'Full System' END AS access_scope
+    FROM vw_AuditLogDetails
+    WHERE 
+        -- ADMIN: Xem tất cả
+        -- AUDITOR: Chỉ xem logs liên quan procurement
+        (@CurrentUserRole = 'Admin' OR is_procurement_log = 1)
+        AND (@StartDate IS NULL OR log_date >= @StartDate)
+        AND (@EndDate IS NULL OR log_date <= @EndDate)
+        AND (@TargetUserId IS NULL OR user_id = @TargetUserId)
+        AND (@Username IS NULL OR username LIKE '%' + @Username + '%')
+        AND (@Role IS NULL OR role = @Role)
+        AND (@Action IS NULL OR action = @Action)
+        AND (@TableName IS NULL OR table_name = @TableName)
+        AND (@RiskLevel IS NULL OR risk_level = @RiskLevel)
+        AND (@Category IS NULL OR category = @Category)
+    ORDER BY log_date DESC
+    OFFSET @Offset ROWS
+    FETCH NEXT @PageSize ROWS ONLY;
+END;
+GO
+
+PRINT 'Created procedure: sp_GetAuditLogs';
+
+-- =====================================================
+-- STORED PROCEDURE: Get Audit Statistics (Procurement-Focused)
+-- =====================================================
+IF OBJECT_ID('sp_GetAuditStatistics', 'P') IS NOT NULL 
+    DROP PROCEDURE sp_GetAuditStatistics;
+GO
+
+CREATE PROCEDURE sp_GetAuditStatistics
+    @CurrentUserId INT,
+    @StartDate DATETIME = NULL,
+    @EndDate DATETIME = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Lấy role của user hiện tại
+    DECLARE @CurrentUserRole NVARCHAR(50);
+    SELECT @CurrentUserRole = role FROM Users WHERE user_id = @CurrentUserId;
+    
+    -- Kiểm tra quyền truy cập
+    IF @CurrentUserRole IS NULL
+    BEGIN
+        SELECT 'ERROR' AS status, N'User không tồn tại' AS message;
+        RETURN;
+    END
+    
+    IF @CurrentUserRole NOT IN ('Admin', 'Auditor')
+    BEGIN
+        SELECT 'ERROR' AS status, N'Bạn không có quyền xem thống kê audit' AS message;
+        RETURN;
+    END
+    
+    -- Set default date range
+    IF @StartDate IS NULL SET @StartDate = DATEADD(DAY, -30, GETDATE());
+    IF @EndDate IS NULL SET @EndDate = GETDATE();
+    
+    -- PROCUREMENT-FOCUSED STATISTICS
+    SELECT 
+        COUNT(*) AS total_actions,
+        COUNT(DISTINCT vw.user_id) AS active_users,
+        COUNT(DISTINCT table_name) AS affected_tables,
+        COUNT(DISTINCT CAST(log_date AS DATE)) AS active_days,
+        
+        -- PROCUREMENT-SPECIFIC METRICS (thay vì login/create/update/delete)
+        SUM(CASE WHEN table_name = 'PurchaseOrders' THEN 1 ELSE 0 END) AS purchase_order_actions,
+        SUM(CASE WHEN table_name = 'Invoices' THEN 1 ELSE 0 END) AS invoice_actions,
+        SUM(CASE WHEN table_name = 'AdvancedShippingNotices' THEN 1 ELSE 0 END) AS shipping_actions,
+        SUM(CASE WHEN table_name = 'DeliveryNotes' THEN 1 ELSE 0 END) AS delivery_actions,
+        SUM(CASE WHEN table_name IN ('Transactions', 'Batches') THEN 1 ELSE 0 END) AS inventory_actions,
+        
+        -- Approval/Rejection stats (quan trọng cho procurement)
+        SUM(CASE WHEN action IN ('APPROVE', 'APPROVED') THEN 1 ELSE 0 END) AS total_approvals,
+        SUM(CASE WHEN action IN ('REJECT', 'REJECTED') THEN 1 ELSE 0 END) AS total_rejections,
+        
+        -- Manager vs Supplier activity
+        SUM(CASE WHEN vw.role = 'Manager' THEN 1 ELSE 0 END) AS manager_actions,
+        SUM(CASE WHEN vw.role = 'Supplier' THEN 1 ELSE 0 END) AS supplier_actions,
+        
+        @CurrentUserRole AS viewer_role,
+        CASE WHEN @CurrentUserRole = 'Auditor' THEN 'Procurement Only' ELSE 'Full System' END AS access_scope
+    FROM vw_AuditLogDetails vw
+    WHERE vw.log_date BETWEEN @StartDate AND @EndDate
+        -- AUDITOR: Chỉ thống kê logs procurement
+        AND (@CurrentUserRole = 'Admin' OR vw.is_procurement_log = 1);
+    
+    -- Actions by role (Manager vs Supplier)
+    SELECT 
+        vw.role,
+        COUNT(vw.log_id) AS action_count,
+        COUNT(DISTINCT vw.user_id) AS user_count
+    FROM vw_AuditLogDetails vw
+    WHERE vw.log_date BETWEEN @StartDate AND @EndDate
+        AND (@CurrentUserRole = 'Admin' OR vw.is_procurement_log = 1)
+    GROUP BY vw.role
+    ORDER BY action_count DESC;
+    
+    -- Actions by procurement table
+    SELECT 
+        vw.table_name,
+        COUNT(*) AS action_count
+    FROM vw_AuditLogDetails vw
+    WHERE vw.log_date BETWEEN @StartDate AND @EndDate
+        AND (@CurrentUserRole = 'Admin' OR vw.is_procurement_log = 1)
+        AND vw.table_name IN ('PurchaseOrders', 'Invoices', 'AdvancedShippingNotices', 
+                              'DeliveryNotes', 'Transactions', 'Suppliers')
+    GROUP BY vw.table_name
+    ORDER BY action_count DESC;
+    
+    -- Top 10 most active users (Manager & Supplier)
+    SELECT TOP 10
+        vw.username,
+        vw.role,
+        COUNT(vw.log_id) AS action_count,
+        MAX(vw.log_date) AS last_action
+    FROM vw_AuditLogDetails vw
+    WHERE vw.log_date BETWEEN @StartDate AND @EndDate
+        AND (@CurrentUserRole = 'Admin' OR vw.is_procurement_log = 1)
+    GROUP BY vw.username, vw.role
+    ORDER BY action_count DESC;
+    
+    -- Daily activity trend
+    SELECT 
+        CAST(vw.log_date AS DATE) AS log_date,
+        COUNT(*) AS action_count,
+        COUNT(DISTINCT vw.user_id) AS active_users,
+        SUM(CASE WHEN vw.role = 'Manager' THEN 1 ELSE 0 END) AS manager_actions,
+        SUM(CASE WHEN vw.role = 'Supplier' THEN 1 ELSE 0 END) AS supplier_actions
+    FROM vw_AuditLogDetails vw
+    WHERE vw.log_date BETWEEN @StartDate AND @EndDate
+        AND (@CurrentUserRole = 'Admin' OR vw.is_procurement_log = 1)
+    GROUP BY CAST(vw.log_date AS DATE)
+    ORDER BY log_date DESC;
+END;
+GO
+
+PRINT 'Created procedure: sp_GetAuditStatistics (Procurement-Focused)';
+
+-- =====================================================
+-- STORED PROCEDURE: Export Audit Report (Updated)
+-- =====================================================
+IF OBJECT_ID('sp_ExportAuditReport', 'P') IS NOT NULL 
+    DROP PROCEDURE sp_ExportAuditReport;
+GO
+
+CREATE PROCEDURE sp_ExportAuditReport
+    @auditor_id INT,
+    @StartDate DATETIME = NULL,
+    @EndDate DATETIME = NULL,
+    @ReportType NVARCHAR(50) = 'ComprehensiveAudit',
+    @ExportFormat NVARCHAR(10) = 'Excel'
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Kiểm tra quyền của auditor
+    DECLARE @AuditorRole NVARCHAR(50);
+    SELECT @AuditorRole = role FROM Users WHERE user_id = @auditor_id;
+    
+    IF @AuditorRole NOT IN ('Admin', 'Auditor')
+    BEGIN
+        SELECT 'ERROR' AS status, N'Chỉ Admin và Auditor mới có thể tạo báo cáo' AS message;
+        RETURN;
+    END
+    
+    -- Set default date range
+    IF @StartDate IS NULL SET @StartDate = DATEADD(DAY, -30, GETDATE());
+    IF @EndDate IS NULL SET @EndDate = GETDATE();
+    
+    DECLARE @reportData NVARCHAR(MAX);
+    
+    -- Generate report data
+    SET @reportData = (
+        SELECT 
+            'AuditSummary' AS section,
+            (SELECT COUNT(*) FROM vw_AuditLogDetails vw
+             WHERE vw.log_date BETWEEN @StartDate AND @EndDate
+             AND (@AuditorRole = 'Admin' OR vw.is_procurement_log = 1)) AS total_actions,
+            (SELECT COUNT(DISTINCT vw.user_id) FROM vw_AuditLogDetails vw
+             WHERE vw.log_date BETWEEN @StartDate AND @EndDate
+             AND (@AuditorRole = 'Admin' OR vw.is_procurement_log = 1)) AS active_users,
+            @StartDate AS period_start,
+            @EndDate AS period_end,
+            @AuditorRole AS auditor_role,
+            CASE WHEN @AuditorRole = 'Auditor' THEN 'Procurement Only (Manager, Supplier)' ELSE 'Full System' END AS report_scope,
+            (
+                SELECT 
+                    vw.role,
+                    COUNT(*) AS action_count
+                FROM vw_AuditLogDetails vw
+                WHERE vw.log_date BETWEEN @StartDate AND @EndDate
+                    AND (@AuditorRole = 'Admin' OR vw.is_procurement_log = 1)
+                GROUP BY vw.role
+                FOR JSON PATH
+            ) AS actions_by_role,
+            (
+                SELECT TOP 10
+                    vw.username,
+                    vw.role,
+                    COUNT(*) AS action_count
+                FROM vw_AuditLogDetails vw
+                WHERE vw.log_date BETWEEN @StartDate AND @EndDate
+                    AND (@AuditorRole = 'Admin' OR vw.is_procurement_log = 1)
+                GROUP BY vw.username, vw.role
+                ORDER BY COUNT(*) DESC
+                FOR JSON PATH
+            ) AS top_users,
+            (
+                SELECT 
+                    table_name,
+                    COUNT(*) AS action_count
+                FROM vw_AuditLogDetails vw
+                WHERE vw.log_date BETWEEN @StartDate AND @EndDate
+                    AND (@AuditorRole = 'Admin' OR vw.is_procurement_log = 1)
+                GROUP BY table_name
+                ORDER BY COUNT(*) DESC
+                FOR JSON PATH
+            ) AS actions_by_table
+        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+    );
+    
+    -- Insert audit report record
+    INSERT INTO AuditReports (auditor_id, report_type, generated_date, data, exported_format, notes)
+    VALUES (
+        @auditor_id, 
+        @ReportType, 
+        GETDATE(), 
+        @reportData, 
+        @ExportFormat, 
+        CONCAT(N'Audit report from ', FORMAT(@StartDate, 'yyyy-MM-dd'), ' to ', FORMAT(@EndDate, 'yyyy-MM-dd'),
+               CASE WHEN @AuditorRole = 'Auditor' THEN N' (Procurement Only - Manager & Supplier)' ELSE N' (Full System)' END)
+    );
+    
+    -- Return report ID
+    SELECT 
+        SCOPE_IDENTITY() AS report_id,
+        @ReportType AS report_type,
+        GETDATE() AS generated_date,
+        @ExportFormat AS format,
+        @AuditorRole AS auditor_role,
+        CASE WHEN @AuditorRole = 'Auditor' THEN 'Procurement Only' ELSE 'Full System' END AS report_scope;
+END;
+GO
+
+PRINT 'Created procedure: sp_ExportAuditReport';
+
+-- =====================================================
+-- STORED PROCEDURE: Get User Timeline (Updated)
+-- =====================================================
+IF OBJECT_ID('sp_GetUserActionTimeline', 'P') IS NOT NULL 
+    DROP PROCEDURE sp_GetUserActionTimeline;
+GO
+
+CREATE PROCEDURE sp_GetUserActionTimeline
+    @CurrentUserId INT,
+    @TargetUserId INT,
+    @StartDate DATETIME = NULL,
+    @EndDate DATETIME = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Lấy role của user hiện tại và target user
+    DECLARE @CurrentUserRole NVARCHAR(50);
+    DECLARE @TargetUserRole NVARCHAR(50);
+    
+    SELECT @CurrentUserRole = role FROM Users WHERE user_id = @CurrentUserId;
+    SELECT @TargetUserRole = role FROM Users WHERE user_id = @TargetUserId;
+    
+    -- Kiểm tra quyền truy cập
+    IF @CurrentUserRole IS NULL
+    BEGIN
+        SELECT 'ERROR' AS status, N'User không tồn tại' AS message;
+        RETURN;
+    END
+    
+    IF @CurrentUserRole NOT IN ('Admin', 'Auditor')
+    BEGIN
+        SELECT 'ERROR' AS status, N'Bạn không có quyền xem user timeline' AS message;
+        RETURN;
+    END
+    
+    -- Auditor chỉ được xem timeline của Manager và Supplier
+    IF @CurrentUserRole = 'Auditor' AND @TargetUserRole NOT IN ('Manager', 'Supplier', 'Admin')
+    BEGIN
+        SELECT 'ERROR' AS status, N'Auditor chỉ có quyền xem timeline của Manager và Supplier' AS message;
+        RETURN;
+    END
+    
+    IF @StartDate IS NULL SET @StartDate = DATEADD(DAY, -30, GETDATE());
+    IF @EndDate IS NULL SET @EndDate = GETDATE();
+    
+    -- Get timeline (filtered for Auditors)
+    SELECT 
+        vw.log_id,
+        vw.action,
+        vw.table_name,
+        vw.record_id,
+        vw.details,
+        vw.ip_address,
+        vw.log_date,
+        vw.category,
+        CASE 
+            WHEN vw.action IN ('DELETE', 'REJECT', 'CANCEL') THEN 'danger'
+            WHEN vw.action IN ('UPDATE', 'APPROVE') THEN 'warning'
+            WHEN vw.action IN ('CREATE', 'INSERT') THEN 'success'
+            ELSE 'info'
+        END AS severity
+    FROM vw_AuditLogDetails vw
+    WHERE vw.user_id = @TargetUserId
+        AND vw.log_date BETWEEN @StartDate AND @EndDate
+        -- Auditor: Chỉ xem procurement logs
+        AND (@CurrentUserRole = 'Admin' OR vw.is_procurement_log = 1)
+    ORDER BY vw.log_date DESC;
+    
+    -- Get user info
+    SELECT 
+        user_id,
+        username,
+        email,
+        role,
+        last_login,
+        failed_attempts,
+        is_active
+    FROM Users
+    WHERE user_id = @TargetUserId;
+END;
+GO
+
+PRINT 'Created procedure: sp_GetUserActionTimeline';
+
+-- =====================================================
+-- VERIFICATION
+-- =====================================================
+PRINT '';
+PRINT '========================================';
+PRINT 'VERIFICATION';
+PRINT '========================================';
+
+-- Test with sample data
+DECLARE @admin_id INT = (SELECT TOP 1 user_id FROM Users WHERE role = 'Admin');
+DECLARE @auditor_id INT = (SELECT TOP 1 user_id FROM Users WHERE role = 'Auditor');
+
+IF @auditor_id IS NOT NULL
+BEGIN
+    PRINT '';
+    PRINT 'Testing Auditor Access...';
+    EXEC sp_GetAuditLogs @CurrentUserId = @auditor_id, @PageSize = 5;
+    
+    PRINT '';
+    PRINT 'Testing Auditor Statistics...';
+    EXEC sp_GetAuditStatistics @CurrentUserId = @auditor_id;
+END
+ELSE
+BEGIN
+    PRINT 'No Auditor found for testing';
+END
 

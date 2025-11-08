@@ -462,28 +462,7 @@ GO
 IF OBJECT_ID('trg_LogUserUpdate', 'TR') IS NOT NULL DROP TRIGGER trg_LogUserUpdate;
 GO
 
-CREATE TRIGGER trg_LogUserUpdate
-ON Users
-AFTER UPDATE
-AS
-BEGIN
-    INSERT INTO SystemLogs (user_id, action, table_name, record_id, old_value, new_value, details, ip_address, log_date)
-    SELECT 
-        i.user_id,
-        'UpdateProfile',
-        'Users',
-        i.user_id,
-        (SELECT STRING_AGG(CONCAT(c.name, ': ', CONVERT(NVARCHAR(MAX), d.value)), ', ') 
-         FROM sys.columns c
-         CROSS APPLY (SELECT CONVERT(NVARCHAR(MAX), d.c.value('(./text())[1]', 'NVARCHAR(MAX)')) AS value) d
-         WHERE c.object_id = OBJECT_ID('Users')),
-        NULL,
-        'User profile updated',
-        '127.0.0.1',
-        GETDATE()
-    FROM inserted i;
-END;
-GO
+
 
 -- =========================================
 -- EXECUTE REFRESH AND GENERATE REPORT
@@ -986,13 +965,7 @@ BEGIN
     DECLARE @aud2 INT = (SELECT user_id FROM Users WHERE username = 'auditor2');
     IF @aud2 IS NULL SET @aud2 = (SELECT TOP 1 user_id FROM Users WHERE role = 'Auditor' ORDER BY user_id DESC);
 
-    INSERT INTO SystemLogs (user_id, action, table_name, record_id, details, ip_address, log_date)
-    VALUES
-    (@mgr2, 'LOGIN', 'Users', @mgr2, N'Manager2 đăng nhập', '192.168.1.105', GETDATE()-6),
-    (@doc2, 'CREATE', 'MedicationRequests', NULL, N'Tạo yêu cầu thuốc mới', '192.168.1.106', GETDATE()-4),
-    (@phar2, 'UPDATE', 'Batches', NULL, N'Cập nhật trạng thái lô hàng', '192.168.1.107', GETDATE()-2),
-    (@mgr2, 'APPROVE', 'PurchaseOrders', NULL, N'Phê duyệt đơn đặt hàng', '192.168.1.105', GETDATE()-1),
-    (@aud2, 'GENERATE', 'AuditReports', NULL, N'Tạo báo cáo kiểm toán', '192.168.1.108', GETDATE());
+    
 END
 GO
 
@@ -1004,13 +977,7 @@ BEGIN
     DECLARE @aud2 INT = (SELECT user_id FROM Users WHERE username = 'auditor2');
     IF @aud2 IS NULL SET @aud2 = (SELECT TOP 1 user_id FROM Users WHERE role = 'Auditor' ORDER BY user_id DESC);
 
-    INSERT INTO AuditReports (auditor_id, report_type, generated_date, data, exported_format, notes)
-    VALUES
-    (@aud2, 'SupplierPerformance', GETDATE()-8, '{"suppliers":[{"name":"Công ty Dược C","rating":4.8}]}', 'Excel', N'Đánh giá tháng 10/2025'),
-    (@aud2, 'PurchaseHistory', GETDATE()-6, '{"total_orders":25,"total_amount":75000000}', 'PDF', N'Lịch sử mua hàng quý 4/2024'),
-    (@aud2, 'InventoryAudit', GETDATE()-4, '{"total_medicines":200,"total_value":350000000}', 'Excel', N'Kiểm kê tồn kho tháng 10'),
-    (@aud2, 'UserActivity', GETDATE()-2, '{"active_users":30,"total_actions":650}', 'Excel', N'Hoạt động người dùng 2 tuần qua'),
-    (@aud2, 'SupplierPerformance', GETDATE(), '{"suppliers":[{"name":"Công ty Dược D","rating":4.0}]}', 'PDF', N'Báo cáo nhà cung cấp mới nhất');
+    
 END
 GO
 
@@ -4127,4 +4094,5 @@ ELSE
 BEGIN
     PRINT 'No Auditor found for testing';
 END
+
 

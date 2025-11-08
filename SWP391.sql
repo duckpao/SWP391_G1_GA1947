@@ -3022,3 +3022,111 @@ CREATE INDEX idx_tickets_created ON Tickets(created_at DESC);
 GO
 
 PRINT 'Tickets table created successfully!';
+
+USE SWP391;
+GO
+
+-- =====================================================
+-- ENHANCED VIEW: Purchase Orders with Complete Status
+-- Includes ASN status (In Transit, Delivered, etc.)
+-- =====================================================
+
+IF OBJECT_ID('vw_PurchaseOrdersWithShipping', 'V') IS NOT NULL 
+    DROP VIEW vw_PurchaseOrdersWithShipping;
+GO
+
+CREATE VIEW vw_PurchaseOrdersWithShipping AS
+SELECT 
+    -- Purchase Order fields
+    po.po_id,
+    po.manager_id,
+    po.supplier_id,
+    po.status AS po_status,
+    po.order_date,
+    po.expected_delivery_date,
+    po.notes,
+    po.updated_at,
+    
+    -- Supplier info
+    s.name AS supplier_name,
+    s.contact_email AS supplier_email,
+    s.contact_phone AS supplier_phone,
+    s.performance_rating,
+    
+    -- Manager info
+    u.username AS manager_name,
+    u.email AS manager_email,
+    
+    -- ASN info (latest ASN for this PO)
+    asn.asn_id,
+    asn.tracking_number,
+    asn.carrier,
+    asn.status AS asn_status,
+    asn.shipment_date,
+    asn.submitted_at AS asn_submitted_at,
+    asn.approved_at AS asn_approved_at,
+    asn.submitted_by,
+    
+    -- Check if PO has ASN
+    CASE WHEN asn.asn_id IS NOT NULL THEN 1 ELSE 0 END AS has_asn,
+    
+    -- Combined status for display (PRIORITY ORDER)
+    CASE 
+        -- ASN statuses take priority when they exist
+        WHEN asn.status = 'Delivered' THEN 'Delivered'
+        WHEN asn.status = 'InTransit' THEN 'In Transit'
+        WHEN asn.status = 'Sent' THEN 'Shipped'
+        WHEN asn.status = 'Pending' THEN 'Awaiting Shipment'
+        
+        -- Fall back to PO status
+        WHEN po.status = 'Completed' THEN 'Completed'
+        WHEN po.status = 'Received' THEN 'Received'
+        WHEN po.status = 'Approved' THEN 'Approved'
+        WHEN po.status = 'Sent' THEN 'Sent to Supplier'
+        WHEN po.status = 'Draft' THEN 'Draft'
+        WHEN po.status = 'Rejected' THEN 'Rejected'
+        ELSE po.status
+    END AS display_status,
+    
+    -- Status badge class for frontend
+    CASE 
+        WHEN asn.status = 'Delivered' OR po.status = 'Completed' THEN 'badge-success'
+        WHEN asn.status = 'InTransit' THEN 'badge-info'
+        WHEN asn.status = 'Sent' THEN 'badge-primary'
+        WHEN po.status = 'Approved' THEN 'badge-success'
+        WHEN po.status = 'Received' THEN 'badge-success'
+        WHEN po.status = 'Draft' THEN 'badge-secondary'
+        WHEN po.status = 'Rejected' THEN 'badge-danger'
+        WHEN po.status = 'Sent' THEN 'badge-info'
+        ELSE 'badge-warning'
+    END AS status_badge_class,
+    
+    -- Priority for sorting (higher = more important)
+    CASE 
+        WHEN asn.status = 'Delivered' OR po.status = 'Completed' THEN 6
+        WHEN asn.status = 'InTransit' THEN 5
+        WHEN asn.status = 'Sent' THEN 4
+        WHEN po.status = 'Received' THEN 3
+        WHEN po.status = 'Approved' THEN 2
+        ELSE 1
+    END AS status_priority,
+    
+    -- Calculate item count
+    (SELECT COUNT(*) FROM PurchaseOrderItems WHERE po_id = po.po_id) AS item_count,
+    
+    -- Calculate total amount
+    (SELECT ISNULL(SUM(quantity * ISNULL(unit_price, 0)), 0) 
+     FROM PurchaseOrderItems WHERE po_id = po.po_id) AS total_amount
+
+FROM PurchaseOrders po
+LEFT JOIN Suppliers s ON po.supplier_id = s.supplier_id
+LEFT JOIN Users u ON po.manager_id = u.user_id
+-- Join with latest ASN for each PO
+LEFT JOIN (
+    SELECT 
+        asn.*,
+        ROW_NUMBER() OVER (PARTITION BY asn.po_id ORDER BY asn.created_at DESC) AS rn
+    FROM AdvancedShippingNotices asn
+) asn ON po.po_id = asn.po_id AND asn.rn = 1;
+
+GO

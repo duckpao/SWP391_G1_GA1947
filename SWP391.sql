@@ -289,8 +289,6 @@ INSERT INTO SystemConfig (config_key, config_value)
 SELECT 'low_stock_threshold','10' WHERE NOT EXISTS (SELECT 1 FROM SystemConfig WHERE config_key='low_stock_threshold');
 INSERT INTO SystemConfig (config_key, config_value)
 SELECT 'max_failed_attempts','5' WHERE NOT EXISTS (SELECT 1 FROM SystemConfig WHERE config_key='max_failed_attempts');
-INSERT INTO SystemConfig (config_key, config_value)
-SELECT 'quarantine_period_days','14' WHERE NOT EXISTS (SELECT 1 FROM SystemConfig WHERE config_key='quarantine_period_days');
 
 INSERT INTO Permissions (permission_name, description)
 SELECT 'view_inventory','View medicines and stock' WHERE NOT EXISTS (SELECT 1 FROM Permissions WHERE permission_name='view_inventory');
@@ -4221,3 +4219,4 @@ PRINT '==========================================';
 PRINT 'FIX COMPLETED!';
 PRINT '==========================================';
 GO
+

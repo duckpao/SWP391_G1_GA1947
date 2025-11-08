@@ -266,10 +266,14 @@ public class AudtitLogDAO extends DBContext {
                 stats.setActiveUsers(rs.getInt("active_users"));
                 stats.setAffectedTables(rs.getInt("affected_tables"));
                 stats.setActiveDays(rs.getInt("active_days"));
-                stats.setTotalLogins(rs.getInt("total_logins"));
-                stats.setTotalCreates(rs.getInt("total_creates"));
-                stats.setTotalUpdates(rs.getInt("total_updates"));
-                stats.setTotalDeletes(rs.getInt("total_deletes"));
+                stats.setPurchaseOrderActions(rs.getInt("purchase_order_actions"));
+stats.setInvoiceActions(rs.getInt("invoice_actions"));
+stats.setShippingActions(rs.getInt("shipping_actions"));
+stats.setDeliveryActions(rs.getInt("delivery_actions"));
+stats.setInventoryActions(rs.getInt("inventory_actions"));
+stats.setTotalRejections(rs.getInt("total_rejections"));
+stats.setManagerActions(rs.getInt("manager_actions"));
+stats.setSupplierActions(rs.getInt("supplier_actions"));
                 stats.setTotalApprovals(rs.getInt("total_approvals"));
             }
 

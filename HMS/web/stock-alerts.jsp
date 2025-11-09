@@ -578,11 +578,6 @@
                     <i class="bi bi-exclamation-triangle"></i> 
                     Stock Alerts & Inventory Status
                 </h2>
-                <div class="header-actions">
-                    <a href="${pageContext.request.contextPath}/create-stock" class="btn btn-success">
-                        <i class="bi bi-plus-circle"></i> Create Stock Request
-                    </a>
-                </div>
             </div>
 
             <!-- Statistics Cards -->

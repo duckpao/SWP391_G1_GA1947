@@ -298,6 +298,9 @@
                         </c:when>
 
                         <c:when test="${sessionScope.role eq 'Pharmacist'}">
+                            <a href="${pageContext.request.contextPath}/view-medicine" class="active">
+                                <i class="bi bi-capsule"></i> Quản lý thuốc
+                            </a>
                             <a href="${pageContext.request.contextPath}/pharmacist/View_MedicineRequest">
                                 <i class="bi bi-file-earmark-plus"></i> Yêu cầu thuốc
                             </a>

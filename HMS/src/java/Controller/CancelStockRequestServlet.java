@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+import util.LoggingUtil;
 
 public class CancelStockRequestServlet extends HttpServlet {
     
@@ -86,6 +87,7 @@ public class CancelStockRequestServlet extends HttpServlet {
             
             // ✅ Thông báo kết quả
             if (success) {
+                LoggingUtil.logPOCancel(request, poId, reason);
                 session.setAttribute("message", 
                     "Stock request #" + poId + " has been cancelled successfully.");
                 session.setAttribute("messageType", "success");

@@ -20,6 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.*;
 import model.User;
+import util.LoggingUtil;
 
 /**
  *
@@ -94,6 +95,7 @@ public class VNPayReturnServlet extends HttpServlet {
                     );
 
                     if (paymentSuccess) {
+                        LoggingUtil.logPaymentComplete(req, poId, vnp_TransactionNo);
                         message = "Thanh toán thành công!";
 
                         // Clear session

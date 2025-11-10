@@ -299,7 +299,7 @@
         <!-- Sidebar -->
         <div class="sidebar">
             <div class="menu">
-                <a href="${pageContext.request.contextPath}/view-medicine?dashboard=pharmacist">
+                <a href="${pageContext.request.contextPath}/view-medicine">
                     <i class="fa fa-pills"></i> Quản lý thuốc
                 </a>
                 <a href="${pageContext.request.contextPath}/pharmacist/View_MedicineRequest" class="active">
@@ -342,6 +342,8 @@
                                     <th>Số lượng</th>
                                     <th>Ghi chú</th>
                                     <th>Thao tác</th>
+                                    <th> Action</th>
+                                    
                                 </tr>
                             </thead>
                             <tbody>
@@ -393,6 +395,22 @@
                                                 </c:otherwise>
                                             </c:choose>
                                         </td>
+                                       
+                                        <td class="text-center">
+    <c:choose>
+        <c:when test="${req.status == 'Approved' || req.status == 'Fulfilled'}">
+            <a href="${pageContext.request.contextPath}/pharmacist/viewIssueSlip?requestId=${req.requestId}"
+               class="btn btn-primary btn-sm" title="Xem phiếu xuất">
+               <i class="bi bi-eye"></i>
+            </a>
+        </c:when>
+        <c:otherwise>
+            <!-- để trống -->
+        </c:otherwise>
+    </c:choose>
+</td>
+
+                                        
                                     </tr>
                                 </c:forEach>
                             </tbody>

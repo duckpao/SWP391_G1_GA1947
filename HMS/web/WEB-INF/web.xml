@@ -572,6 +572,22 @@
         <servlet-name>CancelStockRequestServlet</servlet-name>
         <url-pattern>/cancel-stock-request</url-pattern>
     </servlet-mapping>
+    <servlet>
+        <servlet-name>ViewIssueSlipServlet</servlet-name>
+        <servlet-class>Controller.ViewIssueSlipServlet</servlet-class>
+    </servlet>
+     <servlet-mapping>
+        <servlet-name>ViewIssueSlipServlet</servlet-name>
+        <url-pattern>/pharmacist/viewIssueSlip</url-pattern>
+    </servlet-mapping>
+       <servlet>
+        <servlet-name>BatchAddServlet</servlet-name>
+        <servlet-class>Controller.BatchAddServlet</servlet-class>
+    </servlet>
+     <servlet-mapping>
+        <servlet-name>BatchAddServlet</servlet-name>
+        <url-pattern>/pharmacist/Batch-Add</url-pattern>
+    </servlet-mapping>
     <welcome-file-list>
         <welcome-file>home.jsp</welcome-file>
         <url-pattern>/home</url-pattern>

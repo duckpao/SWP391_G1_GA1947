@@ -4220,3 +4220,19 @@ PRINT 'FIX COMPLETED!';
 PRINT '==========================================';
 GO
 
+CREATE TABLE IssueSlip (
+    slip_id INT IDENTITY(1,1) PRIMARY KEY,      -- ID n?i b? dùng liên k?t b?ng
+    slip_code NVARCHAR(50) UNIQUE NOT NULL,     -- Mã phi?u hi?n th? cho ng??i dùng
+    request_id INT NOT NULL FOREIGN KEY REFERENCES MedicationRequests(request_id) ON DELETE CASCADE,
+    pharmacist_id INT NOT NULL FOREIGN KEY REFERENCES Users(user_id),
+    created_date DATETIME DEFAULT GETDATE(),
+    notes NVARCHAR(MAX) NULL
+);
+
+
+CREATE TABLE IssueSlipItem (
+    item_id INT IDENTITY(1,1) PRIMARY KEY,
+    slip_id INT NOT NULL FOREIGN KEY REFERENCES IssueSlip(slip_id) ON DELETE CASCADE,
+    medicine_code NVARCHAR(50) NOT NULL FOREIGN KEY REFERENCES Medicines(medicine_code),
+    quantity INT NOT NULL CHECK (quantity > 0)
+);

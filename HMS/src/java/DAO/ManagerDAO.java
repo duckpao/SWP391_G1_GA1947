@@ -968,4 +968,22 @@ public List<Manager> getAllStaff() {
     }
     return staffList;
 }
+
+public boolean updatePurchaseOrderToPaid(int poId) {
+    String sql = "UPDATE PurchaseOrders SET status = 'Paid', updated_at = GETDATE() " +
+                 "WHERE po_id = ?";
+    
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        ps.setInt(1, poId);
+        int rows = ps.executeUpdate();
+        
+        System.out.println("Updated PO #" + poId + " to Paid status. Rows affected: " + rows);
+        return rows > 0;
+        
+    } catch (SQLException e) {
+        System.err.println("Error updating PO to Paid: " + e.getMessage());
+        e.printStackTrace();
+        return false;
+    }
+}
 }

@@ -718,4 +718,61 @@ public class ASNDAO extends DBContext {
 
         return 0;
     }
+    
+    
+    public boolean updatePaymentStatus(int asnId, int poId, String transactionNo, 
+                                   String txnRef, int userId) {
+    String updateInvoice = "UPDATE Invoices SET status = 'Paid', " +
+                          "notes = CONCAT(COALESCE(notes, ''), CHAR(13) + CHAR(10), " +
+                          "'Payment completed via VNPay', CHAR(13) + CHAR(10), " +
+                          "'Transaction No: ', ?, CHAR(13) + CHAR(10), " +
+                          "'TxnRef: ', ?), " +
+                          "updated_at = GETDATE() " +
+                          "WHERE asn_id = ? AND po_id = ?";
+    
+    try (PreparedStatement ps = connection.prepareStatement(updateInvoice)) {
+        ps.setString(1, transactionNo);
+        ps.setString(2, txnRef);
+        ps.setInt(3, asnId);
+        ps.setInt(4, poId);
+        
+        int rows = ps.executeUpdate();
+        
+        if (rows > 0) {
+            System.out.println("✅ Invoice updated for ASN #" + asnId + ", PO #" + poId);
+            
+            // Log payment action
+            logPaymentAction(userId, poId, asnId, transactionNo);
+            
+            return true;
+        }
+        
+        System.err.println("⚠️ No invoice found for ASN #" + asnId + ", PO #" + poId);
+        return false;
+        
+    } catch (SQLException e) {
+        System.err.println("Error updating payment status: " + e.getMessage());
+        e.printStackTrace();
+        return false;
+    }
+}
+
+/**
+ * Log payment action to SystemLogs
+ */
+private void logPaymentAction(int userId, int poId, int asnId, String transactionNo) {
+    String sql = "INSERT INTO SystemLogs (user_id, action, table_name, record_id, details, ip_address, log_date) " +
+                 "VALUES (?, 'PAYMENT_COMPLETE', 'Invoices', ?, ?, '0.0.0.0', GETDATE())";
+    
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        ps.setInt(1, userId);
+        ps.setInt(2, poId);
+        ps.setString(3, "Payment completed for PO #" + poId + 
+                        ", ASN #" + asnId + 
+                        ", Transaction: " + transactionNo);
+        ps.executeUpdate();
+    } catch (SQLException e) {
+        System.err.println("Error logging payment: " + e.getMessage());
+    }
+}
 }

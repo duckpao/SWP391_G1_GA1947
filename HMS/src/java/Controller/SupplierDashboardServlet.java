@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import model.SupplierTransaction;
 
 public class SupplierDashboardServlet extends HttpServlet {
     
@@ -67,6 +68,12 @@ public class SupplierDashboardServlet extends HttpServlet {
         List<AdvancedShippingNotice> deliveredASNs = asnDAO.getASNsByStatus(
             supplier.getSupplierId(), "Delivered");
         
+        // ✅ NEW: Get pending transactions
+        List<SupplierTransaction> pendingTransactions = supplierDAO.getPendingTransactions(supplier.getSupplierId());
+
+        // ✅ NEW: Get supplier balance
+        double balance = supplierDAO.getSupplierBalance(supplier.getSupplierId());
+        
         // Lấy thống kê
         Map<String, Object> stats = supplierDAO.getSupplierStats(supplier.getSupplierId());
         
@@ -108,6 +115,8 @@ public class SupplierDashboardServlet extends HttpServlet {
         request.setAttribute("inTransitASNs", inTransitASNs);
         request.setAttribute("deliveredASNs", deliveredASNs);
         request.setAttribute("asnStats", asnStats);
+        request.setAttribute("pendingTransactions", pendingTransactions);
+        request.setAttribute("supplierBalance", balance);
         
         request.getRequestDispatcher("/supplierDashboard.jsp").forward(request, response);
     }

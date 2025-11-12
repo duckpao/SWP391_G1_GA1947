@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import model.SupplierTransaction;
 
 public class SupplierDAO extends DBContext {
 
@@ -471,5 +472,252 @@ public List<Supplier> getAllSuppliers() {
         e.printStackTrace();
     }
     return suppliers;
+}
+
+
+public boolean createPendingSupplierTransaction(int poId, Integer asnId, double amount) {
+    String sql = "INSERT INTO SupplierTransactions " +
+                 "(supplier_id, po_id, invoice_id, amount, transaction_type, status, notes) " +
+                 "SELECT po.supplier_id, po.po_id, inv.invoice_id, inv.amount, 'Credit', 'Pending', " +
+                 "'Payment received from Manager via VNPay, awaiting supplier confirmation' " +
+                 "FROM PurchaseOrders po " +
+                 "INNER JOIN Invoices inv ON po.po_id = inv.po_id " +
+                 "WHERE po.po_id = ?";
+    
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        ps.setInt(1, poId);
+        int rows = ps.executeUpdate();
+        
+        if (rows > 0) {
+            System.out.println("✅ Created pending transaction for PO #" + poId);
+            return true;
+        } else {
+            System.err.println("⚠️ Failed to create pending transaction for PO #" + poId);
+            return false;
+        }
+        
+    } catch (SQLException e) {
+        System.err.println("❌ Error creating pending transaction: " + e.getMessage());
+        e.printStackTrace();
+        return false;
+    }
+}
+
+/**
+ * Get pending transactions for supplier
+ */
+public List<SupplierTransaction> getPendingTransactions(int supplierId) {
+    List<SupplierTransaction> transactions = new ArrayList<>();
+    String sql = "SELECT st.transaction_id, st.supplier_id, st.po_id, st.invoice_id, " +
+                 "st.amount, st.transaction_type, st.status, st.notes, st.created_at, " +
+                 "po.order_date, inv.invoice_number, s.name as supplier_name " +
+                 "FROM SupplierTransactions st " +
+                 "INNER JOIN PurchaseOrders po ON st.po_id = po.po_id " +
+                 "INNER JOIN Invoices inv ON st.invoice_id = inv.invoice_id " +
+                 "INNER JOIN Suppliers s ON st.supplier_id = s.supplier_id " +
+                 "WHERE st.supplier_id = ? AND st.status = 'Pending' " +
+                 "ORDER BY st.created_at DESC";
+    
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        ps.setInt(1, supplierId);
+        ResultSet rs = ps.executeQuery();
+        
+        while (rs.next()) {
+            SupplierTransaction trans = new SupplierTransaction();
+            trans.setTransactionId(rs.getInt("transaction_id"));
+            trans.setSupplierId(rs.getInt("supplier_id"));
+            trans.setPoId(rs.getInt("po_id"));
+            trans.setInvoiceId(rs.getInt("invoice_id"));
+            trans.setAmount(rs.getDouble("amount"));
+            trans.setTransactionType(rs.getString("transaction_type"));
+            trans.setStatus(rs.getString("status"));
+            trans.setNotes(rs.getString("notes"));
+            trans.setCreatedAt(rs.getTimestamp("created_at"));
+            trans.setSupplierName(rs.getString("supplier_name"));
+            trans.setInvoiceNumber(rs.getString("invoice_number"));
+            transactions.add(trans);
+        }
+    } catch (SQLException e) {
+        System.err.println("Error getting pending transactions: " + e.getMessage());
+        e.printStackTrace();
+    }
+    
+    return transactions;
+}
+
+/**
+ * Confirm transaction and credit supplier balance
+ * Also updates PO status from 'Paid' to 'Completed'
+ */
+public boolean confirmTransaction(int transactionId, int supplierId, int userId) {
+    System.out.println("=== Confirming Transaction ===");
+    System.out.println("Transaction ID: " + transactionId);
+    System.out.println("Supplier ID: " + supplierId);
+    System.out.println("User ID: " + userId);
+    
+    Connection conn = null;
+    try {
+        conn = connection;
+        conn.setAutoCommit(false);
+        
+        // 1. Get transaction details AND current balance
+        String getInfoSql = "SELECT st.amount, st.po_id, ISNULL(s.balance, 0) as current_balance " +
+                           "FROM SupplierTransactions st " +
+                           "INNER JOIN Suppliers s ON st.supplier_id = s.supplier_id " +
+                           "WHERE st.transaction_id = ? AND st.supplier_id = ? AND st.status = 'Pending'";
+        
+        double amount = 0;
+        int poId = 0;
+        double currentBalance = 0;
+        
+        try (PreparedStatement ps = conn.prepareStatement(getInfoSql)) {
+            ps.setInt(1, transactionId);
+            ps.setInt(2, supplierId);
+            ResultSet rs = ps.executeQuery();
+            
+            if (rs.next()) {
+                amount = rs.getDouble("amount");
+                poId = rs.getInt("po_id");
+                currentBalance = rs.getDouble("current_balance");
+                
+                System.out.println("   Transaction found:");
+                System.out.println("   - Amount: " + amount);
+                System.out.println("   - PO ID: " + poId);
+                System.out.println("   - Current Balance: " + currentBalance);
+                System.out.println("   - New Balance will be: " + (currentBalance + amount));
+            } else {
+                conn.rollback();
+                System.err.println("⚠️ Transaction #" + transactionId + " not found or already confirmed");
+                return false;
+            }
+        }
+        
+        // 2. Update transaction status first
+        String updateTrans = "UPDATE SupplierTransactions " +
+                           "SET status = 'Confirmed', confirmed_by = ?, confirmed_at = GETDATE() " +
+                           "WHERE transaction_id = ? AND supplier_id = ? AND status = 'Pending'";
+        
+        try (PreparedStatement ps = conn.prepareStatement(updateTrans)) {
+            ps.setInt(1, userId);
+            ps.setInt(2, transactionId);
+            ps.setInt(3, supplierId);
+            int rows = ps.executeUpdate();
+            
+            if (rows == 0) {
+                conn.rollback();
+                System.err.println("⚠️ Failed to update transaction status - may already be confirmed");
+                return false;
+            }
+            System.out.println("✅ Step 1/3: Updated transaction status to Confirmed");
+        }
+        
+        // 3. Update supplier balance - MOST IMPORTANT PART
+        // Using direct calculation instead of relying on subquery
+        String updateBalance = "UPDATE Suppliers " +
+                             "SET balance = ISNULL(balance, 0) + ? " +
+                             "WHERE supplier_id = ?";
+        
+        try (PreparedStatement ps = conn.prepareStatement(updateBalance)) {
+            ps.setDouble(1, amount);
+            ps.setInt(2, supplierId);
+            int rows = ps.executeUpdate();
+            
+            if (rows == 0) {
+                conn.rollback();
+                System.err.println("❌ Failed to update supplier balance - supplier not found!");
+                return false;
+            }
+            
+            System.out.println("✅ Step 2/3: Updated supplier balance");
+            System.out.println("   - Old balance: " + currentBalance);
+            System.out.println("   - Added: " + amount);
+            System.out.println("   - New balance should be: " + (currentBalance + amount));
+            System.out.println("   - Rows affected: " + rows);
+        }
+        
+        // 4. Verify balance was actually updated
+        String verifyBalanceSql = "SELECT balance FROM Suppliers WHERE supplier_id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(verifyBalanceSql)) {
+            ps.setInt(1, supplierId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                double newBalance = rs.getDouble("balance");
+                System.out.println("   - Verified new balance in DB: " + newBalance);
+                
+                if (newBalance != (currentBalance + amount)) {
+                    System.err.println("⚠️ WARNING: Balance mismatch!");
+                    System.err.println("   Expected: " + (currentBalance + amount));
+                    System.err.println("   Got: " + newBalance);
+                }
+            }
+        }
+        
+        // 5. Update Purchase Order status to Completed
+        String updatePO = "UPDATE PurchaseOrders " +
+                        "SET status = 'Completed', updated_at = GETDATE() " +
+                        "WHERE po_id = ? AND status = 'Paid'";
+        
+        try (PreparedStatement ps = conn.prepareStatement(updatePO)) {
+            ps.setInt(1, poId);
+            int rows = ps.executeUpdate();
+            if (rows > 0) {
+                System.out.println("✅ Step 3/3: Updated PO #" + poId + " status from 'Paid' to 'Completed'");
+            } else {
+                System.out.println("⚠️ PO #" + poId + " was not in 'Paid' status (may already be Completed)");
+            }
+        }
+        
+        // Commit all changes
+        conn.commit();
+        System.out.println("✅ Transaction committed successfully!");
+        
+        // Log action
+        logSupplierAction(supplierId, "CONFIRM_PAYMENT", transactionId, 
+                         "Supplier confirmed payment receipt for transaction #" + transactionId + 
+                         " - Amount: " + amount + " - New Balance: " + (currentBalance + amount));
+        
+        System.out.println("✅ Successfully confirmed transaction #" + transactionId);
+        return true;
+        
+    } catch (SQLException e) {
+        try {
+            if (conn != null) {
+                conn.rollback();
+                System.err.println("❌ Transaction rolled back due to error");
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        System.err.println("❌ Error confirming transaction: " + e.getMessage());
+        e.printStackTrace();
+        return false;
+    } finally {
+        try {
+            if (conn != null) conn.setAutoCommit(true);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+/**
+ * Get supplier current balance
+ */
+public double getSupplierBalance(int supplierId) {
+    String sql = "SELECT ISNULL(balance, 0) as balance FROM Suppliers WHERE supplier_id = ?";
+    
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        ps.setInt(1, supplierId);
+        ResultSet rs = ps.executeQuery();
+        
+        if (rs.next()) {
+            return rs.getDouble("balance");
+        }
+    } catch (SQLException e) {
+        System.err.println("Error getting supplier balance: " + e.getMessage());
+        e.printStackTrace();
+    }
+    
+    return 0.0;
 }
 }

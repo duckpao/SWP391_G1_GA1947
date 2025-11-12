@@ -6,6 +6,7 @@ package Controller;
 
 import DAO.ASNDAO;
 import DAO.ManagerDAO;
+import DAO.SupplierDAO;
 import com.vnpay.common.Config;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -88,6 +89,7 @@ public class VNPayReturnServlet extends HttpServlet {
                 try {
                     ASNDAO asnDao = new ASNDAO();
                     ManagerDAO managerDao = new ManagerDAO();
+                    SupplierDAO supplierDao = new SupplierDAO();
 
                     // ✅ 1. Update Invoice
                     boolean invoiceUpdated = asnDao.updatePaymentStatus(
@@ -104,6 +106,16 @@ public class VNPayReturnServlet extends HttpServlet {
                     paymentSuccess = invoiceUpdated && poUpdated;
 
                     if (paymentSuccess) {
+                        // ✅ 3. Create pending transaction for supplier to confirm
+                        if (poId != null && amount != null) {
+                            boolean transactionCreated = supplierDao.createPendingSupplierTransaction(poId, asnId, amount);
+                            if (transactionCreated) {
+                                System.out.println("✅ Created pending supplier transaction for PO #" + poId);
+                            } else {
+                                System.err.println("⚠️ Failed to create pending supplier transaction for PO #" + poId);
+                            }
+                        }
+                        
                         LoggingUtil.logPaymentComplete(req, poId, vnp_TransactionNo);
                         message = "Thanh toán thành công! Đơn hàng #" + poId + " đã được thanh toán.";
 

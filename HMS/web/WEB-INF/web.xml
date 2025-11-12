@@ -241,6 +241,10 @@
         <servlet-name>CaptchaServlet</servlet-name>
         <servlet-class>Controller.CaptchaServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>SupplierConfirmPaymentServlet</servlet-name>
+        <servlet-class>Controller.SupplierConfirmPaymentServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>VNPaymentServlet</servlet-name>
         <url-pattern>/vnpay-payment</url-pattern>
@@ -252,6 +256,10 @@
     <servlet-mapping>
         <servlet-name>CaptchaServlet</servlet-name>
         <url-pattern>/refresh-captcha</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>SupplierConfirmPaymentServlet</servlet-name>
+        <url-pattern>/supplier-confirm-payment</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout> 30 </session-timeout>
@@ -576,15 +584,15 @@
         <servlet-name>ViewIssueSlipServlet</servlet-name>
         <servlet-class>Controller.ViewIssueSlipServlet</servlet-class>
     </servlet>
-     <servlet-mapping>
+    <servlet-mapping>
         <servlet-name>ViewIssueSlipServlet</servlet-name>
         <url-pattern>/pharmacist/viewIssueSlip</url-pattern>
     </servlet-mapping>
-       <servlet>
+    <servlet>
         <servlet-name>BatchAddServlet</servlet-name>
         <servlet-class>Controller.BatchAddServlet</servlet-class>
     </servlet>
-     <servlet-mapping>
+    <servlet-mapping>
         <servlet-name>BatchAddServlet</servlet-name>
         <url-pattern>/pharmacist/Batch-Add</url-pattern>
     </servlet-mapping>

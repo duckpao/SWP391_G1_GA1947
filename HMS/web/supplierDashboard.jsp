@@ -800,29 +800,71 @@
                     <p>${stats.totalOrders}</p>
                 </div>
             </div>
-            <!-- Tabs -->
-            <div class="tabs">
-                <button class="tab-button active" onclick="showTab('pending')">
-                    <i class="bi bi-clock-history"></i>
-                    Pending Orders
-                    <span class="tab-badge">${stats.pendingCount}</span>
-                </button>
-                <button class="tab-button" onclick="showTab('approved')">
-                    <i class="bi bi-check-circle"></i>
-                    Approved Orders
-                    <span class="tab-badge">${stats.approvedCount}</span>
-                </button>
-                <button class="tab-button" onclick="showTab('completed')">
-                    <i class="bi bi-box-seam"></i>
-                    Completed Orders
-                    <span class="tab-badge">${stats.completedCount}</span>
-                </button>
-                <button class="tab-button" onclick="showTab('asn-tracking')">
-                    <i class="bi bi-truck"></i>
-                    ASN Tracking
-                    <span class="tab-badge">${asnStats.totalASNs}</span>
-                </button>
-            </div>
+<div class="stats-grid">
+    <div class="stat-card">
+        <h3>Pending Orders</h3>
+        <p>${stats.pendingCount}</p>
+    </div>
+    <div class="stat-card">
+        <h3>Approved Orders</h3>
+        <p>${stats.approvedCount}</p>
+    </div>
+    <div class="stat-card">
+        <h3>Completed Orders</h3>
+        <p>${stats.completedCount}</p>
+    </div>
+    <div class="stat-card">
+        <h3>Total Orders</h3>
+        <p>${stats.totalOrders}</p>
+    </div>
+    
+    <!-- NEW: Current Balance Card -->
+    <div class="stat-card" style="border-left: 4px solid #28a745;">
+        <h3>Current Balance</h3>
+        <p style="color: #28a745;">
+            <fmt:formatNumber value="${supplierBalance}" pattern="#,##0.00"/> VND
+        </p>
+    </div>
+    
+    <!-- NEW: Pending Payments Card -->
+    <div class="stat-card" style="border-left: 4px solid #ffc107;">
+        <h3>Pending Payments</h3>
+        <p style="color: #ffc107;">
+            ${pendingTransactions.size()}
+        </p>
+    </div>
+</div>
+
+                
+<div class="tabs">
+    <button class="tab-button active" onclick="showTab('pending')">
+        <i class="bi bi-clock-history"></i>
+        Pending Orders
+        <span class="tab-badge">${stats.pendingCount}</span>
+    </button>
+    <button class="tab-button" onclick="showTab('approved')">
+        <i class="bi bi-check-circle"></i>
+        Approved Orders
+        <span class="tab-badge">${stats.approvedCount}</span>
+    </button>
+    <button class="tab-button" onclick="showTab('completed')">
+        <i class="bi bi-box-seam"></i>
+        Completed Orders
+        <span class="tab-badge">${stats.completedCount}</span>
+    </button>
+    <button class="tab-button" onclick="showTab('asn-tracking')">
+        <i class="bi bi-truck"></i>
+        ASN Tracking
+        <span class="tab-badge">${asnStats.totalASNs}</span>
+    </button>
+    
+    <!-- NEW: Pending Payments Tab Button -->
+    <button class="tab-button" onclick="showTab('pending-payments')">
+        <i class="bi bi-cash-coin"></i>
+        Pending Payments
+        <span class="tab-badge" style="background: #ffc107;">${pendingTransactions.size()}</span>
+    </button>
+</div>
             <!-- Pending Orders Tab -->
             <div id="pending-tab" class="tab-content active">
                 <c:choose>
@@ -1391,6 +1433,93 @@
             </div>
             <%@ include file="/asnTracking.jsp" %>
         </div>
+        <div id="pending-payments-tab" class="tab-content">
+    <c:choose>
+        <c:when test="${empty pendingTransactions}">
+            <div class="empty-state">
+                <div class="empty-icon">💰</div>
+                <div class="empty-title">No Pending Payments</div>
+                <div class="empty-text">You don't have any payments waiting for confirmation.</div>
+            </div>
+        </c:when>
+        <c:otherwise>
+            <c:forEach var="transaction" items="${pendingTransactions}">
+                <div class="order-card">
+                    <div class="order-header">
+                        <div class="order-title">
+                            <div class="order-id">Payment for PO #${transaction.poId}</div>
+                            <span class="status-badge" style="background: #fff3cd; color: #664d03; border: 1px solid #ffecb5;">
+                                <i class="bi bi-clock"></i> Pending Confirmation
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="order-meta">
+                        <div class="meta-item">
+                            <i class="bi bi-cash-coin meta-icon"></i>
+                            <div class="meta-content">
+                                <div class="meta-label">Amount</div>
+                                <div class="meta-value" style="color: #28a745; font-size: 18px;">
+                                    <fmt:formatNumber value="${transaction.amount}" pattern="#,##0.00"/> VND
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="meta-item">
+                            <i class="bi bi-calendar3 meta-icon"></i>
+                            <div class="meta-content">
+                                <div class="meta-label">Received Date</div>
+                                <div class="meta-value">
+                                    <fmt:formatDate value="${transaction.createdAt}" pattern="dd MMM yyyy HH:mm"/>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="meta-item">
+                            <i class="bi bi-file-text meta-icon"></i>
+                            <div class="meta-content">
+                                <div class="meta-label">Transaction Type</div>
+                                <div class="meta-value">${transaction.transactionType}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <c:if test="${not empty transaction.notes}">
+                        <div class="notes-box">
+                            <div class="notes-label">Transaction Notes</div>
+                            <div class="notes-text">${transaction.notes}</div>
+                        </div>
+                    </c:if>
+                    
+                    <div class="order-actions">
+                        <form method="POST" action="${pageContext.request.contextPath}/supplier-confirm-payment" 
+                              onsubmit="return confirmPayment(${transaction.amount});" style="flex: 1;">
+                            <input type="hidden" name="transactionId" value="${transaction.transactionId}">
+                            <button type="submit" class="btn" style="width: 100%; background: #28a745; color: white; border: 1px solid #218838;">
+                                <i class="bi bi-check-circle-fill"></i>
+                                Confirm Payment Receipt
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <div style="margin-top: 16px; padding: 12px; background: #e7f3ff; border-left: 4px solid #0c5460; border-radius: 8px; border: 1px solid #bee5eb;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <i class="bi bi-info-circle-fill" style="font-size: 20px; color: #0c5460;"></i>
+                            <div>
+                                <div style="font-size: 13px; font-weight: 600; color: #0c5460; margin-bottom: 4px;">
+                                    Important Notice
+                                </div>
+                                <div style="font-size: 12px; color: #0c5460;">
+                                    After confirming this payment, the amount will be added to your balance and the purchase order status will be updated to "Completed".
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </c:forEach>
+        </c:otherwise>
+    </c:choose>
+</div>
     </div>
 </div>
 <script>
@@ -1482,6 +1611,11 @@
             }, 300);
         }
     }
+    
+    function confirmPayment(amount) {
+    const formattedAmount = new Intl.NumberFormat('vi-VN').format(amount);
+    return confirm('Are you sure you want to confirm receiving payment of ' + formattedAmount + ' VND?\n\nThis will:\n- Add the amount to your balance\n- Mark the purchase order as Completed\n- This action cannot be undone.');
+}
 </script>
 
 <jsp:include page="/admin/footer.jsp" />

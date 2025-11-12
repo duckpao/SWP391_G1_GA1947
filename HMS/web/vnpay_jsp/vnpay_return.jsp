@@ -62,6 +62,7 @@
     </style>
 </head>
 <body>
+    <%@ include file="/admin/header.jsp" %>
     <div class="container">
         <div class="header clearfix">
             <h3 class="text-muted">KẾT QUẢ THANH TOÁN</h3>

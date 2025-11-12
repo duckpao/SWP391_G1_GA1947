@@ -775,4 +775,32 @@ private void logPaymentAction(int userId, int poId, int asnId, String transactio
         System.err.println("Error logging payment: " + e.getMessage());
     }
 }
+
+public boolean createPendingSupplierTransaction(int poId, int asnId, double amount) {
+    String sql = "INSERT INTO SupplierTransactions " +
+                 "(supplier_id, po_id, invoice_id, amount, transaction_type, status, notes) " +
+                 "SELECT po.supplier_id, po.po_id, inv.invoice_id, inv.amount, 'Credit', 'Pending', " +
+                 "'Payment received from Manager via VNPay, awaiting supplier confirmation' " +
+                 "FROM PurchaseOrders po " +
+                 "INNER JOIN Invoices inv ON po.po_id = inv.po_id " +
+                 "WHERE po.po_id = ?";
+    
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        ps.setInt(1, poId);
+        int rows = ps.executeUpdate();
+        
+        if (rows > 0) {
+            System.out.println("✅ Created pending transaction for PO #" + poId);
+            return true;
+        } else {
+            System.err.println("⚠️ Failed to create pending transaction for PO #" + poId);
+            return false;
+        }
+        
+    } catch (SQLException e) {
+        System.err.println("❌ Error creating pending transaction: " + e.getMessage());
+        e.printStackTrace();
+        return false;
+    }
+}
 }

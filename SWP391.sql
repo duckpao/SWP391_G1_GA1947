@@ -4269,3 +4269,24 @@ FROM sys.check_constraints cc
 WHERE cc.parent_object_id = OBJECT_ID('PurchaseOrders')
   AND cc.definition LIKE '%status%';
 GO
+
+
+-- 1. Add balance column to Suppliers table
+ALTER TABLE Suppliers ADD balance DECIMAL(12,2) DEFAULT 0;
+
+-- 2. Create SupplierTransactions table for tracking
+CREATE TABLE SupplierTransactions (
+    transaction_id INT IDENTITY(1,1) PRIMARY KEY,
+    supplier_id INT NOT NULL FOREIGN KEY REFERENCES Suppliers(supplier_id),
+    po_id INT NOT NULL FOREIGN KEY REFERENCES PurchaseOrders(po_id),
+    invoice_id INT FOREIGN KEY REFERENCES Invoices(invoice_id),
+    amount DECIMAL(12,2) NOT NULL,
+    transaction_type NVARCHAR(20) CHECK (transaction_type IN ('Credit','Debit','Pending','Confirmed')),
+    status NVARCHAR(20) DEFAULT 'Pending' CHECK (status IN ('Pending','Confirmed','Rejected')),
+    confirmed_by INT FOREIGN KEY REFERENCES Users(user_id),
+    confirmed_at DATETIME,
+    notes NVARCHAR(MAX),
+    created_at DATETIME DEFAULT GETDATE()
+);
+
+CREATE INDEX idx_supplier_transactions ON SupplierTransactions(supplier_id, status);

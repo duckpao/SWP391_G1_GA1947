@@ -11,42 +11,60 @@ import model.PurchaseOrderItem;
 public class PurchaseOrderDAO extends DBContext {
 
     /**
-     * Get all purchase orders with optional filters NOW INCLUDES ASN STATUS (In
-     * Transit, Delivered, etc.)
+     * Get all purchase orders with optional filters
+     * Shows ACTUAL PO status, not ASN status
      */
     public List<PurchaseOrder> getAllPurchaseOrders(String status, Integer supplierId,
             Date fromDate, Date toDate, String searchKeyword) {
         List<PurchaseOrder> list = new ArrayList<>();
 
-        // Use the view created in database for complete status information
+        // ✅ FIXED: Use direct query instead of view to control status display
         StringBuilder sql = new StringBuilder(
-                "SELECT po_id, manager_id, supplier_id, po_status, "
-                + "order_date, expected_delivery_date, notes, updated_at, "
-                + "supplier_name, manager_name, total_amount, item_count, "
-                + "asn_id, tracking_number, carrier, asn_status, has_asn, "
-                + "display_status, status_badge_class "
-                + "FROM vw_PurchaseOrdersWithShipping "
+                "SELECT "
+                + "po.po_id, po.manager_id, po.supplier_id, po.status AS po_status, "
+                + "po.order_date, po.expected_delivery_date, po.notes, po.updated_at, "
+                + "s.name AS supplier_name, "
+                + "u.username AS manager_name, "
+                // Get ASN info if exists
+                + "asn.asn_id, asn.tracking_number, asn.carrier, asn.status AS asn_status, "
+                + "CASE WHEN asn.asn_id IS NOT NULL THEN 1 ELSE 0 END AS has_asn, "
+                // Calculate totals
+                + "ISNULL(SUM(poi.quantity * ISNULL(poi.unit_price, 0)), 0) AS total_amount, "
+                + "COUNT(DISTINCT poi.item_id) AS item_count "
+                + "FROM PurchaseOrders po "
+                + "LEFT JOIN Suppliers s ON po.supplier_id = s.supplier_id "
+                + "LEFT JOIN Users u ON po.manager_id = u.user_id "
+                + "LEFT JOIN PurchaseOrderItems poi ON po.po_id = poi.po_id "
+                // Get latest ASN
+                + "LEFT JOIN ( "
+                + "  SELECT asn.*, "
+                + "  ROW_NUMBER() OVER (PARTITION BY asn.po_id ORDER BY asn.created_at DESC) AS rn "
+                + "  FROM AdvancedShippingNotices asn "
+                + ") asn ON po.po_id = asn.po_id AND asn.rn = 1 "
                 + "WHERE 1=1 "
         );
 
         // Add filters
         if (status != null && !status.isEmpty()) {
-            sql.append("AND po_status = ? ");
+            sql.append("AND po.status = ? ");
         }
         if (supplierId != null) {
-            sql.append("AND supplier_id = ? ");
+            sql.append("AND po.supplier_id = ? ");
         }
         if (fromDate != null) {
-            sql.append("AND order_date >= ? ");
+            sql.append("AND po.order_date >= ? ");
         }
         if (toDate != null) {
-            sql.append("AND order_date <= ? ");
+            sql.append("AND po.order_date <= ? ");
         }
         if (searchKeyword != null && !searchKeyword.isEmpty()) {
-            sql.append("AND (supplier_name LIKE ? OR notes LIKE ? OR CAST(po_id AS NVARCHAR) LIKE ?) ");
+            sql.append("AND (s.name LIKE ? OR po.notes LIKE ? OR CAST(po.po_id AS NVARCHAR) LIKE ?) ");
         }
 
-        sql.append("ORDER BY order_date DESC");
+        sql.append("GROUP BY po.po_id, po.manager_id, po.supplier_id, po.status, "
+                + "po.order_date, po.expected_delivery_date, po.notes, po.updated_at, "
+                + "s.name, u.username, asn.asn_id, asn.tracking_number, asn.carrier, asn.status "
+                + "ORDER BY po.order_date DESC");
 
         try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
             int paramIndex = 1;
@@ -74,11 +92,14 @@ public class PurchaseOrderDAO extends DBContext {
             while (rs.next()) {
                 PurchaseOrder po = new PurchaseOrder();
 
-                // Basic PO info
                 po.setPoId(rs.getInt("po_id"));
                 po.setManagerId(rs.getInt("manager_id"));
                 po.setSupplierId(rs.getInt("supplier_id"));
-                po.setStatus(rs.getString("po_status"));
+                
+                // ✅ FIXED: Use actual PO status
+                String poStatus = rs.getString("po_status");
+                po.setStatus(poStatus);
+                
                 po.setOrderDate(rs.getTimestamp("order_date"));
                 po.setExpectedDeliveryDate(rs.getDate("expected_delivery_date"));
                 po.setNotes(rs.getString("notes"));
@@ -88,19 +109,44 @@ public class PurchaseOrderDAO extends DBContext {
                 po.setTotalAmount(rs.getDouble("total_amount"));
                 po.setItemCount(rs.getInt("item_count"));
 
-                // ASN information
+                // ASN information (separate from PO status)
                 int asnId = rs.getInt("asn_id");
                 if (!rs.wasNull()) {
                     po.setAsnId(asnId);
                     po.setTrackingNumber(rs.getString("tracking_number"));
                     po.setCarrier(rs.getString("carrier"));
                     po.setAsnStatus(rs.getString("asn_status"));
-                    po.setHasAsn(rs.getBoolean("has_asn"));
+                    po.setHasAsn(true);
+                } else {
+                    po.setHasAsn(false);
                 }
 
-                // Display status (combined PO + ASN status)
-                po.setDisplayStatus(rs.getString("display_status"));
-                po.setStatusBadgeClass(rs.getString("status_badge_class"));
+                // ✅ Display status = PO status (not ASN status)
+                po.setDisplayStatus(poStatus);
+                
+                // Status badge based on PO status
+                String badgeClass = "badge-secondary";
+                switch (poStatus) {
+                    case "Completed":
+                    case "Paid":
+                        badgeClass = "badge-success";
+                        break;
+                    case "Approved":
+                    case "Received":
+                        badgeClass = "badge-primary";
+                        break;
+                    case "Sent":
+                        badgeClass = "badge-info";
+                        break;
+                    case "Draft":
+                        badgeClass = "badge-secondary";
+                        break;
+                    case "Rejected":
+                    case "Cancelled":
+                        badgeClass = "badge-danger";
+                        break;
+                }
+                po.setStatusBadgeClass(badgeClass);
 
                 list.add(po);
             }
@@ -112,16 +158,24 @@ public class PurchaseOrderDAO extends DBContext {
     }
 
     /**
-     * Get purchase order by ID with ASN details
+     * Get purchase order by ID
      */
     public PurchaseOrder getPurchaseOrderById(int poId) {
-        String sql = "SELECT po_id, manager_id, supplier_id, po_status, "
-                + "order_date, expected_delivery_date, notes, updated_at, "
-                + "supplier_name, manager_name, total_amount, item_count, "
-                + "asn_id, tracking_number, carrier, asn_status, has_asn, "
-                + "display_status, status_badge_class "
-                + "FROM vw_PurchaseOrdersWithShipping "
-                + "WHERE po_id = ?";
+        String sql = "SELECT "
+                + "po.po_id, po.manager_id, po.supplier_id, po.status AS po_status, "
+                + "po.order_date, po.expected_delivery_date, po.notes, po.updated_at, "
+                + "s.name AS supplier_name, "
+                + "u.username AS manager_name, "
+                + "asn.asn_id, asn.tracking_number, asn.carrier, asn.status AS asn_status "
+                + "FROM PurchaseOrders po "
+                + "LEFT JOIN Suppliers s ON po.supplier_id = s.supplier_id "
+                + "LEFT JOIN Users u ON po.manager_id = u.user_id "
+                + "LEFT JOIN ( "
+                + "  SELECT asn.*, "
+                + "  ROW_NUMBER() OVER (PARTITION BY asn.po_id ORDER BY asn.created_at DESC) AS rn "
+                + "  FROM AdvancedShippingNotices asn "
+                + ") asn ON po.po_id = asn.po_id AND asn.rn = 1 "
+                + "WHERE po.po_id = ?";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, poId);
@@ -132,7 +186,10 @@ public class PurchaseOrderDAO extends DBContext {
                 po.setPoId(rs.getInt("po_id"));
                 po.setManagerId(rs.getInt("manager_id"));
                 po.setSupplierId(rs.getInt("supplier_id"));
-                po.setStatus(rs.getString("po_status"));
+                
+                String poStatus = rs.getString("po_status");
+                po.setStatus(poStatus);
+                
                 po.setOrderDate(rs.getTimestamp("order_date"));
                 po.setExpectedDeliveryDate(rs.getDate("expected_delivery_date"));
                 po.setNotes(rs.getString("notes"));
@@ -147,11 +204,10 @@ public class PurchaseOrderDAO extends DBContext {
                     po.setTrackingNumber(rs.getString("tracking_number"));
                     po.setCarrier(rs.getString("carrier"));
                     po.setAsnStatus(rs.getString("asn_status"));
-                    po.setHasAsn(rs.getBoolean("has_asn"));
+                    po.setHasAsn(true);
                 }
 
-                po.setDisplayStatus(rs.getString("display_status"));
-                po.setStatusBadgeClass(rs.getString("status_badge_class"));
+                po.setDisplayStatus(poStatus);
 
                 return po;
             }
@@ -163,7 +219,7 @@ public class PurchaseOrderDAO extends DBContext {
     }
 
     /**
-     * Get items with COMPLETE medicine details
+     * Get items by PO ID
      */
     public List<PurchaseOrderItem> getItemsByPurchaseOrderId(int poId) {
         List<PurchaseOrderItem> items = new ArrayList<>();
@@ -194,7 +250,6 @@ public class PurchaseOrderDAO extends DBContext {
                 item.setPriority(rs.getString("priority"));
                 item.setNotes(rs.getString("notes"));
 
-                // Medicine details
                 item.setMedicineName(rs.getString("name"));
                 item.setMedicineCategory(rs.getString("category"));
                 item.setMedicineStrength(rs.getString("strength"));
@@ -262,270 +317,241 @@ public class PurchaseOrderDAO extends DBContext {
         return stats;
     }
 
+    /**
+     * ✅ FIXED: Get historical purchase orders - ONLY Completed status
+     */
     public List<PurchaseOrder> getHistoricalPurchaseOrders(Integer supplierId,
-        Date fromDate, Date toDate,
-        String searchKeyword) {
-    List<PurchaseOrder> list = new ArrayList<>();
-    StringBuilder sql = new StringBuilder(
-            "SELECT "
-            + "po.po_id, po.manager_id, po.supplier_id, po.status AS po_status, "
-            + "po.order_date, po.expected_delivery_date, po.notes, po.updated_at, "
-            + "s.name AS supplier_name, u.username AS manager_name, "
-            + // Get ASN status
-            "asn.status AS asn_status, "
-            + "asn.tracking_number, "
-            + "asn.carrier, "
-            + "asn.approved_at, "
-            + // Calculate combined status
-            "CASE "
-            + "  WHEN asn.status = 'Delivered' THEN 'Delivered' "
-            + "  WHEN asn.status = 'InTransit' THEN 'In Transit' "
-            + "  WHEN asn.status = 'Sent' THEN 'Shipped' "
-            + "  WHEN po.status = 'Completed' THEN 'Completed' "
-            + "  WHEN po.status = 'Received' THEN 'Received' "
-            + "  ELSE po.status "
-            + "END AS display_status, "
-            + // Calculate totals
-            "ISNULL(SUM(poi.quantity * poi.unit_price), 0) AS total_amount, "
-            + "COUNT(DISTINCT poi.item_id) AS item_count "
-            + "FROM PurchaseOrders po "
-            + "LEFT JOIN Suppliers s ON po.supplier_id = s.supplier_id "
-            + "LEFT JOIN Users u ON po.manager_id = u.user_id "
-            + "LEFT JOIN PurchaseOrderItems poi ON po.po_id = poi.po_id "
-            + // Join with LATEST ASN for each PO
-            "INNER JOIN ( "  // ⚠️ Changed from LEFT JOIN to INNER JOIN
-            + "  SELECT asn.*, "
-            + "  ROW_NUMBER() OVER (PARTITION BY asn.po_id ORDER BY asn.created_at DESC) AS rn "
-            + "  FROM AdvancedShippingNotices asn "
-            + "  WHERE asn.status = 'Delivered' "  // ⚠️ Only get Delivered ASNs
-            + ") asn ON po.po_id = asn.po_id AND asn.rn = 1 "
-            + "WHERE 1=1 "  // ASN must exist and be Delivered
-    );
+            Date fromDate, Date toDate, String searchKeyword) {
+        List<PurchaseOrder> list = new ArrayList<>();
 
-    // Add additional filters
-    if (supplierId != null) {
-        sql.append("AND po.supplier_id = ? ");
-    }
-    if (fromDate != null) {
-        sql.append("AND po.order_date >= ? ");
-    }
-    if (toDate != null) {
-        sql.append("AND po.order_date <= ? ");
-    }
-    if (searchKeyword != null && !searchKeyword.isEmpty()) {
-        sql.append("AND (s.name LIKE ? OR po.notes LIKE ? OR CAST(po.po_id AS NVARCHAR) LIKE ?) ");
-    }
-
-    sql.append("GROUP BY po.po_id, po.manager_id, po.supplier_id, po.status, "
-            + "po.order_date, po.expected_delivery_date, po.notes, po.updated_at, "
-            + "s.name, u.username, asn.status, asn.tracking_number, asn.carrier, asn.approved_at "
-            + "ORDER BY po.order_date DESC");
-
-    System.out.println("====================================");
-    System.out.println("DEBUG: Historical PO Query (DELIVERED ONLY)");
-    System.out.println("SQL: " + sql.toString());
-    System.out.println("====================================");
-
-    try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
-        int paramIndex = 1;
+        StringBuilder sql = new StringBuilder(
+                "SELECT "
+                + "po.po_id, po.manager_id, po.supplier_id, po.status AS po_status, "
+                + "po.order_date, po.expected_delivery_date, po.notes, po.updated_at, "
+                + "s.name AS supplier_name, u.username AS manager_name, "
+                + "asn.status AS asn_status, "
+                + "asn.tracking_number, "
+                + "asn.carrier, "
+                + "asn.approved_at, "
+                + "ISNULL(SUM(poi.quantity * poi.unit_price), 0) AS total_amount, "
+                + "COUNT(DISTINCT poi.item_id) AS item_count "
+                + "FROM PurchaseOrders po "
+                + "LEFT JOIN Suppliers s ON po.supplier_id = s.supplier_id "
+                + "LEFT JOIN Users u ON po.manager_id = u.user_id "
+                + "LEFT JOIN PurchaseOrderItems poi ON po.po_id = poi.po_id "
+                + "LEFT JOIN ( "
+                + "  SELECT asn.*, "
+                + "  ROW_NUMBER() OVER (PARTITION BY asn.po_id ORDER BY asn.created_at DESC) AS rn "
+                + "  FROM AdvancedShippingNotices asn "
+                + ") asn ON po.po_id = asn.po_id AND asn.rn = 1 "
+                // ✅ CRITICAL: Only Completed orders
+                + "WHERE po.status = 'Completed' "
+        );
 
         if (supplierId != null) {
-            ps.setInt(paramIndex++, supplierId);
-            System.out.println("Filter - Supplier ID: " + supplierId);
+            sql.append("AND po.supplier_id = ? ");
         }
         if (fromDate != null) {
-            ps.setDate(paramIndex++, fromDate);
-            System.out.println("Filter - From Date: " + fromDate);
+            sql.append("AND po.order_date >= ? ");
         }
         if (toDate != null) {
-            ps.setDate(paramIndex++, toDate);
-            System.out.println("Filter - To Date: " + toDate);
+            sql.append("AND po.order_date <= ? ");
         }
         if (searchKeyword != null && !searchKeyword.isEmpty()) {
-            String keyword = "%" + searchKeyword + "%";
-            ps.setString(paramIndex++, keyword);
-            ps.setString(paramIndex++, keyword);
-            ps.setString(paramIndex++, keyword);
-            System.out.println("Filter - Keyword: " + keyword);
+            sql.append("AND (s.name LIKE ? OR po.notes LIKE ? OR CAST(po.po_id AS NVARCHAR) LIKE ?) ");
         }
 
-        ResultSet rs = ps.executeQuery();
-        int count = 0;
-        while (rs.next()) {
-            count++;
-            PurchaseOrder po = new PurchaseOrder();
-            po.setPoId(rs.getInt("po_id"));
-            po.setManagerId(rs.getInt("manager_id"));
-            po.setSupplierId(rs.getInt("supplier_id"));
+        sql.append("GROUP BY po.po_id, po.manager_id, po.supplier_id, po.status, "
+                + "po.order_date, po.expected_delivery_date, po.notes, po.updated_at, "
+                + "s.name, u.username, asn.status, asn.tracking_number, asn.carrier, asn.approved_at "
+                + "ORDER BY po.order_date DESC");
 
-            // Use display_status
-            String displayStatus = rs.getString("display_status");
-            po.setStatus(displayStatus);
-
-            po.setOrderDate(rs.getTimestamp("order_date"));
-            po.setExpectedDeliveryDate(rs.getDate("expected_delivery_date"));
-            po.setNotes(rs.getString("notes"));
-            po.setUpdatedAt(rs.getTimestamp("updated_at"));
-            po.setSupplierName(rs.getString("supplier_name"));
-            po.setManagerName(rs.getString("manager_name"));
-            po.setTotalAmount(rs.getDouble("total_amount"));
-            po.setItemCount(rs.getInt("item_count"));
-
-            // ASN info (guaranteed to exist because of INNER JOIN)
-            String asnStatus = rs.getString("asn_status");
-            String trackingNumber = rs.getString("tracking_number");
-            String carrier = rs.getString("carrier");
-            Timestamp approvedAt = rs.getTimestamp("approved_at");
-
-            po.setAsnStatus(asnStatus);
-            po.setTrackingNumber(trackingNumber);
-            po.setCarrier(carrier);
-            po.setHasAsn(true);
-
-            System.out.println("PO #" + po.getPoId()
-                    + " - PO Status: " + rs.getString("po_status")
-                    + " - ASN Status: " + asnStatus
-                    + " - Display Status: " + displayStatus
-                    + " - Tracking: " + trackingNumber
-                    + " - Approved: " + approvedAt);
-
-            list.add(po);
-        }
-
-        System.out.println("Total historical orders found (Delivered only): " + count);
+        System.out.println("====================================");
+        System.out.println("DEBUG: Historical PO Query (Completed ONLY)");
         System.out.println("====================================");
 
-    } catch (SQLException e) {
-        System.err.println("ERROR in getHistoricalPurchaseOrders: " + e.getMessage());
-        e.printStackTrace();
+        try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
+            int paramIndex = 1;
+
+            if (supplierId != null) {
+                ps.setInt(paramIndex++, supplierId);
+            }
+            if (fromDate != null) {
+                ps.setDate(paramIndex++, fromDate);
+            }
+            if (toDate != null) {
+                ps.setDate(paramIndex++, toDate);
+            }
+            if (searchKeyword != null && !searchKeyword.isEmpty()) {
+                String keyword = "%" + searchKeyword + "%";
+                ps.setString(paramIndex++, keyword);
+                ps.setString(paramIndex++, keyword);
+                ps.setString(paramIndex++, keyword);
+            }
+
+            ResultSet rs = ps.executeQuery();
+            int count = 0;
+            while (rs.next()) {
+                count++;
+                PurchaseOrder po = new PurchaseOrder();
+                po.setPoId(rs.getInt("po_id"));
+                po.setManagerId(rs.getInt("manager_id"));
+                po.setSupplierId(rs.getInt("supplier_id"));
+
+                // ✅ FIXED: Always show "Completed"
+                String poStatus = rs.getString("po_status");
+                po.setStatus(poStatus);
+
+                po.setOrderDate(rs.getTimestamp("order_date"));
+                po.setExpectedDeliveryDate(rs.getDate("expected_delivery_date"));
+                po.setNotes(rs.getString("notes"));
+                po.setUpdatedAt(rs.getTimestamp("updated_at"));
+                po.setSupplierName(rs.getString("supplier_name"));
+                po.setManagerName(rs.getString("manager_name"));
+                po.setTotalAmount(rs.getDouble("total_amount"));
+                po.setItemCount(rs.getInt("item_count"));
+
+                // ASN info (optional)
+                String asnStatus = rs.getString("asn_status");
+                if (asnStatus != null) {
+                    po.setAsnStatus(asnStatus);
+                    po.setTrackingNumber(rs.getString("tracking_number"));
+                    po.setCarrier(rs.getString("carrier"));
+                    po.setHasAsn(true);
+                } else {
+                    po.setHasAsn(false);
+                }
+
+                System.out.println("PO #" + po.getPoId()
+                        + " - Status: " + poStatus
+                        + " - ASN Status: " + asnStatus);
+
+                list.add(po);
+            }
+
+            System.out.println("Total historical orders found: " + count);
+            System.out.println("====================================");
+
+        } catch (SQLException e) {
+            System.err.println("ERROR in getHistoricalPurchaseOrders: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return list;
     }
-    return list;
-}
 
     /**
-     * === FIXED: Get trend data considering ASN status ===
+     * Get trend data - ONLY completed orders
      */
     public List<Map<String, Object>> getTrendDataByMonth(Integer supplierId, Date fromDate, Date toDate) {
-    List<Map<String, Object>> trendData = new ArrayList<>();
-    StringBuilder sql = new StringBuilder(
-            "SELECT "
-            + "YEAR(po.order_date) AS year, "
-            + "MONTH(po.order_date) AS month, "
-            + "COUNT(po.po_id) AS order_count, "
-            + "ISNULL(SUM(poi.quantity * poi.unit_price), 0) AS total_amount "
-            + "FROM PurchaseOrders po "
-            + "LEFT JOIN PurchaseOrderItems poi ON po.po_id = poi.po_id "
-            + "INNER JOIN ( "  // ⚠️ Changed to INNER JOIN
-            + "  SELECT asn.*, "
-            + "  ROW_NUMBER() OVER (PARTITION BY asn.po_id ORDER BY asn.created_at DESC) AS rn "
-            + "  FROM AdvancedShippingNotices asn "
-            + "  WHERE asn.status = 'Delivered' "  // ⚠️ Only Delivered
-            + ") asn ON po.po_id = asn.po_id AND asn.rn = 1 "
-            + "WHERE 1=1 "
-    );
-
-    if (supplierId != null) {
-        sql.append("AND po.supplier_id = ? ");
-    }
-    if (fromDate != null) {
-        sql.append("AND po.order_date >= ? ");
-    }
-    if (toDate != null) {
-        sql.append("AND po.order_date <= ? ");
-    }
-
-    sql.append("GROUP BY YEAR(po.order_date), MONTH(po.order_date) "
-            + "ORDER BY year, month");
-
-    try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
-        int paramIndex = 1;
+        List<Map<String, Object>> trendData = new ArrayList<>();
+        StringBuilder sql = new StringBuilder(
+                "SELECT "
+                + "YEAR(po.order_date) AS year, "
+                + "MONTH(po.order_date) AS month, "
+                + "COUNT(po.po_id) AS order_count, "
+                + "ISNULL(SUM(poi.quantity * poi.unit_price), 0) AS total_amount "
+                + "FROM PurchaseOrders po "
+                + "LEFT JOIN PurchaseOrderItems poi ON po.po_id = poi.po_id "
+                + "WHERE po.status = 'Completed' "
+        );
 
         if (supplierId != null) {
-            ps.setInt(paramIndex++, supplierId);
+            sql.append("AND po.supplier_id = ? ");
         }
         if (fromDate != null) {
-            ps.setDate(paramIndex++, fromDate);
+            sql.append("AND po.order_date >= ? ");
         }
         if (toDate != null) {
-            ps.setDate(paramIndex++, toDate);
+            sql.append("AND po.order_date <= ? ");
         }
 
-        ResultSet rs = ps.executeQuery();
-        while (rs.next()) {
-            Map<String, Object> data = new HashMap<>();
-            data.put("year", rs.getInt("year"));
-            data.put("month", rs.getInt("month"));
-            data.put("orderCount", rs.getInt("order_count"));
-            data.put("totalAmount", rs.getDouble("total_amount"));
-            trendData.add(data);
+        sql.append("GROUP BY YEAR(po.order_date), MONTH(po.order_date) "
+                + "ORDER BY year, month");
+
+        try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
+            int paramIndex = 1;
+
+            if (supplierId != null) {
+                ps.setInt(paramIndex++, supplierId);
+            }
+            if (fromDate != null) {
+                ps.setDate(paramIndex++, fromDate);
+            }
+            if (toDate != null) {
+                ps.setDate(paramIndex++, toDate);
+            }
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Map<String, Object> data = new HashMap<>();
+                data.put("year", rs.getInt("year"));
+                data.put("month", rs.getInt("month"));
+                data.put("orderCount", rs.getInt("order_count"));
+                data.put("totalAmount", rs.getDouble("total_amount"));
+                trendData.add(data);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error in getTrendDataByMonth: " + e.getMessage());
+            e.printStackTrace();
         }
-    } catch (SQLException e) {
-        System.err.println("Error in getTrendDataByMonth: " + e.getMessage());
-        e.printStackTrace();
+        return trendData;
     }
-    return trendData;
-}
+
     /**
-     * === FIXED: Get supplier performance considering ASN status ===
+     * Get supplier performance - ONLY completed orders
      */
     public List<Map<String, Object>> getSupplierPerformance(Date fromDate, Date toDate) {
-    List<Map<String, Object>> performance = new ArrayList<>();
-    StringBuilder sql = new StringBuilder(
-            "SELECT "
-            + "s.supplier_id, "
-            + "s.name AS supplier_name, "
-            + "COUNT(po.po_id) AS total_orders, "
-            + "COUNT(po.po_id) AS completed_orders, "  // All are completed because of Delivered filter
-            + "ISNULL(SUM(poi.quantity * poi.unit_price), 0) AS total_amount, "
-            + "AVG(DATEDIFF(day, po.order_date, asn.approved_at)) AS avg_delivery_days "
-            + "FROM Suppliers s "
-            + "LEFT JOIN PurchaseOrders po ON s.supplier_id = po.supplier_id "
-            + "LEFT JOIN PurchaseOrderItems poi ON po.po_id = poi.po_id "
-            + "INNER JOIN ( "  // ⚠️ INNER JOIN for Delivered only
-            + "  SELECT asn.*, "
-            + "  ROW_NUMBER() OVER (PARTITION BY asn.po_id ORDER BY asn.created_at DESC) AS rn "
-            + "  FROM AdvancedShippingNotices asn "
-            + "  WHERE asn.status = 'Delivered' "
-            + ") asn ON po.po_id = asn.po_id AND asn.rn = 1 "
-            + "WHERE 1=1 "
-    );
-
-    if (fromDate != null) {
-        sql.append("AND po.order_date >= ? ");
-    }
-    if (toDate != null) {
-        sql.append("AND po.order_date <= ? ");
-    }
-
-    sql.append("GROUP BY s.supplier_id, s.name "
-            + "HAVING COUNT(po.po_id) > 0 "
-            + "ORDER BY total_amount DESC");
-
-    try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
-        int paramIndex = 1;
+        List<Map<String, Object>> performance = new ArrayList<>();
+        StringBuilder sql = new StringBuilder(
+                "SELECT "
+                + "s.supplier_id, "
+                + "s.name AS supplier_name, "
+                + "COUNT(po.po_id) AS total_orders, "
+                + "COUNT(CASE WHEN po.status = 'Completed' THEN 1 END) AS completed_orders, "
+                + "ISNULL(SUM(poi.quantity * poi.unit_price), 0) AS total_amount, "
+                + "AVG(DATEDIFF(day, po.order_date, po.updated_at)) AS avg_delivery_days "
+                + "FROM Suppliers s "
+                + "LEFT JOIN PurchaseOrders po ON s.supplier_id = po.supplier_id "
+                + "LEFT JOIN PurchaseOrderItems poi ON po.po_id = poi.po_id "
+                + "WHERE po.status = 'Completed' "
+        );
 
         if (fromDate != null) {
-            ps.setDate(paramIndex++, fromDate);
+            sql.append("AND po.order_date >= ? ");
         }
         if (toDate != null) {
-            ps.setDate(paramIndex++, toDate);
+            sql.append("AND po.order_date <= ? ");
         }
 
-        ResultSet rs = ps.executeQuery();
-        while (rs.next()) {
-            Map<String, Object> data = new HashMap<>();
-            data.put("supplierId", rs.getInt("supplier_id"));
-            data.put("supplierName", rs.getString("supplier_name"));
-            data.put("totalOrders", rs.getInt("total_orders"));
-            data.put("completedOrders", rs.getInt("completed_orders"));
-            data.put("totalAmount", rs.getDouble("total_amount"));
-            data.put("avgDeliveryDays", rs.getInt("avg_delivery_days"));
-            performance.add(data);
+        sql.append("GROUP BY s.supplier_id, s.name "
+                + "HAVING COUNT(po.po_id) > 0 "
+                + "ORDER BY total_amount DESC");
+
+        try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
+            int paramIndex = 1;
+
+            if (fromDate != null) {
+                ps.setDate(paramIndex++, fromDate);
+            }
+            if (toDate != null) {
+                ps.setDate(paramIndex++, toDate);
+            }
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Map<String, Object> data = new HashMap<>();
+                data.put("supplierId", rs.getInt("supplier_id"));
+                data.put("supplierName", rs.getString("supplier_name"));
+                data.put("totalOrders", rs.getInt("total_orders"));
+                data.put("completedOrders", rs.getInt("completed_orders"));
+                data.put("totalAmount", rs.getDouble("total_amount"));
+                data.put("avgDeliveryDays", rs.getInt("avg_delivery_days"));
+                performance.add(data);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error in getSupplierPerformance: " + e.getMessage());
+            e.printStackTrace();
         }
-    } catch (SQLException e) {
-        System.err.println("Error in getSupplierPerformance: " + e.getMessage());
-        e.printStackTrace();
+        return performance;
     }
-    return performance;
-}
 }

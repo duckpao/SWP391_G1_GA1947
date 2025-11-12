@@ -554,7 +554,7 @@ public boolean confirmTransaction(int transactionId, int supplierId, int userId)
     System.out.println("Transaction ID: " + transactionId);
     System.out.println("Supplier ID: " + supplierId);
     System.out.println("User ID: " + userId);
-    
+        
     Connection conn = null;
     try {
         conn = connection;

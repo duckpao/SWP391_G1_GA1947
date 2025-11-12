@@ -1,5 +1,6 @@
 package Controller;
 
+import DAO.PurchaseOrderDAO;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -24,14 +25,26 @@ public class AuditorDashboard extends HttpServlet {
         String role = (String) session.getAttribute("role");
         String path = request.getServletPath();
 
+        PurchaseOrderDAO poDAO = new PurchaseOrderDAO();
+
+        Object[] stats = poDAO.getPurchaseOrderStatistics();
+
         // ✅ Admin được vào tất cả dashboard
         if ("Admin".equals(role)) {
+            request.setAttribute("totalOrders", stats[0]);
+        request.setAttribute("completedOrders", stats[1]);
+        request.setAttribute("pendingOrders", stats[2]);
+        request.setAttribute("totalAmount", stats[3]);
             request.getRequestDispatcher("/auditor/auditor-dashboard.jsp").forward(request, response);
             return;
         }
 
         // ✅ Auditor chỉ được vào auditor-dashboard
         if ("Auditor".equals(role)) {
+            request.setAttribute("totalOrders", stats[0]);
+        request.setAttribute("completedOrders", stats[1]);
+        request.setAttribute("pendingOrders", stats[2]);
+        request.setAttribute("totalAmount", stats[3]);
             request.getRequestDispatcher("/auditor/auditor-dashboard.jsp").forward(request, response);
             return;
         }
@@ -60,8 +73,8 @@ public class AuditorDashboard extends HttpServlet {
             return;
         }
 
-        // ❌ Không hợp lệ → quay về login
         response.sendRedirect(request.getContextPath() + "/login");
+
     }
 
     @Override

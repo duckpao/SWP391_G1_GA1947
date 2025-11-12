@@ -12,6 +12,9 @@
     <link href="${pageContext.request.contextPath}/vnpay_jsp/assets/bootstrap.min.css" rel="stylesheet"/>
     <link href="${pageContext.request.contextPath}/vnpay_jsp/assets/jumbotron-narrow.css" rel="stylesheet">
     <script src="${pageContext.request.contextPath}/vnpay_jsp/assets/jquery-1.11.3.min.js"></script>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .success-box {
             background-color: #d4edda;

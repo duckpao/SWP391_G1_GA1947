@@ -4220,3 +4220,52 @@ PRINT 'FIX COMPLETED!';
 PRINT '==========================================';
 GO
 
+CREATE TABLE IssueSlip (
+    slip_id INT IDENTITY(1,1) PRIMARY KEY,      -- ID n?i b? dùng liên k?t b?ng
+    slip_code NVARCHAR(50) UNIQUE NOT NULL,     -- Mã phi?u hi?n th? cho ng??i dùng
+    request_id INT NOT NULL FOREIGN KEY REFERENCES MedicationRequests(request_id) ON DELETE CASCADE,
+    pharmacist_id INT NOT NULL FOREIGN KEY REFERENCES Users(user_id),
+    created_date DATETIME DEFAULT GETDATE(),
+    notes NVARCHAR(MAX) NULL
+);
+
+
+CREATE TABLE IssueSlipItem (
+    item_id INT IDENTITY(1,1) PRIMARY KEY,
+    slip_id INT NOT NULL FOREIGN KEY REFERENCES IssueSlip(slip_id) ON DELETE CASCADE,
+    medicine_code NVARCHAR(50) NOT NULL FOREIGN KEY REFERENCES Medicines(medicine_code),
+    quantity INT NOT NULL CHECK (quantity > 0)
+);
+
+USE SWP391;
+GO
+
+-- Drop constraint cũ
+DECLARE @ConstraintName NVARCHAR(200);
+SELECT @ConstraintName = cc.name 
+FROM sys.check_constraints cc
+WHERE cc.parent_object_id = OBJECT_ID('PurchaseOrders')
+  AND cc.definition LIKE '%status%';
+
+IF @ConstraintName IS NOT NULL
+BEGIN
+    DECLARE @DropSQL NVARCHAR(500) = 'ALTER TABLE PurchaseOrders DROP CONSTRAINT ' + QUOTENAME(@ConstraintName);
+    EXEC sp_executesql @DropSQL;
+    PRINT 'Dropped old constraint: ' + @ConstraintName;
+END
+
+-- Thêm constraint mới với 'Paid'
+ALTER TABLE PurchaseOrders 
+ADD CONSTRAINT CK_PurchaseOrders_Status 
+CHECK (status IN ('Draft','Sent','Approved','Received','Rejected','Completed','Cancelled','Paid'));
+
+PRINT '✅ Added Paid status to PurchaseOrders';
+
+-- Verify
+SELECT 
+    cc.name AS ConstraintName,
+    cc.definition AS AllowedStatuses
+FROM sys.check_constraints cc
+WHERE cc.parent_object_id = OBJECT_ID('PurchaseOrders')
+  AND cc.definition LIKE '%status%';
+GO

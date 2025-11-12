@@ -43,26 +43,12 @@ public class CrudMedicine extends HttpServlet {
 private void addMedicine(HttpServletRequest request, HttpServletResponse response)
         throws IOException {
     try {
-        // --- Lấy DAO ---
         MedicineDAO dao = new MedicineDAO();
 
-        // --- Lấy mã thuốc do người dùng nhập ---
-        String medicineCode = request.getParameter("medicineCode");
-        if (medicineCode == null || medicineCode.trim().isEmpty()) {
-            request.getSession().setAttribute("error", "⚠️ Vui lòng nhập mã thuốc!");
-            response.sendRedirect(request.getContextPath() + "/view-medicine");
-            return;
-        }
-        medicineCode = medicineCode.trim();
+        // --- Sinh mã thuốc & mã lô tự động ---
+        String medicineCode = dao.generateNextMedicineCode();
+        String lotNumber = dao.generateNextLotNumber();
 
-        // --- Kiểm tra trùng mã thuốc ---
-        if (dao.existsMedicineCode(medicineCode)) {
-            request.getSession().setAttribute("error", "⚠️ Mã thuốc '" + medicineCode + "' đã tồn tại!");
-            response.sendRedirect(request.getContextPath() + "/view-medicine");
-            return;
-        }
-
-        // --- Chuẩn bị đối tượng Medicine ---
         Medicine med = new Medicine();
         med.setMedicineCode(medicineCode);
         med.setName(request.getParameter("name"));
@@ -77,64 +63,62 @@ private void addMedicine(HttpServletRequest request, HttpServletResponse respons
         med.setDrugGroup(request.getParameter("drugGroup"));
         med.setDrugType(request.getParameter("drugType"));
 
-        // --- Chuẩn bị đối tượng Batch ---
         Batches batch = new Batches();
         batch.setMedicineCode(medicineCode);
+        batch.setLotNumber(lotNumber);
 
-        // Lấy Supplier ID (nếu có)
-        String supplierIdStr = request.getParameter("supplierId");
-        int supplierId = 1; // mặc định
-        if (supplierIdStr != null && !supplierIdStr.isEmpty()) {
-            supplierId = Integer.parseInt(supplierIdStr);
-        }
+        String supplierIdStr = request.getParameter("manufacturer"); // chọn từ Supplier
+        int supplierId = Integer.parseInt(supplierIdStr);
         batch.setSupplierId(supplierId);
 
-        // Lô hàng
-        batch.setLotNumber("LOT-" + UUID.randomUUID().toString().substring(0, 6));
-
-        // Hạn sử dụng
         String expiryParam = request.getParameter("expiryDate");
         if (expiryParam != null && !expiryParam.isEmpty()) {
             batch.setExpiryDate(Date.valueOf(expiryParam));
-        } else {
-            batch.setExpiryDate(null);
         }
 
-        // Tồn kho
         int stock = Integer.parseInt(request.getParameter("stock"));
         batch.setInitialQuantity(stock);
         batch.setCurrentQuantity(stock);
-
-        // Trạng thái
         batch.setStatus("Received");
 
-        // --- Debug Log ---
-        System.out.println("➕ Add medicine: " + med.getMedicineCode() + ", Name=" + med.getName());
-        System.out.println("   Batch lot=" + batch.getLotNumber() + ", Expiry=" + batch.getExpiryDate() + ", Supplier=" + batch.getSupplierId());
-
-        // --- Gọi DAO ---
         boolean success = dao.addMedicine(med, batch);
 
         if (success) {
-            request.getSession().setAttribute("success", "✅ Thêm thuốc thành công!");
+            request.getSession().setAttribute("success",
+                    "✅ Thêm thuốc thành công! (" + medicineCode + " / " + lotNumber + ")");
         } else {
             request.getSession().setAttribute("error", "❌ Thêm thuốc thất bại!");
+            response.sendRedirect(request.getContextPath() + "/view-medicine");
         }
 
     } catch (Exception e) {
         e.printStackTrace();
-        request.getSession().setAttribute("error", "❌ Lỗi khi thêm thuốc!");
+        request.getSession().setAttribute("error", "❌ Lỗi khi thêm thuốc: " + e.getMessage());
     }
 
     response.sendRedirect(request.getContextPath() + "/view-medicine");
 }
-   // ===================== UPDATE =====================
- 
 
-private void updateMedicine(HttpServletRequest request, HttpServletResponse response) throws IOException {
+
+   // ===================== UPDATE =====================
+ private void updateMedicine(HttpServletRequest request, HttpServletResponse response)
+        throws IOException {
     try {
+        String medicineCode = request.getParameter("medicineCode");
+        String batchIdStr = request.getParameter("batchId");
+
+        System.out.println("=== UpdateMedicine Servlet ===");
+        System.out.println("Received batchId=" + batchIdStr + ", medicineCode=" + medicineCode);
+
+        if (medicineCode == null || medicineCode.trim().isEmpty()) {
+            request.getSession().setAttribute("error", "? Mã thuốc không được để trống!");
+            response.sendRedirect(request.getContextPath() + "/view-medicine");
+            return;
+        }
+
+        // --- Medicine object ---
         Medicine med = new Medicine();
-        med.setMedicineCode(request.getParameter("medicineCode"));
+        med.setMedicineCode(medicineCode);
         med.setName(request.getParameter("name"));
         med.setCategory(request.getParameter("category"));
         med.setDescription(request.getParameter("description"));
@@ -147,44 +131,48 @@ private void updateMedicine(HttpServletRequest request, HttpServletResponse resp
         med.setDrugGroup(request.getParameter("drugGroup"));
         med.setDrugType(request.getParameter("drugType"));
 
-        Batches batch = new Batches();
-        String batchIdStr = request.getParameter("batchId");
-        if (batchIdStr == null || batchIdStr.isEmpty()) {
-            request.getSession().setAttribute("error", "❌ Không xác định batch để update!");
-            response.sendRedirect(request.getContextPath() + "/view-medicine");
-            return;
+        // --- Batch object (optional, nhưng FE đã gửi batchId) ---
+        Batches batch = null;
+        if (batchIdStr != null && !batchIdStr.trim().isEmpty()) {
+            batch = new Batches();
+            batch.setBatchId(Integer.parseInt(batchIdStr));
+            batch.setMedicineCode(medicineCode);
+
+            String supplierIdStr = request.getParameter("supplierId");
+            if (supplierIdStr != null && !supplierIdStr.trim().isEmpty()) {
+                batch.setSupplierId(Integer.parseInt(supplierIdStr));
+            }
+
+            String expiryParam = request.getParameter("expiryDate");
+            if (expiryParam != null && !expiryParam.isEmpty()) {
+                batch.setExpiryDate(Date.valueOf(expiryParam));
+            }
+
+            String stockStr = request.getParameter("stock");
+            if (stockStr != null && !stockStr.trim().isEmpty()) {
+                int stock = Integer.parseInt(stockStr);
+                batch.setCurrentQuantity(stock);
+                batch.setInitialQuantity(stock); // nếu muốn đồng bộ luôn
+            }
         }
 
-        batch.setBatchId(Integer.parseInt(batchIdStr));
-        batch.setMedicineCode(med.getMedicineCode());
-        batch.setLotNumber("LOT-" + batch.getBatchId());
-
-        String expiry = request.getParameter("expiryDate");
-        if (expiry != null && !expiry.isEmpty()) batch.setExpiryDate(Date.valueOf(expiry));
-
-        String stockStr = request.getParameter("stock");
-        batch.setCurrentQuantity(stockStr != null && !stockStr.isEmpty() ? Integer.parseInt(stockStr) : 0);
-
-        batch.setStatus("Received");
-
-        String sup = request.getParameter("supplierId");
-        batch.setSupplierId(sup != null && !sup.isEmpty() ? Integer.parseInt(sup) : 1);
-
-        boolean ok = dao.updateMedicine(med, batch);
-
-        if (ok)
-            request.getSession().setAttribute("success", "✅ Cập nhật thuốc thành công!");
-        else
-            request.getSession().setAttribute("error", "❌ Cập nhật thất bại! Kiểm tra lại mã thuốc hoặc batch ID.");
+        // --- DAO update ---
+        boolean success = dao.updateMedicine(med, batch);
+        if (success) {
+            request.getSession().setAttribute("success", "? Cập nhật thuốc thành công!");
+        } else {
+            request.getSession().setAttribute("error", "? Cập nhật thuốc thất bại!");
+        }
 
     } catch (Exception e) {
         e.printStackTrace();
-        request.getSession().setAttribute("error", "❌ Lỗi khi cập nhật thuốc!");
+        request.getSession().setAttribute("error", "? Lỗi: " + e.getMessage());
     }
 
     response.sendRedirect(request.getContextPath() + "/view-medicine");
 }
-
+ 
+ 
     // ===================== DELETE =====================
     private void deleteMedicine(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
@@ -204,4 +192,7 @@ private void updateMedicine(HttpServletRequest request, HttpServletResponse resp
 
         response.sendRedirect(request.getContextPath() + "/view-medicine");
     }
+    
+   
+
 }

@@ -63,10 +63,13 @@ public class ViewRequestHistoryServlet extends HttpServlet {
         // --- Bộ lọc ---
         String medicineName = request.getParameter("medicineName");
         String dateStr = request.getParameter("date");
+        String status = request.getParameter("status");
 
+        // Áp dụng bộ lọc nếu có
         if ((medicineName != null && !medicineName.trim().isEmpty())
-                || (dateStr != null && !dateStr.isEmpty())) {
-            requests = filterRequests(requests, medicineName, dateStr);
+                || (dateStr != null && !dateStr.isEmpty())
+                || (status != null && !status.isEmpty() && !"all".equals(status))) {
+            requests = filterRequests(requests, medicineName, dateStr, status, dao);
         }
 
         // --- Lấy items cho mỗi request ---
@@ -82,18 +85,36 @@ public class ViewRequestHistoryServlet extends HttpServlet {
         request.getRequestDispatcher("/jsp/viewRequestHistory.jsp").forward(request, response);
     }
 
-    private List<MedicationRequest> filterRequests(List<MedicationRequest> requests, String medicineName, String dateStr) {
+    private List<MedicationRequest> filterRequests(List<MedicationRequest> requests, 
+                                                    String medicineName, 
+                                                    String dateStr, 
+                                                    String status,
+                                                    MedicationRequestDAO dao) {
         try {
             String searchName = (medicineName != null && !medicineName.trim().isEmpty())
                     ? medicineName.trim().toLowerCase() : null;
+            
             java.util.Date date = (dateStr != null && !dateStr.isEmpty())
                     ? new SimpleDateFormat("yyyy-MM-dd").parse(dateStr) : null;
+            
+            String searchStatus = (status != null && !status.isEmpty() && !"all".equals(status))
+                    ? status : null;
 
             return requests.stream()
                     .filter(req -> {
-                        boolean matchesMedicine = searchName == null || hasMedicineByName(req.getRequestId(), searchName);
-                        boolean matchesDate = date == null || isSameDay((Timestamp) req.getRequestDate(), date);
-                        return matchesMedicine && matchesDate;
+                        // Lọc theo tên thuốc
+                        boolean matchesMedicine = searchName == null || 
+                                hasMedicineByName(req.getRequestId(), searchName, dao);
+                        
+                        // Lọc theo ngày
+                        boolean matchesDate = date == null || 
+                                isSameDay((Timestamp) req.getRequestDate(), date);
+                        
+                        // Lọc theo trạng thái
+                        boolean matchesStatus = searchStatus == null || 
+                                (req.getStatus() != null && req.getStatus().equalsIgnoreCase(searchStatus));
+                        
+                        return matchesMedicine && matchesDate && matchesStatus;
                     })
                     .collect(Collectors.toList());
         } catch (ParseException e) {
@@ -102,16 +123,32 @@ public class ViewRequestHistoryServlet extends HttpServlet {
         }
     }
 
-    private boolean hasMedicineByName(int requestId, String medicineName) {
-        MedicationRequestDAO dao = new MedicationRequestDAO();
-        List<MedicationRequestItem> items = dao.getRequestItems(requestId);
-        return items.stream().anyMatch(item ->
-                item.getMedicineName() != null &&
-                        item.getMedicineName().toLowerCase().contains(medicineName));
+    private boolean hasMedicineByName(int requestId, String medicineName, MedicationRequestDAO dao) {
+        try {
+            List<MedicationRequestItem> items = dao.getRequestItems(requestId);
+            if (items == null || items.isEmpty()) {
+                return false;
+            }
+            
+            // Tìm kiếm trong tất cả các thuộc tính của medicine
+            return items.stream().anyMatch(item -> {
+                if (item.getMedicineName() != null && 
+                    item.getMedicineName().toLowerCase().contains(medicineName)) {
+                    return true;
+                }
+                // Có thể thêm tìm kiếm theo các trường khác nếu cần
+                return false;
+            });
+        } catch (Exception e) {
+            System.err.println("Error in hasMedicineByName: " + e.getMessage());
+            return false;
+        }
     }
 
     private boolean isSameDay(java.sql.Timestamp requestDate, java.util.Date filterDate) {
-        if (requestDate == null || filterDate == null) return false;
+        if (requestDate == null || filterDate == null) {
+            return false;
+        }
         java.util.Calendar cal1 = java.util.Calendar.getInstance();
         java.util.Calendar cal2 = java.util.Calendar.getInstance();
         cal1.setTime(requestDate);

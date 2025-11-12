@@ -6,10 +6,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý Yêu cầu Cấp phát</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -17,164 +15,239 @@
             box-sizing: border-box;
         }
 
-        html, body {
-            height: 100%;
-        }
-
         body {
-            display: flex;
-            flex-direction: column;
-            background-color: #f9fafb;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            font-size: 14px;
-            line-height: 1.5;
-            color: #374151;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #ffffff;
             min-height: 100vh;
+            padding: 40px 20px;
         }
 
-        .page-wrapper {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .main {
-            max-width: 1200px;
+        .container {
+            width: 100%;
+            max-width: 1000px;
             margin: 0 auto;
-            padding: 40px 20px 60px 20px;
-            background-color: #f9fafb;
         }
 
-        /* Page header */
+        /* Page Header */
         .page-header {
             background: white;
-            padding: 30px;
-            border-radius: 12px;
-            margin-bottom: 24px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            border-left: 4px solid #6b7280;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            margin-bottom: 30px;
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header-section {
+            background: white;
+            color: #1f2937;
+            padding: 40px 30px;
+            border-bottom: 4px solid #6c757d;
+        }
+
+        .header-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 20px;
             flex-wrap: wrap;
-            gap: 15px;
+            gap: 16px;
         }
 
-        .page-header h1 {
-            color: #1f2937;
-            font-size: 28px;
-            font-weight: 700;
-            margin: 0;
+        .header-title {
             display: flex;
             align-items: center;
             gap: 12px;
+        }
+
+        .header-icon {
+            width: 50px;
+            height: 50px;
+            background: #eff6ff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .header-section h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0;
+            color: #1f2937;
         }
 
         .back-btn {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background: #6b7280;
+            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
             color: white;
-            padding: 10px 20px;
+            padding: 12px 24px;
             text-decoration: none;
-            border-radius: 8px;
+            border-radius: 12px;
             font-weight: 600;
             font-size: 14px;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .back-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .back-btn:hover::before {
+            left: 100%;
         }
 
         .back-btn:hover {
-            background: #4b5563;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(107, 114, 128, 0.2);
+            background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(108, 117, 125, 0.4);
             color: white;
         }
 
-        /* Alert messages */
+        .back-btn:active {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+        }
+
+        .header-section p {
+            font-size: 14px;
+            color: #6b7280;
+            margin: 0;
+        }
+
+        /* Alert Messages */
         .alert {
-            padding: 16px 20px;
-            border-radius: 10px;
-            margin-bottom: 24px;
-            font-weight: 500;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 20px 30px;
+            margin-bottom: 30px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            animation: slideUp 0.5s ease 0.05s both;
+            border-left: 4px solid;
         }
 
         .alert-success {
             background: #d1fae5;
             color: #065f46;
-            border: 1px solid #a7f3d0;
+            border-left-color: #10b981;
         }
 
         .alert-error {
             background: #fee2e2;
             color: #991b1b;
-            border: 1px solid #fecaca;
+            border-left-color: #ef4444;
         }
 
-        /* Requests section */
+        .alert i {
+            font-size: 20px;
+        }
+
+        /* Requests Section */
         .requests-section {
             background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            margin-bottom: 24px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            animation: slideUp 0.5s ease 0.1s both;
+            margin-bottom: 30px;
         }
 
-        .requests-section h2 {
-            color: #1f2937;
-            margin-bottom: 24px;
-            font-size: 20px;
+        .section-header {
+            background: #ffffff;
+            padding: 24px 30px;
+            border-bottom: 1px solid #e5e7eb;
+            border-left: 4px solid #6c757d;
+        }
+
+        .section-header h2 {
+            font-size: 18px;
             font-weight: 700;
-            border-bottom: 2px solid #e5e7eb;
-            padding-bottom: 12px;
+            color: #1f2937;
+            margin: 0;
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
-        /* Request card */
+        .section-body {
+            padding: 30px;
+        }
+
+        /* Request Card */
         .request-card {
-            background: #f9fafb;
-            padding: 24px;
-            border-radius: 10px;
+            padding: 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
             margin-bottom: 16px;
-            border-left: 4px solid #6b7280;
             transition: all 0.3s ease;
+            background: #ffffff;
         }
 
         .request-card:hover {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            transform: translateX(4px);
+            border-color: #6c757d;
+            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.1);
         }
 
         .request-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
             margin-bottom: 16px;
         }
 
-        .request-info p {
-            color: #374151;
-            margin: 10px 0;
-            font-size: 14px;
+        .info-item {
             display: flex;
-            align-items: center;
-            gap: 8px;
+            flex-direction: column;
+            gap: 4px;
         }
 
-        .request-info strong {
-            color: #1f2937;
-            min-width: 120px;
-            font-weight: 600;
-        }
-
-        /* Status badges */
-        .status {
-            display: inline-block;
-            padding: 6px 14px;
-            border-radius: 20px;
+        .info-label {
             font-size: 12px;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            font-size: 14px;
+            color: #1f2937;
+            font-weight: 500;
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
             font-weight: 600;
         }
 
@@ -193,138 +266,182 @@
             color: #991b1b;
         }
 
-        /* Button group */
+        /* Button Group */
         .btn-group {
-            margin-top: 12px;
             display: flex;
-            gap: 10px;
+            gap: 12px;
             flex-wrap: wrap;
         }
 
         .btn {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            padding: 10px 18px;
+            gap: 8px;
+            padding: 12px 24px;
             text-decoration: none;
-            border-radius: 8px;
+            border-radius: 12px;
             font-weight: 600;
             font-size: 14px;
             transition: all 0.3s ease;
             border: none;
             cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
         }
 
         .btn-update {
-            background: #6b7280;
+            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
             color: white;
         }
 
         .btn-update:hover {
-            background: #4b5563;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(107, 114, 128, 0.2);
+            background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(108, 117, 125, 0.4);
             color: white;
         }
 
+        .btn-update:active {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+        }
+
         .btn-cancel {
-            background: #ef4444;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
             color: white;
         }
 
         .btn-cancel:hover {
-            background: #dc2626;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
             color: white;
         }
 
-        /* History link */
-        .history-link {
-            background: white;
-            padding: 24px;
-            border-radius: 12px;
-            text-align: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            margin-bottom: 40px;
+        .btn-cancel:active {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
         }
 
-        .history-link a {
+        /* History Link Section */
+        .history-section {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            text-align: center;
+            animation: slideUp 0.5s ease 0.15s both;
+        }
+
+        .history-section a {
             display: inline-flex;
             align-items: center;
             gap: 10px;
-            background: #6b7280;
+            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
             color: white;
-            padding: 14px 32px;
+            padding: 16px 40px;
             text-decoration: none;
-            border-radius: 8px;
+            border-radius: 12px;
             font-weight: 600;
             font-size: 15px;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.2);
+            position: relative;
+            overflow: hidden;
         }
 
-        .history-link a:hover {
-            background: #4b5563;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(107, 114, 128, 0.2);
+        .history-section a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .history-section a:hover::before {
+            left: 100%;
+        }
+
+        .history-section a:hover {
+            background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(108, 117, 125, 0.4);
             color: white;
         }
 
-        /* Empty state */
-        .no-requests {
-            text-align: center;
-            padding: 60px 20px;
-            color: #9ca3af;
+        .history-section a:active {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
         }
 
-        .no-requests h3 {
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 30px;
             color: #6b7280;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .empty-state h3 {
             font-size: 18px;
+            font-weight: 600;
+            color: #1f2937;
             margin-bottom: 8px;
         }
 
-        .no-requests p {
-            color: #9ca3af;
+        .empty-state p {
             font-size: 14px;
-        }
-
-        /* Scrollbar styling */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.05);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(0, 0, 0, 0.3);
+            color: #6b7280;
         }
 
         /* Responsive */
         @media (max-width: 768px) {
-            .main {
+            body {
                 padding: 20px 15px;
             }
 
-            .page-header {
+            .header-section {
+                padding: 30px 20px;
+            }
+
+            .header-top {
                 flex-direction: column;
                 align-items: flex-start;
             }
 
-            .page-header h1 {
-                font-size: 22px;
+            .header-section h1 {
+                font-size: 24px;
             }
 
-            .request-info p {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 4px;
+            .section-body {
+                padding: 20px;
+            }
+
+            .request-info {
+                grid-template-columns: 1fr;
             }
 
             .btn-group {
@@ -341,47 +458,54 @@
 <body>
     <%@ include file="/admin/header.jsp" %>
 
-    <div class="page-wrapper">
-        <div class="main">
-            <div class="page-header">
-                <h1>
-                    <i class="bi bi-clipboard-check"></i>
-                    Quản lý Yêu cầu Cấp phát Thuốc
-                </h1>
-                <a href="doctor-dashboard" class="back-btn">
-                    <i class="bi bi-arrow-left"></i>
-                    Quay lại Dashboard
-                </a>
+    <div class="container">
+        <!-- Header -->
+        <div class="page-header">
+            <div class="header-section">
+                <div class="header-top">
+                    <div class="header-title">
+                        <div class="header-icon">📋</div>
+                        <h1>Quản lý Yêu cầu Cấp phát</h1>
+                    </div>
+                    <a href="doctor-dashboard" class="back-btn">
+                        ← Quay lại Dashboard
+                    </a>
+                </div>
+                <p>Xem và quản lý các yêu cầu cấp phát thuốc đang chờ xử lý</p>
+            </div>
+        </div>
+
+        <!-- Alert Messages -->
+        <c:if test="${not empty param.message}">
+            <c:choose>
+                <c:when test="${param.message == 'cancel_success'}">
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Hủy yêu cầu thành công!</span>
+                    </div>
+                </c:when>
+                <c:when test="${param.message == 'error_cancel'}">
+                    <div class="alert alert-error">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Hủy yêu cầu thất bại. Vui lòng thử lại!</span>
+                    </div>
+                </c:when>
+            </c:choose>
+        </c:if>
+
+        <!-- Requests Section -->
+        <div class="requests-section">
+            <div class="section-header">
+                <h2>
+                    ⏳ Yêu cầu Đang Chờ Xử Lý
+                </h2>
             </div>
 
-            <!-- Thông báo -->
-            <c:if test="${not empty param.message}">
-                <c:choose>
-                    <c:when test="${param.message == 'cancel_success'}">
-                        <div class="alert alert-success">
-                            <i class="bi bi-check-circle-fill"></i>
-                            <span>Hủy yêu cầu thành công!</span>
-                        </div>
-                    </c:when>
-                    <c:when test="${param.message == 'error_cancel'}">
-                        <div class="alert alert-error">
-                            <i class="bi bi-exclamation-triangle-fill"></i>
-                            <span>Hủy yêu cầu thất bại. Vui lòng thử lại!</span>
-                        </div>
-                    </c:when>
-                </c:choose>
-            </c:if>
-
-            <!-- Danh sách yêu cầu đang chờ -->
-            <div class="requests-section">
-                <h2>
-                    <i class="bi bi-hourglass-split"></i>
-                    Yêu cầu Đang Chờ Xử Lý
-                </h2>
-                
+            <div class="section-body">
                 <c:choose>
                     <c:when test="${empty requests}">
-                        <div class="no-requests">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📭</div>
                             <h3>Không có yêu cầu nào đang chờ xử lý</h3>
                             <p>Tất cả yêu cầu của bạn đã được xử lý hoặc chưa có yêu cầu nào.</p>
                         </div>
@@ -390,35 +514,37 @@
                         <c:forEach var="req" items="${requests}">
                             <div class="request-card">
                                 <div class="request-info">
-                                    <p>
-                                        <strong><i class="bi bi-hash"></i> Mã yêu cầu:</strong>
-                                        <span>${req.requestId}</span>
-                                    </p>
-                                    <p>
-                                        <strong><i class="bi bi-calendar-event"></i> Ngày tạo:</strong>
-                                        <span>${req.requestDate}</span>
-                                    </p>
-                                    <p>
-                                        <strong><i class="bi bi-flag"></i> Trạng thái:</strong>
-                                        <span class="status status-${req.status.toLowerCase()}">
-                                            ${req.status}
+                                    <div class="info-item">
+                                        <span class="info-label">Mã Yêu Cầu</span>
+                                        <span class="info-value">#${req.requestId}</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Ngày Tạo</span>
+                                        <span class="info-value">📅 ${req.requestDate}</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Trạng Thái</span>
+                                        <span class="info-value">
+                                            <span class="status-badge status-${req.status.toLowerCase()}">
+                                                ${req.status}
+                                            </span>
                                         </span>
-                                    </p>
-                                    <p>
-                                        <strong><i class="bi bi-chat-left-text"></i> Ghi chú:</strong>
-                                        <span>${req.notes != null && req.notes != '' ? req.notes : 'Không có'}</span>
-                                    </p>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Ghi Chú</span>
+                                        <span class="info-value">
+                                            ${req.notes != null && req.notes != '' ? req.notes : 'Không có'}
+                                        </span>
+                                    </div>
                                 </div>
                                 <div class="btn-group">
                                     <a href="update-request?requestId=${req.requestId}" class="btn btn-update">
-                                        <i class="bi bi-pencil-square"></i>
-                                        Cập nhật
+                                        ✏️ Cập nhật
                                     </a>
                                     <a href="cancel-request?requestId=${req.requestId}" 
                                        class="btn btn-cancel"
                                        onclick="return confirm('Bạn có chắc muốn hủy yêu cầu này?')">
-                                        <i class="bi bi-x-circle"></i>
-                                        Hủy yêu cầu
+                                        ✕ Hủy yêu cầu
                                     </a>
                                 </div>
                             </div>
@@ -426,19 +552,16 @@
                     </c:otherwise>
                 </c:choose>
             </div>
+        </div>
 
-            <!-- Link xem lịch sử -->
-            <div class="history-link">
-                <a href="view-request-history">
-                    <i class="bi bi-clock-history"></i>
-                    Xem Lịch sử Yêu cầu
-                </a>
-            </div>
+        <!-- History Link -->
+        <div class="history-section">
+            <a href="view-request-history">
+                🕐 Xem Lịch sử Yêu cầu
+            </a>
         </div>
     </div>
 
     <%@ include file="/admin/footer.jsp" %>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

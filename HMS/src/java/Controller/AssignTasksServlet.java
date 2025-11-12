@@ -43,6 +43,19 @@ public class AssignTasksServlet extends HttpServlet {
                 if (viewTask != null && viewTask.getPoId() > 0) {
                     List<PurchaseOrderItem> items = dao.getPurchaseOrderItems(viewTask.getPoId());
                     request.setAttribute("poItems", items);
+                    
+                    // DEBUG: Print items info
+                    System.out.println("=== VIEW TASK DEBUG ===");
+                    System.out.println("Task ID: " + taskId);
+                    System.out.println("PO ID: " + viewTask.getPoId());
+                    System.out.println("Items count: " + (items != null ? items.size() : 0));
+                    if (items != null) {
+                        for (PurchaseOrderItem item : items) {
+                            System.out.println("  - Item: " + item.getMedicineCode() + 
+                                             " | Name: " + item.getMedicineName() +
+                                             " | Qty: " + item.getQuantity());
+                        }
+                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -50,12 +63,16 @@ public class AssignTasksServlet extends HttpServlet {
         }
         
         List<Task> tasks = dao.getTasks();
-        List<PurchaseOrder> pendingOrders = dao.getPendingStockRequests();
-        List<model.Manager> auditors = dao.getAllAuditors();
+        
+        // ✅ THAY ĐỔI: Lấy TẤT CẢ PO (không chỉ Pending)
+        List<PurchaseOrder> allOrders = dao.getAllPurchaseOrders(); // Method mới
+        
+        // ✅ THAY ĐỔI: Lấy cả Auditor VÀ Pharmacist
+        List<model.Manager> staffList = dao.getAllStaff(); // Method mới - trả về cả Auditor và Pharmacist
         
         request.setAttribute("tasks", tasks);
-        request.setAttribute("pendingOrders", pendingOrders);
-        request.setAttribute("auditors", auditors);
+        request.setAttribute("pendingOrders", allOrders); // Giữ tên cũ để không phá vỡ JSP
+        request.setAttribute("auditors", staffList); // Giữ tên cũ cho tương thích
         
         // Handle messages from session
         String message = (String) session.getAttribute("message");
@@ -102,11 +119,11 @@ public class AssignTasksServlet extends HttpServlet {
             } else if ("edit".equals(action)) {
                 // Edit task
                 int taskId = Integer.parseInt(request.getParameter("taskId"));
-                int auditorId = Integer.parseInt(request.getParameter("auditorId"));
+                int staffId = Integer.parseInt(request.getParameter("auditorId")); // Vẫn dùng tên param cũ
                 String taskType = request.getParameter("taskType");
                 Date deadline = Date.valueOf(request.getParameter("deadline"));
                 
-                boolean success = dao.updateTask(taskId, auditorId, taskType, deadline);
+                boolean success = dao.updateTask(taskId, staffId, taskType, deadline);
                 
                 if (success) {
                     session.setAttribute("message", "Task updated successfully!");
@@ -119,11 +136,11 @@ public class AssignTasksServlet extends HttpServlet {
             } else {
                 // Assign new task
                 int poId = Integer.parseInt(request.getParameter("poId"));
-                int auditorId = Integer.parseInt(request.getParameter("auditorId"));
+                int staffId = Integer.parseInt(request.getParameter("auditorId"));
                 String taskType = request.getParameter("taskType");
                 Date deadline = Date.valueOf(request.getParameter("deadline"));
                 
-                boolean success = dao.assignTask(poId, auditorId, taskType, deadline);
+                boolean success = dao.assignTask(poId, staffId, taskType, deadline);
                 
                 if (success) {
                     session.setAttribute("message", "Task assigned successfully!");

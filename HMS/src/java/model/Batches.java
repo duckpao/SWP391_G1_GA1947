@@ -15,6 +15,11 @@ public class Batches {
     private String quarantineNotes;
     private Date createdAt;
     private Date updatedAt;
+    
+    private String medicineName;
+    private String category;
+    private String manufacturer;
+    private String countryOfOrigin;
 
     public Batches() {}
 
@@ -34,6 +39,38 @@ public class Batches {
         this.quarantineNotes = quarantineNotes;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+    }
+
+    public String getMedicineName() {
+        return medicineName;
+    }
+
+    public void setMedicineName(String medicineName) {
+        this.medicineName = medicineName;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getManufacturer() {
+        return manufacturer;
+    }
+
+    public void setManufacturer(String manufacturer) {
+        this.manufacturer = manufacturer;
+    }
+
+    public String getCountryOfOrigin() {
+        return countryOfOrigin;
+    }
+
+    public void setCountryOfOrigin(String countryOfOrigin) {
+        this.countryOfOrigin = countryOfOrigin;
     }
 
     // Getters và setters

@@ -21,7 +21,10 @@ public class Medicine {
     private Timestamp updatedAt;
     private List<Batches> batches = new ArrayList<>();
      private double unitPrice;
-
+     
+     
+     
+ private String supplierName;
     public Medicine() {}
 
     public Medicine(String medicineCode, String name, String category, String description,
@@ -109,6 +112,14 @@ public class Medicine {
 
     public void setUnitPrice(double unitPrice) {
         this.unitPrice = unitPrice;
+    }
+    
+    public String getSupplierName() {
+        return supplierName;
+    }
+
+    public void setSupplierName(String supplierName) {
+        this.supplierName = supplierName;
     }
     
 }

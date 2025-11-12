@@ -14,6 +14,7 @@ import java.util.List;
 import model.Supplier;
 import model.PurchaseOrderItem;
 import model.Medicine;
+import util.LoggingUtil;
 
 public class CreateStockServlet extends HttpServlet {
 
@@ -150,14 +151,26 @@ public class CreateStockServlet extends HttpServlet {
             System.out.println("\nCreated PO ID: " + poId);
 
             if (poId > 0) {
-                session.setAttribute("message", "Stock request #" + poId + " created successfully!");
-                session.setAttribute("messageType", "success");
-                System.out.println("SUCCESS: Stock request created!");
-            } else {
-                session.setAttribute("message", "Failed to create stock request.");
-                session.setAttribute("messageType", "error");
-                System.out.println("ERROR: Failed to create stock request!");
-            }
+    // ✅ THÊM LOGGING - PO Created
+    String supplierName = "Unknown";
+    if (supplierId != null) {
+        // Get supplier name for logging
+        ManagerDAO tempDao = new ManagerDAO();
+        Supplier supplier = tempDao.getSupplierById(supplierId);
+        if (supplier != null) {
+            supplierName = supplier.getName();
+        }
+    }
+    LoggingUtil.logPOCreate(request, poId, supplierName);
+    
+    session.setAttribute("message", "Stock request #" + poId + " created successfully!");
+    session.setAttribute("messageType", "success");
+    System.out.println("SUCCESS: Stock request created!");
+} else {
+    session.setAttribute("message", "Failed to create stock request.");
+    session.setAttribute("messageType", "error");
+    System.out.println("ERROR: Failed to create stock request!");
+}
             
             System.out.println("========================================\n");
             response.sendRedirect("manager-dashboard");

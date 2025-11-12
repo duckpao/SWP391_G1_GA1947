@@ -13,6 +13,8 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.sql.Date;
+import util.LoggingUtil;
+
 
 public class CreateASNServlet extends HttpServlet {
     
@@ -143,6 +145,7 @@ public class CreateASNServlet extends HttpServlet {
             );
             
             if (asnId > 0) {
+                util.LoggingUtil.logASNCreate(request, asnId, poId);
                 String message = "Shipping notice created successfully! ASN #" + asnId + 
                                 " (Status: " + initialStatus + ")";
                 response.sendRedirect("supplier-dashboard?success=" + 

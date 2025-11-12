@@ -191,4 +191,141 @@ public class LoggingUtil {
         }
         return null;
     }
+    
+    // =====================================================
+// ✅ NEW METHODS: Procurement Logging (UPDATED)
+// =====================================================
+
+/**
+ * Internal helper - log with table name
+ */
+private static void logWithTable(HttpServletRequest request, String action, String tableName, 
+                                 Integer recordId, String details) {
+    try {
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            User user = (User) session.getAttribute("user");
+            if (user != null) {
+                String ipAddress = getClientIP(request);
+                // Call SystemLogsDAO with table name
+                logsDAO.log(user.getUserId(), action, tableName, recordId, details, ipAddress);
+            }
+        }
+    } catch (Exception e) {
+        System.err.println("Failed to log action with table: " + e.getMessage());
+        e.printStackTrace();
+    }
+}
+
+/**
+ * Log Purchase Order creation
+ */
+public static void logPOCreate(HttpServletRequest request, int poId, String supplierName) {
+    String details = String.format("Created Purchase Order #%d for supplier: %s", poId, supplierName);
+    logWithTable(request, "CREATE", "PurchaseOrders", poId, details);
+}
+
+/**
+ * Log Purchase Order approval
+ */
+public static void logPOApprove(HttpServletRequest request, int poId) {
+    String details = String.format("Approved Purchase Order #%d", poId);
+    logWithTable(request, "APPROVE", "PurchaseOrders", poId, details);
+}
+
+/**
+ * Log Purchase Order rejection
+ */
+public static void logPOReject(HttpServletRequest request, int poId, String reason) {
+    String details = String.format("Rejected Purchase Order #%d. Reason: %s", poId, reason);
+    logWithTable(request, "REJECT", "PurchaseOrders", poId, details);
+}
+
+/**
+ * Log Purchase Order cancellation
+ */
+public static void logPOCancel(HttpServletRequest request, int poId, String reason) {
+    String details = String.format("Cancelled Purchase Order #%d. Reason: %s", poId, reason);
+    logWithTable(request, "CANCEL", "PurchaseOrders", poId, details);
+}
+
+/**
+ * Log Purchase Order update
+ */
+public static void logPOUpdate(HttpServletRequest request, int poId, String changes) {
+    String details = String.format("Updated Purchase Order #%d. Changes: %s", poId, changes);
+    logWithTable(request, "UPDATE", "PurchaseOrders", poId, details);
+}
+
+/**
+ * Log Purchase Order status change
+ */
+public static void logPOStatusChange(HttpServletRequest request, int poId, String oldStatus, String newStatus) {
+    String details = String.format("Changed Purchase Order #%d status from '%s' to '%s'", poId, oldStatus, newStatus);
+    logWithTable(request, "UPDATE", "PurchaseOrders", poId, details);
+}
+
+/**
+ * Log ASN (Advanced Shipping Notice) creation
+ */
+public static void logASNCreate(HttpServletRequest request, int asnId, int poId) {
+    String details = String.format("Created ASN #%d for Purchase Order #%d", asnId, poId);
+    logWithTable(request, "CREATE", "AdvancedShippingNotices", asnId, details);
+}
+
+/**
+ * Log ASN update
+ */
+public static void logASNUpdate(HttpServletRequest request, int asnId, String changes) {
+    String details = String.format("Updated ASN #%d. Changes: %s", asnId, changes);
+    logWithTable(request, "UPDATE", "AdvancedShippingNotices", asnId, details);
+}
+
+/**
+ * Log ASN shipment confirmation
+ */
+public static void logASNConfirmShipment(HttpServletRequest request, int asnId, String trackingNumber) {
+    String details = String.format("Confirmed shipment for ASN #%d. Tracking: %s", asnId, trackingNumber);
+    logWithTable(request, "CONFIRM", "AdvancedShippingNotices", asnId, details);
+}
+
+/**
+ * Log ASN status change
+ */
+public static void logASNStatusChange(HttpServletRequest request, int asnId, String oldStatus, String newStatus) {
+    String details = String.format("Changed ASN #%d status from '%s' to '%s'", asnId, oldStatus, newStatus);
+    logWithTable(request, "UPDATE", "AdvancedShippingNotices", asnId, details);
+}
+
+/**
+ * Log Invoice creation
+ */
+public static void logInvoiceCreate(HttpServletRequest request, int invoiceId, int poId, double amount) {
+    String details = String.format("Created Invoice #%d for PO #%d. Amount: %.2f", invoiceId, poId, amount);
+    logWithTable(request, "CREATE", "Invoices", invoiceId, details);
+}
+
+/**
+ * Log Invoice payment approval
+ */
+public static void logInvoicePaymentApprove(HttpServletRequest request, int invoiceId, double amount) {
+    String details = String.format("Approved payment for Invoice #%d. Amount: %.2f", invoiceId, amount);
+    logWithTable(request, "APPROVE", "Invoices", invoiceId, details);
+}
+
+/**
+ * Log Delivery confirmation
+ */
+public static void logDeliveryConfirm(HttpServletRequest request, int dnId, int asnId) {
+    String details = String.format("Confirmed delivery for DN #%d (ASN #%d)", dnId, asnId);
+    logWithTable(request, "CONFIRM", "DeliveryNotes", dnId, details);
+}
+
+/**
+ * Log Payment completion
+ */
+public static void logPaymentComplete(HttpServletRequest request, int poId, String transactionNo) {
+    String details = String.format("Payment completed for PO #%d. Transaction: %s", poId, transactionNo);
+    logWithTable(request, "PAYMENT", "PurchaseOrders", poId, details);
+}
 }

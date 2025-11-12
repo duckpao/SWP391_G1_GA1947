@@ -698,9 +698,6 @@
                     <a class="sidebar-item" href="${pageContext.request.contextPath}/admin-dashboard/notifications">
                         🛎 ️Gửi Thông báo
                     </a>
-                    <a class="sidebar-item" href="${pageContext.request.contextPath}/admin/permissions">
-                        🔐 Phân quyền
-                    </a>
                     <a class="sidebar-item" href="${pageContext.request.contextPath}/admin-dashboard/create">
                         ➕ Tạo tài khoản
                     </a>
@@ -970,7 +967,7 @@
       <p>Chọn dashboard bạn muốn truy cập:</p>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:16px;">
         <a href="doctor-dashboard" style="background:#495057;color:#ffffff;padding:12px;border-radius:8px;text-align:center;text-decoration:none;font-weight:600;">Doctor</a>
-        <a href="view-medicine" style="background:#495057;color:#ffffff;padding:12px;border-radius:8px;text-align:center;text-decoration:none;font-weight:600;">Pharmacist</a>
+        <a href="view-medicine?dashboard=pharmacist" style="background:#495057;color:#ffffff;padding:12px;border-radius:8px;text-align:center;text-decoration:none;font-weight:600;">Pharmacist</a>
         <a href="manager-dashboard" style="background:#495057;color:#ffffff;padding:12px;border-radius:8px;text-align:center;text-decoration:none;font-weight:600;">Manager</a>
         <a href="auditor-dashboard" style="background:#495057;color:#ffffff;padding:12px;border-radius:8px;text-align:center;text-decoration:none;font-weight:600;">Auditor</a>
       </div>

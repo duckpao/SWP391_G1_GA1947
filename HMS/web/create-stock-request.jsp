@@ -1,5 +1,4 @@
-
-page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html>
@@ -18,11 +17,80 @@ page contentType="text/html" pageEncoding="UTF-8"%>
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f3f4f6;
-            color: #1f2937;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f9fafb;
             min-height: 100vh;
-            padding: 20px;
+            color: #374151;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar styling */
+        .sidebar {
+            width: 280px;
+            background: white;
+            color: #1f2937;
+            padding: 30px 20px;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.08);
+            overflow-y: auto;
+            border-right: 1px solid #e5e7eb;
+        }
+
+        .sidebar-header {
+            margin-bottom: 30px;
+        }
+
+        .sidebar-header h4 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #1f2937;
+        }
+
+        .sidebar-header hr {
+            border: none;
+            border-top: 1px solid #e5e7eb;
+            margin: 15px 0;
+        }
+
+        .nav-link {
+            color: #6b7280;
+            text-decoration: none;
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin: 6px 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: #f3f4f6;
+            color: #3b82f6;
+            transform: translateX(4px);
+        }
+
+        .nav-divider {
+            border: none;
+            border-top: 1px solid #e5e7eb;
+            margin: 15px 0;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            background: #f9fafb;
         }
 
         .container {
@@ -403,7 +471,38 @@ page contentType="text/html" pageEncoding="UTF-8"%>
             color: #991b1b;
         }
 
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
         @media (max-width: 768px) {
+            .dashboard-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                padding: 20px;
+            }
+
+            .main-content {
+                padding: 20px;
+            }
+
             .form-content {
                 padding: 20px;
             }
@@ -423,107 +522,156 @@ page contentType="text/html" pageEncoding="UTF-8"%>
         }
     </style>
 </head>
+<%@ include file="/admin/header.jsp" %>
 <body>
-    <div class="container">
-        <div class="header">
-            <h2><i class="bi bi-plus-circle"></i> Create Stock Request</h2>
-            <p>Create a new purchase order for medicine inventory</p>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h4><i class="bi bi-hospital"></i> Manager</h4>
+                <hr class="sidebar-divider">
+            </div>
+
+            <nav>
+                <a class="nav-link" href="${pageContext.request.contextPath}/manager-dashboard">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a class="nav-link active" href="${pageContext.request.contextPath}/create-stock">
+                    <i class="bi bi-plus-circle"></i> New Stock Request
+                </a>
+                <a class="nav-link" href="${pageContext.request.contextPath}/cancelled-tasks">
+                    <i class="bi bi-ban"></i> Cancelled Orders
+                </a>
+                
+                <hr class="nav-divider">
+                
+                <!-- Reports Section -->
+                <a class="nav-link" href="${pageContext.request.contextPath}/inventory-report">
+                    <i class="bi bi-boxes"></i> Inventory Report
+                </a>
+                <a class="nav-link" href="${pageContext.request.contextPath}/expiry-report?days=30">
+                    <i class="bi bi-calendar-times"></i> Expiry Report
+                </a>
+                <a class="nav-link" href="${pageContext.request.contextPath}/stock-alerts">
+                    <i class="bi bi-exclamation-triangle"></i> Stock Alerts
+                </a>
+                
+                <hr class="nav-divider">
+                
+                <!-- Management Section -->
+                <a class="nav-link" href="${pageContext.request.contextPath}/tasks/assign">
+                    <i class="bi bi-pencil"></i> Assign Tasks
+                </a>
+                <a class="nav-link" href="${pageContext.request.contextPath}/manage/transit">
+                    <i class="bi bi-truck"></i> Transit Orders
+                </a>
+            </nav>
         </div>
 
-        <div class="form-content">
-            <c:if test="${not empty message}">
-                <div class="alert alert-${messageType == 'success' ? 'success' : 'error'}">
-                    <i class="bi bi-${messageType == 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-                    ${message}
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="container">
+                <div class="header">
+                    <h2><i class="bi bi-plus-circle"></i> Create Stock Request</h2>
+                    <p>Create a new purchase order for medicine inventory</p>
                 </div>
-            </c:if>
 
-            <form action="${pageContext.request.contextPath}/create-stock" method="post" id="createStockForm">
-                <!-- Supplier Section -->
-                <div class="form-section">
-                    <div class="section-header">
-                        <i class="bi bi-building"></i>
-                        Supplier Information
-                    </div>
-
-                    <div class="form-group">
-                        <label for="supplier">Select Supplier (Optional)</label>
-                        <div class="input-wrapper">
-                            <i class="bi bi-shop input-icon"></i>
-                            <select id="supplier" name="supplierId">
-                                <option value="">-- Choose a supplier --</option>
-                                <c:forEach items="${suppliers}" var="supplier">
-                                    <option value="${supplier.supplierId}">
-                                        ${supplier.name}
-                                        <c:if test="${not empty supplier.performanceRating}">
-                                            - Rating: ${supplier.performanceRating}/5.0</c:if>
-                                    </option>
-                                </c:forEach>
-                            </select>
+                <div class="form-content">
+                    <c:if test="${not empty message}">
+                        <div class="alert alert-${messageType == 'success' ? 'success' : 'error'}">
+                            <i class="bi bi-${messageType == 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                            ${message}
                         </div>
-                    </div>
-                </div>
+                    </c:if>
 
-                <!-- Medicine Items Section -->
-                <div class="form-section">
-                    <div class="section-header">
-                        <i class="bi bi-capsule"></i>
-                        Medicine Items
-                    </div>
+                    <form action="${pageContext.request.contextPath}/create-stock" method="post" id="createStockForm">
+                        <!-- Supplier Section -->
+                        <div class="form-section">
+                            <div class="section-header">
+                                <i class="bi bi-building"></i>
+                                Supplier Information
+                            </div>
 
-                    <div id="medicineItemsContainer">
-                        <!-- Items will be added by JavaScript -->
-                    </div>
-
-                    <!-- Total Summary Box -->
-                    <div id="totalSummary" class="total-summary">
-                        <div class="total-label">Total Amount:</div>
-                        <div class="total-amount" id="totalAmount">0 VN?</div>
-                    </div>
-
-                    <button type="button" class="btn-add-medicine" onclick="addMedicineItem()">
-                        <i class="bi bi-plus-lg"></i>
-                        Add Medicine Item
-                    </button>
-                </div>
-
-                <!-- Delivery & Notes Section -->
-                <div class="form-section">
-                    <div class="section-header">
-                        <i class="bi bi-calendar-check"></i>
-                        Delivery & Notes
-                    </div>
-
-                    <div class="form-row two">
-                        <div class="form-group">
-                            <label for="deliveryDate">
-                                Expected Delivery Date <span class="required">*</span>
-                            </label>
-                            <div class="input-wrapper">
-                                <i class="bi bi-calendar3 input-icon"></i>
-                                <input type="date" id="deliveryDate" name="expectedDeliveryDate" required>
+                            <div class="form-group">
+                                <label for="supplier">Select Supplier (Optional)</label>
+                                <div class="input-wrapper">
+                                    <i class="bi bi-shop input-icon"></i>
+                                    <select id="supplier" name="supplierId">
+                                        <option value="">-- Choose a supplier --</option>
+                                        <c:forEach items="${suppliers}" var="supplier">
+                                            <option value="${supplier.supplierId}">
+                                                ${supplier.name}
+                                                <c:if test="${not empty supplier.performanceRating}">
+                                                    - Rating: ${supplier.performanceRating}/5.0</c:if>
+                                            </option>
+                                        </c:forEach>
+                                    </select>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="form-group">
-                        <label for="generalNotes">General Notes</label>
-                        <textarea id="generalNotes" name="notes" placeholder="Enter any additional notes or special instructions..."></textarea>
-                    </div>
-                </div>
+                        <!-- Medicine Items Section -->
+                        <div class="form-section">
+                            <div class="section-header">
+                                <i class="bi bi-capsule"></i>
+                                Medicine Items
+                            </div>
 
-                <!-- Action Buttons -->
-                <div class="button-group">
-                    <button type="submit" class="btn-submit">
-                        <i class="bi bi-check-circle"></i>
-                        Create Stock Request
-                    </button>
-                    <a href="${pageContext.request.contextPath}/manager-dashboard" class="btn-cancel">
-                        <i class="bi bi-x-circle"></i>
-                        Cancel
-                    </a>
+                            <div id="medicineItemsContainer">
+                                <!-- Items will be added by JavaScript -->
+                            </div>
+
+                            <!-- Total Summary Box -->
+                            <div id="totalSummary" class="total-summary">
+                                <div class="total-label">Total Amount:</div>
+                                <div class="total-amount" id="totalAmount">0 VNĐ</div>
+                            </div>
+
+                            <button type="button" class="btn-add-medicine" onclick="addMedicineItem()">
+                                <i class="bi bi-plus-lg"></i>
+                                Add Medicine Item
+                            </button>
+                        </div>
+
+                        <!-- Delivery & Notes Section -->
+                        <div class="form-section">
+                            <div class="section-header">
+                                <i class="bi bi-calendar-check"></i>
+                                Delivery & Notes
+                            </div>
+
+                            <div class="form-row two">
+                                <div class="form-group">
+                                    <label for="deliveryDate">
+                                        Expected Delivery Date <span class="required">*</span>
+                                    </label>
+                                    <div class="input-wrapper">
+                                        <i class="bi bi-calendar3 input-icon"></i>
+                                        <input type="date" id="deliveryDate" name="expectedDeliveryDate" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="generalNotes">General Notes</label>
+                                <textarea id="generalNotes" name="notes" placeholder="Enter any additional notes or special instructions..."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="button-group">
+                            <button type="submit" class="btn-submit">
+                                <i class="bi bi-check-circle"></i>
+                                Create Stock Request
+                            </button>
+                            <a href="${pageContext.request.contextPath}/manager-dashboard" class="btn-cancel">
+                                <i class="bi bi-x-circle"></i>
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 
@@ -601,10 +749,10 @@ page contentType="text/html" pageEncoding="UTF-8"%>
                 '</div>' +
                 '</div>' +
 
-                // Unit Price (NEW)
+                // Unit Price
                 '<div class="form-group">' +
                 '<label for="unitPrice_' + index + '">' +
-                'Unit Price (VN?) <span class="required">*</span>' +
+                'Unit Price (VNĐ) <span class="required">*</span>' +
                 '</label>' +
                 '<div class="input-wrapper">' +
                 '<i class="bi bi-currency-dollar input-icon"></i>' +
@@ -667,7 +815,7 @@ page contentType="text/html" pageEncoding="UTF-8"%>
             }
 
             // Format number with Vietnamese currency format
-            var formattedTotal = total.toLocaleString('vi-VN') + ' VN?';
+            var formattedTotal = total.toLocaleString('vi-VN') + ' VNĐ';
             document.getElementById('totalAmount').textContent = formattedTotal;
 
             // Show/hide summary box
@@ -842,4 +990,5 @@ page contentType="text/html" pageEncoding="UTF-8"%>
         });
     </script>
 </body>
+<%@ include file="/admin/footer.jsp" %>
 </html>

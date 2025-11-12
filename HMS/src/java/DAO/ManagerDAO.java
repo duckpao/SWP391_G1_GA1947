@@ -62,44 +62,67 @@ public class ManagerDAO extends DBContext {
     }
 
     // Cancel Stock Request - Chỉ cancel được khi status là Sent
-    public boolean cancelStockRequest(int poId, String reason) {
-        String query = "UPDATE PurchaseOrders SET status = 'Cancelled', " +
-                      "notes = CONCAT(COALESCE(notes, ''), '\nCancellation Reason: ', ?), updated_at = GETDATE() " +
-                      "WHERE po_id = ? AND status = 'Sent'";
-        try (PreparedStatement ps = connection.prepareStatement(query)) {
-            ps.setString(1, reason);
-            ps.setInt(2, poId);
-            int result = ps.executeUpdate();
-            System.out.println("Cancel PO #" + poId + ": Affected rows = " + result);
-            if (result == 0) {
-                System.out.println("Cancel failed: PO #" + poId + " not found or status is not 'Sent'. Current status: " +
-                    getCurrentStatus(poId));
-            }
-            return result > 0;
-        } catch (SQLException e) {
-            System.err.println("Error cancelling stock request #" + poId + ": " + e.getMessage());
-            e.printStackTrace();
+public boolean cancelStockRequest(int poId, String reason) {
+    String query = "UPDATE PurchaseOrders SET status = 'Cancelled', " +
+                  "notes = CONCAT(COALESCE(notes, ''), CHAR(13) + CHAR(10) + 'Cancellation Reason: ', ?), " +
+                  "updated_at = GETDATE() " +
+                  "WHERE po_id = ? AND status = 'Sent'";
+    
+    try (PreparedStatement ps = connection.prepareStatement(query)) {
+        ps.setString(1, reason);
+        ps.setInt(2, poId);
+        
+        System.out.println("========================================");
+        System.out.println("EXECUTING CANCEL STOCK REQUEST");
+        System.out.println("PO ID: " + poId);
+        System.out.println("Reason: " + reason);
+        System.out.println("SQL: " + query);
+        System.out.println("========================================");
+        
+        int result = ps.executeUpdate();
+        
+        System.out.println("Cancel PO #" + poId + ": Affected rows = " + result);
+        
+        if (result == 0) {
+            String currentStatus = getCurrentStatus(poId);
+            System.out.println("Cancel failed!");
+            System.out.println("Current status: " + currentStatus);
+            System.out.println("Required status: 'Sent'");
             return false;
         }
+        
+        System.out.println("Cancel successful!");
+        return true;
+        
+    } catch (SQLException e) {
+        System.err.println("SQL Error cancelling stock request #" + poId);
+        System.err.println("Error Code: " + e.getErrorCode());
+        System.err.println("SQL State: " + e.getSQLState());
+        System.err.println("Message: " + e.getMessage());
+        e.printStackTrace();
+        return false;
     }
+}
 
-    // Helper method to get current status for debugging
-    private String getCurrentStatus(int poId) {
-        String query = "SELECT status FROM PurchaseOrders WHERE po_id = ?";
-        try (PreparedStatement ps = connection.prepareStatement(query)) {
-            ps.setInt(1, poId);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                String status = rs.getString("status");
-                System.out.println("Current status for PO #" + poId + ": '" + status + "'");
-                return status;
-            }
-            return "Not found";
-        } catch (SQLException e) {
-            System.err.println("Error checking status for PO #" + poId + ": " + e.getMessage());
-            return "Error";
+/**
+ * Helper method to get current status of a PO for debugging
+ */
+private String getCurrentStatus(int poId) {
+    String query = "SELECT status FROM PurchaseOrders WHERE po_id = ?";
+    try (PreparedStatement ps = connection.prepareStatement(query)) {
+        ps.setInt(1, poId);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            String status = rs.getString("status");
+            System.out.println("Current status for PO #" + poId + ": '" + status + "'");
+            return status;
         }
+        return "NOT_FOUND";
+    } catch (SQLException e) {
+        System.err.println("Error checking status for PO #" + poId + ": " + e.getMessage());
+        return "ERROR";
     }
+}
 
     // === CẬP NHẬT: Lấy danh sách thuốc với đầy đủ thông tin + medicine_code ===
     public List<Medicine> getAllMedicines() {
@@ -582,40 +605,75 @@ public List<StockAlert> getStockAlerts() {
         return null;
     }
 
-    public List<PurchaseOrder> getCancelledStockRequests() {
-        List<PurchaseOrder> requests = new ArrayList<>();
-        String query = "SELECT po.po_id, po.manager_id, po.supplier_id, po.status, " +
-                      "po.order_date, po.expected_delivery_date, po.notes, " +
-                      "s.name as supplier_name, u.username as manager_name " +
-                      "FROM PurchaseOrders po " +
-                      "LEFT JOIN Suppliers s ON po.supplier_id = s.supplier_id " +
-                      "LEFT JOIN Users u ON po.manager_id = u.user_id " +
-                      "WHERE TRIM(po.status) = 'Cancelled' " +
-                      "ORDER BY po.order_date DESC";
+public List<PurchaseOrder> getCancelledStockRequests() {
+    List<PurchaseOrder> orders = new ArrayList<>();
+    String query = "SELECT po.*, u.username as manager_name, s.name as supplier_name " +
+                  "FROM PurchaseOrders po " +
+                  "LEFT JOIN Users u ON po.manager_id = u.user_id " +
+                  "LEFT JOIN Suppliers s ON po.supplier_id = s.supplier_id " +
+                  "WHERE po.status = 'Cancelled' " +
+                  "ORDER BY po.updated_at DESC";
+    
+    try (PreparedStatement ps = connection.prepareStatement(query);
+         ResultSet rs = ps.executeQuery()) {
         
-        try (PreparedStatement ps = connection.prepareStatement(query);
-             ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                PurchaseOrder po = new PurchaseOrder();
-                po.setPoId(rs.getInt("po_id"));
-                po.setManagerId(rs.getInt("manager_id"));
-                po.setSupplierId(rs.getInt("supplier_id"));
-                po.setStatus(rs.getString("status"));
-                po.setOrderDate(rs.getTimestamp("order_date"));
-                po.setExpectedDeliveryDate(rs.getDate("expected_delivery_date"));
-                po.setNotes(rs.getString("notes"));
-                po.setSupplierName(rs.getString("supplier_name"));
-                po.setManagerName(rs.getString("manager_name"));
-                requests.add(po);
-            }
-            System.out.println("Loaded " + requests.size() + " cancelled stock requests.");
-        } catch (SQLException e) {
-            System.err.println("Error getting cancelled stock requests: " + e.getMessage());
-            e.printStackTrace();
+        System.out.println("========================================");
+        System.out.println("FETCHING CANCELLED ORDERS");
+        System.out.println("Query: " + query);
+        System.out.println("========================================");
+        
+        int count = 0;
+        while (rs.next()) {
+            PurchaseOrder po = new PurchaseOrder();
+            po.setPoId(rs.getInt("po_id"));
+            po.setManagerId(rs.getInt("manager_id"));
+            po.setSupplierId(rs.getInt("supplier_id"));
+            po.setStatus(rs.getString("status"));
+            po.setOrderDate(rs.getTimestamp("order_date"));
+            po.setExpectedDeliveryDate(rs.getDate("expected_delivery_date"));
+            po.setNotes(rs.getString("notes"));
+            po.setUpdatedAt(rs.getTimestamp("updated_at"));
+            po.setManagerName(rs.getString("manager_name"));
+            po.setSupplierName(rs.getString("supplier_name"));
+            
+            orders.add(po);
+            count++;
+            
+            System.out.println("Found cancelled PO #" + po.getPoId() + 
+                             ", Supplier: " + po.getSupplierName());
         }
-        return requests;
+        
+        System.out.println("Total cancelled orders found: " + count);
+        System.out.println("========================================");
+        
+    } catch (SQLException e) {
+        System.err.println("Error fetching cancelled stock requests: " + e.getMessage());
+        e.printStackTrace();
     }
+    
+    return orders;
+}
 
+/**
+ * Check if a PO can be cancelled
+ * @param poId The PO ID to check
+ * @return true if it can be cancelled (status = 'Sent'), false otherwise
+ */
+public boolean canCancelPurchaseOrder(int poId) {
+    String query = "SELECT status FROM PurchaseOrders WHERE po_id = ?";
+    try (PreparedStatement ps = connection.prepareStatement(query)) {
+        ps.setInt(1, poId);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            String status = rs.getString("status");
+            return "Sent".equals(status);
+        }
+        return false;
+    } catch (SQLException e) {
+        System.err.println("Error checking if PO can be cancelled: " + e.getMessage());
+        return false;
+    }
+}
     public List<Manager> getAllAuditors() {
         List<Manager> auditors = new ArrayList<>();
         String query = "SELECT * FROM Users WHERE role = 'Auditor' AND is_active = 1 ORDER BY username";
@@ -849,5 +907,83 @@ public List<PurchaseOrderItem> getPurchaseOrderItems(int poId) {
         e.printStackTrace();
     }
     return items;
+}
+public List<PurchaseOrder> getAllPurchaseOrders() {
+    List<PurchaseOrder> orders = new ArrayList<>();
+    String query = "SELECT po.po_id, po.manager_id, po.supplier_id, po.status, " +
+                  "po.order_date, po.expected_delivery_date, po.notes, " +
+                  "s.name as supplier_name, u.username as manager_name " +
+                  "FROM PurchaseOrders po " +
+                  "LEFT JOIN Suppliers s ON po.supplier_id = s.supplier_id " +
+                  "LEFT JOIN Users u ON po.manager_id = u.user_id " +
+                  "ORDER BY po.order_date DESC";
+    
+    try (PreparedStatement ps = connection.prepareStatement(query);
+         ResultSet rs = ps.executeQuery()) {
+        while (rs.next()) {
+            PurchaseOrder po = new PurchaseOrder();
+            po.setPoId(rs.getInt("po_id"));
+            po.setManagerId(rs.getInt("manager_id"));
+            po.setSupplierId(rs.getInt("supplier_id"));
+            po.setStatus(rs.getString("status"));
+            po.setOrderDate(rs.getTimestamp("order_date"));
+            po.setExpectedDeliveryDate(rs.getDate("expected_delivery_date"));
+            po.setNotes(rs.getString("notes"));
+            po.setSupplierName(rs.getString("supplier_name"));
+            po.setManagerName(rs.getString("manager_name"));
+            orders.add(po);
+        }
+        System.out.println("Loaded " + orders.size() + " purchase orders (all statuses).");
+    } catch (SQLException e) {
+        System.err.println("Error getting all purchase orders: " + e.getMessage());
+        e.printStackTrace();
+    }
+    return orders;
+}
+
+/**
+ * Lấy tất cả Staff (Auditor + Pharmacist) để assign tasks
+ * Thay thế getAllAuditors() - bây giờ bao gồm cả Pharmacist
+ */
+public List<Manager> getAllStaff() {
+    List<Manager> staffList = new ArrayList<>();
+    String query = "SELECT * FROM Users " +
+                  "WHERE role IN ('Auditor', 'Pharmacist') AND is_active = 1 " +
+                  "ORDER BY role, username";
+    try (PreparedStatement ps = connection.prepareStatement(query);
+         ResultSet rs = ps.executeQuery()) {
+        while (rs.next()) {
+            Manager staff = new Manager();
+            staff.setUserId(rs.getInt("user_id"));
+            staff.setUsername(rs.getString("username"));
+            staff.setEmail(rs.getString("email"));
+            staff.setPhone(rs.getString("phone"));
+            staff.setRole(rs.getString("role")); // "Auditor" hoặc "Pharmacist"
+            staffList.add(staff);
+        }
+        System.out.println("Loaded " + staffList.size() + " staff members (Auditor + Pharmacist).");
+    } catch (SQLException e) {
+        System.err.println("Error getting staff list: " + e.getMessage());
+        e.printStackTrace();
+    }
+    return staffList;
+}
+
+public boolean updatePurchaseOrderToPaid(int poId) {
+    String sql = "UPDATE PurchaseOrders SET status = 'Paid', updated_at = GETDATE() " +
+                 "WHERE po_id = ?";
+    
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        ps.setInt(1, poId);
+        int rows = ps.executeUpdate();
+        
+        System.out.println("Updated PO #" + poId + " to Paid status. Rows affected: " + rows);
+        return rows > 0;
+        
+    } catch (SQLException e) {
+        System.err.println("Error updating PO to Paid: " + e.getMessage());
+        e.printStackTrace();
+        return false;
+    }
 }
 }

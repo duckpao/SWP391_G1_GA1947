@@ -9,7 +9,9 @@ import model.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.*;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ChatControllerServlet extends HttpServlet {
 
@@ -71,6 +73,13 @@ public class ChatControllerServlet extends HttpServlet {
             case "getConversations":
                 handleGetConversations(request, response);
                 break;
+            case "getUnreadCounts":
+                handleGetUnreadCounts(request, response);
+                break;
+
+            case "markMessagesRead":
+                handleMarkMessagesRead(request, response);
+                break;
             default:
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().write("{\"error\":\"Invalid action\"}");
@@ -109,6 +118,50 @@ public class ChatControllerServlet extends HttpServlet {
                 response.getWriter().write("{\"error\":\"Invalid action\"}");
         }
     }
+    
+    private void handleGetUnreadCounts(HttpServletRequest request, HttpServletResponse response)
+        throws IOException {
+    try {
+        int userId = Integer.parseInt(request.getParameter("userId"));
+        
+        // Lấy danh sách tất cả users
+        List<User> users = UserDAO.getAllUsers();
+        
+        // Tạo map để lưu số tin nhắn chưa đọc từ mỗi user
+        Map<Integer, Integer> unreadCounts = new HashMap<>();
+        
+        for (User user : users) {
+            if (user.getUserId() != userId) {
+                int count = messageDAO.getUnreadCountFromUser(userId, user.getUserId());
+                if (count > 0) {
+                    unreadCounts.put(user.getUserId(), count);
+                }
+            }
+        }
+        
+        response.getWriter().write(gson.toJson(unreadCounts));
+    } catch (Exception e) {
+        e.printStackTrace();
+        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        response.getWriter().write("{\"error\":\"Failed to get unread counts\"}");
+    }
+}
+
+private void handleMarkMessagesRead(HttpServletRequest request, HttpServletResponse response)
+        throws IOException {
+    try {
+        int receiverId = Integer.parseInt(request.getParameter("receiverId"));
+        int senderId = Integer.parseInt(request.getParameter("senderId"));
+        
+        boolean success = messageDAO.markMessagesAsReadFromUser(receiverId, senderId);
+        
+        response.getWriter().write("{\"success\":" + success + "}");
+    } catch (Exception e) {
+        e.printStackTrace();
+        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        response.getWriter().write("{\"error\":\"Failed to mark messages as read\"}");
+    }
+}
 
     private void handleGetUserList(HttpServletRequest request, HttpServletResponse response)
             throws IOException {

@@ -574,72 +574,101 @@
                     </div>
 
                     <!-- Purchase Orders Table -->
-                    <div class="dashboard-card">
-                        <div class="card-header">
-                            <h5><i class="bi bi-list-ul"></i> Purchase Orders List</h5>
-                        </div>
-                        <div class="card-body p-0">
-                            <div class="table-responsive">
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>PO ID</th>
-                                            <th>Order Date</th>
-                                            <th>Supplier</th>
-                                            <th>Manager</th>
-                                            <th>Status</th>
-                                            <th>Items</th>
-                                            <th>Total Amount</th>
-                                            <th>Expected Delivery</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
+                    <!-- Replace the existing table section in your JSP with this -->
+<div class="dashboard-card">
+    <div class="card-header">
+        <h5><i class="bi bi-list-ul"></i> Purchase Orders List</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>PO ID</th>
+                        <th>Order Date</th>
+                        <th>Supplier</th>
+                        <th>Manager</th>
+                        <th>Status</th>
+                        <th>Shipping Status</th>
+                        <th>Items</th>
+                        <th>Total Amount</th>
+                        <th>Expected Delivery</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <c:choose>
+                        <c:when test="${empty purchaseOrders}">
+                            <tr>
+                                <td colspan="10">
+                                    <div class="empty-state">
+                                        <i class="bi bi-inbox"></i>
+                                        <p>No purchase orders found</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </c:when>
+                        <c:otherwise>
+                            <c:forEach var="po" items="${purchaseOrders}">
+                                <tr>
+                                    <td><strong>#${po.poId}</strong></td>
+                                    <td><fmt:formatDate value="${po.orderDate}" pattern="dd/MM/yyyy"/></td>
+                                    <td>${po.supplierName}</td>
+                                    <td>${po.managerName}</td>
+                                    
+                                    <!-- Combined Status Column -->
+                                    <td>
+                                        <span class="${po.finalStatusBadgeClass}">
+                                            ${po.finalDisplayStatus}
+                                        </span>
+                                    </td>
+                                    
+                                    <!-- Shipping Status Column -->
+                                    <td>
                                         <c:choose>
-                                            <c:when test="${empty purchaseOrders}">
-                                                <tr>
-                                                    <td colspan="9">
-                                                        <div class="empty-state">
-                                                            <i class="bi bi-inbox"></i>
-                                                            <p>No purchase orders found</p>
-                                                        </div>
-                                                    </td>
-                                                </tr>
+                                            <c:when test="${po.hasAsn}">
+                                                <span class="${po.asnStatusBadgeClass}">
+                                                    ${po.asnStatusDisplay}
+                                                </span>
+                                                <c:if test="${not empty po.trackingNumber}">
+                                                    <br>
+                                                    <small style="color: #6b7280;">
+                                                        <i class="bi bi-truck"></i> ${po.trackingNumber}
+                                                    </small>
+                                                </c:if>
                                             </c:when>
                                             <c:otherwise>
-                                                <c:forEach var="po" items="${purchaseOrders}">
-                                                    <tr>
-                                                        <td><strong>#${po.poId}</strong></td>
-                                                        <td><fmt:formatDate value="${po.orderDate}" pattern="dd/MM/yyyy"/></td>
-                                                        <td>${po.supplierName}</td>
-                                                        <td>${po.managerName}</td>
-                                                        <td><span class="${po.statusBadgeClass}">${po.status}</span></td>
-                                                        <td><span class="badge badge-secondary">${po.itemCount} items</span></td>
-                                                        <td><fmt:formatNumber value="${po.totalAmount}" type="currency" currencySymbol="$"/></td>
-                                                        <td>
-                                                            <c:choose>
-                                                                <c:when test="${not empty po.expectedDeliveryDate}">
-                                                                    <fmt:formatDate value="${po.expectedDeliveryDate}" pattern="dd/MM/yyyy"/>
-                                                                </c:when>
-                                                                <c:otherwise>
-                                                                    <span style="color: #9ca3af;">N/A</span>
-                                                                </c:otherwise>
-                                                            </c:choose>
-                                                        </td>
-                                                        <td>
-                                                            <a href="purchase-orders?action=view&id=${po.poId}" class="btn-sm">
-                                                                <i class="bi bi-eye"></i>
-                                                            </a>
-                                                        </td>
-                                                    </tr>
-                                                </c:forEach>
+                                                <span class="badge bg-secondary">No Shipment</span>
                                             </c:otherwise>
                                         </c:choose>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
+                                    </td>
+                                    
+                                    <td><span class="badge badge-secondary">${po.itemCount} items</span></td>
+                                    <td><fmt:formatNumber value="${po.totalAmount}" type="currency" currencySymbol="$"/></td>
+                                    <td>
+                                        <c:choose>
+                                            <c:when test="${not empty po.expectedDeliveryDate}">
+                                                <fmt:formatDate value="${po.expectedDeliveryDate}" pattern="dd/MM/yyyy"/>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <span style="color: #9ca3af;">N/A</span>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </td>
+                                    <td>
+                                        <a href="purchase-orders?action=view&id=${po.poId}" class="btn-sm">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </c:forEach>
+                        </c:otherwise>
+                    </c:choose>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
                 </div>
             </div>
         </div>

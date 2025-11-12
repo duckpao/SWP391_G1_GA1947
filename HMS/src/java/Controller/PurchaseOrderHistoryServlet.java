@@ -124,9 +124,9 @@ public class PurchaseOrderHistoryServlet extends HttpServlet {
                     System.err.println("Invalid from date: " + fromDateParam);
                 }
             } else {
-                // Default: 6 months ago
+                // Lấy từ năm 2000 (đủ xa)
                 java.util.Calendar cal = java.util.Calendar.getInstance();
-                cal.add(java.util.Calendar.MONTH, -6);
+                cal.set(2000, 0, 1); // 2000-01-01
                 fromDate = new Date(cal.getTimeInMillis());
             }
 
@@ -138,8 +138,10 @@ public class PurchaseOrderHistoryServlet extends HttpServlet {
                     System.err.println("Invalid to date: " + toDateParam);
                 }
             } else {
-                // Default: today
-                toDate = new Date(System.currentTimeMillis());
+                // Lấy đến năm 2099 (đủ xa)
+                java.util.Calendar cal = java.util.Calendar.getInstance();
+                cal.set(2099, 11, 31); // 2099-12-31
+                toDate = new Date(cal.getTimeInMillis());
             }
 
             // Get historical purchase orders

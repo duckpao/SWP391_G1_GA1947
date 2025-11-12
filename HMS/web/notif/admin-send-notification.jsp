@@ -366,7 +366,7 @@
             </div>
             <div class="sidebar-menu">
                 <a class="sidebar-item" href="${pageContext.request.contextPath}/admin-dashboard">
-                    Dashboard
+                    ← Quay lại Dashboard
                 </a>
                 <a class="sidebar-item" href="${pageContext.request.contextPath}/user-reports/generate">
                     📊 Báo cáo
@@ -376,9 +376,6 @@
                 </a>
                 <a class="sidebar-item sidebar-item-primary" href="${pageContext.request.contextPath}/admin-dashboard/notifications">
                     🛎️ Gửi Thông báo
-                </a>
-                <a class="sidebar-item" href="${pageContext.request.contextPath}/admin/permissions">
-                    🔐 Phân quyền
                 </a>
                 <a class="sidebar-item" href="${pageContext.request.contextPath}/admin-dashboard/create">
                     ➕ Tạo tài khoản
@@ -507,7 +504,7 @@
                                         <button type="submit" class="btn btn-primary flex-grow-1">
                                             <i class="fas fa-paper-plane me-2"></i>Gửi thông báo
                                         </button>
-                                        <button type="reset" class="btn btn-outline-secondary">
+                                        <button type="reset" class="btn btn-outline-secondary" onclick="resetForm()">
                                             <i class="fas fa-redo me-2"></i>Đặt lại
                                         </button>
                                     </div>
@@ -521,7 +518,7 @@
                                 <h4 class="mb-3">
                                     <i class="fas fa-eye me-2"></i>Xem trước
                                 </h4>
-                                <div class="notification-preview">
+                                <div class="notification-preview" id="notificationPreview">
                                     <div class="d-flex align-items-start">
                                         <div class="me-3">
                                             <div style="width: 50px; height: 50px; background: #e7f3ff; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
@@ -594,12 +591,117 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // ===== NOTIFICATION TYPE SELECTION =====
         function selectType(type) {
-            document.querySelectorAll('.icon-option').forEach(el => el.classList.remove('active'));
-            document.querySelector(`[data-type="${type}"]`).classList.add('active');
-            document.querySelector('#notificationType').value = type;
+            console.log('Selecting type:', type);
+            
+            // Remove active class from all options
+            document.querySelectorAll('.icon-option').forEach(function(el) {
+                el.classList.remove('active');
+            });
+            
+            // Add active class to selected option
+            const selectedOption = document.querySelector('.icon-option[data-type="' + type + '"]');
+            if (selectedOption) {
+                selectedOption.classList.add('active');
+            }
+            
+            // Update hidden input value
+            document.getElementById('notificationType').value = type;
+            
+            // Update preview
+            updatePreview();
+            
+            console.log('Type selected:', type);
         }
 
+        // ===== UPDATE PREVIEW =====
+        function updatePreview() {
+            const title = document.getElementById('title').value || 'Tiêu đề thông báo';
+            const message = document.getElementById('message').value || 'Nội dung thông báo sẽ hiển thị ở đây...';
+            const type = document.getElementById('notificationType').value;
+            const priority = document.getElementById('priority').value;
+            const receiverId = document.getElementById('receiverId').value;
+            
+            // Icon và màu theo loại
+            const typeConfig = {
+                'info': { icon: 'fa-info-circle', color: '#0d6efd', bgColor: '#e7f3ff', label: 'Thông tin' },
+                'warning': { icon: 'fa-exclamation-triangle', color: '#ffc107', bgColor: '#fff3cd', label: 'Cảnh báo' },
+                'success': { icon: 'fa-check-circle', color: '#198754', bgColor: '#d1e7dd', label: 'Thành công' },
+                'error': { icon: 'fa-times-circle', color: '#dc3545', bgColor: '#f8d7da', label: 'Lỗi' },
+                'alert': { icon: 'fa-bell', color: '#dc3545', bgColor: '#f8d7da', label: 'Cảnh báo khẩn' }
+            };
+            
+            const config = typeConfig[type] || typeConfig['info'];
+            
+            // Priority badge
+            const priorityConfig = {
+                'low': { label: 'Thấp', bg: '#e9ecef', color: '#495057' },
+                'normal': { label: 'Bình thường', bg: '#e9ecef', color: '#495057' },
+                'high': { label: 'Cao', bg: '#fff3cd', color: '#856404' },
+                'urgent': { label: 'Khẩn cấp', bg: '#f8d7da', color: '#721c24' }
+            };
+            
+            const priorityStyle = priorityConfig[priority] || priorityConfig['normal'];
+            
+            // Receiver label
+            let receiverLabel = 'Tất cả người dùng';
+            if (receiverId !== 'all') {
+                const selectedOption = document.querySelector('#receiverId option[value="' + receiverId + '"]');
+                if (selectedOption) {
+                    receiverLabel = selectedOption.text;
+                }
+            }
+            
+            // Update preview HTML
+            const previewHtml = 
+                '<div class="d-flex align-items-start">' +
+                    '<div class="me-3">' +
+                        '<div style="width: 50px; height: 50px; background: ' + config.bgColor + '; border-radius: 50%; display: flex; align-items: center; justify-content: center;">' +
+                            '<i class="fas ' + config.icon + ' fa-2x" style="color: ' + config.color + ';"></i>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="flex-grow-1">' +
+                        '<h5 class="mb-2" style="color: #2c3e50;">' + escapeHtml(title) + '</h5>' +
+                        '<p class="mb-3" style="color: #495057;">' + escapeHtml(message) + '</p>' +
+                        '<div class="mb-2">' +
+                            '<span class="priority-badge" style="background: ' + priorityStyle.bg + '; color: ' + priorityStyle.color + ';">' +
+                                priorityStyle.label +
+                            '</span>' +
+                            '<span class="badge" style="background: ' + config.bgColor + '; color: ' + config.color + ';">' +
+                                config.label +
+                            '</span>' +
+                            '<span class="badge bg-secondary">' + escapeHtml(receiverLabel) + '</span>' +
+                        '</div>' +
+                        '<small class="text-muted">' +
+                            '<i class="fas fa-clock me-1"></i>' +
+                            'Vừa xong' +
+                        '</small>' +
+                    '</div>' +
+                '</div>';
+            
+            document.getElementById('notificationPreview').innerHTML = previewHtml;
+        }
+
+        // ===== ESCAPE HTML =====
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+
+        // ===== RESET FORM =====
+        function resetForm() {
+            selectType('info');
+            updatePreview();
+        }
+
+        // ===== MODAL FUNCTIONS =====
         function openSwitchDashboardModal() {
             document.getElementById("switchDashboardModal").classList.add("active");
         }
@@ -608,12 +710,14 @@
             document.getElementById("switchDashboardModal").classList.remove("active");
         }
 
-        document.getElementById("switchDashboardModal").addEventListener("click", function (e) {
-            if (e.target === this)
-                closeSwitchDashboardModal();
-        });
+        // ===== SHOW TOAST =====
+        function showToast(message) {
+            document.getElementById('toastMessage').textContent = message;
+            const toast = new bootstrap.Toast(document.getElementById('successToast'));
+            toast.show();
+        }
 
-        // Form submission
+        // ===== FORM SUBMISSION =====
         document.getElementById('notificationForm').addEventListener('submit', function(e) {
             e.preventDefault();
            
@@ -655,11 +759,11 @@
                 },
                 body: params
             })
-            .then(response => {
+            .then(function(response) {
                 console.log('Response received:', response.status);
                 return response.text();
             })
-            .then(text => {
+            .then(function(text) {
                 console.log('Response text:', text);
                
                 try {
@@ -668,7 +772,7 @@
                    
                     if (data.success) {
                         showToast('Thông báo đã được gửi thành công!');
-                        setTimeout(() => {
+                        setTimeout(function() {
                             document.getElementById('notificationForm').reset();
                             selectType('info');
                         }, 1500);
@@ -680,17 +784,30 @@
                     alert('Lỗi: Không thể đọc response từ server\n' + text);
                 }
             })
-            .catch(error => {
+            .catch(function(error) {
                 console.error('Fetch error:', error);
                 alert('Có lỗi xảy ra khi gửi: ' + error.message);
             });
         });
 
-        function showToast(message) {
-            document.getElementById('toastMessage').textContent = message;
-            const toast = new bootstrap.Toast(document.getElementById('successToast'));
-            toast.show();
-        }
+        // ===== EVENT LISTENERS FOR LIVE PREVIEW =====
+        document.getElementById('title').addEventListener('input', updatePreview);
+        document.getElementById('message').addEventListener('input', updatePreview);
+        document.getElementById('priority').addEventListener('change', updatePreview);
+        document.getElementById('receiverId').addEventListener('change', updatePreview);
+
+        // ===== MODAL CLOSE ON OUTSIDE CLICK =====
+        document.getElementById("switchDashboardModal").addEventListener("click", function (e) {
+            if (e.target === this) {
+                closeSwitchDashboardModal();
+            }
+        });
+
+        // ===== INITIALIZE ON PAGE LOAD =====
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded, initializing preview...');
+            updatePreview();
+        });
     </script>
 </body>
 </html>

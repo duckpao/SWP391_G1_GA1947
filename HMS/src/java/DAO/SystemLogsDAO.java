@@ -338,4 +338,55 @@ public class SystemLogsDAO extends DBContext {
             return ps.executeUpdate();
         }
     }
+    
+    private String extractTableName(String action) {
+    // Extract table name from actions like CREATE, UPDATE, APPROVE, etc.
+    // Return null for LOGIN, LOGOUT, etc.
+    if (action.contains("CREATE") || action.contains("UPDATE") || 
+        action.contains("APPROVE") || action.contains("REJECT") || 
+        action.contains("CONFIRM")) {
+        
+        // Map actions to table names
+        if (action.contains("PO") || action.contains("Purchase")) {
+            return "PurchaseOrders";
+        } else if (action.contains("ASN")) {
+            return "AdvancedShippingNotices";
+        } else if (action.contains("Invoice")) {
+            return "Invoices";
+        } else if (action.contains("Delivery")) {
+            return "DeliveryNotes";
+        } else if (action.contains("Batch")) {
+            return "Batches";
+        } else if (action.contains("Transaction")) {
+            return "Transactions";
+        }
+    }
+    return null;
+}
+    public boolean log(int userId, String action, String tableName, Integer recordId, String details, String ipAddress) {
+    String sql = "INSERT INTO SystemLogs (user_id, action, table_name, record_id, details, ip_address, log_date) " +
+                "VALUES (?, ?, ?, ?, ?, ?, GETDATE())";
+    
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        ps.setInt(1, userId);
+        ps.setString(2, action);
+        ps.setString(3, tableName);
+        
+        if (recordId != null) {
+            ps.setInt(4, recordId);
+        } else {
+            ps.setNull(4, Types.INTEGER);
+        }
+        
+        ps.setString(5, details);
+        ps.setString(6, ipAddress);
+        
+        return ps.executeUpdate() > 0;
+        
+    } catch (SQLException e) {
+        System.err.println("Error logging with table: " + e.getMessage());
+        e.printStackTrace();
+        return false;
+    }
+}
 }

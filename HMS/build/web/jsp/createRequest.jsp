@@ -382,20 +382,11 @@
         <!-- Sidebar matching view-medicine -->
         <div class="sidebar">
             <div class="menu">
-                <a href="${pageContext.request.contextPath}/view-medicine">
+                <a href="${pageContext.request.contextPath}/view-medicine?dashboard=doctor">
                     <i class="bi bi-capsule"></i> Quản lý thuốc
                 </a>
                 <a href="${pageContext.request.contextPath}/create-request" class="active">
                     <i class="bi bi-file-earmark-plus"></i> Yêu cầu thuốc
-                </a>
-                <a href="${pageContext.request.contextPath}/pharmacist/manage-batch">
-                    <i class="bi bi-box-seam"></i> Quản lý số lô/lô hàng
-                </a>
-                <a href="${pageContext.request.contextPath}/pharmacist/recordExpiredDamaged">
-                    <i class="bi bi-exclamation-triangle"></i> Thuốc hết hạn/hư hỏng
-                </a>
-                <a href="${pageContext.request.contextPath}/report">
-                    <i class="bi bi-graph-up"></i> Báo cáo thống kê
                 </a>
             </div>
         </div>

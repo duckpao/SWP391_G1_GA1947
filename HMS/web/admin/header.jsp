@@ -249,7 +249,7 @@
                                 <a href="/HMS/auditor-dashboard" class="header-logo">
                                 </c:when>
                                 <c:when test="${sessionScope.user.role == 'Supplier'}">
-                                    <a href="/HMS/supplierDashboard" class="header-logo">
+                                    <a href="/HMS/supplier-dashboard" class="header-logo">
                                     </c:when>
                                     <c:otherwise>
                                         <a href="home" class="header-logo">

@@ -596,6 +596,23 @@
         <servlet-name>BatchAddServlet</servlet-name>
         <url-pattern>/pharmacist/Batch-Add</url-pattern>
     </servlet-mapping>
+     <servlet>
+        <servlet-name>ViewDeliveredOrderDetailsServlet</servlet-name>
+        <servlet-class>Controller.ViewDeliveredOrderDetailsServlet</servlet-class>
+    </servlet>
+ <servlet-mapping>
+        <servlet-name>ViewDeliveredOrderDetailsServlet</servlet-name>
+        <url-pattern>/pharmacist/view-order-details</url-pattern>
+    </servlet-mapping>
+     <servlet>
+        <servlet-name>BatchQualityCheckServlet</servlet-name>
+        <servlet-class>Controller.BatchQualityCheckServlet</servlet-class>
+    </servlet>
+<servlet-mapping>
+        <servlet-name>BatchQualityCheckServlet</servlet-name>
+        <url-pattern>/pharmacist/BatchQualityCheck</url-pattern>
+    </servlet-mapping>
+
     <welcome-file-list>
         <welcome-file>home.jsp</welcome-file>
         <url-pattern>/home</url-pattern>

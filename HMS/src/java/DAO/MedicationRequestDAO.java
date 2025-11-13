@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.sql.Connection;
 import java.util.HashMap;
+
 public class MedicationRequestDAO extends DBContext {
 
     public int createRequest(MedicationRequest request) {
@@ -39,13 +40,12 @@ public class MedicationRequestDAO extends DBContext {
         return -1;
     }
 
-    // ✅ SỬA: medicine_id → medicine_code
     public void addRequestItems(int requestId, List<MedicationRequestItem> items) {
         String sql = "INSERT INTO MedicationRequestItems (request_id, medicine_code, quantity) VALUES (?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             for (MedicationRequestItem item : items) {
                 ps.setInt(1, requestId);
-                ps.setString(2, item.getMedicineCode());  // ✅ ĐỔI: setString
+                ps.setString(2, item.getMedicineCode());
                 ps.setInt(3, item.getQuantity());
                 ps.addBatch();
             }
@@ -56,7 +56,6 @@ public class MedicationRequestDAO extends DBContext {
         }
     }
 
-    // ✅ SỬA: Đổi SQL query để lấy đầy đủ thông tin
     public List<Medicine> getAllMedicines() {
         List<Medicine> medicines = new ArrayList<>();
         String sql = "SELECT DISTINCT m.medicine_code, m.name, m.category, m.description, " +
@@ -118,7 +117,6 @@ public class MedicationRequestDAO extends DBContext {
         return null;
     }
 
-    // ✅ SỬA: medicine_id → medicine_code
     public List<MedicationRequestItem> getRequestItems(int requestId) {
         List<MedicationRequestItem> items = new ArrayList<>();
         String sql = "SELECT mri.item_id, mri.request_id, mri.medicine_code, mri.quantity, m.name AS medicine_name " +
@@ -132,7 +130,7 @@ public class MedicationRequestDAO extends DBContext {
                     MedicationRequestItem item = new MedicationRequestItem();
                     item.setItemId(rs.getInt("item_id"));
                     item.setRequestId(rs.getInt("request_id"));
-                    item.setMedicineCode(rs.getString("medicine_code"));  // ✅ ĐỔI
+                    item.setMedicineCode(rs.getString("medicine_code"));
                     item.setQuantity(rs.getInt("quantity"));
                     item.setMedicineName(rs.getString("medicine_name"));
                     items.add(item);
@@ -197,12 +195,11 @@ public class MedicationRequestDAO extends DBContext {
         return false;
     }
 
-    // ✅ SỬA: Cancelled → Canceled (theo DB constraint)
     public boolean cancelRequest(int requestId) {
         System.out.println("=== CANCEL REQUEST ===");
         System.out.println("Request ID: " + requestId);
         
-        String sql = "UPDATE MedicationRequests SET status = 'Canceled' WHERE request_id = ?";  // ✅ ĐỔI
+        String sql = "UPDATE MedicationRequests SET status = 'Canceled' WHERE request_id = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, requestId);
             int rowsAffected = ps.executeUpdate();
@@ -233,10 +230,10 @@ public class MedicationRequestDAO extends DBContext {
             e.printStackTrace();
         }
     }
-    // Lấy danh sách tất cả MedicationRequests + items bằng 1 query
-  public List<MedicationRequest> viewMedicationRequests() {
+
+    public List<MedicationRequest> viewMedicationRequests() {
         List<MedicationRequest> requests = new ArrayList<>();
-        Map<Integer, MedicationRequest> requestMap = new LinkedHashMap<>(); // giữ thứ tự theo request_date
+        Map<Integer, MedicationRequest> requestMap = new LinkedHashMap<>();
 
         String sql = "SELECT mr.request_id, mr.doctor_id, u.username AS doctor_name, "
                    + "mr.status, mr.request_date, mr.notes, "
@@ -250,36 +247,33 @@ public class MedicationRequestDAO extends DBContext {
         try (PreparedStatement pst = connection.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
 
-      while (rs.next()) {
-    int requestId = rs.getInt("request_id");
+            while (rs.next()) {
+                int requestId = rs.getInt("request_id");
 
-    // Nếu request chưa có trong map thì tạo mới
-    MedicationRequest request = requestMap.get(requestId);
-    if (request == null) {
-        request = new MedicationRequest();
-        request.setRequestId(requestId);
-        request.setDoctorId(rs.getInt("doctor_id"));
-        request.setDoctorName(rs.getString("doctor_name")); // ✅ lấy trực tiếp từ bảng Users
-        request.setStatus(rs.getString("status"));
-        request.setRequestDate(rs.getTimestamp("request_date"));
-        request.setNotes(rs.getString("notes"));
-        request.setItems(new ArrayList<>());
-        requestMap.put(requestId, request);
-    }
+                MedicationRequest request = requestMap.get(requestId);
+                if (request == null) {
+                    request = new MedicationRequest();
+                    request.setRequestId(requestId);
+                    request.setDoctorId(rs.getInt("doctor_id"));
+                    request.setDoctorName(rs.getString("doctor_name"));
+                    request.setStatus(rs.getString("status"));
+                    request.setRequestDate(rs.getTimestamp("request_date"));
+                    request.setNotes(rs.getString("notes"));
+                    request.setItems(new ArrayList<>());
+                    requestMap.put(requestId, request);
+                }
 
-    // Thêm thuốc (nếu có)
-    String medicineCode = rs.getString("medicine_code");
-    if (medicineCode != null) {
-        MedicationRequestItem item = new MedicationRequestItem();
-        item.setItemId(rs.getInt("item_id"));
-        item.setRequestId(requestId);
-        item.setMedicineCode(medicineCode);
-        item.setMedicineName(rs.getString("medicine_name"));
-        item.setQuantity(rs.getInt("quantity"));
-        request.getItems().add(item);
-    }
-}
-
+                String medicineCode = rs.getString("medicine_code");
+                if (medicineCode != null) {
+                    MedicationRequestItem item = new MedicationRequestItem();
+                    item.setItemId(rs.getInt("item_id"));
+                    item.setRequestId(requestId);
+                    item.setMedicineCode(medicineCode);
+                    item.setMedicineName(rs.getString("medicine_name"));
+                    item.setQuantity(rs.getInt("quantity"));
+                    request.getItems().add(item);
+                }
+            }
 
             requests.addAll(requestMap.values());
 
@@ -288,15 +282,28 @@ public class MedicationRequestDAO extends DBContext {
         }
 
         return requests;
-    } 
+    }
 
-    
-  // Approve request: giảm tồn kho và cập nhật trạng thái
-  // approve request
-     public void approveRequest(int requestId, int pharmacistId) throws SQLException {
+    /**
+     * ✅ APPROVE REQUEST WITH FULL INVENTORY PROCESSING
+     * - Trừ kho theo FIFO (First In First Out)
+     * - Tạo transactions
+     * - Tạo IssueSlip (phiếu xuất)
+     * - Update status thành 'Approved'
+     * 
+     * @param requestId ID của medication request
+     * @param pharmacistId ID của pharmacist approve
+     * @throws SQLException nếu có lỗi database hoặc không đủ tồn kho
+     */
+    public void approveRequestWithInventory(int requestId, int pharmacistId) throws SQLException {
         Connection conn = new DBContext().getConnection();
         try {
             conn.setAutoCommit(false);
+            
+            System.out.println("========================================");
+            System.out.println("→ Starting approveRequestWithInventory");
+            System.out.println("  Request ID: " + requestId);
+            System.out.println("  Pharmacist ID: " + pharmacistId);
 
             // 1️⃣ Lấy items của request
             String sqlItems = "SELECT item_id, medicine_code, quantity FROM MedicationRequestItems WHERE request_id=?";
@@ -308,6 +315,8 @@ public class MedicationRequestDAO extends DBContext {
                     while (rs.next()) {
                         String medicineCode = rs.getString("medicine_code");
                         int qtyNeeded = rs.getInt("quantity");
+                        
+                        System.out.println("  → Processing medicine: " + medicineCode + " (qty: " + qtyNeeded + ")");
 
                         // 2️⃣ Trừ kho batch FIFO chỉ lấy lô có status='Approved'
                         String sqlBatch = "SELECT batch_id, current_quantity "
@@ -322,13 +331,15 @@ public class MedicationRequestDAO extends DBContext {
                                 boolean foundApprovedBatch = false;
 
                                 while (qtyNeeded > 0 && rsBatch.next()) {
-                                    foundApprovedBatch = true; // Có ít nhất 1 lô Approved hợp lệ
+                                    foundApprovedBatch = true;
 
                                     int batchId = rsBatch.getInt("batch_id");
                                     int currentQty = rsBatch.getInt("current_quantity");
                                     int deduct = Math.min(currentQty, qtyNeeded);
 
-                                    // 🔸 Cập nhật số lượng trong lô
+                                    System.out.println("    → Deducting from batch " + batchId + ": " + deduct + " units");
+
+                                    // Cập nhật số lượng trong lô
                                     try (PreparedStatement psUpdate = conn.prepareStatement(
                                             "UPDATE Batches SET current_quantity=? WHERE batch_id=?")) {
                                         psUpdate.setInt(1, currentQty - deduct);
@@ -336,7 +347,7 @@ public class MedicationRequestDAO extends DBContext {
                                         psUpdate.executeUpdate();
                                     }
 
-                                    // 🔸 Ghi nhận giao dịch xuất kho
+                                    // Ghi nhận giao dịch xuất kho
                                     try (PreparedStatement psTrans = conn.prepareStatement(
                                             "INSERT INTO Transactions(batch_id, user_id, type, quantity, transaction_date, notes) "
                                             + "VALUES(?,?,?,?,GETDATE(),?)")) {
@@ -353,45 +364,48 @@ public class MedicationRequestDAO extends DBContext {
                                     totalIssued += deduct;
                                 }
 
-                                // ❗ Nếu không có batch Approved nào
                                 if (!foundApprovedBatch) {
                                     throw new SQLException("Không có lô thuốc trạng thái 'Approved' cho mã " + medicineCode);
                                 }
 
-                                // ❗ Nếu tồn kho Approved không đủ
                                 if (qtyNeeded > 0) {
                                     throw new SQLException("Không đủ tồn kho (Approved) cho thuốc Code=" + medicineCode);
                                 }
 
                                 issuedMedicines.put(medicineCode, totalIssued);
+                                System.out.println("    ✓ Total issued for " + medicineCode + ": " + totalIssued);
                             }
                         }
-
                     }
                 }
             }
 
             // 3️⃣ Update trạng thái request
-            try (PreparedStatement psStatus = conn.prepareStatement("UPDATE MedicationRequests SET status='Approved' WHERE request_id=?")) {
+            try (PreparedStatement psStatus = conn.prepareStatement(
+                    "UPDATE MedicationRequests SET status='Approved' WHERE request_id=?")) {
                 psStatus.setInt(1, requestId);
                 psStatus.executeUpdate();
+                System.out.println("  ✓ Updated request status to Approved");
             }
 
             // 4️⃣ Tạo phiếu xuất (IssueSlip)
             String slipCode = generateSlipCode(conn);
             int slipId;
-            String sqlInsertSlip = "INSERT INTO IssueSlip(slip_code, request_id, pharmacist_id, notes, created_date) VALUES(?,?,?, ?, GETDATE())";
+            String sqlInsertSlip = "INSERT INTO IssueSlip(slip_code, request_id, pharmacist_id, notes, created_date) " +
+                                 "VALUES(?,?,?, ?, GETDATE())";
 
-            try (PreparedStatement psSlip = conn.prepareStatement(sqlInsertSlip, java.sql.Statement.RETURN_GENERATED_KEYS)) {
+            try (PreparedStatement psSlip = conn.prepareStatement(sqlInsertSlip, 
+                    java.sql.Statement.RETURN_GENERATED_KEYS)) {
                 psSlip.setString(1, slipCode);
                 psSlip.setInt(2, requestId);
                 psSlip.setInt(3, pharmacistId);
-                psSlip.setString(4, "Xuất kho tự động"); // notes
+                psSlip.setString(4, "Xuất kho tự động");
                 psSlip.executeUpdate();
 
                 try (ResultSet rsSlip = psSlip.getGeneratedKeys()) {
                     if (rsSlip.next()) {
                         slipId = rsSlip.getInt(1);
+                        System.out.println("  ✓ Created IssueSlip: " + slipCode + " (ID: " + slipId + ")");
                     } else {
                         throw new SQLException("Không lấy được slip_id khi tạo phiếu xuất");
                     }
@@ -406,13 +420,18 @@ public class MedicationRequestDAO extends DBContext {
                     psItem.setString(2, entry.getKey());
                     psItem.setInt(3, entry.getValue());
                     psItem.executeUpdate();
+                    System.out.println("    → Added to slip: " + entry.getKey() + " x " + entry.getValue());
                 }
             }
 
             conn.commit();
+            System.out.println("✅ Transaction committed successfully!");
+            System.out.println("========================================");
 
         } catch (SQLException ex) {
             conn.rollback();
+            System.err.println("❌ Error in approveRequestWithInventory: " + ex.getMessage());
+            System.err.println("========================================");
             throw ex;
         } finally {
             conn.setAutoCommit(true);
@@ -420,20 +439,119 @@ public class MedicationRequestDAO extends DBContext {
         }
     }
 
-// Hàm sinh mã phiếu PX-YYYYMMDD-xxx
+    /**
+     * ✅ REJECT REQUEST
+     * Từ chối request và lưu lý do vào notes
+     * 
+     * @param requestId ID của request
+     * @param reason Lý do từ chối
+     * @return true nếu thành công, false nếu thất bại
+     */
+    public boolean rejectRequest(int requestId, String reason) {
+        Connection conn = null;
+        try {
+            conn = new DBContext().getConnection();
+            
+            System.out.println("========================================");
+            System.out.println("→ Rejecting request #" + requestId);
+            System.out.println("  Reason: " + reason);
+            
+            String sql = "UPDATE MedicationRequests SET status='Rejected', " +
+                        "notes=CONCAT(COALESCE(notes, ''), '\nRejected: ', ?) " +
+                        "WHERE request_id=?";
+            
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, reason);
+                ps.setInt(2, requestId);
+                int rows = ps.executeUpdate();
+                
+                if (rows > 0) {
+                    System.out.println("✅ Request rejected successfully!");
+                    System.out.println("========================================");
+                    return true;
+                } else {
+                    System.out.println("❌ No rows affected - request not found?");
+                    System.out.println("========================================");
+                    return false;
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("❌ Error in rejectRequest: " + e.getMessage());
+            e.printStackTrace();
+            System.err.println("========================================");
+            return false;
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    /**
+     * ✅ GET MEDICATION REQUEST BY ID (with doctor info)
+     * Lấy thông tin đầy đủ của request bao gồm doctor name và items
+     * 
+     * @param requestId ID của request
+     * @return MedicationRequest object hoặc null nếu không tìm thấy
+     */
+    public MedicationRequest getMedicationRequestById(int requestId) {
+        String sql = "SELECT mr.request_id, mr.doctor_id, mr.status, mr.request_date, " +
+                     "mr.notes, u.username as doctor_name " +
+                     "FROM MedicationRequests mr " +
+                     "INNER JOIN Users u ON mr.doctor_id = u.user_id " +
+                     "WHERE mr.request_id = ?";
+        
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, requestId);
+            ResultSet rs = ps.executeQuery();
+            
+            if (rs.next()) {
+                MedicationRequest req = new MedicationRequest();
+                req.setRequestId(rs.getInt("request_id"));
+                req.setDoctorId(rs.getInt("doctor_id"));
+                req.setStatus(rs.getString("status"));
+                req.setRequestDate(rs.getTimestamp("request_date"));
+                req.setNotes(rs.getString("notes"));
+                req.setDoctorName(rs.getString("doctor_name"));
+                
+                // Get items
+                List<MedicationRequestItem> items = getRequestItems(requestId);
+                req.setItems(items);
+                
+                System.out.println("✓ Found medication request #" + requestId);
+                return req;
+            } else {
+                System.out.println("⚠️ Medication request #" + requestId + " not found");
+            }
+        } catch (SQLException e) {
+            System.err.println("❌ Error getting medication request: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * Helper method: Generate IssueSlip code
+     * Format: PX-YYYYMMDD-XXX
+     */
     private String generateSlipCode(Connection conn) throws SQLException {
         java.util.Date now = new java.util.Date();
         java.text.SimpleDateFormat sdfDate = new java.text.SimpleDateFormat("yyyyMMdd");
         String datePart = sdfDate.format(now);
 
-        // Lấy đầu ngày và cuối ngày
         java.text.SimpleDateFormat sdfFull = new java.text.SimpleDateFormat("yyyy-MM-dd");
         String today = sdfFull.format(now);
 
-        String sql = "SELECT COUNT(*) AS cnt FROM IssueSlip WHERE created_date >= ? AND created_date < DATEADD(DAY, 1, ?)";
+        String sql = "SELECT COUNT(*) AS cnt FROM IssueSlip " +
+                    "WHERE created_date >= ? AND created_date < DATEADD(DAY, 1, ?)";
+        
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, today); // đầu ngày
-            ps.setString(2, today); // để tính đến cuối ngày
+            ps.setString(1, today);
+            ps.setString(2, today);
             try (ResultSet rs = ps.executeQuery()) {
                 int seq = 1;
                 if (rs.next()) {
@@ -443,14 +561,4 @@ public class MedicationRequestDAO extends DBContext {
             }
         }
     }
-
- public void rejectRequest(int requestId, String reason) throws SQLException {
-    Connection conn = new DBContext().getConnection();
-    String sql = "UPDATE MedicationRequests SET status='Rejected', notes=? WHERE request_id=?";
-    PreparedStatement ps = conn.prepareStatement(sql);
-    ps.setString(1, reason);
-    ps.setInt(2, requestId);
-    ps.executeUpdate();
-    conn.close();
-}
 }

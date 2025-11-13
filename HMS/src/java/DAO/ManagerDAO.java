@@ -14,6 +14,7 @@ import java.sql.Date;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import model.SupplierRating;
 import model.Task;
 
 public class ManagerDAO extends DBContext {
@@ -984,6 +985,212 @@ public boolean updatePurchaseOrderToPaid(int poId) {
         System.err.println("Error updating PO to Paid: " + e.getMessage());
         e.printStackTrace();
         return false;
+    }
+}
+// Thêm vào class ManagerDAO
+
+/**
+ * Rate a supplier after completing a purchase order
+ * @param supplierId Supplier ID
+ * @param managerId Manager ID who is rating
+ * @param poId Purchase Order ID
+ * @param rating Rating value (1-5)
+ * @param reviewText Optional review text
+ * @return true if successful, false otherwise
+ */
+public boolean rateSupplier(int supplierId, int managerId, int poId, int rating, String reviewText) {
+    // Validate rating
+    if (rating < 1 || rating > 5) {
+        System.err.println("Invalid rating: " + rating + ". Must be between 1-5.");
+        return false;
+    }
+    
+    String insertQuery = "INSERT INTO SupplierRatings " +
+                        "(supplier_id, manager_id, po_id, rating, review_text) " +
+                        "VALUES (?, ?, ?, ?, ?)";
+    
+    String updateQuery = "{CALL sp_UpdateSupplierRating(?)}";
+    
+    try {
+        connection.setAutoCommit(false);
+        
+        // 1. Insert rating
+        try (PreparedStatement ps = connection.prepareStatement(insertQuery)) {
+            ps.setInt(1, supplierId);
+            ps.setInt(2, managerId);
+            ps.setInt(3, poId);
+            ps.setInt(4, rating);
+            ps.setString(5, reviewText);
+            
+            int result = ps.executeUpdate();
+            if (result == 0) {
+                connection.rollback();
+                return false;
+            }
+            
+            System.out.println("✅ Inserted rating for Supplier #" + supplierId);
+        }
+        
+        // 2. Update average rating
+        try (PreparedStatement ps = connection.prepareStatement(updateQuery)) {
+            ps.setInt(1, supplierId);
+            ResultSet rs = ps.executeQuery();
+            
+            if (rs.next()) {
+                double newRating = rs.getDouble("new_rating");
+                System.out.println("✅ Updated average rating to " + newRating + " for Supplier #" + supplierId);
+            }
+        }
+        
+        connection.commit();
+        
+        // 3. Log action
+        logManagerAction(managerId, "RATE_SUPPLIER", supplierId, 
+                        "Rated supplier " + supplierId + " with " + rating + " stars for PO #" + poId);
+        
+        return true;
+        
+    } catch (SQLException e) {
+        try {
+            connection.rollback();
+        } catch (SQLException rollbackEx) {
+            rollbackEx.printStackTrace();
+        }
+        System.err.println("Error rating supplier: " + e.getMessage());
+        e.printStackTrace();
+        return false;
+    } finally {
+        try {
+            connection.setAutoCommit(true);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+/**
+ * Check if a PO has already been rated by the manager
+ */
+public boolean hasRatedPO(int poId, int managerId) {
+    String query = "SELECT COUNT(*) FROM SupplierRatings " +
+                  "WHERE po_id = ? AND manager_id = ?";
+    
+    try (PreparedStatement ps = connection.prepareStatement(query)) {
+        ps.setInt(1, poId);
+        ps.setInt(2, managerId);
+        ResultSet rs = ps.executeQuery();
+        
+        if (rs.next()) {
+            return rs.getInt(1) > 0;
+        }
+    } catch (SQLException e) {
+        System.err.println("Error checking if PO is rated: " + e.getMessage());
+    }
+    return false;
+}
+
+/**
+ * Get all ratings for a supplier
+ */
+public List<SupplierRating> getSupplierRatings(int supplierId) {
+    List<SupplierRating> ratings = new ArrayList<>();
+    String query = "SELECT sr.rating_id, sr.supplier_id, sr.manager_id, sr.po_id, " +
+                  "sr.rating, sr.review_text, sr.created_at, " +
+                  "u.username as manager_name, s.name as supplier_name " +
+                  "FROM SupplierRatings sr " +
+                  "LEFT JOIN Users u ON sr.manager_id = u.user_id " +
+                  "LEFT JOIN Suppliers s ON sr.supplier_id = s.supplier_id " +
+                  "WHERE sr.supplier_id = ? " +
+                  "ORDER BY sr.created_at DESC";
+    
+    try (PreparedStatement ps = connection.prepareStatement(query)) {
+        ps.setInt(1, supplierId);
+        ResultSet rs = ps.executeQuery();
+        
+        while (rs.next()) {
+            SupplierRating rating = new SupplierRating();
+            rating.setRatingId(rs.getInt("rating_id"));
+            rating.setSupplierId(rs.getInt("supplier_id"));
+            rating.setManagerId(rs.getInt("manager_id"));
+            rating.setPoId(rs.getInt("po_id"));
+            rating.setRating(rs.getInt("rating"));
+            rating.setReviewText(rs.getString("review_text"));
+            rating.setCreatedAt(rs.getTimestamp("created_at"));
+            rating.setManagerName(rs.getString("manager_name"));
+            rating.setSupplierName(rs.getString("supplier_name"));
+            ratings.add(rating);
+        }
+        
+        System.out.println("Loaded " + ratings.size() + " ratings for Supplier #" + supplierId);
+    } catch (SQLException e) {
+        System.err.println("Error getting supplier ratings: " + e.getMessage());
+        e.printStackTrace();
+    }
+    
+    return ratings;
+}
+
+/**
+ * Get POs that are completed but not yet rated by manager
+ */
+public List<PurchaseOrder> getUnratedCompletedPOs(int managerId) {
+    List<PurchaseOrder> orders = new ArrayList<>();
+    String query = "SELECT po.po_id, po.manager_id, po.supplier_id, po.status, " +
+                  "po.order_date, po.expected_delivery_date, po.notes, po.updated_at, " +
+                  "s.name as supplier_name, s.performance_rating " +
+                  "FROM PurchaseOrders po " +
+                  "INNER JOIN Suppliers s ON po.supplier_id = s.supplier_id " +
+                  "WHERE po.manager_id = ? " +
+                  "AND po.status = 'Completed' " +
+                  "AND NOT EXISTS ( " +
+                  "    SELECT 1 FROM SupplierRatings sr " +
+                  "    WHERE sr.po_id = po.po_id AND sr.manager_id = ? " +
+                  ") " +
+                  "ORDER BY po.updated_at DESC";
+    
+    try (PreparedStatement ps = connection.prepareStatement(query)) {
+        ps.setInt(1, managerId);
+        ps.setInt(2, managerId);
+        ResultSet rs = ps.executeQuery();
+        
+        while (rs.next()) {
+            PurchaseOrder po = new PurchaseOrder();
+            po.setPoId(rs.getInt("po_id"));
+            po.setManagerId(rs.getInt("manager_id"));
+            po.setSupplierId(rs.getInt("supplier_id"));
+            po.setStatus(rs.getString("status"));
+            po.setOrderDate(rs.getTimestamp("order_date"));
+            po.setExpectedDeliveryDate(rs.getDate("expected_delivery_date"));
+            po.setNotes(rs.getString("notes"));
+            po.setUpdatedAt(rs.getTimestamp("updated_at"));
+            po.setSupplierName(rs.getString("supplier_name"));
+            orders.add(po);
+        }
+        
+        System.out.println("Found " + orders.size() + " unrated completed POs for Manager #" + managerId);
+    } catch (SQLException e) {
+        System.err.println("Error getting unrated POs: " + e.getMessage());
+        e.printStackTrace();
+    }
+    
+    return orders;
+}
+
+/**
+ * Log manager actions (if not exists)
+ */
+private void logManagerAction(int managerId, String action, int recordId, String details) {
+    String sql = "INSERT INTO SystemLogs (user_id, action, table_name, record_id, details, log_date) " +
+                 "VALUES (?, ?, 'Suppliers', ?, ?, GETDATE())";
+    
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        ps.setInt(1, managerId);
+        ps.setString(2, action);
+        ps.setInt(3, recordId);
+        ps.setString(4, details);
+        ps.executeUpdate();
+    } catch (SQLException e) {
+        System.err.println("Error logging action: " + e.getMessage());
     }
 }
 }

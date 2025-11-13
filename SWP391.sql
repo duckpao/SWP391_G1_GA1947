@@ -4290,3 +4290,53 @@ CREATE TABLE SupplierTransactions (
 );
 
 CREATE INDEX idx_supplier_transactions ON SupplierTransactions(supplier_id, status);
+
+USE SWP391;
+GO
+
+-- Tạo bảng SupplierRatings để lưu lịch sử đánh giá
+CREATE TABLE SupplierRatings (
+    rating_id INT IDENTITY(1,1) PRIMARY KEY,
+    supplier_id INT NOT NULL FOREIGN KEY REFERENCES Suppliers(supplier_id) ON DELETE CASCADE,
+    manager_id INT NOT NULL FOREIGN KEY REFERENCES Users(user_id) ON DELETE NO ACTION,
+    po_id INT NOT NULL FOREIGN KEY REFERENCES PurchaseOrders(po_id) ON DELETE NO ACTION,
+    rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    review_text NVARCHAR(MAX),
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE()
+);
+
+-- Index để tìm kiếm nhanh
+CREATE INDEX idx_supplier_ratings ON SupplierRatings(supplier_id, created_at DESC);
+CREATE INDEX idx_manager_ratings ON SupplierRatings(manager_id);
+CREATE INDEX idx_po_rating ON SupplierRatings(po_id);
+
+-- Stored Procedure: Tính toán lại performance_rating trung bình
+IF OBJECT_ID('sp_UpdateSupplierRating', 'P') IS NOT NULL 
+    DROP PROCEDURE sp_UpdateSupplierRating;
+GO
+
+CREATE PROCEDURE sp_UpdateSupplierRating
+    @supplier_id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    DECLARE @avg_rating DECIMAL(3,2);
+    
+    -- Tính trung bình rating
+    SELECT @avg_rating = AVG(CAST(rating AS DECIMAL(3,2)))
+    FROM SupplierRatings
+    WHERE supplier_id = @supplier_id;
+    
+    -- Cập nhật vào Suppliers table
+    UPDATE Suppliers
+    SET performance_rating = @avg_rating,
+        updated_at = GETDATE()
+    WHERE supplier_id = @supplier_id;
+    
+    SELECT @avg_rating AS new_rating;
+END;
+GO
+
+PRINT '✅ SupplierRatings table and stored procedure created successfully!';

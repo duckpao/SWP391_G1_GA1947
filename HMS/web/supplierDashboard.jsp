@@ -59,10 +59,10 @@
                 <span class="nav-badge">${stats.approvedCount}</span>
             </a>
             
-            <a href="#" class="nav-item" data-tab="completed">
-                <i class="bi bi-box-seam"></i>
-                <span>Completed Orders</span>
-                <span class="nav-badge">${stats.completedCount}</span>
+            <a href="#" class="nav-item" data-tab="pending-payments">
+                <i class="bi bi-cash-coin"></i>
+                <span>Pending Payments</span>
+                <span class="nav-badge badge-warning">${pendingTransactions.size()}</span>
             </a>
             
             <a href="#" class="nav-item" data-tab="asn-tracking">
@@ -71,10 +71,10 @@
                 <span class="nav-badge">${asnStats.totalASNs}</span>
             </a>
             
-            <a href="#" class="nav-item" data-tab="pending-payments">
-                <i class="bi bi-cash-coin"></i>
-                <span>Pending Payments</span>
-                <span class="nav-badge badge-warning">${pendingTransactions.size()}</span>
+            <a href="#" class="nav-item" data-tab="completed">
+                <i class="bi bi-box-seam"></i>
+                <span>Completed Orders</span>
+                <span class="nav-badge">${stats.completedCount}</span>
             </a>
         </nav>
 

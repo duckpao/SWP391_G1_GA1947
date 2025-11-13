@@ -11,6 +11,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.sql.Statement;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import model.Supplier;
 
 public class MedicineDAO {
@@ -22,8 +24,9 @@ public class MedicineDAO {
     }
 
     // ✅ Lấy danh sách thuốc có tổng tồn và hạn gần nhất
-    public List<Medicine> getAllMedicines() {
+public List<Medicine> getAllMedicines() {
     List<Medicine> medicines = new ArrayList<>();
+    Map<String, Medicine> medicineMap = new LinkedHashMap<>();
 
     String sql = """
         SELECT 
@@ -43,19 +46,17 @@ public class MedicineDAO {
             m.updated_at,
             b.batch_id,
             b.supplier_id,
+            b.lot_number,
             b.current_quantity,
+            b.initial_quantity,
             b.expiry_date,
+            b.received_date,
+            b.status,
             s.name AS supplier_name
         FROM Medicines m
-        LEFT JOIN Batches b 
-            ON m.medicine_code = b.medicine_code
-            AND b.expiry_date = (
-                SELECT MIN(b2.expiry_date)
-                FROM Batches b2
-                WHERE b2.medicine_code = m.medicine_code
-            )
+        LEFT JOIN Batches b ON m.medicine_code = b.medicine_code
         LEFT JOIN Suppliers s ON b.supplier_id = s.supplier_id
-        ORDER BY m.name;
+        ORDER BY m.name, b.expiry_date ASC;
     """;
 
     try (Connection conn = dbContext.getConnection();
@@ -63,8 +64,13 @@ public class MedicineDAO {
          ResultSet rs = ps.executeQuery()) {
 
         while (rs.next()) {
-            Medicine med = new Medicine(
-                    rs.getString("medicine_code"),
+            String medicineCode = rs.getString("medicine_code");
+            
+            // Nếu medicine chưa có trong map, tạo mới
+            Medicine med = medicineMap.get(medicineCode);
+            if (med == null) {
+                med = new Medicine(
+                    medicineCode,
                     rs.getString("medicine_name"),
                     rs.getString("category"),
                     rs.getString("description"),
@@ -78,19 +84,29 @@ public class MedicineDAO {
                     rs.getString("drug_type"),
                     rs.getTimestamp("created_at"),
                     rs.getTimestamp("updated_at")
-            );
+                );
+                med.setSupplierName(rs.getString("supplier_name"));
+                medicineMap.put(medicineCode, med);
+            }
 
-            med.setSupplierName(rs.getString("supplier_name"));
-
-            Batches batch = new Batches();
-            batch.setBatchId(rs.getInt("batch_id"));
-            batch.setSupplierId(rs.getInt("supplier_id"));
-            batch.setCurrentQuantity(rs.getInt("current_quantity"));
-            batch.setExpiryDate(rs.getDate("expiry_date"));
-
-            med.getBatches().add(batch);
-            medicines.add(med);
+            // Thêm batch vào medicine (nếu có)
+            if (rs.getInt("batch_id") > 0) {
+                Batches batch = new Batches();
+                batch.setBatchId(rs.getInt("batch_id"));
+                batch.setMedicineCode(medicineCode);
+                batch.setSupplierId(rs.getInt("supplier_id"));
+                batch.setLotNumber(rs.getString("lot_number"));
+                batch.setCurrentQuantity(rs.getInt("current_quantity"));
+                batch.setInitialQuantity(rs.getInt("initial_quantity"));
+                batch.setExpiryDate(rs.getDate("expiry_date"));
+                batch.setReceivedDate(rs.getDate("received_date"));
+                batch.setStatus(rs.getString("status"));
+                
+                med.getBatches().add(batch);
+            }
         }
+        
+        medicines.addAll(medicineMap.values());
 
     } catch (SQLException e) {
         e.printStackTrace();
@@ -100,106 +116,127 @@ public class MedicineDAO {
 }
 
 // ✅ Tìm kiếm thuốc theo tên, loại và trạng thái tồn kho
-    public List<Medicine> searchMedicines(String keyword, String category, String activeIngredient,
+public List<Medicine> searchMedicines(String keyword, String category, String activeIngredient,
                                       String drugGroup, String drugType, String status) {
-        List<Medicine> medicines = new ArrayList<>();
+    Map<String, Medicine> medicineMap = new LinkedHashMap<>();
+    
+    StringBuilder sql = new StringBuilder(
+        "SELECT m.medicine_code, m.name, m.category, m.description, " +
+        "m.active_ingredient, m.dosage_form, m.strength, m.unit, " +
+        "m.manufacturer, m.country_of_origin, m.drug_group, m.drug_type, " +
+        "m.created_at, m.updated_at, " +
+        "b.batch_id, b.supplier_id, b.lot_number, b.current_quantity, b.initial_quantity, " +
+        "b.expiry_date, b.received_date, b.status, " +
+        "s.name AS supplier_name " +
+        "FROM Medicines m " +
+        "LEFT JOIN Batches b ON m.medicine_code = b.medicine_code " +
+        "LEFT JOIN Suppliers s ON b.supplier_id = s.supplier_id " +
+        "WHERE 1=1 "
+    );
 
-        StringBuilder sql = new StringBuilder(
-                "SELECT m.medicine_code, m.name, m.category, m.description, "
-                + "m.active_ingredient, m.dosage_form, m.strength, m.unit, "
-                + "m.manufacturer, m.country_of_origin, m.drug_group, m.drug_type, "
-                + "m.created_at, m.updated_at, "
-                + "ISNULL(SUM(b.current_quantity), 0) AS total_quantity, MIN(b.expiry_date) AS nearest_expiry "
-                + "FROM Medicines m LEFT JOIN Batches b ON m.medicine_code = b.medicine_code WHERE 1=1 "
-        );
+    List<Object> params = new ArrayList<>();
 
-        List<Object> params = new ArrayList<>();
+    // Tìm theo keyword
+    if (keyword != null && !keyword.trim().isEmpty()) {
+        sql.append("AND (m.name LIKE ? OR m.description LIKE ?) ");
+        String kw = "%" + keyword.trim() + "%";
+        params.add(kw);
+        params.add(kw);
+    }
 
-        // 🔍 Tìm theo tên hoặc mô tả
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            sql.append("AND (m.name LIKE ? OR m.description LIKE ?) ");
-            String kw = "%" + keyword.trim() + "%";
-            params.add(kw);
-            params.add(kw);
-        }
-
-        // 🏷 Lọc theo Danh mục (Category)
+    // Lọc theo category
     if (category != null && !category.equals("All") && !category.trim().isEmpty()) {
         sql.append("AND m.category = ? ");
         params.add(category);
     }
 
-    // 💊 Lọc theo Hoạt chất (Active Ingredient)
+    // Lọc theo active ingredient
     if (activeIngredient != null && !activeIngredient.equals("All") && !activeIngredient.trim().isEmpty()) {
         sql.append("AND m.active_ingredient = ? ");
         params.add(activeIngredient);
     }
 
-    // 🧪 Lọc theo Nhóm thuốc (Drug Group)
+    // Lọc theo drug group
     if (drugGroup != null && !drugGroup.equals("All") && !drugGroup.trim().isEmpty()) {
         sql.append("AND m.drug_group = ? ");
         params.add(drugGroup);
     }
 
-    // 🧴 Lọc theo Loại thuốc (Drug Type)
+    // Lọc theo drug type
     if (drugType != null && !drugType.equals("All") && !drugType.trim().isEmpty()) {
         sql.append("AND m.drug_type = ? ");
         params.add(drugType);
     }
 
-
-        // 📦 Lọc theo trạng thái tồn kho
-        if (status != null && !status.trim().isEmpty()) {
-            switch (status) {
-                case "In Stock" ->
-                    sql.append("AND m.medicine_code IN (SELECT medicine_code FROM Batches GROUP BY medicine_code HAVING SUM(current_quantity) > 50) ");
-                case "Low Stock" ->
-                    sql.append("AND m.medicine_code IN (SELECT medicine_code FROM Batches GROUP BY medicine_code HAVING SUM(current_quantity) BETWEEN 1 AND 50) ");
-                case "Out of Stock" ->
-                    sql.append("AND m.medicine_code IN (SELECT medicine_code FROM Batches GROUP BY medicine_code HAVING SUM(current_quantity) = 0 OR SUM(current_quantity) IS NULL) ");
-            }
+    // Lọc theo status tồn kho
+    if (status != null && !status.trim().isEmpty()) {
+        switch (status) {
+            case "In Stock" ->
+                sql.append("AND m.medicine_code IN (SELECT medicine_code FROM Batches GROUP BY medicine_code HAVING SUM(current_quantity) > 50) ");
+            case "Low Stock" ->
+                sql.append("AND m.medicine_code IN (SELECT medicine_code FROM Batches GROUP BY medicine_code HAVING SUM(current_quantity) BETWEEN 1 AND 50) ");
+            case "Out of Stock" ->
+                sql.append("AND m.medicine_code IN (SELECT medicine_code FROM Batches GROUP BY medicine_code HAVING SUM(current_quantity) = 0 OR SUM(current_quantity) IS NULL) ");
         }
-
-        sql.append("GROUP BY m.medicine_code, m.name, m.category, m.description, m.active_ingredient, m.dosage_form, m.strength, m.unit, m.manufacturer, m.country_of_origin, m.drug_group, m.drug_type, m.created_at, m.updated_at ORDER BY m.name");
-
-        try (Connection conn = dbContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
-
-            for (int i = 0; i < params.size(); i++) {
-                ps.setObject(i + 1, params.get(i));
-            }
-
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                Medicine med = new Medicine(
-                        rs.getString("medicine_code"),
-                        rs.getString("name"),
-                        rs.getString("category"),
-                        rs.getString("description"),
-                        rs.getString("active_ingredient"),
-                        rs.getString("dosage_form"),
-                        rs.getString("strength"),
-                        rs.getString("unit"),
-                        rs.getString("manufacturer"),
-                        rs.getString("country_of_origin"),
-                        rs.getString("drug_group"),
-                        rs.getString("drug_type"),
-                        rs.getTimestamp("created_at"),
-                        rs.getTimestamp("updated_at")
-                );
-
-                Batches batch = new Batches();
-                batch.setCurrentQuantity(rs.getInt("total_quantity"));
-                batch.setExpiryDate(rs.getDate("nearest_expiry"));
-                med.getBatches().add(batch);
-
-                medicines.add(med);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return medicines;
     }
+
+    sql.append("ORDER BY m.name, b.expiry_date ASC");
+
+    try (Connection conn = dbContext.getConnection(); 
+         PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+        for (int i = 0; i < params.size(); i++) {
+            ps.setObject(i + 1, params.get(i));
+        }
+
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            String medicineCode = rs.getString("medicine_code");
+            
+            Medicine med = medicineMap.get(medicineCode);
+            if (med == null) {
+                med = new Medicine(
+                    medicineCode,
+                    rs.getString("name"),
+                    rs.getString("category"),
+                    rs.getString("description"),
+                    rs.getString("active_ingredient"),
+                    rs.getString("dosage_form"),
+                    rs.getString("strength"),
+                    rs.getString("unit"),
+                    rs.getString("manufacturer"),
+                    rs.getString("country_of_origin"),
+                    rs.getString("drug_group"),
+                    rs.getString("drug_type"),
+                    rs.getTimestamp("created_at"),
+                    rs.getTimestamp("updated_at")
+                );
+                med.setSupplierName(rs.getString("supplier_name"));
+                medicineMap.put(medicineCode, med);
+            }
+
+            // Thêm batch
+            if (rs.getInt("batch_id") > 0) {
+                Batches batch = new Batches();
+                batch.setBatchId(rs.getInt("batch_id"));
+                batch.setMedicineCode(medicineCode);
+                batch.setSupplierId(rs.getInt("supplier_id"));
+                batch.setLotNumber(rs.getString("lot_number"));
+                batch.setCurrentQuantity(rs.getInt("current_quantity"));
+                batch.setInitialQuantity(rs.getInt("initial_quantity"));
+                batch.setExpiryDate(rs.getDate("expiry_date"));
+                batch.setReceivedDate(rs.getDate("received_date"));
+                batch.setStatus(rs.getString("status"));
+                
+                med.getBatches().add(batch);
+            }
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+
+    return new ArrayList<>(medicineMap.values());
+}
 
     public List<String> getAllCategories() throws SQLException {
     List<String> list = new ArrayList<>();

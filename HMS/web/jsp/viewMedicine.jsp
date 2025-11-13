@@ -506,20 +506,14 @@
                         <a href="${pageContext.request.contextPath}/create-request">
                             <i class="bi bi-file-earmark-plus"></i> Yêu cầu thuốc
                         </a>
-                        <a href="${pageContext.request.contextPath}/pharmacist/manage-batch">
-                            <i class="bi bi-box-seam"></i> Quản lý số lô/lô hàng
-                        </a>
-                        <a href="${pageContext.request.contextPath}/pharmacist/recordExpiredDamaged">
-                            <i class="bi bi-exclamation-triangle"></i> Thuốc hết hạn/hư hỏng
-                        </a>
-                        <a href="${pageContext.request.contextPath}/report">
-                            <i class="bi bi-graph-up"></i> Báo cáo thống kê
-                        </a>
                     </c:if>
 
                     <c:if test="${sessionScope.role eq 'Pharmacist'}">
                         <a href="${pageContext.request.contextPath}/pharmacist/View_MedicineRequest">
                             <i class="bi bi-file-earmark-plus"></i> Yêu cầu thuốc
+                        </a>
+                            <a href="${pageContext.request.contextPath}/pharmacist/view-order-details">
+                            <i class="bi bi-box-seam"></i> Đơn hàng đã giao
                         </a>
                         <a href="${pageContext.request.contextPath}/pharmacist/manage-batch">
                             <i class="bi bi-box-seam"></i> Quản lý số lô/lô hàng
@@ -538,103 +532,104 @@
             <div class="main">
                 <h1>Medicine Details</h1>
 
-                <!-- Search + Filter Container -->
-                <div class="search-container mb-4">
-                    <form action="${pageContext.request.contextPath}/view-medicine" method="get" class="row g-3">
+                 <!-- Search + Filter Container -->
+<div class="search-container mb-4">
+    <form action="${pageContext.request.contextPath}/view-medicine" method="get" class="row g-3">
 
-                        <!-- Keyword -->
-                        <div class="col-md-4">
-                            <input type="text" name="keyword" value="${keyword}"
-                                   placeholder="🔍 Tìm kiếm thuốc..." class="form-control">
-                        </div>
+        <!-- Keyword -->
+        <div class="col-md-4">
+            <input type="text" name="keyword" value="${keyword}"
+                   placeholder="🔍 Tìm kiếm thuốc..." class="form-control">
+        </div>
 
-                        <!-- Dropdown Filter Type -->
-                        <div class="col-md-4 position-relative">
-                            <div class="dropdown w-100">
-                                <button id="filterButton"
-                                        class="btn btn-outline-primary dropdown-toggle w-100"
-                                        type="button"
-                                        data-bs-toggle="dropdown"
-                                        aria-expanded="false">
-                                    <c:choose>
-                                        <c:when test="${not empty filterValue}">
-                                            ${filterValue}
-                                        </c:when>
-                                        <c:otherwise>Chọn tiêu chí lọc</c:otherwise>
-                                    </c:choose>
-                                </button>
+        <!-- Dropdown Filter Type -->
+        <div class="col-md-4 position-relative">
+            <div class="dropdown w-100">
+                <button id="filterButton"
+                        class="btn btn-outline-primary dropdown-toggle w-100"
+                        type="button"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                    Chọn tiêu chí lọc
+                </button>
 
-                                <!-- Mega Dropdown -->
-                                <ul class="dropdown-menu p-3" style="width: 100%; max-height: 400px; overflow-y: auto;">
-                                    <li class="dropdown-submenu position-relative">
-                                        <a href="#" class="dropdown-item fw-bold">Danh mục</a>
-                                        <ul class="dropdown-menu submenu shadow-sm bg-white">
-                                            <c:forEach var="cat" items="${categories}">
-                                                <li>
-                                                    <a href="#" class="dropdown-item filter-option"
-                                                       data-type="category" data-value="${cat}">${cat}</a>
-                                                </li>
-                                            </c:forEach>
-                                        </ul>
-                                    </li>
-                                    <li class="dropdown-submenu position-relative mt-2">
-                                        <a href="#" class="dropdown-item fw-bold">Hoạt chất</a>
-                                        <ul class="dropdown-menu submenu shadow-sm bg-white">
-                                            <c:forEach var="ai" items="${activeIngredients}">
-                                                <li>
-                                                    <a href="#" class="dropdown-item filter-option"
-                                                       data-type="activeIngredient" data-value="${ai}">${ai}</a>
-                                                </li>
-                                            </c:forEach>
-                                        </ul>
-                                    </li>
-                                    <li class="dropdown-submenu position-relative mt-2">
-                                        <a href="#" class="dropdown-item fw-bold">Nhóm thuốc</a>
-                                        <ul class="dropdown-menu submenu shadow-sm bg-white">
-                                            <c:forEach var="dg" items="${drugGroups}">
-                                                <li>
-                                                    <a href="#" class="dropdown-item filter-option"
-                                                       data-type="drugGroup" data-value="${dg}">${dg}</a>
-                                                </li>
-                                            </c:forEach>
-                                        </ul>
-                                    </li>
-                                    <li class="dropdown-submenu position-relative mt-2">
-                                        <a href="#" class="dropdown-item fw-bold">Loại thuốc</a>
-                                        <ul class="dropdown-menu submenu shadow-sm bg-white">
-                                            <c:forEach var="dt" items="${drugTypes}">
-                                                <li>
-                                                    <a href="#" class="dropdown-item filter-option"
-                                                       data-type="drugType" data-value="${dt}">${dt}</a>
-                                                </li>
-                                            </c:forEach>
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
+                <!-- Mega Dropdown -->
+                <ul class="dropdown-menu p-3" style="width: 100%; max-height: 400px; overflow-y: auto;">
+                    <!-- Danh mục -->
+                    <li class="dropdown-submenu position-relative">
+                        <a href="#" class="dropdown-item fw-bold">Danh mục</a>
+                        <ul class="dropdown-menu submenu shadow-sm bg-white">
+                            <c:forEach var="cat" items="${categories}">
+                                <li>
+                                    <a href="#" class="dropdown-item filter-option"
+                                       data-type="category" data-value="${cat}">${cat}</a>
+                                </li>
+                            </c:forEach>
+                        </ul>
+                    </li>
+                    <!-- Hoạt chất -->
+                    <li class="dropdown-submenu position-relative mt-2">
+                        <a href="#" class="dropdown-item fw-bold">Hoạt chất</a>
+                        <ul class="dropdown-menu submenu shadow-sm bg-white">
+                            <c:forEach var="ai" items="${activeIngredients}">
+                                <li>
+                                    <a href="#" class="dropdown-item filter-option"
+                                       data-type="activeIngredient" data-value="${ai}">${ai}</a>
+                                </li>
+                            </c:forEach>
+                        </ul>
+                    </li>
+                    <!-- Nhóm thuốc -->
+                    <li class="dropdown-submenu position-relative mt-2">
+                        <a href="#" class="dropdown-item fw-bold">Nhóm thuốc</a>
+                        <ul class="dropdown-menu submenu shadow-sm bg-white">
+                            <c:forEach var="dg" items="${drugGroups}">
+                                <li>
+                                    <a href="#" class="dropdown-item filter-option"
+                                       data-type="drugGroup" data-value="${dg}">${dg}</a>
+                                </li>
+                            </c:forEach>
+                        </ul>
+                    </li>
+                    <!-- Loại thuốc -->
+                    <li class="dropdown-submenu position-relative mt-2">
+                        <a href="#" class="dropdown-item fw-bold">Loại thuốc</a>
+                        <ul class="dropdown-menu submenu shadow-sm bg-white">
+                            <c:forEach var="dt" items="${drugTypes}">
+                                <li>
+                                    <a href="#" class="dropdown-item filter-option"
+                                       data-type="drugType" data-value="${dt}">${dt}</a>
+                                </li>
+                            </c:forEach>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
 
-                        <!-- Hidden Inputs -->
-                        <input type="hidden" id="filterType">
-                        <input type="hidden" id="filterValue">
+        <!-- Hidden Inputs cho từng filter -->
+        <input type="hidden" name="category" id="filterCategory" value="${selectedCategory != null ? selectedCategory : ''}">
+        <input type="hidden" name="activeIngredient" id="filterActiveIngredient" value="${selectedActiveIngredient != null ? selectedActiveIngredient : ''}">
+        <input type="hidden" name="drugGroup" id="filterDrugGroup" value="${selectedDrugGroup != null ? selectedDrugGroup : ''}">
+        <input type="hidden" name="drugType" id="filterDrugType" value="${selectedDrugType != null ? selectedDrugType : ''}">
 
-                        <!-- Status -->
-                        <div class="col-md-2">
-                            <select name="status" class="form-select">
-                                <option value="" ${selectedStatus == '' ? 'selected' : ''}>Tất cả</option>
-                                <option value="In Stock" ${selectedStatus == 'In Stock' ? 'selected' : ''}>Còn nhiều</option>
-                                <option value="Low Stock" ${selectedStatus == 'Low Stock' ? 'selected' : ''}>Sắp hết</option>
-                                <option value="Out of Stock" ${selectedStatus == 'Out of Stock' ? 'selected' : ''}>Hết hàng</option>
-                            </select>
-                        </div>
+        <!-- Status -->
+        <div class="col-md-2">
+            <select name="status" class="form-select">
+                <option value="" ${selectedStatus == '' ? 'selected' : ''}>Tất cả</option>
+                <option value="In Stock" ${selectedStatus == 'In Stock' ? 'selected' : ''}>Còn nhiều</option>
+                <option value="Low Stock" ${selectedStatus == 'Low Stock' ? 'selected' : ''}>Sắp hết</option>
+                <option value="Out of Stock" ${selectedStatus == 'Out of Stock' ? 'selected' : ''}>Hết hàng</option>
+            </select>
+        </div>
 
-                        <!-- Buttons -->
-                        <div class="col-md-2 d-flex gap-2">
-                            <button type="submit" class="btn btn-success flex-fill">Tìm kiếm</button>
-                            <a href="${pageContext.request.contextPath}/view-medicine" class="btn btn-secondary flex-fill">Reset</a>
-                        </div>
-                    </form>
-                </div>
+        <!-- Buttons -->
+        <div class="col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-success flex-fill">Tìm kiếm</button>
+            <a href="${pageContext.request.contextPath}/view-medicine" class="btn btn-secondary flex-fill">Reset</a>
+        </div>
+    </form>
+</div>
 
 
                 <!-- Action Buttons -->
@@ -1055,53 +1050,61 @@ editModal.addEventListener('show.bs.modal', function (event) {
 
                                                               // Script cho Filter Dropdown
                                                               document.addEventListener("DOMContentLoaded", function () {
-                                                                  const filterOptions = document.querySelectorAll(".filter-option");
-                                                                  const filterButton = document.getElementById("filterButton");
-                                                                  const filterTypeInput = document.getElementById("filterType");
-                                                                  const filterValueInput = document.getElementById("filterValue");
+    const filterOptions = document.querySelectorAll(".filter-option");
+    const filterButton = document.getElementById("filterButton");
 
-                                                                  filterOptions.forEach(option => {
-                                                                      option.addEventListener("click", function (e) {
-                                                                          e.preventDefault();
-                                                                          e.stopPropagation(); // Ngăn sự kiện lan truyền
+    // 4 hidden inputs
+    const filterCategory = document.getElementById("filterCategory");
+    const filterActiveIngredient = document.getElementById("filterActiveIngredient");
+    const filterDrugGroup = document.getElementById("filterDrugGroup");
+    const filterDrugType = document.getElementById("filterDrugType");
 
-                                                                          const type = this.dataset.type;
-                                                                          const value = this.innerText.trim(); // Dùng innerText thay vì dataset.value
+    function updateButtonText() {
+        // Chỉ lấy những giá trị đã chọn, bỏ "All" hoặc rỗng
+        const values = [
+            filterCategory.value,
+            filterActiveIngredient.value,
+            filterDrugGroup.value,
+            filterDrugType.value
+        ].filter(v => v && v.toLowerCase() !== "all");
 
-                                                                          // Lưu vào input ẩn
-                                                                          filterTypeInput.value = type;
-                                                                          filterValueInput.value = value;
+        filterButton.textContent = values.length > 0 ? values.join(" | ") : "Chọn tiêu chí lọc";
+    }
 
-                                                                          // Hiển thị trên nút lọc
-                                                                          filterButton.innerHTML = value;
+    filterOptions.forEach(option => {
+        option.addEventListener("click", function (e) {
+            e.preventDefault();
+            e.stopPropagation(); // Ngăn sự kiện lan truyền
 
-                                                                          // Đóng tất cả dropdown
-                                                                          document.querySelectorAll('.dropdown-menu').forEach(menu => {
-                                                                              menu.classList.remove('show');
-                                                                          });
-                                                                      });
-                                                                  });
+            const type = this.dataset.type;
+            const value = this.innerText.trim();
 
-                                                                  // Khi submit form => thêm input tương ứng
-                                                                  const form = document.querySelector("form");
-                                                                  form.addEventListener("submit", function () {
-                                                                      const type = filterTypeInput.value;
-                                                                      const value = filterValueInput.value;
+            // Set value vào hidden input
+            switch (type) {
+                case "category":
+                    filterCategory.value = value;
+                    break;
+                case "activeIngredient":
+                    filterActiveIngredient.value = value;
+                    break;
+                case "drugGroup":
+                    filterDrugGroup.value = value;
+                    break;
+                case "drugType":
+                    filterDrugType.value = value;
+                    break;
+            }
 
-                                                                      // Xóa input cũ
-                                                                      document.querySelectorAll(".dynamic-filter").forEach(el => el.remove());
+            updateButtonText();
 
-                                                                      if (type && value) {
-                                                                          const input = document.createElement("input");
-                                                                          input.type = "hidden";
-                                                                          input.name = type;
-                                                                          input.value = value;
-                                                                          input.classList.add("dynamic-filter");
-                                                                          this.appendChild(input);
-                                                                      }
-                                                                  });
-                                                              });
+            // Đóng tất cả dropdown
+            document.querySelectorAll('.dropdown-menu').forEach(menu => menu.classList.remove('show'));
+        });
+    });
 
+    // Khởi tạo hiển thị ban đầu
+    updateButtonText();
+});
 
                 </script>
                 </body>

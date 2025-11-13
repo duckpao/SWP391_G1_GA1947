@@ -521,6 +521,15 @@
                 <a class="nav-link" href="${pageContext.request.contextPath}/manage/transit">
                     <i class="bi bi-truck"></i> Transit Orders
                 </a>
+                    <li class="nav-item">
+    <a class="nav-link" href="${pageContext.request.contextPath}/manager/rate-supplier">
+        <i class="bi bi-star-fill"></i>
+        Rate Suppliers
+        <c:if test="${unratedCount > 0}">
+            <span class="badge bg-warning">${unratedCount}</span>
+        </c:if>
+    </a>
+</li>
             </nav>
         </div>
         <!-- Main Content -->

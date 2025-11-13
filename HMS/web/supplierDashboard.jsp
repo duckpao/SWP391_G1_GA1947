@@ -14,6 +14,64 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/supplier-dashboard.css">
 </head>
+    <style>
+        /* Fix footer positioning */
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+        }
+        
+        .page-container {
+            display: flex;
+            flex: 1;
+            position: relative;
+        }
+        
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 60px; /* Height of header */
+            bottom: 0;
+            width: 280px;
+            overflow-y: auto;
+            z-index: 100;
+        }
+        
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 30px;
+            min-height: calc(100vh - 60px);
+        }
+        
+        .main-footer {
+            margin-left: 280px;
+            margin-top: 0 !important;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: -280px;
+                transition: left 0.3s ease;
+            }
+            
+            .sidebar.active {
+                left: 0;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .main-footer {
+                margin-left: 0;
+            }
+        }
+    </style>
+
 <%@ include file="/admin/header.jsp" %>
 <body>
     <!-- Mobile Menu Toggle -->

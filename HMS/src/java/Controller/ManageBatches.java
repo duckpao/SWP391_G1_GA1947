@@ -18,28 +18,19 @@ public class ManageBatches extends HttpServlet {
 
         BatchDAO dao = new BatchDAO();
         try {
-            // ✅ Lấy danh sách thuốc và nhà cung cấp
             List<Medicine> medicineList = dao.getAllMedicines();
             List<Supplier> supplierList = dao.getAllSuppliers();
             String nextLotNumber = dao.generateNextLotNumber();
 
-            // ✅ Lấy các tham số filter từ request
             String lotNumber = request.getParameter("lotNumber");
-            String filterType = request.getParameter("filterType"); // medicineCode / supplierId
-            String filterValue = request.getParameter("filterValue");
             String status = request.getParameter("status");
+            String medicineCodeFilter = request.getParameter("medicineCode");
+            String supplierIdFilter = request.getParameter("supplierId");
 
-            String medicineCodeFilter = null;
-            String supplierIdFilter = null;
-
-            if ("medicineCode".equals(filterType)) medicineCodeFilter = filterValue;
-            if ("supplierId".equals(filterType)) supplierIdFilter = filterValue;
-
-            // ✅ Lấy danh sách lô thuốc có filter
             List<Map<String, Object>> batches;
-            if ((lotNumber != null && !lotNumber.isEmpty()) || 
-                (medicineCodeFilter != null) || 
-                (supplierIdFilter != null) || 
+            if ((lotNumber != null && !lotNumber.isEmpty()) ||
+                (medicineCodeFilter != null && !medicineCodeFilter.isEmpty()) ||
+                (supplierIdFilter != null && !supplierIdFilter.isEmpty()) ||
                 (status != null && !status.isEmpty())) {
 
                 batches = dao.filterBatches(lotNumber, medicineCodeFilter, supplierIdFilter);
@@ -47,30 +38,34 @@ public class ManageBatches extends HttpServlet {
                 batches = dao.getBatchList();
             }
 
-            // ✅ Chuyển filterValue thành tên hiển thị
-            String filterDisplay = null;
-            if ("medicineCode".equals(filterType) && filterValue != null) {
+            // ✅ Lấy tên thuốc và NCC để giữ lại sau khi tìm kiếm
+            String medicineLabel = "";
+            String supplierLabel = "";
+
+            if (medicineCodeFilter != null && !medicineCodeFilter.isEmpty()) {
                 for (Medicine m : medicineList) {
-                    if (m.getMedicineCode().equals(filterValue)) {
-                        filterDisplay = m.getName(); // hiển thị tên thuốc
-                        break;
-                    }
-                }
-            } else if ("supplierId".equals(filterType) && filterValue != null) {
-                for (Supplier s : supplierList) {
-                    if (String.valueOf(s.getSupplierId()).equals(filterValue)) {
-                        filterDisplay = s.getName(); // hiển thị tên nhà cung cấp
+                    if (m.getMedicineCode().equals(medicineCodeFilter)) {
+                        medicineLabel = m.getName();
                         break;
                     }
                 }
             }
 
-            // ✅ Đưa dữ liệu sang JSP
+            if (supplierIdFilter != null && !supplierIdFilter.isEmpty()) {
+                for (Supplier s : supplierList) {
+                    if (String.valueOf(s.getSupplierId()).equals(supplierIdFilter)) {
+                        supplierLabel = s.getName();
+                        break;
+                    }
+                }
+            }
+
             request.setAttribute("batches", batches);
             request.setAttribute("medicineList", medicineList);
             request.setAttribute("supplierList", supplierList);
             request.setAttribute("nextLotNumber", nextLotNumber);
-            request.setAttribute("filterDisplay", filterDisplay); // dùng để hiển thị nút dropdown
+            request.setAttribute("medicineLabel", medicineLabel);
+            request.setAttribute("supplierLabel", supplierLabel);
 
         } catch (SQLException e) {
             e.printStackTrace();

@@ -19,15 +19,11 @@ public class BatchDAO extends DBContext {
                 s.name AS supplierName,
                 b.received_date AS receivedDate,   -- 🆕 thêm cột này
                 b.expiry_date AS expiryDate,
-                b.initial_quantity AS initialQuantity,
                 b.current_quantity AS currentQuantity,
-                poi.unit_price AS unitPrice,
                 b.status AS status
             FROM Batches b
             JOIN Medicines m ON b.medicine_code = m.medicine_code
             JOIN Suppliers s ON b.supplier_id = s.supplier_id
-            LEFT JOIN PurchaseOrderItems poi 
-                ON b.medicine_code = poi.medicine_code
             ORDER BY b.batch_id DESC;
         """;
 
@@ -43,9 +39,8 @@ public class BatchDAO extends DBContext {
                 row.put("supplierName", rs.getString("supplierName"));
                 row.put("receivedDate", rs.getDate("receivedDate")); // 🆕 thêm dòng này
                 row.put("expiryDate", rs.getDate("expiryDate"));
-                row.put("initialQuantity", rs.getInt("initialQuantity"));
                 row.put("currentQuantity", rs.getInt("currentQuantity"));
-                row.put("unitPrice", rs.getBigDecimal("unitPrice"));
+              //  row.put("unitPrice", rs.getBigDecimal("unitPrice"));
                 row.put("status", rs.getString("status"));
                 list.add(row);
             }
@@ -250,23 +245,30 @@ public class BatchDAO extends DBContext {
     
       // ✅ UPDATE batch info
     public boolean updateBatch(Batches batch) {
-        String sql = "UPDATE Batches "
-                   + "SET expiry_date = ?, current_quantity = ?, status = ? "
-                   + "WHERE batch_id = ?";
-        try (Connection conn = getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+    String sql = "UPDATE Batches "
+               + "SET expiry_date = ?, current_quantity = ?, status = ?, quarantine_notes = ? "
+               + "WHERE batch_id = ?";
+    try (Connection conn = getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setDate(1, batch.getExpiryDate());
-            ps.setInt(2, batch.getCurrentQuantity());
-            ps.setString(3, batch.getStatus());
-            ps.setInt(4, batch.getBatchId());
-
-            return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+        ps.setDate(1, batch.getExpiryDate());
+        ps.setInt(2, batch.getCurrentQuantity());
+        ps.setString(3, batch.getStatus());
+        if (batch.getQuarantineNotes() != null && !batch.getQuarantineNotes().isEmpty()) {
+            ps.setString(4, batch.getQuarantineNotes());
+        } else {
+            ps.setNull(4, java.sql.Types.VARCHAR);
         }
+        ps.setInt(5, batch.getBatchId());
+
+        return ps.executeUpdate() > 0;
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+        return false;
     }
+}
+
 
     // ✅ DELETE batch
     public boolean deleteBatch(int batchId) {
@@ -281,6 +283,25 @@ public class BatchDAO extends DBContext {
             return false;
         }
     }
+    
+    
+    
+    public boolean updateQualityCheck(int batchId, String status, String quarantineNotes) {
+    String sql = "UPDATE Batches "
+               + "SET status = ?, quarantine_notes = ?, updated_at = GETDATE() "
+               + "WHERE batch_id = ?";
+    try (Connection conn = getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setString(1, status);
+        ps.setString(2, quarantineNotes);
+        ps.setInt(3, batchId);
+        return ps.executeUpdate() > 0;
+    } catch (SQLException e) {
+        e.printStackTrace();
+        return false;
+    }
+}
+
 }
 
 

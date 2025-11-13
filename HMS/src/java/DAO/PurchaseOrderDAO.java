@@ -555,43 +555,71 @@ public class PurchaseOrderDAO extends DBContext {
         return performance;
     }
      // 1️⃣ Lấy danh sách các đơn đã giao
-    public List<PurchaseOrder> getDeliveredOrders() throws SQLException {
-        List<PurchaseOrder> list = new ArrayList<>();
-        String sql = """
-            SELECT po.po_id,
-                   po.status,
-                   po.order_date,
-                   po.expected_delivery_date,
-                   s.name AS supplier_name,
-                   u.username AS manager_name,
-                   ISNULL(SUM(poi.quantity * poi.unit_price),0) AS total_amount
-            FROM PurchaseOrders po
-            LEFT JOIN Suppliers s ON po.supplier_id = s.supplier_id
-            LEFT JOIN Users u ON po.manager_id = u.user_id
-            LEFT JOIN PurchaseOrderItems poi ON po.po_id = poi.po_id
-            WHERE po.status IN ('Completed')
-            GROUP BY po.po_id, po.status, po.order_date, po.expected_delivery_date, s.name, u.username
-            ORDER BY po.order_date DESC
-        """;
+public List<PurchaseOrder> getDeliveredOrders() throws SQLException {
+    List<PurchaseOrder> list = new ArrayList<>();
+    
+    String sql = """
+        SELECT 
+            po.po_id,
+            po.status,
+            po.order_date,
+            po.expected_delivery_date,
+            po.supplier_id,
+            po.manager_id,
+            po.notes,
+            s.name AS supplier_name,
+            u.username AS manager_name,
+            ISNULL(SUM(poi.quantity * poi.unit_price), 0) AS total_amount,
+            COUNT(DISTINCT poi.item_id) AS item_count
+        FROM PurchaseOrders po
+        LEFT JOIN Suppliers s ON po.supplier_id = s.supplier_id
+        LEFT JOIN Users u ON po.manager_id = u.user_id
+        LEFT JOIN PurchaseOrderItems poi ON po.po_id = poi.po_id
+        WHERE po.status = 'Completed'
+        GROUP BY po.po_id, po.status, po.order_date, po.expected_delivery_date, 
+                 po.supplier_id, po.manager_id, po.notes, s.name, u.username
+        ORDER BY po.order_date DESC
+    """;
 
-        try (
-             PreparedStatement ps = connection.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+    try (Connection conn = getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
 
-            while(rs.next()) {
-                PurchaseOrder po = new PurchaseOrder();
-                po.setPoId(rs.getInt("po_id"));
-                po.setStatus(rs.getString("status"));
-                po.setOrderDate(rs.getTimestamp("order_date"));
-                po.setExpectedDeliveryDate(rs.getDate("expected_delivery_date"));
-                po.setSupplierName(rs.getString("supplier_name"));
-                po.setManagerName(rs.getString("manager_name"));
-                po.setTotalAmount(rs.getDouble("total_amount"));
-                list.add(po);
-            }
+        System.out.println("====================================");
+        System.out.println("DEBUG: getDeliveredOrders() - Query executed");
+        System.out.println("====================================");
+
+        int count = 0;
+        while (rs.next()) {
+            count++;
+            PurchaseOrder po = new PurchaseOrder();
+            po.setPoId(rs.getInt("po_id"));
+            po.setStatus(rs.getString("status"));
+            po.setOrderDate(rs.getTimestamp("order_date"));
+            po.setExpectedDeliveryDate(rs.getDate("expected_delivery_date"));
+            po.setSupplierId(rs.getInt("supplier_id"));
+            po.setManagerId(rs.getInt("manager_id"));
+            po.setNotes(rs.getString("notes"));
+            po.setSupplierName(rs.getString("supplier_name"));
+            po.setManagerName(rs.getString("manager_name"));
+            po.setTotalAmount(rs.getDouble("total_amount"));
+            po.setItemCount(rs.getInt("item_count"));
+            
+            // ✅ KHÔNG load items ở đây - sẽ load ở Servlet
+            
+            System.out.println("Found PO #" + po.getPoId() + 
+                             " - Status: " + po.getStatus() + 
+                             " - Item count: " + po.getItemCount());
+            
+            list.add(po);
         }
-        return list;
+        
+        System.out.println("Total orders found: " + count);
+        System.out.println("====================================");
     }
+    
+    return list;
+}
     
    /** 🔹 Lấy thông tin đơn hàng + danh sách item chi tiết */
 public PurchaseOrder getOrderWithItems(int poId) throws SQLException {
@@ -663,4 +691,108 @@ public PurchaseOrder getOrderWithItems(int poId) throws SQLException {
 
     return order;
 }
+    public boolean updateOrderStatusToBatchCreated(int poId) {
+        String sql = """
+            UPDATE PurchaseOrders 
+            SET status = 'BatchCreated', 
+                updated_at = GETDATE() 
+            WHERE po_id = ? 
+            AND status = 'Completed'
+        """;
+        
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, poId);
+            int result = ps.executeUpdate();
+            
+            if (result > 0) {
+                System.out.println("✅ Đơn hàng #" + poId + " đã chuyển sang trạng thái BatchCreated");
+                return true;
+            } else {
+                System.out.println("⚠️ Đơn hàng #" + poId + " không được cập nhật (có thể không ở trạng thái Completed)");
+                return false;
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("❌ Lỗi khi cập nhật trạng thái đơn hàng: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * ✅ Lấy danh sách đơn hàng đã giao NHƯNG CHƯA TẠO LÔ
+     * (status = 'Completed' - chưa chuyển sang 'BatchCreated')
+     */
+    public List<PurchaseOrder> getDeliveredOrdersNotBatched() {
+        List<PurchaseOrder> list = new ArrayList<>();
+        String sql = """
+            SELECT 
+                po.po_id, 
+                po.manager_id, 
+                po.supplier_id, 
+                po.status, 
+                po.order_date, 
+                po.expected_delivery_date, 
+                po.notes,
+                s.name AS supplier_name
+            FROM PurchaseOrders po
+            LEFT JOIN Suppliers s ON po.supplier_id = s.supplier_id
+            WHERE po.status = 'Completed'
+            ORDER BY po.order_date DESC
+        """;
+        
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            
+            while (rs.next()) {
+                PurchaseOrder order = new PurchaseOrder();
+                order.setPoId(rs.getInt("po_id"));
+                order.setManagerId(rs.getInt("manager_id"));
+                order.setSupplierId(rs.getInt("supplier_id"));
+                order.setStatus(rs.getString("status"));
+                order.setOrderDate(rs.getTimestamp("order_date"));
+                order.setExpectedDeliveryDate(rs.getDate("expected_delivery_date"));
+                order.setNotes(rs.getString("notes"));
+                order.setSupplierName(rs.getString("supplier_name"));
+                list.add(order);
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("❌ Lỗi khi lấy danh sách đơn hàng chưa tạo lô: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return list;
+    }
+
+    /**
+     * ✅ Kiểm tra xem đơn hàng đã tạo lô chưa
+     */
+    public boolean hasOrderCreatedBatches(int poId) {
+        String sql = """
+            SELECT COUNT(*) AS batch_count 
+            FROM Batches 
+            WHERE quarantine_notes LIKE ?
+        """;
+        
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setString(1, "%Lô từ đơn hàng #" + poId + "%");
+            ResultSet rs = ps.executeQuery();
+            
+            if (rs.next()) {
+                int count = rs.getInt("batch_count");
+                return count > 0;
+            }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return false;
+    }
 }

@@ -605,11 +605,11 @@
         <url-pattern>/pharmacist/Batch-Add</url-pattern>
     </servlet-mapping>
     <servlet>
-        <servlet-name>ViewDeliveredOrderDetailsServlet</servlet-name>
-        <servlet-class>Controller.ViewDeliveredOrderDetailsServlet</servlet-class>
+        <servlet-name>ViewDeliveredOrderServlet</servlet-name>
+        <servlet-class>Controller.ViewDeliveredOrderServlet</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>ViewDeliveredOrderDetailsServlet</servlet-name>
+        <servlet-name>ViewDeliveredOrderServlet</servlet-name>
         <url-pattern>/pharmacist/view-order-details</url-pattern>
     </servlet-mapping>
     <servlet>

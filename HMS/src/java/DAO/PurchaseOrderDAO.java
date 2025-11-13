@@ -554,4 +554,113 @@ public class PurchaseOrderDAO extends DBContext {
         }
         return performance;
     }
+     // 1️⃣ Lấy danh sách các đơn đã giao
+    public List<PurchaseOrder> getDeliveredOrders() throws SQLException {
+        List<PurchaseOrder> list = new ArrayList<>();
+        String sql = """
+            SELECT po.po_id,
+                   po.status,
+                   po.order_date,
+                   po.expected_delivery_date,
+                   s.name AS supplier_name,
+                   u.username AS manager_name,
+                   ISNULL(SUM(poi.quantity * poi.unit_price),0) AS total_amount
+            FROM PurchaseOrders po
+            LEFT JOIN Suppliers s ON po.supplier_id = s.supplier_id
+            LEFT JOIN Users u ON po.manager_id = u.user_id
+            LEFT JOIN PurchaseOrderItems poi ON po.po_id = poi.po_id
+            WHERE po.status IN ('Completed')
+            GROUP BY po.po_id, po.status, po.order_date, po.expected_delivery_date, s.name, u.username
+            ORDER BY po.order_date DESC
+        """;
+
+        try (
+             PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while(rs.next()) {
+                PurchaseOrder po = new PurchaseOrder();
+                po.setPoId(rs.getInt("po_id"));
+                po.setStatus(rs.getString("status"));
+                po.setOrderDate(rs.getTimestamp("order_date"));
+                po.setExpectedDeliveryDate(rs.getDate("expected_delivery_date"));
+                po.setSupplierName(rs.getString("supplier_name"));
+                po.setManagerName(rs.getString("manager_name"));
+                po.setTotalAmount(rs.getDouble("total_amount"));
+                list.add(po);
+            }
+        }
+        return list;
+    }
+    
+   /** 🔹 Lấy thông tin đơn hàng + danh sách item chi tiết */
+public PurchaseOrder getOrderWithItems(int poId) throws SQLException {
+    PurchaseOrder order = null;
+
+    String sqlOrder = """
+        SELECT po.po_id, po.order_date, po.status, po.supplier_id, po.manager_id,
+               s.name AS supplier_name, u.username AS manager_name
+        FROM PurchaseOrders po
+        JOIN Suppliers s ON po.supplier_id = s.supplier_id
+        LEFT JOIN Users u ON po.manager_id = u.user_id
+        WHERE po.po_id = ?
+    """;
+
+    String sqlItems = """
+        SELECT poi.item_id, poi.medicine_code, poi.quantity, poi.unit_price,
+               m.name AS medicine_name, m.strength, m.dosage_form, 
+               m.category, m.active_ingredient
+        FROM PurchaseOrderItems poi
+        JOIN Medicines m ON poi.medicine_code = m.medicine_code
+        WHERE poi.po_id = ?
+    """;
+
+    try (Connection conn = getConnection();
+         PreparedStatement psOrder = conn.prepareStatement(sqlOrder);
+         PreparedStatement psItems = conn.prepareStatement(sqlItems)) {
+
+        // --- 1️⃣ Lấy thông tin đơn hàng ---
+        psOrder.setInt(1, poId);
+        ResultSet rs = psOrder.executeQuery();
+
+        if (rs.next()) {
+            order = new PurchaseOrder();
+            order.setPoId(rs.getInt("po_id"));
+            order.setOrderDate(rs.getTimestamp("order_date"));
+            order.setStatus(rs.getString("status"));
+            order.setSupplierId(rs.getInt("supplier_id"));
+            order.setSupplierName(rs.getString("supplier_name"));
+            order.setManagerName(rs.getString("manager_name"));
+        }
+
+        // --- 2️⃣ Lấy danh sách thuốc trong đơn ---
+        if (order != null) {
+            List<PurchaseOrderItem> items = new ArrayList<>();
+            psItems.setInt(1, poId);
+            ResultSet rs2 = psItems.executeQuery();
+
+            while (rs2.next()) {
+                PurchaseOrderItem item = new PurchaseOrderItem();
+                item.setItemId(rs2.getInt("item_id"));
+                item.setMedicineCode(rs2.getString("medicine_code"));
+                item.setMedicineName(rs2.getString("medicine_name"));
+                item.setMedicineStrength(rs2.getString("strength"));
+                item.setMedicineDosageForm(rs2.getString("dosage_form"));
+                item.setMedicineCategory(rs2.getString("category"));
+                item.setActiveIngredient(rs2.getString("active_ingredient"));
+                item.setQuantity(rs2.getInt("quantity"));
+                item.setUnitPrice(rs2.getDouble("unit_price"));
+                items.add(item);
+            }
+
+            order.setItems(items);
+        }
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+        throw e;
+    }
+
+    return order;
+}
 }

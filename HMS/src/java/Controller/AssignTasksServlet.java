@@ -1,6 +1,7 @@
 package Controller;
 
 import DAO.ManagerDAO;
+import DAO.NotificationDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -43,19 +44,6 @@ public class AssignTasksServlet extends HttpServlet {
                 if (viewTask != null && viewTask.getPoId() > 0) {
                     List<PurchaseOrderItem> items = dao.getPurchaseOrderItems(viewTask.getPoId());
                     request.setAttribute("poItems", items);
-                    
-                    // DEBUG: Print items info
-                    System.out.println("=== VIEW TASK DEBUG ===");
-                    System.out.println("Task ID: " + taskId);
-                    System.out.println("PO ID: " + viewTask.getPoId());
-                    System.out.println("Items count: " + (items != null ? items.size() : 0));
-                    if (items != null) {
-                        for (PurchaseOrderItem item : items) {
-                            System.out.println("  - Item: " + item.getMedicineCode() + 
-                                             " | Name: " + item.getMedicineName() +
-                                             " | Qty: " + item.getQuantity());
-                        }
-                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -63,16 +51,12 @@ public class AssignTasksServlet extends HttpServlet {
         }
         
         List<Task> tasks = dao.getTasks();
-        
-        // ✅ THAY ĐỔI: Lấy TẤT CẢ PO (không chỉ Pending)
-        List<PurchaseOrder> allOrders = dao.getAllPurchaseOrders(); // Method mới
-        
-        // ✅ THAY ĐỔI: Lấy cả Auditor VÀ Pharmacist
-        List<model.Manager> staffList = dao.getAllStaff(); // Method mới - trả về cả Auditor và Pharmacist
+        List<PurchaseOrder> allOrders = dao.getAllPurchaseOrders();
+        List<model.Manager> staffList = dao.getAllStaff();
         
         request.setAttribute("tasks", tasks);
-        request.setAttribute("pendingOrders", allOrders); // Giữ tên cũ để không phá vỡ JSP
-        request.setAttribute("auditors", staffList); // Giữ tên cũ cho tương thích
+        request.setAttribute("pendingOrders", allOrders);
+        request.setAttribute("auditors", staffList);
         
         // Handle messages from session
         String message = (String) session.getAttribute("message");
@@ -93,6 +77,7 @@ public class AssignTasksServlet extends HttpServlet {
         HttpSession session = request.getSession();
         String role = (String) session.getAttribute("role");
         Integer userId = (Integer) session.getAttribute("userId");
+        String managerUsername = (String) session.getAttribute("username");
         
         if (!"Manager".equals(role) || userId == null) {
             response.sendRedirect(request.getContextPath() + "/login");
@@ -101,14 +86,40 @@ public class AssignTasksServlet extends HttpServlet {
         
         String action = request.getParameter("action");
         ManagerDAO dao = new ManagerDAO();
+        NotificationDAO notifDAO = new NotificationDAO();
         
         try {
             if ("cancel".equals(action)) {
                 // Cancel task
                 int taskId = Integer.parseInt(request.getParameter("taskId"));
+                
+                // Lấy thông tin task trước khi cancel
+                Task task = dao.getTaskById(taskId);
+                
                 boolean success = dao.cancelTask(taskId);
                 
                 if (success) {
+                    // ✅ GỬI THÔNG BÁO khi cancel task
+                    if (task != null) {
+                        String notifTitle = "🚫 Task Cancelled";
+                        String notifMessage = String.format(
+                            "Your task #%d for PO #%d (%s) has been cancelled by Manager %s.",
+                            taskId, task.getPoId(), task.getTaskType(), managerUsername
+                        );
+                        
+                        notifDAO.sendNotificationToUser(
+                            userId,                    // sender (Manager)
+                            task.getStaffId(),        // receiver (Staff được assign)
+                            notifTitle,
+                            notifMessage,
+                            "warning",                // type
+                            "high",                   // priority
+                            request.getContextPath() + "/tasks/assign" // link
+                        );
+                        
+                        System.out.println("✓ Sent cancellation notification to user #" + task.getStaffId());
+                    }
+                    
                     session.setAttribute("message", "Task cancelled successfully!");
                     session.setAttribute("messageType", "success");
                 } else {
@@ -119,13 +130,60 @@ public class AssignTasksServlet extends HttpServlet {
             } else if ("edit".equals(action)) {
                 // Edit task
                 int taskId = Integer.parseInt(request.getParameter("taskId"));
-                int staffId = Integer.parseInt(request.getParameter("auditorId")); // Vẫn dùng tên param cũ
+                int staffId = Integer.parseInt(request.getParameter("auditorId"));
                 String taskType = request.getParameter("taskType");
                 Date deadline = Date.valueOf(request.getParameter("deadline"));
+                
+                // Lấy thông tin task cũ
+                Task oldTask = dao.getTaskById(taskId);
                 
                 boolean success = dao.updateTask(taskId, staffId, taskType, deadline);
                 
                 if (success) {
+                    // ✅ GỬI THÔNG BÁO khi update task
+                    if (oldTask != null) {
+                        // Nếu đổi người assign
+                        if (oldTask.getStaffId() != staffId) {
+                            // Thông báo cho người CŨ
+                            String oldStaffMsg = String.format(
+                                "Task #%d has been reassigned to another staff member by Manager %s.",
+                                taskId, managerUsername
+                            );
+                            notifDAO.sendNotificationToUser(
+                                userId, oldTask.getStaffId(),
+                                "⚠️ Task Reassigned", oldStaffMsg,
+                                "info", "normal",
+                                request.getContextPath() + "/tasks/assign"
+                            );
+                            
+                            // Thông báo cho người MỚI
+                            String newStaffMsg = String.format(
+                                "You have been assigned to Task #%d for PO #%d (%s). Deadline: %s",
+                                taskId, oldTask.getPoId(), taskType, deadline.toString()
+                            );
+                            notifDAO.sendNotificationToUser(
+                                userId, staffId,
+                                "✅ New Task Assigned", newStaffMsg,
+                                "success", "high",
+                                request.getContextPath() + "/tasks/assign"
+                            );
+                        } else {
+                            // Chỉ update thông tin task
+                            String updateMsg = String.format(
+                                "Your task #%d has been updated by Manager %s. New deadline: %s",
+                                taskId, managerUsername, deadline.toString()
+                            );
+                            notifDAO.sendNotificationToUser(
+                                userId, staffId,
+                                "📝 Task Updated", updateMsg,
+                                "info", "normal",
+                                request.getContextPath() + "/tasks/assign"
+                            );
+                        }
+                        
+                        System.out.println("✓ Sent update notification(s)");
+                    }
+                    
                     session.setAttribute("message", "Task updated successfully!");
                     session.setAttribute("messageType", "success");
                 } else {
@@ -134,7 +192,7 @@ public class AssignTasksServlet extends HttpServlet {
                 }
                 
             } else {
-                // Assign new task
+                // ✅ ASSIGN NEW TASK - GỬI THÔNG BÁO
                 int poId = Integer.parseInt(request.getParameter("poId"));
                 int staffId = Integer.parseInt(request.getParameter("auditorId"));
                 String taskType = request.getParameter("taskType");
@@ -143,6 +201,41 @@ public class AssignTasksServlet extends HttpServlet {
                 boolean success = dao.assignTask(poId, staffId, taskType, deadline);
                 
                 if (success) {
+                    // ✅ GỬI THÔNG BÁO đến staff được assign
+                    PurchaseOrder po = dao.getPurchaseOrderById(poId);
+                    
+                    String taskTypeDisplay = getTaskTypeDisplay(taskType);
+                    
+                    String notifTitle = "✅ New Task Assigned";
+                    String notifMessage = String.format(
+                        "You have been assigned a new task by Manager %s.\n" +
+                        "Task Type: %s\n" +
+                        "Purchase Order: #%d%s\n" +
+                        "Deadline: %s\n\n" +
+                        "Please check the task details and complete it before the deadline.",
+                        managerUsername,
+                        taskTypeDisplay,
+                        poId,
+                        (po != null && po.getSupplierName() != null ? " - " + po.getSupplierName() : ""),
+                        deadline.toString()
+                    );
+                    
+                    boolean notifSent = notifDAO.sendNotificationToUser(
+                        userId,                              // sender (Manager)
+                        staffId,                            // receiver (Staff)
+                        notifTitle,
+                        notifMessage,
+                        "success",                          // type
+                        "high",                             // priority
+                        request.getContextPath() + "/tasks/assign" // link URL
+                    );
+                    
+                    if (notifSent) {
+                        System.out.println("✓ Notification sent to staff #" + staffId + " for new task assignment");
+                    } else {
+                        System.err.println("✗ Failed to send notification to staff #" + staffId);
+                    }
+                    
                     session.setAttribute("message", "Task assigned successfully!");
                     session.setAttribute("messageType", "success");
                 } else {
@@ -157,5 +250,25 @@ public class AssignTasksServlet extends HttpServlet {
         }
         
         response.sendRedirect(request.getContextPath() + "/tasks/assign");
+    }
+    
+    /**
+     * Helper method để format task type display
+     */
+    private String getTaskTypeDisplay(String taskType) {
+        switch (taskType) {
+            case "stock_in":
+                return "📦 Stock In Verification";
+            case "stock_out":
+                return "📤 Stock Out Verification";
+            case "counting":
+                return "🔢 Inventory Counting";
+            case "quality_check":
+                return "✅ Quality Check";
+            case "expiry_audit":
+                return "⏰ Expiry Date Audit";
+            default:
+                return taskType;
+        }
     }
 }

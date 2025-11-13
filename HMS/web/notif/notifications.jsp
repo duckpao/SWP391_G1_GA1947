@@ -27,20 +27,19 @@
             --danger: #dc2626;
             --info: #0284c7;
         }
-
         body {
             background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             min-height: 100vh;
             color: var(--gray-800);
         }
-        
+       
         .notification-container {
             max-width: 1100px;
             margin: 0 auto;
             padding: 20px;
         }
-        
+       
         /* Header Card */
         .notification-header {
             background: white;
@@ -51,7 +50,6 @@
             border: 1px solid var(--gray-200);
             animation: slideDown 0.4s ease-out;
         }
-
         @keyframes slideDown {
             from {
                 opacity: 0;
@@ -62,7 +60,6 @@
                 transform: translateY(0);
             }
         }
-
         .page-title {
             display: flex;
             align-items: center;
@@ -73,12 +70,10 @@
             color: var(--primary-blue);
             letter-spacing: -0.02em;
         }
-
         .page-title i {
             color: var(--primary-light);
             font-size: 1.6rem;
         }
-
         /* Buttons - Medical Gray Theme */
         .btn-medical {
             background: white;
@@ -92,7 +87,6 @@
             align-items: center;
             gap: 8px;
         }
-
         .btn-medical:hover {
             background: var(--gray-50);
             border-color: var(--gray-400);
@@ -100,27 +94,22 @@
             transform: translateY(-1px);
             box-shadow: 0 2px 4px rgba(0,0,0,0.08);
         }
-
         .btn-medical:active {
             transform: translateY(0);
         }
-
         .btn-medical i {
             font-size: 0.95rem;
         }
-
         .btn-primary-medical {
             background: var(--primary-blue);
             color: white;
             border: 1.5px solid var(--primary-blue);
         }
-
         .btn-primary-medical:hover {
             background: var(--primary-light);
             border-color: var(--primary-light);
             color: white;
         }
-
         /* Notification Item */
         .notification-item {
             background: white;
@@ -134,7 +123,6 @@
             overflow: visible;
             animation: fadeInUp 0.4s ease-out backwards;
         }
-
         .notification-item::before {
             content: '';
             position: absolute;
@@ -148,11 +136,9 @@
             pointer-events: none;
             z-index: 0;
         }
-
         .notification-item:hover::before {
             opacity: 1;
         }
-
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -163,33 +149,32 @@
                 transform: translateY(0);
             }
         }
-
         .notification-item:nth-child(1) { animation-delay: 0.05s; }
         .notification-item:nth-child(2) { animation-delay: 0.1s; }
         .notification-item:nth-child(3) { animation-delay: 0.15s; }
         .notification-item:nth-child(4) { animation-delay: 0.2s; }
         .notification-item:nth-child(5) { animation-delay: 0.25s; }
-        
+       
         .notification-item:hover {
             box-shadow: 0 4px 12px rgba(44, 95, 141, 0.08);
             transform: translateX(4px);
             border-left-width: 5px;
         }
-        
+       
         .notification-item.unread {
             background: linear-gradient(to right, #f0f7ff 0%, #ffffff 100%);
             border-left-color: var(--primary-blue);
             box-shadow: 0 2px 8px rgba(44, 95, 141, 0.06);
         }
-        
+       
         .notification-item.priority-urgent {
             border-left-color: var(--danger);
         }
-        
+       
         .notification-item.priority-high {
             border-left-color: var(--warning);
         }
-        
+       
         /* Icon Styles */
         .notification-icon {
             width: 52px;
@@ -202,36 +187,35 @@
             flex-shrink: 0;
             transition: transform 0.3s ease;
         }
-
         .notification-item:hover .notification-icon {
             transform: scale(1.05);
         }
-        
-        .type-info { 
+       
+        .type-info {
             background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%);
             color: var(--info);
         }
-        
-        .type-warning { 
+       
+        .type-warning {
             background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
             color: var(--warning);
         }
-        
-        .type-success { 
+       
+        .type-success {
             background: linear-gradient(135deg, #d1fae5 0%, #bbf7d0 100%);
             color: var(--success);
         }
-        
-        .type-error { 
+       
+        .type-error {
             background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
             color: var(--danger);
         }
-        
-        .type-alert { 
+       
+        .type-alert {
             background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
             color: var(--gray-600);
         }
-        
+       
         /* Badge Styles */
         .badge-unread {
             background: var(--primary-blue);
@@ -242,7 +226,6 @@
             font-weight: 600;
             letter-spacing: 0.02em;
         }
-
         .badge-priority {
             font-size: 0.7rem;
             padding: 4px 10px;
@@ -250,19 +233,16 @@
             font-weight: 600;
             border: 1px solid;
         }
-
         .badge-urgent {
             background: #fee2e2;
             color: var(--danger);
             border-color: #fecaca;
         }
-
         .badge-high {
             background: #fef3c7;
             color: var(--warning);
             border-color: #fde68a;
         }
-
         .unread-count-badge {
             background: var(--danger);
             color: white;
@@ -272,12 +252,11 @@
             font-weight: 600;
             animation: pulse 2s infinite;
         }
-
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.85; }
         }
-        
+       
         /* Action Buttons */
         .notification-actions {
             opacity: 1;
@@ -287,11 +266,10 @@
             position: relative;
             z-index: 10;
         }
-        
+       
         .notification-item:hover .notification-actions {
             opacity: 1;
         }
-
         .action-btn {
             padding: 6px 12px;
             border-radius: 6px;
@@ -304,35 +282,30 @@
             position: relative;
             z-index: 10;
         }
-
         .action-btn:hover {
             background: var(--gray-50);
             border-color: var(--gray-400);
             transform: translateY(-1px);
         }
-
         .action-btn.btn-check {
             color: var(--success);
             border-color: #bbf7d0;
             pointer-events: auto !important;
         }
-
         .action-btn.btn-check:hover {
             background: #f0fdf4;
             border-color: var(--success);
         }
-
         .action-btn.btn-delete {
             color: var(--danger);
             border-color: #fecaca;
             pointer-events: auto !important;
         }
-
         .action-btn.btn-delete:hover {
             background: #fef2f2;
             border-color: var(--danger);
         }
-        
+       
         /* Empty State */
         .empty-state {
             text-align: center;
@@ -342,34 +315,29 @@
             border: 2px dashed var(--gray-300);
             animation: fadeIn 0.6s ease-out;
         }
-
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
-        
+       
         .empty-state i {
             font-size: 72px;
             color: var(--gray-300);
             margin-bottom: 20px;
             animation: float 3s ease-in-out infinite;
         }
-
         @keyframes float {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-10px); }
         }
-
         .empty-state h4 {
             color: var(--gray-700);
             font-weight: 600;
             margin-bottom: 8px;
         }
-
         .empty-state p {
             color: var(--gray-500);
         }
-
         /* WebSocket Status */
         .ws-indicator {
             display: inline-flex;
@@ -383,40 +351,33 @@
             color: var(--gray-600);
             font-weight: 500;
         }
-
         .ws-indicator .dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
             background: var(--gray-400);
         }
-
         .ws-indicator.connected {
             background: #f0fdf4;
             border-color: #bbf7d0;
             color: var(--success);
         }
-
         .ws-indicator.connected .dot {
             background: var(--success);
             animation: pulse-dot 2s infinite;
         }
-
         @keyframes pulse-dot {
             0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.4); }
             50% { opacity: 0.8; box-shadow: 0 0 0 4px rgba(5, 150, 105, 0); }
         }
-
         .ws-indicator.connecting .dot {
             background: var(--warning);
             animation: blink 1s infinite;
         }
-
         @keyframes blink {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.3; }
         }
-
         /* Notification Content */
         .notification-title {
             font-size: 1.05rem;
@@ -425,27 +386,22 @@
             margin-bottom: 8px;
             line-height: 1.4;
         }
-
         .notification-message {
             color: var(--gray-600);
             line-height: 1.6;
             margin-bottom: 12px;
         }
-
         .notification-meta {
             font-size: 0.85rem;
             color: var(--gray-500);
         }
-
         .notification-meta strong {
             color: var(--gray-700);
             font-weight: 600;
         }
-
         .notification-meta i {
             color: var(--gray-400);
         }
-
         /* Link Button */
         .link-btn {
             padding: 6px 14px;
@@ -461,14 +417,12 @@
             align-items: center;
             gap: 6px;
         }
-
         .link-btn:hover {
             background: var(--primary-blue);
             color: white;
             transform: translateY(-1px);
             box-shadow: 0 2px 8px rgba(44, 95, 141, 0.2);
         }
-
         /* Toast Notification */
         .toast-medical {
             position: fixed;
@@ -486,7 +440,6 @@
             gap: 12px;
             animation: slideInRight 0.3s ease-out;
         }
-
         @keyframes slideInRight {
             from {
                 transform: translateX(400px);
@@ -497,48 +450,38 @@
                 opacity: 1;
             }
         }
-
         .toast-medical.toast-success { border-left-color: var(--success); }
         .toast-medical.toast-danger { border-left-color: var(--danger); }
         .toast-medical.toast-warning { border-left-color: var(--warning); }
-
         .toast-medical i {
             font-size: 1.2rem;
         }
-
         .toast-medical.toast-success i { color: var(--success); }
         .toast-medical.toast-danger i { color: var(--danger); }
         .toast-medical.toast-warning i { color: var(--warning); }
-
         /* Responsive */
         @media (max-width: 768px) {
             .notification-header {
                 padding: 20px;
             }
-
             .page-title {
                 font-size: 1.4rem;
             }
-
             .notification-item {
                 padding: 16px;
             }
-
             .notification-icon {
                 width: 44px;
                 height: 44px;
             }
-
             .btn-medical {
                 padding: 8px 14px;
                 font-size: 0.9rem;
             }
-
             .notification-actions {
                 opacity: 1;
             }
         }
-
         /* Loading Animation */
         .loading-spinner {
             display: inline-block;
@@ -549,14 +492,12 @@
             border-top-color: var(--primary-blue);
             animation: spin 0.6s linear infinite;
         }
-
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
     </style>
 </head>
 <%@ include file="/admin/header.jsp" %>
-
 <body>
     <div class="container mt-4 notification-container">
         <div class="notification-header">
@@ -571,7 +512,7 @@
             </div>
             <div class="d-flex justify-content-end gap-2 flex-wrap">
                 <c:if test="${unreadCount > 0}">
-                    <button class="btn-medical btn-primary-medical" onclick="markAllAsRead()">
+                    <button class="btn-medical btn-primary-medical" id="markAllBtn">
                         <i class="fas fa-check-double"></i>
                         <span>Đánh dấu tất cả đã đọc</span>
                     </button>
@@ -681,14 +622,14 @@
                                         <div class="notification-actions">
                                             <c:if test="${!notif.read}">
                                                 <button class="action-btn btn-check" 
-                                                        onclick="markAsRead(${notif.notificationId})"
+                                                        data-notif-id="${notif.notificationId}"
                                                         title="Đánh dấu đã đọc"
                                                         type="button">
                                                     <i class="fas fa-check"></i>
                                                 </button>
                                             </c:if>
                                             <button class="action-btn btn-delete" 
-                                                    onclick="deleteNotification(${notif.notificationId})"
+                                                    data-notif-id="${notif.notificationId}"
                                                     title="Xóa thông báo"
                                                     type="button">
                                                 <i class="fas fa-trash-alt"></i>
@@ -706,12 +647,6 @@
                                             <fmt:formatDate value="${notif.createdAt}" 
                                                           pattern="dd/MM/yyyy HH:mm"/>
                                         </small>
-                                        <c:if test="${not empty notif.linkUrl}">
-                                            <a href="${notif.linkUrl}" class="link-btn">
-                                                <i class="fas fa-external-link-alt"></i>
-                                                <span>Xem chi tiết</span>
-                                            </a>
-                                        </c:if>
                                     </div>
                                 </div>
                             </div>
@@ -724,39 +659,75 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const contextPath = '${pageContext.request.contextPath}';
+        // Context path - check if already declared
+        if (typeof contextPath === 'undefined') {
+            var contextPath = '${pageContext.request.contextPath}';
+        }
+        var notificationContextPath = '${pageContext.request.contextPath}';
 
-        console.log('Page loaded - Total notifications:', ${notifications.size()});
+        console.log('=== NOTIFICATION PAGE LOADED ===');
+        console.log('Context Path:', notificationContextPath);
+        console.log('Total notifications:', ${notifications.size()});
         console.log('Unread count:', ${unreadCount});
 
-        // Đánh dấu một thông báo đã đọc
-        function markAsRead(notificationId) {
-            console.log('markAsRead called with ID:', notificationId);
+        // Toast notification function
+        function showToast(message, type) {
+            if (!type) type = 'success';
             
-            const item = document.querySelector(`[data-id="${notificationId}"]`);
+            var toast = document.createElement('div');
+            toast.className = 'toast-medical toast-' + type;
+            
+            var icons = {
+                'success': 'fa-check-circle',
+                'danger': 'fa-times-circle',
+                'warning': 'fa-exclamation-triangle',
+                'info': 'fa-info-circle'
+            };
+            
+            toast.innerHTML = '<i class="fas ' + (icons[type] || icons.info) + '"></i>' +
+                '<span style="color: var(--gray-800); font-weight: 500;">' + message + '</span>';
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(function() {
+                toast.style.transition = 'all 0.3s ease-out';
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(400px)';
+                setTimeout(function() { toast.remove(); }, 300);
+            }, 2500);
+        }
+
+        // Mark as read function
+        function markAsRead(notificationId) {
+            console.log('=== MARK AS READ ===');
+            console.log('Notification ID:', notificationId);
+            
+            var item = document.querySelector('[data-id="' + notificationId + '"]');
             if (item) {
                 item.style.opacity = '0.6';
                 item.style.pointerEvents = 'none';
             }
             
-            fetch(contextPath + '/notifications?action=markAsRead&id=' + notificationId, {
+            fetch(notificationContextPath + '/notifications?action=markAsRead&id=' + notificationId, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 }
             })
-            .then(response => {
+            .then(function(response) {
                 console.log('Response status:', response.status);
                 if (!response.ok) {
                     throw new Error('Network response was not ok: ' + response.status);
                 }
                 return response.json();
             })
-            .then(data => {
+            .then(function(data) {
                 console.log('Server response:', data);
                 if (data.success) {
                     showToast('Đã đánh dấu đã đọc', 'success');
-                    setTimeout(() => window.location.reload(), 600);
+                    setTimeout(function() { 
+                        window.location.reload(); 
+                    }, 600);
                 } else {
                     if (item) {
                         item.style.opacity = '1';
@@ -765,8 +736,8 @@
                     showToast('Không thể đánh dấu: ' + (data.message || 'Lỗi không xác định'), 'danger');
                 }
             })
-            .catch(error => {
-                console.error('Error marking as read:', error);
+            .catch(function(error) {
+                console.error('Error:', error);
                 if (item) {
                     item.style.opacity = '1';
                     item.style.pointerEvents = 'auto';
@@ -775,38 +746,40 @@
             });
         }
 
-        // Đánh dấu tất cả đã đọc
+        // Mark all as read function
         function markAllAsRead() {
             if (!confirm('Đánh dấu tất cả thông báo là đã đọc?')) {
                 return;
             }
             
-            console.log('markAllAsRead called');
+            console.log('=== MARK ALL AS READ ===');
             
-            const btn = event.target.closest('.btn-medical');
+            var btn = document.getElementById('markAllBtn');
             if (btn) {
                 btn.disabled = true;
                 btn.innerHTML = '<span class="loading-spinner me-2"></span><span>Đang xử lý...</span>';
             }
             
-            fetch(contextPath + '/notifications?action=markAllAsRead', {
+            fetch(notificationContextPath + '/notifications?action=markAllAsRead', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 }
             })
-            .then(response => {
+            .then(function(response) {
                 console.log('Response status:', response.status);
                 if (!response.ok) {
                     throw new Error('Network response was not ok: ' + response.status);
                 }
                 return response.json();
             })
-            .then(data => {
+            .then(function(data) {
                 console.log('Server response:', data);
                 if (data.success) {
                     showToast('Đã đánh dấu tất cả', 'success');
-                    setTimeout(() => window.location.reload(), 600);
+                    setTimeout(function() { 
+                        window.location.reload(); 
+                    }, 600);
                 } else {
                     if (btn) {
                         btn.disabled = false;
@@ -815,8 +788,8 @@
                     showToast('Không thể đánh dấu: ' + (data.message || 'Lỗi không xác định'), 'danger');
                 }
             })
-            .catch(error => {
-                console.error('Error marking all as read:', error);
+            .catch(function(error) {
+                console.error('Error:', error);
                 if (btn) {
                     btn.disabled = false;
                     btn.innerHTML = '<i class="fas fa-check-double"></i><span>Đánh dấu tất cả đã đọc</span>';
@@ -825,7 +798,7 @@
             });
         }
 
-        // Xóa thông báo
+        // Delete notification function
         function deleteNotification(notificationId) {
             if (!confirm('Bạn có chắc muốn xóa thông báo này?')) {
                 return;
@@ -834,32 +807,30 @@
             console.log('=== DELETE NOTIFICATION ===');
             console.log('Notification ID:', notificationId);
             
-            const item = document.querySelector(`[data-id="${notificationId}"]`);
+            var item = document.querySelector('[data-id="' + notificationId + '"]');
             if (item) {
                 item.style.opacity = '0.5';
                 item.style.pointerEvents = 'none';
             }
             
-            fetch(contextPath + '/notifications?action=delete&id=' + notificationId, {
+            fetch(notificationContextPath + '/notifications?action=delete&id=' + notificationId, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 }
             })
-            .then(response => {
+            .then(function(response) {
                 console.log('Response status:', response.status);
-                console.log('Response ok:', response.ok);
                 if (!response.ok) {
                     throw new Error('Network response was not ok: ' + response.status);
                 }
                 return response.json();
             })
-            .then(data => {
+            .then(function(data) {
                 console.log('Server response:', data);
                 if (data.success) {
-                    console.log('✓ Delete successful, reloading page...');
+                    console.log('✓ Delete successful');
                     
-                    // Smooth fade out animation
                     if (item) {
                         item.style.transition = 'all 0.4s ease-out';
                         item.style.opacity = '0';
@@ -867,8 +838,7 @@
                     }
                     
                     showToast('Đã xóa thông báo', 'success');
-                    setTimeout(() => {
-                        console.log('Executing reload...');
+                    setTimeout(function() {
                         window.location.reload();
                     }, 600);
                 } else {
@@ -880,8 +850,8 @@
                     showToast('Không thể xóa: ' + (data.message || 'Lỗi không xác định'), 'danger');
                 }
             })
-            .catch(error => {
-                console.error('Error deleting notification:', error);
+            .catch(function(error) {
+                console.error('Error:', error);
                 if (item) {
                     item.style.opacity = '1';
                     item.style.pointerEvents = 'auto';
@@ -890,198 +860,43 @@
             });
         }
 
-        // Cập nhật số lượng thông báo chưa đọc
-        function updateUnreadCount() {
-            fetch(contextPath + '/notifications?action=getUnreadCount')
-                .then(response => {
-                    if (!response.ok) throw new Error('Network response was not ok');
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Unread count updated:', data.unreadCount);
-                    const badge = document.getElementById('unreadBadge');
-                    if (data.unreadCount > 0) {
-                        if (badge) {
-                            badge.textContent = data.unreadCount;
-                        } else {
-                            const title = document.querySelector('.page-title');
-                            const newBadge = document.createElement('span');
-                            newBadge.id = 'unreadBadge';
-                            newBadge.className = 'unread-count-badge';
-                            newBadge.textContent = data.unreadCount;
-                            title.appendChild(newBadge);
-                        }
-                    } else {
-                        if (badge) badge.remove();
-                    }
-                })
-                .catch(error => console.error('Error updating unread count:', error));
-        }
-
-        // Medical-themed Toast notification
-        function showToast(message, type = 'success') {
-            const toast = document.createElement('div');
-            toast.className = `toast-medical toast-${type}`;
+        // Initialize event listeners when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('=== INITIALIZING EVENT LISTENERS ===');
             
-            const icons = {
-                'success': 'fa-check-circle',
-                'danger': 'fa-times-circle',
-                'warning': 'fa-exclamation-triangle',
-                'info': 'fa-info-circle'
-            };
-            
-            toast.innerHTML = `
-                <i class="fas ${icons[type] || icons.info}"></i>
-                <span style="color: var(--gray-800); font-weight: 500;">${message}</span>
-            `;
-            
-            document.body.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.style.transition = 'all 0.3s ease-out';
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateX(400px)';
-                setTimeout(() => toast.remove(), 300);
-            }, 2500);
-        }
-
-        // ============== WEBSOCKET FOR REAL-TIME UPDATES ==============
-        let notificationPageWs = null;
-        let reconnectAttempts = 0;
-        const maxReconnectAttempts = 5;
-
-        function updateWsIndicator(status) {
-            const indicator = document.getElementById('wsIndicator');
-            if (!indicator) return;
-
-            const statusTexts = {
-                'connected': 'Kết nối realtime',
-                'connecting': 'Đang kết nối...',
-                'disconnected': 'Mất kết nối'
-            };
-
-            indicator.className = 'ws-indicator ' + status;
-            indicator.querySelector('.text').textContent = statusTexts[status] || 'Không xác định';
-        }
-
-        function initPageWebSocket() {
-            <c:if test="${sessionScope.user == null}">
-                console.log('No user logged in, skipping WebSocket');
-                return;
-            </c:if>
-
-            const userId = ${sessionScope.user.userId};
-            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsUrl = protocol + '//' + window.location.host + contextPath + '/notifications';
-            
-            console.log('Connecting page WebSocket:', wsUrl);
-            updateWsIndicator('connecting');
-            
-            try {
-                notificationPageWs = new WebSocket(wsUrl);
-                
-                notificationPageWs.onopen = function() {
-                    console.log('✓ Page WebSocket connected');
-                    reconnectAttempts = 0;
-                    updateWsIndicator('connected');
-                    
-                    // Register user
-                    notificationPageWs.send(JSON.stringify({
-                        action: 'register',
-                        userId: userId
-                    }));
-                };
-                
-                notificationPageWs.onmessage = function(event) {
-                    try {
-                        const data = JSON.parse(event.data);
-                        console.log('Page WebSocket message:', data);
-                        
-                        switch(data.type) {
-                            case 'registered':
-                                console.log('✓ Registered for notifications');
-                                break;
-
-                            case 'newNotification':
-                                // Show toast and reload to display new notification
-                                showToast('Bạn có thông báo mới!', 'info');
-                                setTimeout(() => window.location.reload(), 1500);
-                                break;
-                                
-                            case 'unreadCount':
-                                // Update badge in real-time
-                                const badge = document.getElementById('unreadBadge');
-                                if (data.count > 0) {
-                                    if (badge) {
-                                        badge.textContent = data.count;
-                                    } else {
-                                        const title = document.querySelector('.page-title');
-                                        const newBadge = document.createElement('span');
-                                        newBadge.id = 'unreadBadge';
-                                        newBadge.className = 'unread-count-badge';
-                                        newBadge.textContent = data.count;
-                                        title.appendChild(newBadge);
-                                    }
-                                } else {
-                                    if (badge) badge.remove();
-                                }
-                                break;
-
-                            case 'error':
-                                console.error('WebSocket error:', data.message);
-                                break;
-                        }
-                    } catch (e) {
-                        console.error('Error parsing WebSocket message:', e);
-                    }
-                };
-                
-                notificationPageWs.onerror = function(error) {
-                    console.error('❌ Page WebSocket error:', error);
-                    updateWsIndicator('disconnected');
-                };
-                
-                notificationPageWs.onclose = function() {
-                    console.log('Page WebSocket closed');
-                    updateWsIndicator('disconnected');
-                    
-                    // Try to reconnect
-                    if (reconnectAttempts < maxReconnectAttempts) {
-                        reconnectAttempts++;
-                        const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000);
-                        console.log(`Reconnecting in ${delay}ms (attempt ${reconnectAttempts}/${maxReconnectAttempts})`);
-                        setTimeout(initPageWebSocket, delay);
-                    } else {
-                        console.log('Max reconnect attempts reached');
-                    }
-                };
-                
-            } catch (e) {
-                console.error('Failed to create WebSocket:', e);
-                updateWsIndicator('disconnected');
+            // Mark all button
+            var markAllBtn = document.getElementById('markAllBtn');
+            if (markAllBtn) {
+                console.log('✓ Mark All button found');
+                markAllBtn.addEventListener('click', markAllAsRead);
             }
-        }
-
-        // Cleanup on page unload
-        window.addEventListener('beforeunload', function() {
-            if (notificationPageWs && notificationPageWs.readyState === WebSocket.OPEN) {
-                notificationPageWs.close();
-            }
+            
+            // Mark as read buttons
+            var checkButtons = document.querySelectorAll('.btn-check');
+            console.log('✓ Check buttons found:', checkButtons.length);
+            checkButtons.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var notifId = this.getAttribute('data-notif-id');
+                    console.log('Check button clicked for ID:', notifId);
+                    markAsRead(notifId);
+                });
+            });
+            
+            // Delete buttons
+            var deleteButtons = document.querySelectorAll('.btn-delete');
+            console.log('✓ Delete buttons found:', deleteButtons.length);
+            deleteButtons.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var notifId = this.getAttribute('data-notif-id');
+                    console.log('Delete button clicked for ID:', notifId);
+                    deleteNotification(notifId);
+                });
+            });
+            
+            console.log('=== EVENT LISTENERS INITIALIZED ===');
         });
 
-        // Initialize WebSocket when page loads
-        <c:if test="${sessionScope.user != null}">
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initPageWebSocket);
-        } else {
-            initPageWebSocket();
-        }
-        </c:if>
-
-        // ============== DEBUG CODE ==============
-        console.log('=== DEBUG NOTIFICATION PAGE ===');
-        console.log('Total notifications:', ${notifications.size()});
-        
+        // Debug: Log all notifications
         <c:forEach var="notif" items="${notifications}" varStatus="status">
         console.log('Notification ${status.index + 1}:', {
             id: ${notif.notificationId},
@@ -1091,61 +906,6 @@
             type: '${notif.notificationType}'
         });
         </c:forEach>
-
-        // Check if buttons exist
-        document.addEventListener('DOMContentLoaded', function() {
-            const checkButtons = document.querySelectorAll('.action-btn.btn-check');
-            const deleteButtons = document.querySelectorAll('.action-btn.btn-delete');
-            
-            console.log('Check buttons found:', checkButtons.length);
-            console.log('Delete buttons found:', deleteButtons.length);
-            
-            deleteButtons.forEach((btn, index) => {
-                console.log(`Delete button ${index + 1}:`, {
-                    exists: !!btn,
-                    onclick: btn.getAttribute('onclick'),
-                    disabled: btn.disabled,
-                    visible: window.getComputedStyle(btn).display !== 'none',
-                    pointerEvents: window.getComputedStyle(btn).pointerEvents,
-                    zIndex: window.getComputedStyle(btn).zIndex
-                });
-                
-                // Add manual click listener for testing
-                btn.addEventListener('click', function(e) {
-                    console.log('BUTTON CLICKED!', e);
-                }, true);
-            });
-
-            checkButtons.forEach((btn, index) => {
-                console.log(`Check button ${index + 1}:`, {
-                    exists: !!btn,
-                    onclick: btn.getAttribute('onclick'),
-                    disabled: btn.disabled,
-                    visible: window.getComputedStyle(btn).display !== 'none',
-                    pointerEvents: window.getComputedStyle(btn).pointerEvents,
-                    zIndex: window.getComputedStyle(btn).zIndex
-                });
-                
-                // Add manual click listener for testing
-                btn.addEventListener('click', function(e) {
-                    console.log('CHECK BUTTON CLICKED!', e);
-                }, true);
-            });
-
-            // Test if onclick works
-            if (deleteButtons.length > 0) {
-                console.log('Testing first delete button click handler...');
-                const firstBtn = deleteButtons[0];
-                const onclickAttr = firstBtn.getAttribute('onclick');
-                console.log('onclick attribute:', onclickAttr);
-                
-                // Check what's blocking the button
-                const rect = firstBtn.getBoundingClientRect();
-                const elementAtPoint = document.elementFromPoint(rect.left + rect.width/2, rect.top + rect.height/2);
-                console.log('Element at button center:', elementAtPoint);
-                console.log('Is button?', elementAtPoint === firstBtn || firstBtn.contains(elementAtPoint));
-            }
-        });
     </script>
 </body>
 <%@ include file="/admin/footer.jsp" %>

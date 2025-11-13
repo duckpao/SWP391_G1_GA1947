@@ -2,16 +2,19 @@ package Controller;
 
 import DAO.ASNDAO;
 import DAO.SupplierDAO;
+import DAO.NotificationDAO;
+import DAO.UserDAO;
 import model.AdvancedShippingNotice;
 import model.Supplier;
+import model.User;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.List;
 
 public class UpdateASNStatusServlet extends HttpServlet {
     
@@ -74,6 +77,9 @@ public class UpdateASNStatusServlet extends HttpServlet {
             boolean updated = asnDAO.updateASNStatus(asnId, newStatus);
             
             if (updated) {
+                // Send notifications to managers based on status
+                sendStatusNotificationToManagers(userId, supplier, asn, newStatus);
+                
                 String message = "ASN #" + asnId + " status updated to " + newStatus + " successfully!";
                 response.sendRedirect("supplier-dashboard?success=" + URLEncoder.encode(message, "UTF-8"));
             } else {
@@ -88,6 +94,92 @@ public class UpdateASNStatusServlet extends HttpServlet {
             e.printStackTrace();
             response.sendRedirect("supplier-dashboard?error=" + 
                 URLEncoder.encode("Error: " + e.getMessage(), "UTF-8"));
+        }
+    }
+    
+    /**
+     * Send notification to all managers when ASN status changes
+     */
+    private void sendStatusNotificationToManagers(int senderId, Supplier supplier, 
+                                                  AdvancedShippingNotice asn, String newStatus) {
+        try {
+            NotificationDAO notificationDAO = new NotificationDAO();
+            UserDAO userDAO = new UserDAO();
+            
+            // Get all managers
+            List<User> managers = userDAO.getUsersByRole("Manager");
+            System.out.println("Found " + managers.size() + " managers to notify about ASN status change");
+            
+            String notificationTitle = "";
+            String notificationMessage = "";
+            String notificationType = "";
+            String priority = "normal";
+            String linkUrl = "/asn-details?asnId=" + asn.getAsnId();
+            
+            // Customize notification based on status
+            switch (newStatus) {
+                case "Sent":
+                    notificationTitle = "ASN #" + asn.getAsnId() + " - Shipment Ready";
+                    notificationMessage = "Supplier '" + supplier.getName() + "' has marked ASN #" + asn.getAsnId() + 
+                                        " (PO #" + asn.getPoId() + ") as SENT. The shipment is ready for pickup.";
+                    notificationType = "info";
+                    priority = "normal";
+                    break;
+                    
+                case "InTransit":
+                    notificationTitle = "ASN #" + asn.getAsnId() + " - In Transit";
+                    notificationMessage = "Shipment ASN #" + asn.getAsnId() + " (PO #" + asn.getPoId() + 
+                                        ") from '" + supplier.getName() + "' has been handed over to the carrier " +
+                                        "(" + asn.getCarrier() + "). Tracking: " + asn.getTrackingNumber();
+                    notificationType = "success";
+                    priority = "high";
+                    break;
+                    
+                case "Delivered":
+                    notificationTitle = "ASN #" + asn.getAsnId() + " - Delivered";
+                    notificationMessage = "Shipment ASN #" + asn.getAsnId() + " (PO #" + asn.getPoId() + 
+                                        ") has been marked as DELIVERED. Please verify and update receiving status.";
+                    notificationType = "success";
+                    priority = "high";
+                    break;
+                    
+                case "Cancelled":
+                    notificationTitle = "ASN #" + asn.getAsnId() + " - Cancelled";
+                    notificationMessage = "Supplier '" + supplier.getName() + "' has CANCELLED shipment ASN #" + 
+                                        asn.getAsnId() + " (PO #" + asn.getPoId() + ").";
+                    notificationType = "warning";
+                    priority = "urgent";
+                    break;
+                    
+                default:
+                    // For other statuses, send a generic notification
+                    notificationTitle = "ASN #" + asn.getAsnId() + " - Status Updated";
+                    notificationMessage = "ASN #" + asn.getAsnId() + " (PO #" + asn.getPoId() + 
+                                        ") status has been updated to " + newStatus + ".";
+                    notificationType = "info";
+                    priority = "normal";
+            }
+            
+            // Send notification to all managers
+            for (User manager : managers) {
+                boolean notifSent = notificationDAO.sendNotificationToUser(
+                    senderId,
+                    manager.getUserId(),
+                    notificationTitle,
+                    notificationMessage,
+                    notificationType,
+                    priority,
+                    linkUrl
+                );
+                
+                System.out.println("Notification sent to manager " + manager.getUsername() + 
+                                 " for ASN #" + asn.getAsnId() + " (" + newStatus + "): " + notifSent);
+            }
+            
+        } catch (Exception e) {
+            System.err.println("Error sending notifications to managers: " + e.getMessage());
+            e.printStackTrace();
+            // Don't throw exception - notification failure shouldn't stop the main operation
         }
     }
     

@@ -401,6 +401,9 @@
                     <a href="${pageContext.request.contextPath}/pharmacist/View_MedicineRequest">
                         <i class="bi bi-file-earmark-plus"></i> Yêu cầu thuốc
                     </a>
+                    <a href="${pageContext.request.contextPath}/pharmacist/view-order-details">
+                        <i class="bi bi-box-seam"></i> Đơn hàng đã giao
+                    </a>
                     <a href="${pageContext.request.contextPath}/pharmacist/manage-batch" class="active">
                         <i class="bi bi-box-seam"></i> Quản lý số lô/lô hàng
                     </a>
@@ -417,96 +420,101 @@
             <div class="main">
                 <h1>Quản lý số lô thuốc</h1>
 
-             <!-- Search + Filter Container -->
-<div class="search-container mb-4">
-    <form action="${pageContext.request.contextPath}/pharmacist/manage-batch" method="get" class="row g-3">
+                <!-- Search + Filter Container -->
+                <div class="search-container mb-4">
+                    <form action="${pageContext.request.contextPath}/pharmacist/manage-batch" method="get" class="row g-3">
 
-        <!-- Keyword / Lot Number -->
-        <div class="col-md-3">
-            <input type="text" name="lotNumber" value="${param.lotNumber}"
-                   placeholder="🔍 Số lô..." class="form-control">
-        </div>
+                        <!-- Keyword / Lot Number -->
+                        <div class="col-md-3">
+                            <input type="text" name="lotNumber" value="${param.lotNumber}"
+                                   placeholder="🔍 Số lô..." class="form-control">
+                        </div>
 
-<!-- Dropdown Filter Type (Tên thuốc / Nhà cung cấp) -->
-<div class="col-md-4 position-relative">
-    <div class="dropdown w-100">
-        <button id="filterDropdown" class="btn btn-outline-primary dropdown-toggle w-100"
-                type="button" data-bs-toggle="dropdown" aria-expanded="false">
-            <c:choose>
-                <c:when test="${not empty param.filterValue}">
-                    ${param.filterValue}
-                </c:when>
-                <c:otherwise>Chọn tiêu chí lọc</c:otherwise>
-            </c:choose>
-        </button>
+                        <!-- Dropdown Filter -->
+                        <div class="col-md-4 position-relative">
+                            <div class="dropdown w-100">
+                                <button id="filterDropdown" class="btn btn-outline-primary dropdown-toggle w-100"
+                                        type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <c:choose>
+                                        <c:when test="${not empty medicineLabel or not empty supplierLabel}">
+                                            <c:if test="${not empty medicineLabel}">${medicineLabel}</c:if>
+                                            <c:if test="${not empty medicineLabel and not empty supplierLabel}"> | </c:if>
+                                            <c:if test="${not empty supplierLabel}">${supplierLabel}</c:if>
+                                        </c:when>
+                                        <c:otherwise>Chọn tiêu chí lọc</c:otherwise>
+                                    </c:choose>
+                                </button>
 
-        <!-- Mega Dropdown -->
-        <ul class="dropdown-menu p-3" style="width: 100%; max-height: 400px; overflow: visible; position: static;">
-            <!-- Tên thuốc -->
-            <li class="dropdown-submenu position-relative">
-                <a href="#" class="dropdown-item fw-bold">Tên thuốc</a>
-                <ul class="dropdown-menu submenu shadow-sm bg-white"
-                    style="position: absolute; top: 0; left: 100%; min-width: 200px; max-height: 300px; overflow-y: auto;">
-                    <c:forEach var="m" items="${medicineList}">
-                        <li>
-                            <a href="#" class="dropdown-item filter-option"
-                               data-type="medicineCode" data-value="${m.medicineCode}">
-                                ${m.name}
-                            </a>
-                        </li>
-                    </c:forEach>
-                </ul>
-            </li>
 
-            <!-- Nhà cung cấp -->
-            <li class="dropdown-submenu position-relative mt-2">
-                <a href="#" class="dropdown-item fw-bold">Nhà cung cấp</a>
-                <ul class="dropdown-menu submenu shadow-sm bg-white"
-                    style="position: absolute; top: 0; left: 100%; min-width: 200px; max-height: 300px; overflow-y: auto;">
-                    <c:forEach var="s" items="${supplierList}">
-                        <li>
-                            <a href="#" class="dropdown-item filter-option"
-                               data-type="supplierId" data-value="${s.supplierId}">
-                                ${s.name}
-                            </a>
-                        </li>
-                    </c:forEach>
-                </ul>
-            </li>
-        </ul>
-    </div>
-</div>
+                                <!-- Dropdown menu -->
+                                <ul class="dropdown-menu p-3" style="width: 100%; max-height: 400px; overflow: visible;">
+                                    <!-- Tên thuốc -->
+                                    <li class="dropdown-submenu position-relative">
+                                        <a href="#" class="dropdown-item fw-bold">Tên thuốc</a>
+                                        <ul class="dropdown-menu submenu shadow-sm bg-white"
+                                            style="position: absolute; top: 0; left: 100%; min-width: 200px; max-height: 300px; overflow-y: auto;">
+                                            <c:forEach var="m" items="${medicineList}">
+                                                <li>
+                                                    <a href="#" class="dropdown-item filter-option"
+                                                       data-type="medicine" data-value="${m.medicineCode}" data-label="${m.name}">
+                                                        ${m.name}
+                                                    </a>
+                                                </li>
+                                            </c:forEach>
+                                        </ul>
+                                    </li>
 
-        <!-- Hidden Inputs for Filter -->
-        <input type="hidden" id="filterType" name="filterType" value="${param.filterType}">
-        <input type="hidden" id="filterValue" name="filterValue" value="${param.filterValue}">
+                                    <!-- Nhà cung cấp -->
+                                    <li class="dropdown-submenu position-relative mt-2">
+                                        <a href="#" class="dropdown-item fw-bold">Nhà cung cấp</a>
+                                        <ul class="dropdown-menu submenu shadow-sm bg-white"
+                                            style="position: absolute; top: 0; left: 100%; min-width: 200px; max-height: 300px; overflow-y: auto;">
+                                            <c:forEach var="s" items="${supplierList}">
+                                                <li>
+                                                    <a href="#" class="dropdown-item filter-option"
+                                                       data-type="supplier" data-value="${s.supplierId}" data-label="${s.name}">
+                                                        ${s.name}
+                                                    </a>
+                                                </li>
+                                            </c:forEach>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
 
-        <!-- Status -->
-        <div class="col-md-2">
-            <select name="status" class="form-select">
-                <option value="" ${param.status == '' ? 'selected' : ''}>Tất cả</option>
-                <option value="Received" ${param.status == 'Received' ? 'selected' : ''}>Received</option>
-                <option value="Quarantined" ${param.status == 'Quarantined' ? 'selected' : ''}>Quarantined</option>
-                <option value="Approved" ${param.status == 'Approved' ? 'selected' : ''}>Approved</option>
-            </select>
-        </div>
+                        <!-- Hidden Inputs -->
+                        <input type="hidden" id="selectedMedicine" name="medicineCode" value="${param.medicineCode}" data-label="${medicineLabel}">
+                        <input type="hidden" id="selectedSupplier" name="supplierId" value="${param.supplierId}" data-label="${supplierLabel}">
 
-        <!-- Buttons -->
-        <div class="col-md-3 d-flex gap-2">
-            <button type="submit" class="btn btn-success flex-fill">Tìm kiếm</button>
-            <a href="${pageContext.request.contextPath}/pharmacist/manage-batch" class="btn btn-secondary flex-fill">Reset</a>
-        </div>
-    </form>
-</div>
 
-                <c:if test="${sessionScope.role eq 'Pharmacist'}">
+                        <!-- Status -->
+                        <div class="col-md-2">
+                            <select name="status" class="form-select">
+                                <option value="" ${param.status == '' ? 'selected' : ''}>Tất cả</option>
+                                <option value="Received" ${param.status == 'Received' ? 'selected' : ''}>Received</option>
+                                <option value="Quarantined" ${param.status == 'Quarantined' ? 'selected' : ''}>Quarantined</option>
+                                <option value="Approved" ${param.status == 'Approved' ? 'selected' : ''}>Approved</option>
+                            </select>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="col-md-3 d-flex gap-2">
+                            <button type="submit" class="btn btn-success flex-fill">Tìm kiếm</button>
+                            <a href="${pageContext.request.contextPath}/pharmacist/manage-batch" class="btn btn-secondary flex-fill">Reset</a>
+                        </div>
+                    </form>
+                </div>
+
+
+                <%--<c:if test="${sessionScope.role eq 'Pharmacist'}">
                     <div class="d-flex justify-content-end mb-3">
                         <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addMedicineModal">
                             <i class="bi bi-plus-circle"></i> Add New Batch
                         </button>
                     </div>
                 </c:if>
-
+                --%>
                 <!-- Table -->
                 <c:choose>
                     <c:when test="${not empty batches}">
@@ -520,12 +528,10 @@
                                         <th>Nhà cung cấp</th>
                                         <th>Ngày nhập</th>
                                         <th>Hạn sử dụng</th>
-                                        <th>SL ban đầu</th>
-                                        <th>SL hiện tại</th>
-                                       <!-- <th>Giá nhập</th>  -->
+                                        <th>Tồn kho</th>
                                         <th>Trạng thái</th>
                                         <th>Chỉnh sửa</th>
-                                        <th>Xóa</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -537,9 +543,7 @@
                                             <td>${b.supplierName}</td>
                                             <td><fmt:formatDate value="${b.receivedDate}" pattern="dd/MM/yyyy"/></td>
                                             <td><fmt:formatDate value="${b.expiryDate}" pattern="yyyy-MM-dd"/></td>
-                                            <td>${b.initialQuantity}</td>
                                             <td>${b.currentQuantity}</td>
-                                            <%--<td><fmt:formatNumber value="${b.unitPrice}" type="currency" currencySymbol="₫"/></td>--%>
                                             <td>
                                                 <span class="status-badge
                                                       ${b.status == 'Available' ? 'status-available' :
@@ -555,21 +559,32 @@
                                                             data-lot="${b.lotNumber}"
                                                             data-medicine="${b.medicineName}"
                                                             data-supplier="${b.supplierName}"
-                                                            data-expiry="${b.expiryDate}"
-                                                            data-initial="${b.initialQuantity}"
+                                                            data-expiry="<fmt:formatDate value='${b.expiryDate}' pattern='yyyy-MM-dd'/>"
+                                                            data-received="<fmt:formatDate value='${b.receivedDate}' pattern='yyyy-MM-dd'/>"
                                                             data-current="${b.currentQuantity}"
-                                                            <%--data-price="${b.unitPrice}" --%>
-                                                            data-status="${b.status}">
+                                                            data-status="${b.status}"
+                                                            data-quarantinenotes="${b.quarantineNotes}">
                                                         <i class="bi bi-pencil-square"></i>
                                                     </button>
                                                 </td>
                                                 <td>
-                                                    <a href="${pageContext.request.contextPath}/pharmacist/Batch-Delete?id=${b.batchId}" 
-                                                       class="btn btn-danger btn-sm"
-                                                       onclick="return confirm('Bạn có chắc muốn xóa lô này không?')">
-                                                        <i class="bi bi-trash"></i>
-                                                    </a>
+                                                    <c:choose>
+                                                        <c:when test="${b.status eq 'Received' || b.status eq 'Quarantined'}">
+                                                            <button class="btn btn-info btn-sm"
+                                                                    data-bs-toggle="modal"
+                                                                    data-bs-target="#qcModal"
+                                                                    data-id="${b.batchId}">
+                                                                <i class="bi bi-clipboard-check"></i> Kiểm chứng
+                                                            </button>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <button class="btn btn-secondary btn-sm" disabled>
+                                                                <i class="bi bi-shield-check"></i> Đã kiểm chứng
+                                                            </button>
+                                                        </c:otherwise>
+                                                    </c:choose>
                                                 </td>
+
                                             </tr>
                                         </c:forEach>
                                     </tbody>
@@ -590,96 +605,15 @@
             </div>
 
 
-            <!-- Modal thêm mới -->
-            <div class="modal fade" id="addMedicineModal" tabindex="-1">
-                <div class="modal-dialog">
-                    <form action="${pageContext.request.contextPath}/pharmacist/Batch-Add" method="post" class="modal-content">
-                        <div class="modal-header bg-success text-white">
-                            <h5 class="modal-title"><i class="bi bi-plus-circle"></i> Thêm lô thuốc mới</h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                        </div>
-
-                        <div class="modal-body">
-                            <!-- Số lô tự động, ẩn -->
-                            <input type="hidden" name="lotNumber" value="${nextLotNumber}">
-
-                            <!-- Tên thuốc -->
-                            <div class="mb-3">
-                                <label>Tên thuốc</label>
-                                <select name="medicineCode" class="form-select" required>
-                                    <option value="">-- Chọn thuốc --</option>
-                                    <c:forEach var="m" items="${medicineList}">
-                                        <option value="${m.medicineCode}">${m.name}</option>
-                                    </c:forEach>
-                                </select>
-                            </div>
-
-                            <!-- Nhà cung cấp -->
-                            <div class="mb-3">
-                                <label>Nhà cung cấp</label>
-                                <select name="supplierId" class="form-select" required>
-                                    <option value="">-- Chọn nhà cung cấp --</option>
-                                    <c:forEach var="s" items="${supplierList}">
-                                        <option value="${s.supplierId}">${s.name}</option>
-                                    </c:forEach>
-                                </select>
-                            </div>
-
-                            <!-- Ngày nhập -->
-                            <div class="mb-3">
-                                <label>Ngày nhập</label>
-                                <input type="date" name="receivedDate" class="form-control" required>
-                            </div>
-
-                            <!-- Hạn sử dụng -->
-                            <div class="mb-3">
-                                <label>Hạn sử dụng</label>
-                                <input type="date" name="expiryDate" class="form-control" required>
-                            </div>
-
-                            <!-- Số lượng ban đầu -->
-                            <div class="mb-3">
-                                <label>Số lượng</label>
-                                <input type="number" name="initialQuantity" id="initialQuantity" class="form-control" required>
-                            </div>
-
-                            <!-- Số lượng hiện tại ẩn, tự = số lượng ban đầu -->
-                            <input type="hidden" name="currentQuantity" id="currentQuantity" value="0">
-
-                            <!-- Trạng thái -->
-                            <div class="mb-3">
-                                <label>Trạng thái</label>
-                                <select name="status" class="form-select" required>
-                                    <option value="Received">Received</option>
-                                    <option value="Quarantined">Quarantined</option>
-                                    <option value="Approved">Approved</option>
-                                </select>
-                            </div>
-
-                            <!-- Ghi chú cách ly -->
-                            <div class="mb-3">
-                                <label>Ghi chú cách ly</label>
-                                <textarea name="quarantineNotes" class="form-control" rows="2"></textarea>
-                            </div>
-                        </div>
-
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                            <button class="btn btn-success">
-                                <i class="bi bi-check-circle"></i> Thêm mới
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
             <!-- Modal chỉnh sửa -->
             <div class="modal fade" id="editBatchModal" tabindex="-1">
                 <div class="modal-dialog">
-                    <form action="${pageContext.request.contextPath}/pharmacist/Batch-Update" method="post" class="modal-content">
+                    <form action="${pageContext.request.contextPath}/pharmacist/Batch-Update" 
+                          method="post" class="modal-content">
+
                         <div class="modal-header">
                             <h5 class="modal-title"><i class="bi bi-pencil-square"></i> Cập nhật lô thuốc</h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
 
                         <div class="modal-body">
@@ -687,52 +621,96 @@
 
                             <div class="mb-3">
                                 <label>Số lô</label>
-                                <input type="text" id="edit-lot" name="lotNumber" class="form-control" readonly>
+                                <input type="text" id="edit-lot" class="form-control" readonly>
                             </div>
+
                             <div class="mb-3">
                                 <label>Tên thuốc</label>
-                                <input type="text" id="edit-medicine" name="medicineName" class="form-control" readonly>
+                                <input type="text" id="edit-medicine" class="form-control" readonly>
                             </div>
+
                             <div class="mb-3">
                                 <label>Nhà cung cấp</label>
-                                <input type="text" id="edit-supplier" name="supplierName" class="form-control" readonly>
+                                <input type="text" id="edit-supplier" class="form-control" readonly>
                             </div>
+
                             <div class="mb-3">
                                 <label>Hạn sử dụng</label>
                                 <input type="date" id="edit-expiry" name="expiryDate" class="form-control" required>
                             </div>
                             <div class="mb-3">
-                                <label>SL ban đầu</label>
-                                <input type="number" id="edit-initial" name="initialQuantity" class="form-control" readonly>
+                                <label>Ngày nhập</label>
+                                <input type="date" id="edit-received" class="form-control" readonly disabled>
+                                <input type="hidden" name="receivedDate" id="hidden-received">
                             </div>
+
+
                             <div class="mb-3">
-                                <label>SL hiện tại</label>
+                                <label>Tồn kho</label>
                                 <input type="number" id="edit-current" name="currentQuantity" class="form-control" required>
                             </div>
-                            
-                            <%--
-                            <div class="mb-3">
-                                <label>Giá nhập</label>
-                                <input type="number" step="0.01" id="edit-price" name="unitPrice" class="form-control" readonly>
-                            </div>
-                            --%>
+
                             <div class="mb-3">
                                 <label>Trạng thái</label>
                                 <select id="edit-status" name="status" class="form-select">
                                     <option value="Received">Received</option>
                                     <option value="Quarantined">Quarantined</option>
                                     <option value="Approved">Approved</option>
-                                    <option value="Rejected">Rejected</option>
-                                    <option value="Expired">Expired</option>
+
                                 </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="edit-quarantine-notes" class="form-label">Ghi chú kiểm định (Quarantine Notes)</label>
+                                <textarea id="edit-quarantine-notes"
+                                          name="quarantineNotes"
+                                          class="form-control"
+                                          rows="2"
+                                          placeholder="Nhập ghi chú kiểm định, tình trạng lô thuốc..."></textarea>
+                            </div>
+
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                            <button class="btn btn-warning"><i class="bi bi-check-circle"></i> Cập nhật</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+
+
+            <!-- Modal Kiểm chứng -->                   
+            <div class="modal fade" id="qcModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <form action="${pageContext.request.contextPath}/pharmacist/BatchQualityCheck" method="post" class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">🧪 Kiểm chứng chất lượng</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            <input type="hidden" name="batchId" id="qc-batch-id">
+
+                            <div class="mb-3">
+                                <label for="qc-status" class="form-label">Trạng thái mới</label>
+                                <select id="qc-status" name="status" class="form-select" required>
+                                    <option value="Quarantined">Quarantined (Cần đánh giá thêm)</option>
+                                    <option value="Approved">Approved (Đạt chuẩn)</option>
+                                    <option value="Rejected">Rejected (Không đạt)</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="qc-notes" class="form-label">Ghi chú kiểm chứng</label>
+                                <textarea id="qc-notes" name="quarantineNotes" class="form-control" rows="3"></textarea>
                             </div>
                         </div>
 
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                            <button class="btn btn-warning">
-                                <i class="bi bi-check-circle"></i> Cập nhật
-                            </button>
+                            <button type="submit" class="btn btn-success">Lưu</button>
                         </div>
                     </form>
                 </div>
@@ -744,158 +722,218 @@
             <script>
 
 // JS xử lý dropdown chọn filter 
- // Hover submenu
-    document.querySelectorAll('.dropdown-submenu > a').forEach(el => {
-        const submenu = el.nextElementSibling;
-        el.addEventListener('mouseenter', () => { if(submenu) submenu.style.display = 'block'; });
-        el.addEventListener('mouseleave', () => { if(submenu) submenu.style.display = 'none'; });
-        if(submenu){
-            submenu.addEventListener('mouseenter', () => submenu.style.display = 'block');
-            submenu.addEventListener('mouseleave', () => submenu.style.display = 'none');
-        }
-    });
+                // Hover submenu
+                document.querySelectorAll('.dropdown-submenu > a').forEach(el => {
+                    const submenu = el.nextElementSibling;
+                    el.addEventListener('mouseenter', () => {
+                        if (submenu)
+                            submenu.style.display = 'block';
+                    });
+                    el.addEventListener('mouseleave', () => {
+                        if (submenu)
+                            submenu.style.display = 'none';
+                    });
+                    if (submenu) {
+                        submenu.addEventListener('mouseenter', () => submenu.style.display = 'block');
+                        submenu.addEventListener('mouseleave', () => submenu.style.display = 'none');
+                    }
+                });
 
-    // Click chọn option
-    document.querySelectorAll('.filter-option').forEach(el => {
-        el.addEventListener('click', function(e){
-            e.preventDefault();
-            document.getElementById('filterType').value = this.dataset.type;
-            document.getElementById('filterValue').value = this.dataset.value;
-            document.getElementById('filterDropdown').innerText = this.innerText;
-        });
-    });
-    
-    document.querySelectorAll('.filter-option').forEach(option => {
-    option.addEventListener('click', function(e) {
-        e.preventDefault();
-        const type = this.dataset.type;
-        const value = this.dataset.value;
-        const displayText = this.innerText;
+                // Click chọn option
 
-        // Cập nhật 2 hidden input
-        document.getElementById('filterType').value = type;
-        document.getElementById('filterValue').value = value;
+                document.addEventListener("DOMContentLoaded", function () {
+                    const filterOptions = document.querySelectorAll(".filter-option");
+                    const filterButton = document.getElementById("filterDropdown");
+                    const selectedMedicine = document.getElementById("selectedMedicine");
+                    const selectedSupplier = document.getElementById("selectedSupplier");
 
-        // Cập nhật nút hiển thị tên đã chọn
-        document.getElementById('filterButton').innerText = displayText;
-    });
-});
-                                                           // Script tự động copy số lượng ban đầu sang số lượng hiện tại 
-                                                           const initialInput = document.getElementById('initialQuantity');
-                                                           const currentInput = document.getElementById('currentQuantity');
+                    function updateButtonText() {
+                        const medLabel = selectedMedicine.dataset.label || "";
+                        const supLabel = selectedSupplier.dataset.label || "";
+                        const labels = [medLabel, supLabel].filter(Boolean);
+                        filterButton.textContent = labels.length > 0 ? labels.join(" | ") : "Chọn tiêu chí lọc";
+                    }
 
-                                                           initialInput.addEventListener('input', () => {
-                                                               currentInput.value = initialInput.value || 0;
-                                                           });
+                    filterOptions.forEach(option => {
+                        option.addEventListener("mousedown", function (e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const {type, value, label} = this.dataset;
 
+                            if (type === "medicine") {
+                                selectedMedicine.value = value;
+                                selectedMedicine.dataset.label = label;
+                            } else if (type === "supplier") {
+                                selectedSupplier.value = value;
+                                selectedSupplier.dataset.label = label;
+                            }
 
+                            updateButtonText();
+                            const dropdown = bootstrap.Dropdown.getInstance(filterButton);
+                            if (dropdown)
+                                dropdown.hide();
+                        });
+                    });
 
-                                                           // Modal edit handler
-                                                           const editModal = document.getElementById('editBatchModal');
-                                                           editModal.addEventListener('show.bs.modal', event => {
-                                                               const button = event.relatedTarget;
-                                                               document.getElementById('edit-id').value = button.dataset.id;
-                                                               document.getElementById('edit-lot').value = button.dataset.lot;
-                                                               document.getElementById('edit-medicine').value = button.dataset.medicine;
-                                                               document.getElementById('edit-supplier').value = button.dataset.supplier;
-                                                               document.getElementById('edit-expiry').value = button.dataset.expiry?.split('T')[0] || "";
-                                                               document.getElementById('edit-initial').value = button.dataset.initial;
-                                                               document.getElementById('edit-current').value = button.dataset.current;
-                                                               document.getElementById('edit-price').value = button.dataset.price;
-                                                               document.getElementById('edit-status').value = button.dataset.status;
-                                                           });
-
-                                                           // Pagination + Filter
-                                                           const rowsPerPage = 10;
-                                                           const table = document.getElementById("batchTable");
-                                                           const pagination = document.getElementById("pagination");
-                                                           const allRows = table ? Array.from(table.querySelectorAll("tbody tr")) : [];
-                                                           let filteredRows = [...allRows];
-                                                           let currentPage = 1;
-
-                                                           function displayPage(page) {
-                                                               const start = (page - 1) * rowsPerPage;
-                                                               const end = start + rowsPerPage;
-                                                               filteredRows.forEach((r, i) => r.style.display = (i >= start && i < end) ? "" : "none");
-                                                           }
-
-                                                           function setupPagination() {
-                                                               pagination.innerHTML = "";
-                                                               const pageCount = Math.ceil(filteredRows.length / rowsPerPage);
-                                                               if (pageCount === 0)
-                                                                   return;
-
-                                                               const prev = document.createElement("li");
-                                                               prev.className = "page-item" + (currentPage === 1 ? " disabled" : "");
-                                                               prev.innerHTML = `<a class="page-link" href="#">&laquo;</a>`;
-                                                               prev.addEventListener("click", (e) => {
-                                                                   e.preventDefault();
-                                                                   if (currentPage > 1) {
-                                                                       currentPage--;
-                                                                       displayPage(currentPage);
-                                                                       setupPagination();
-                                                                   }
-                                                               });
-                                                               pagination.appendChild(prev);
-
-                                                               for (let i = 1; i <= pageCount; i++) {
-                                                                   const li = document.createElement("li");
-                                                                   li.className = "page-item" + (i === currentPage ? " active" : "");
-                                                                   li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
-                                                                   li.addEventListener("click", (e) => {
-                                                                       e.preventDefault();
-                                                                       currentPage = i;
-                                                                       displayPage(currentPage);
-                                                                       setupPagination();
-                                                                   });
-                                                                   pagination.appendChild(li);
-                                                               }
-
-                                                               const next = document.createElement("li");
-                                                               next.className = "page-item" + (currentPage === pageCount ? " disabled" : "");
-                                                               next.innerHTML = `<a class="page-link" href="#">&raquo;</a>`;
-                                                               next.addEventListener("click", (e) => {
-                                                                   e.preventDefault();
-                                                                   if (currentPage < pageCount) {
-                                                                       currentPage++;
-                                                                       displayPage(currentPage);
-                                                                       setupPagination();
-                                                                   }
-                                                               });
-                                                               pagination.appendChild(next);
-                                                               displayPage(currentPage);
-                                                           }
-
-                                                           function applyFilter() {
-                                                               const keyword = document.getElementById("searchInput").value.toLowerCase();
-                                                               const status = document.getElementById("statusFilter").value.toLowerCase();
-
-                                                               filteredRows = allRows.filter(row => {
-                                                                   const lot = row.cells[0].innerText.toLowerCase();      // Số lô
-                                                                   const name = row.cells[1].innerText.toLowerCase();     // Tên thuốc
-                                                                   const rowStatus = row.cells[2].innerText.toLowerCase(); // Trạng thái
-
-                                                                   const matchesKeyword = lot.includes(keyword) || name.includes(keyword);
-                                                                   const matchesStatus = status ? rowStatus.includes(status) : true;
-
-                                                                   return matchesKeyword && matchesStatus;
-                                                               });
-
-                                                               currentPage = 1;
-                                                               setupPagination();
-                                                           }
+                    // ✅ Giữ text khi reload lại (JSP đã gán data-label sẵn)
+                    updateButtonText();
+                });
 
 
-                                                           function resetFilter() {
-                                                               document.getElementById("searchInput").value = "";
-                                                               document.getElementById("statusFilter").value = "";
-                                                               filteredRows = [...allRows];
-                                                               currentPage = 1;
-                                                               setupPagination();
-                                                           }
 
-                                                           if (allRows.length > 0)
-                                                               setupPagination();
+                // Script tự động copy số lượng ban đầu sang số lượng hiện tại 
+                const initialInput = document.getElementById('initialQuantity');
+                const currentInput = document.getElementById('currentQuantity');
+
+                if (initialInput && currentInput) {
+                    initialInput.addEventListener('input', () => {
+                        currentInput.value = initialInput.value || 0;
+                    });
+                }
+
+
+
+
+
+                // Modal edit handler
+
+                document.addEventListener("DOMContentLoaded", function () {
+                    const modal = document.getElementById("editBatchModal");
+                    if (!modal)
+                        return;
+
+                    modal.addEventListener("show.bs.modal", function (event) {
+                        const button = event.relatedTarget;
+                        if (!button)
+                            return;
+                        console.log("🔍 DATA:", button.dataset);
+
+                        document.getElementById("edit-id").value = button.dataset.id || "";
+                        document.getElementById("edit-lot").value = button.dataset.lot || "";
+                        document.getElementById("edit-medicine").value = button.dataset.medicine || "";
+                        document.getElementById("edit-supplier").value = button.dataset.supplier || "";
+                        document.getElementById("edit-received").value = button.dataset.received || "";
+                        document.getElementById("hidden-received").value = button.dataset.received || "";
+                        // ✅ chỉ hiển thị
+                        document.getElementById("edit-expiry").value = button.dataset.expiry || "";
+                        document.getElementById("edit-current").value = button.dataset.current || "";
+                        document.getElementById("edit-status").value = button.dataset.status || "Received";
+                        document.getElementById("edit-quarantine-notes").value = button.dataset.quarantinenotes || "";
+
+                    });
+                });
+
+
+
+
+                // Pagination + Filter
+                const rowsPerPage = 10;
+                const table = document.getElementById("batchTable");
+                const pagination = document.getElementById("pagination");
+                const allRows = table ? Array.from(table.querySelectorAll("tbody tr")) : [];
+                let filteredRows = [...allRows];
+                let currentPage = 1;
+
+                function displayPage(page) {
+                    const start = (page - 1) * rowsPerPage;
+                    const end = start + rowsPerPage;
+                    filteredRows.forEach((r, i) => r.style.display = (i >= start && i < end) ? "" : "none");
+                }
+
+                function setupPagination() {
+                    pagination.innerHTML = "";
+                    const pageCount = Math.ceil(filteredRows.length / rowsPerPage);
+                    if (pageCount === 0)
+                        return;
+
+                    const prev = document.createElement("li");
+                    prev.className = "page-item" + (currentPage === 1 ? " disabled" : "");
+                    prev.innerHTML = `<a class="page-link" href="#">&laquo;</a>`;
+                    prev.addEventListener("click", (e) => {
+                        e.preventDefault();
+                        if (currentPage > 1) {
+                            currentPage--;
+                            displayPage(currentPage);
+                            setupPagination();
+                        }
+                    });
+                    pagination.appendChild(prev);
+
+                    for (let i = 1; i <= pageCount; i++) {
+                        const li = document.createElement("li");
+                        li.className = "page-item" + (i === currentPage ? " active" : "");
+                        li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+                        li.addEventListener("click", (e) => {
+                            e.preventDefault();
+                            currentPage = i;
+                            displayPage(currentPage);
+                            setupPagination();
+                        });
+                        pagination.appendChild(li);
+                    }
+
+                    const next = document.createElement("li");
+                    next.className = "page-item" + (currentPage === pageCount ? " disabled" : "");
+                    next.innerHTML = `<a class="page-link" href="#">&raquo;</a>`;
+                    next.addEventListener("click", (e) => {
+                        e.preventDefault();
+                        if (currentPage < pageCount) {
+                            currentPage++;
+                            displayPage(currentPage);
+                            setupPagination();
+                        }
+                    });
+                    pagination.appendChild(next);
+                    displayPage(currentPage);
+                }
+
+                function applyFilter() {
+                    const keyword = document.getElementById("searchInput").value.toLowerCase();
+                    const status = document.getElementById("statusFilter").value.toLowerCase();
+
+                    filteredRows = allRows.filter(row => {
+                        const lot = row.cells[0].innerText.toLowerCase();      // Số lô
+                        const name = row.cells[1].innerText.toLowerCase();     // Tên thuốc
+                        const rowStatus = row.cells[2].innerText.toLowerCase(); // Trạng thái
+
+                        const matchesKeyword = lot.includes(keyword) || name.includes(keyword);
+                        const matchesStatus = status ? rowStatus.includes(status) : true;
+
+                        return matchesKeyword && matchesStatus;
+                    });
+
+                    currentPage = 1;
+                    setupPagination();
+                }
+
+
+                function resetFilter() {
+                    document.getElementById("searchInput").value = "";
+                    document.getElementById("statusFilter").value = "";
+                    filteredRows = [...allRows];
+                    currentPage = 1;
+                    setupPagination();
+                }
+
+                if (allRows.length > 0)
+                    setupPagination();
+
+
+                // Modal kiểm chứng
+                document.addEventListener("DOMContentLoaded", function () {
+                    const qcModal = document.getElementById("qcModal");
+                    if (!qcModal)
+                        return;
+
+                    qcModal.addEventListener("show.bs.modal", function (event) {
+                        const button = event.relatedTarget;
+                        if (!button)
+                            return;
+
+                        // Gán batch_id vào input ẩn
+                        document.getElementById("qc-batch-id").value = button.getAttribute("data-id") || "";
+                    });
+                });
             </script>
         </body>
     </html>

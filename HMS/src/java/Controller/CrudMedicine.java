@@ -67,7 +67,7 @@ private void addMedicine(HttpServletRequest request, HttpServletResponse respons
         batch.setMedicineCode(medicineCode);
         batch.setLotNumber(lotNumber);
 
-        String supplierIdStr = request.getParameter("manufacturer"); // chọn từ Supplier
+        String supplierIdStr = request.getParameter("supplierId"); // chọn từ Supplier
         int supplierId = Integer.parseInt(supplierIdStr);
         batch.setSupplierId(supplierId);
 

@@ -78,7 +78,7 @@
             <a href="${pageContext.request.contextPath}/pharmacist/View_MedicineRequest">
                 <i class="bi bi-file-earmark-plus"></i> Yêu cầu thuốc
             </a>
-            <a href="${pageContext.request.contextPath}/pharmacist/ViewDeliveredOrder" class="active">
+            <a href="${pageContext.request.contextPath}/pharmacist/view-order-details" class="active">
                 <i class="bi bi-truck"></i> Đơn hàng đã giao
             </a>
             <a href="${pageContext.request.contextPath}/pharmacist/manage-batch">

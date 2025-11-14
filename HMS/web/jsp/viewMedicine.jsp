@@ -387,106 +387,106 @@
                 box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.1) !important;
                 background-color: white !important;
             }
-            
-           /* === Modal Tổng Thể === */
-.modal-content {
-  border-radius: 16px;
-  overflow: hidden;
-  border: none;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
-}
 
-/* === Header === */
-.modal-header {
-  background: linear-gradient(120deg, #20c997, #198754);
-  color: white;
-  border-bottom: none;
-  padding: 1rem 1.5rem;
-}
+            /* === Modal Tổng Thể === */
+            .modal-content {
+                border-radius: 16px;
+                overflow: hidden;
+                border: none;
+                box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
+            }
 
-.modal-title {
-  font-weight: 700;
-  font-size: 1.25rem;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
+            /* === Header === */
+            .modal-header {
+                background: linear-gradient(120deg, #20c997, #198754);
+                color: white;
+                border-bottom: none;
+                padding: 1rem 1.5rem;
+            }
 
-.btn-close {
-  filter: brightness(0) invert(1);
-}
+            .modal-title {
+                font-weight: 700;
+                font-size: 1.25rem;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
 
-/* === Nội dung === */
-.modal-body {
-  background-color: #f8f9fa;
-  padding: 28px;
-}
+            .btn-close {
+                filter: brightness(0) invert(1);
+            }
 
-.form-label {
-  font-weight: 600;
-  color: #2d2d2d;
-  margin-bottom: 5px;
-}
+            /* === Nội dung === */
+            .modal-body {
+                background-color: #f8f9fa;
+                padding: 28px;
+            }
 
-.form-control,
-.form-select {
-  border-radius: 8px;
-  padding: 10px 12px;
-  border: 1px solid #d0d5dd;
-  background-color: #fff;
-  transition: all 0.2s ease-in-out;
-}
+            .form-label {
+                font-weight: 600;
+                color: #2d2d2d;
+                margin-bottom: 5px;
+            }
 
-.form-control:focus,
-.form-select:focus {
-  border-color: #20c997;
-  box-shadow: 0 0 0 0.15rem rgba(32, 201, 151, 0.25);
-}
+            .form-control,
+            .form-select {
+                border-radius: 8px;
+                padding: 10px 12px;
+                border: 1px solid #d0d5dd;
+                background-color: #fff;
+                transition: all 0.2s ease-in-out;
+            }
 
-/* === Phần tiêu đề nhóm (nếu muốn chia section sau này) === */
-.section-title {
-  font-weight: 700;
-  color: #198754;
-  margin-top: 25px;
-  border-bottom: 2px solid #20c997;
-  padding-bottom: 6px;
-  font-size: 1rem;
-}
+            .form-control:focus,
+            .form-select:focus {
+                border-color: #20c997;
+                box-shadow: 0 0 0 0.15rem rgba(32, 201, 151, 0.25);
+            }
 
-/* === Footer === */
-.modal-footer {
-  background-color: #f1f3f5;
-  border-top: none;
-  padding: 1rem 1.5rem;
-}
+            /* === Phần tiêu đề nhóm (nếu muốn chia section sau này) === */
+            .section-title {
+                font-weight: 700;
+                color: #198754;
+                margin-top: 25px;
+                border-bottom: 2px solid #20c997;
+                padding-bottom: 6px;
+                font-size: 1rem;
+            }
 
-.btn-success {
-  background-color: #20c997;
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  padding: 8px 18px;
-  transition: 0.2s;
-}
+            /* === Footer === */
+            .modal-footer {
+                background-color: #f1f3f5;
+                border-top: none;
+                padding: 1rem 1.5rem;
+            }
 
-.btn-success:hover {
-  background-color: #17a589;
-  transform: translateY(-1px);
-}
+            .btn-success {
+                background-color: #20c997;
+                border: none;
+                border-radius: 8px;
+                font-weight: 600;
+                padding: 8px 18px;
+                transition: 0.2s;
+            }
 
-.btn-secondary {
-  border-radius: 8px;
-  font-weight: 600;
-}
+            .btn-success:hover {
+                background-color: #17a589;
+                transform: translateY(-1px);
+            }
 
-/* === Giao diện đồng bộ giữa Add và Edit === */
-#addMedicineModal .modal-header i {
-  color: #e3f9f0;
-}
+            .btn-secondary {
+                border-radius: 8px;
+                font-weight: 600;
+            }
 
-#editMedicineModal .modal-header {
-  background: linear-gradient(120deg, #0d6efd, #1a73e8);
-}
+            /* === Giao diện đồng bộ giữa Add và Edit === */
+            #addMedicineModal .modal-header i {
+                color: #e3f9f0;
+            }
+
+            #editMedicineModal .modal-header {
+                background: linear-gradient(120deg, #0d6efd, #1a73e8);
+            }
 
         </style>
     </head>
@@ -512,7 +512,7 @@
                         <a href="${pageContext.request.contextPath}/pharmacist/View_MedicineRequest">
                             <i class="bi bi-file-earmark-plus"></i> Yêu cầu thuốc
                         </a>
-                            <a href="${pageContext.request.contextPath}/pharmacist/view-order-details">
+                        <a href="${pageContext.request.contextPath}/pharmacist/view-order-details">
                             <i class="bi bi-box-seam"></i> Đơn hàng đã giao
                         </a>
                         <a href="${pageContext.request.contextPath}/pharmacist/manage-batch">
@@ -532,104 +532,104 @@
             <div class="main">
                 <h1>Medicine Details</h1>
 
-                 <!-- Search + Filter Container -->
-<div class="search-container mb-4">
-    <form action="${pageContext.request.contextPath}/view-medicine" method="get" class="row g-3">
+                <!-- Search + Filter Container -->
+                <div class="search-container mb-4">
+                    <form action="${pageContext.request.contextPath}/view-medicine" method="get" class="row g-3">
 
-        <!-- Keyword -->
-        <div class="col-md-4">
-            <input type="text" name="keyword" value="${keyword}"
-                   placeholder="🔍 Tìm kiếm thuốc..." class="form-control">
-        </div>
+                        <!-- Keyword -->
+                        <div class="col-md-4">
+                            <input type="text" name="keyword" value="${keyword}"
+                                   placeholder="🔍 Tìm kiếm thuốc..." class="form-control">
+                        </div>
 
-        <!-- Dropdown Filter Type -->
-        <div class="col-md-4 position-relative">
-            <div class="dropdown w-100">
-                <button id="filterButton"
-                        class="btn btn-outline-primary dropdown-toggle w-100"
-                        type="button"
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false">
-                    Chọn tiêu chí lọc
-                </button>
+                        <!-- Dropdown Filter Type -->
+                        <div class="col-md-4 position-relative">
+                            <div class="dropdown w-100">
+                                <button id="filterButton"
+                                        class="btn btn-outline-primary dropdown-toggle w-100"
+                                        type="button"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false">
+                                    Chọn tiêu chí lọc
+                                </button>
 
-                <!-- Mega Dropdown -->
-                <ul class="dropdown-menu p-3" style="width: 100%; max-height: 400px; overflow-y: auto;">
-                    <!-- Danh mục -->
-                    <li class="dropdown-submenu position-relative">
-                        <a href="#" class="dropdown-item fw-bold">Danh mục</a>
-                        <ul class="dropdown-menu submenu shadow-sm bg-white">
-                            <c:forEach var="cat" items="${categories}">
-                                <li>
-                                    <a href="#" class="dropdown-item filter-option"
-                                       data-type="category" data-value="${cat}">${cat}</a>
-                                </li>
-                            </c:forEach>
-                        </ul>
-                    </li>
-                    <!-- Hoạt chất -->
-                    <li class="dropdown-submenu position-relative mt-2">
-                        <a href="#" class="dropdown-item fw-bold">Hoạt chất</a>
-                        <ul class="dropdown-menu submenu shadow-sm bg-white">
-                            <c:forEach var="ai" items="${activeIngredients}">
-                                <li>
-                                    <a href="#" class="dropdown-item filter-option"
-                                       data-type="activeIngredient" data-value="${ai}">${ai}</a>
-                                </li>
-                            </c:forEach>
-                        </ul>
-                    </li>
-                    <!-- Nhóm thuốc -->
-                    <li class="dropdown-submenu position-relative mt-2">
-                        <a href="#" class="dropdown-item fw-bold">Nhóm thuốc</a>
-                        <ul class="dropdown-menu submenu shadow-sm bg-white">
-                            <c:forEach var="dg" items="${drugGroups}">
-                                <li>
-                                    <a href="#" class="dropdown-item filter-option"
-                                       data-type="drugGroup" data-value="${dg}">${dg}</a>
-                                </li>
-                            </c:forEach>
-                        </ul>
-                    </li>
-                    <!-- Loại thuốc -->
-                    <li class="dropdown-submenu position-relative mt-2">
-                        <a href="#" class="dropdown-item fw-bold">Loại thuốc</a>
-                        <ul class="dropdown-menu submenu shadow-sm bg-white">
-                            <c:forEach var="dt" items="${drugTypes}">
-                                <li>
-                                    <a href="#" class="dropdown-item filter-option"
-                                       data-type="drugType" data-value="${dt}">${dt}</a>
-                                </li>
-                            </c:forEach>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-        </div>
+                                <!-- Mega Dropdown -->
+                                <ul class="dropdown-menu p-3" style="width: 100%; max-height: 400px; overflow-y: auto;">
+                                    <!-- Danh mục -->
+                                    <li class="dropdown-submenu position-relative">
+                                        <a href="#" class="dropdown-item fw-bold">Danh mục</a>
+                                        <ul class="dropdown-menu submenu shadow-sm bg-white">
+                                            <c:forEach var="cat" items="${categories}">
+                                                <li>
+                                                    <a href="#" class="dropdown-item filter-option"
+                                                       data-type="category" data-value="${cat}">${cat}</a>
+                                                </li>
+                                            </c:forEach>
+                                        </ul>
+                                    </li>
+                                    <!-- Hoạt chất -->
+                                    <li class="dropdown-submenu position-relative mt-2">
+                                        <a href="#" class="dropdown-item fw-bold">Hoạt chất</a>
+                                        <ul class="dropdown-menu submenu shadow-sm bg-white">
+                                            <c:forEach var="ai" items="${activeIngredients}">
+                                                <li>
+                                                    <a href="#" class="dropdown-item filter-option"
+                                                       data-type="activeIngredient" data-value="${ai}">${ai}</a>
+                                                </li>
+                                            </c:forEach>
+                                        </ul>
+                                    </li>
+                                    <!-- Nhóm thuốc -->
+                                    <li class="dropdown-submenu position-relative mt-2">
+                                        <a href="#" class="dropdown-item fw-bold">Nhóm thuốc</a>
+                                        <ul class="dropdown-menu submenu shadow-sm bg-white">
+                                            <c:forEach var="dg" items="${drugGroups}">
+                                                <li>
+                                                    <a href="#" class="dropdown-item filter-option"
+                                                       data-type="drugGroup" data-value="${dg}">${dg}</a>
+                                                </li>
+                                            </c:forEach>
+                                        </ul>
+                                    </li>
+                                    <!-- Loại thuốc -->
+                                    <li class="dropdown-submenu position-relative mt-2">
+                                        <a href="#" class="dropdown-item fw-bold">Loại thuốc</a>
+                                        <ul class="dropdown-menu submenu shadow-sm bg-white">
+                                            <c:forEach var="dt" items="${drugTypes}">
+                                                <li>
+                                                    <a href="#" class="dropdown-item filter-option"
+                                                       data-type="drugType" data-value="${dt}">${dt}</a>
+                                                </li>
+                                            </c:forEach>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
 
-        <!-- Hidden Inputs cho từng filter -->
-        <input type="hidden" name="category" id="filterCategory" value="${selectedCategory != null ? selectedCategory : ''}">
-        <input type="hidden" name="activeIngredient" id="filterActiveIngredient" value="${selectedActiveIngredient != null ? selectedActiveIngredient : ''}">
-        <input type="hidden" name="drugGroup" id="filterDrugGroup" value="${selectedDrugGroup != null ? selectedDrugGroup : ''}">
-        <input type="hidden" name="drugType" id="filterDrugType" value="${selectedDrugType != null ? selectedDrugType : ''}">
+                        <!-- Hidden Inputs cho từng filter -->
+                        <input type="hidden" name="category" id="filterCategory" value="${selectedCategory != null ? selectedCategory : ''}">
+                        <input type="hidden" name="activeIngredient" id="filterActiveIngredient" value="${selectedActiveIngredient != null ? selectedActiveIngredient : ''}">
+                        <input type="hidden" name="drugGroup" id="filterDrugGroup" value="${selectedDrugGroup != null ? selectedDrugGroup : ''}">
+                        <input type="hidden" name="drugType" id="filterDrugType" value="${selectedDrugType != null ? selectedDrugType : ''}">
 
-        <!-- Status -->
-        <div class="col-md-2">
-            <select name="status" class="form-select">
-                <option value="" ${selectedStatus == '' ? 'selected' : ''}>Tất cả</option>
-                <option value="In Stock" ${selectedStatus == 'In Stock' ? 'selected' : ''}>Còn nhiều</option>
-                <option value="Low Stock" ${selectedStatus == 'Low Stock' ? 'selected' : ''}>Sắp hết</option>
-                <option value="Out of Stock" ${selectedStatus == 'Out of Stock' ? 'selected' : ''}>Hết hàng</option>
-            </select>
-        </div>
+                        <!-- Status -->
+                        <div class="col-md-2">
+                            <select name="status" class="form-select">
+                                <option value="" ${selectedStatus == '' ? 'selected' : ''}>Tất cả</option>
+                                <option value="In Stock" ${selectedStatus == 'In Stock' ? 'selected' : ''}>Còn nhiều</option>
+                                <option value="Low Stock" ${selectedStatus == 'Low Stock' ? 'selected' : ''}>Sắp hết</option>
+                                <option value="Out of Stock" ${selectedStatus == 'Out of Stock' ? 'selected' : ''}>Hết hàng</option>
+                            </select>
+                        </div>
 
-        <!-- Buttons -->
-        <div class="col-md-2 d-flex gap-2">
-            <button type="submit" class="btn btn-success flex-fill">Tìm kiếm</button>
-            <a href="${pageContext.request.contextPath}/view-medicine" class="btn btn-secondary flex-fill">Reset</a>
-        </div>
-    </form>
-</div>
+                        <!-- Buttons -->
+                        <div class="col-md-2 d-flex gap-2">
+                            <button type="submit" class="btn btn-success flex-fill">Tìm kiếm</button>
+                            <a href="${pageContext.request.contextPath}/view-medicine" class="btn btn-secondary flex-fill">Reset</a>
+                        </div>
+                    </form>
+                </div>
 
 
                 <!-- Action Buttons -->
@@ -778,333 +778,333 @@
 
 
                 <!-- Modal Add Medicine -->
-               <div class="modal fade" id="addMedicineModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title"><i class="bi bi-plus-circle"></i> Add New Medicine</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
+                <div class="modal fade" id="addMedicineModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title"><i class="bi bi-plus-circle"></i> Add New Medicine</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
 
-      <div class="modal-body">
-        <form method="post" action="${pageContext.request.contextPath}/Medicine/add">
-          <div class="row g-3">
-            <!-- Tên thuốc -->
-            <div class="col-md-6">
-              <label class="form-label">Tên thuốc</label>
-              <input type="text" class="form-control" name="name" required>
-            </div>
+                            <div class="modal-body">
+                                <form method="post" action="${pageContext.request.contextPath}/Medicine/add">
+                                    <div class="row g-3">
+                                        <!-- Tên thuốc -->
+                                        <div class="col-md-6">
+                                            <label class="form-label">Tên thuốc</label>
+                                            <input type="text" class="form-control" name="name" required>
+                                        </div>
 
-            <!-- Danh mục -->
-            <div class="col-md-6">
-              <label class="form-label">Danh mục</label>
-              <select class="form-select" name="category" required>
-                <option value="">-- Chọn danh mục thuốc --</option>
-                <option>Vitamin & Khoáng chất</option>
-                <option>Tim mạch</option>
-                <option>Kháng sinh</option>
-                <option>Hô hấp</option>
-                <option>Nội tiết</option>
-                <option>Tiêu hóa</option>
-              </select>
-            </div>
+                                        <!-- Danh mục -->
+                                        <div class="col-md-6">
+                                            <label class="form-label">Danh mục</label>
+                                            <select class="form-select" name="category" required>
+                                                <option value="">-- Chọn danh mục thuốc --</option>
+                                                <option>Vitamin & Khoáng chất</option>
+                                                <option>Tim mạch</option>
+                                                <option>Kháng sinh</option>
+                                                <option>Hô hấp</option>
+                                                <option>Nội tiết</option>
+                                                <option>Tiêu hóa</option>
+                                            </select>
+                                        </div>
 
-            <!-- Mô tả -->
-            <div class="col-md-12">
-              <label class="form-label">Mô tả</label>
-              <textarea class="form-control" name="description" rows="2"></textarea>
-            </div>
+                                        <!-- Mô tả -->
+                                        <div class="col-md-12">
+                                            <label class="form-label">Mô tả</label>
+                                            <textarea class="form-control" name="description" rows="2"></textarea>
+                                        </div>
 
-            <!-- Hoạt chất -->
-            <div class="col-md-6">
-              <label class="form-label">Hoạt chất</label>
-              <input type="text" class="form-control" name="activeIngredient">
-            </div>
+                                        <!-- Hoạt chất -->
+                                        <div class="col-md-6">
+                                            <label class="form-label">Hoạt chất</label>
+                                            <input type="text" class="form-control" name="activeIngredient">
+                                        </div>
 
-            <!-- Dạng bào chế -->
-            <div class="col-md-6">
-              <label class="form-label">Dạng bào chế</label>
-              <select class="form-select" name="dosageForm">
-                <option value="">-- Chọn dạng bào chế --</option>
-                <option>Viên nén</option>
-                <option>Viên nhộng</option>
-                <option>Dung dịch</option>
-                <option>Siro</option>
-                <option>Thuốc tiêm</option>
-                <option>Thuốc mỡ</option>
-              </select>
-            </div>
+                                        <!-- Dạng bào chế -->
+                                        <div class="col-md-6">
+                                            <label class="form-label">Dạng bào chế</label>
+                                            <select class="form-select" name="dosageForm">
+                                                <option value="">-- Chọn dạng bào chế --</option>
+                                                <option>Viên nén</option>
+                                                <option>Viên nhộng</option>
+                                                <option>Dung dịch</option>
+                                                <option>Siro</option>
+                                                <option>Thuốc tiêm</option>
+                                                <option>Thuốc mỡ</option>
+                                            </select>
+                                        </div>
 
-            <!-- Hàm lượng, Đơn vị, Nhà sản xuất -->
-            <div class="col-md-4">
-              <label class="form-label">Hàm lượng</label>
-              <select class="form-select" name="strength">
-                <option value="">-- Chọn hàm lượng --</option>
-                <option>10mg</option>
-                <option>50mg</option>
-                <option>100mg</option>
-              </select>
-            </div>
+                                        <!-- Hàm lượng, Đơn vị, Nhà sản xuất -->
+                                        <div class="col-md-4">
+                                            <label class="form-label">Hàm lượng</label>
+                                            <select class="form-select" name="strength">
+                                                <option value="">-- Chọn hàm lượng --</option>
+                                                <option>10mg</option>
+                                                <option>50mg</option>
+                                                <option>100mg</option>
+                                            </select>
+                                        </div>
 
-            <div class="col-md-4">
-              <label class="form-label">Đơn vị</label>
-              <select class="form-select" name="unit">
-                <option value="">-- Chọn đơn vị --</option>
-                <option>Viên</option>
-                <option>Ống</option>
-                <option>Chai</option>
-                <option>Gói</option>
-                <option>Tuýp</option>
-              </select>
-            </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Đơn vị</label>
+                                            <select class="form-select" name="unit">
+                                                <option value="">-- Chọn đơn vị --</option>
+                                                <option>Viên</option>
+                                                <option>Ống</option>
+                                                <option>Chai</option>
+                                                <option>Gói</option>
+                                                <option>Tuýp</option>
+                                            </select>
+                                        </div>
 
-            <div class="col-md-4">
-              <label class="form-label">Nhà sản xuất</label>
-              <input type="text" class="form-control" name="manufacturer" placeholder="Nhập tên nhà sản xuất" required>
-            </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Nhà sản xuất</label>
+                                            <input type="text" class="form-control" name="manufacturer" placeholder="Nhập tên nhà sản xuất" required>
+                                        </div>
 
-            <!-- Nhà cung cấp -->
-            <div class="col-md-4">
-              <label class="form-label">Nhà cung cấp</label>
-              <select class="form-select" name="supplierId" required>
-                <option value="">-- Chọn nhà cung cấp --</option>
-                <c:forEach var="s" items="${supplierList}">
-                  <option value="${s.supplierId}">${s.name}</option>
-                </c:forEach>
-              </select>
-            </div>
+                                        <!-- Nhà cung cấp -->
+                                        <div class="col-md-4">
+                                            <label class="form-label">Nhà cung cấp</label>
+                                            <select class="form-select" name="supplierId" required>
+                                                <option value="">-- Chọn nhà cung cấp --</option>
+                                                <c:forEach var="s" items="${supplierList}">
+                                                    <option value="${s.supplierId}">${s.name}</option>
+                                                </c:forEach>
+                                            </select>
+                                        </div>
 
-            <!-- Xuất xứ -->
-            <div class="col-md-4">
-              <label class="form-label">Xuất xứ</label>
-              <select class="form-select" name="origin">
-                <option value="">-- Chọn quốc gia --</option>
-                <option>Việt Nam</option>
-                <option>Mỹ</option>
-                <option>Nhật Bản</option>
-                <option>Hàn Quốc</option>
-                <option>Pháp</option>
-              </select>
-            </div>
+                                        <!-- Xuất xứ -->
+                                        <div class="col-md-4">
+                                            <label class="form-label">Xuất xứ</label>
+                                            <select class="form-select" name="origin">
+                                                <option value="">-- Chọn quốc gia --</option>
+                                                <option>Việt Nam</option>
+                                                <option>Mỹ</option>
+                                                <option>Nhật Bản</option>
+                                                <option>Hàn Quốc</option>
+                                                <option>Pháp</option>
+                                            </select>
+                                        </div>
 
-            <!-- Nhóm thuốc -->
-            <div class="col-md-4">
-              <label class="form-label">Nhóm thuốc</label>
-              <select class="form-select" name="drugGroup">
-                <option value="">-- Chọn nhóm thuốc --</option>
-                <option>Điều trị ung thư</option>
-                <option>Giảm đau - Hạ sốt</option>
-                <option>Tim mạch</option>
-                <option>Tiêu hóa</option>
-                <option>Vitamin - Khoáng chất</option>
-              </select>
-            </div>
+                                        <!-- Nhóm thuốc -->
+                                        <div class="col-md-4">
+                                            <label class="form-label">Nhóm thuốc</label>
+                                            <select class="form-select" name="drugGroup">
+                                                <option value="">-- Chọn nhóm thuốc --</option>
+                                                <option>Điều trị ung thư</option>
+                                                <option>Giảm đau - Hạ sốt</option>
+                                                <option>Tim mạch</option>
+                                                <option>Tiêu hóa</option>
+                                                <option>Vitamin - Khoáng chất</option>
+                                            </select>
+                                        </div>
 
-            <!-- Loại thuốc, tồn kho, hạn -->
-            <div class="col-md-4">
-              <label class="form-label">Loại thuốc</label>
-              <select class="form-select" name="drugType">
-                <option value="">-- Chọn loại thuốc --</option>
-                <option>Đặc trị</option>
-                <option>Bảo hiểm</option>
-                <option>Khác</option>
-              </select>
-            </div>
+                                        <!-- Loại thuốc, tồn kho, hạn -->
+                                        <div class="col-md-4">
+                                            <label class="form-label">Loại thuốc</label>
+                                            <select class="form-select" name="drugType">
+                                                <option value="">-- Chọn loại thuốc --</option>
+                                                <option>Đặc trị</option>
+                                                <option>Bảo hiểm</option>
+                                                <option>Khác</option>
+                                            </select>
+                                        </div>
 
-            <div class="col-md-4">
-              <label class="form-label">Tồn kho</label>
-              <input type="number" class="form-control" name="stock" required>
-            </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Tồn kho</label>
+                                            <input type="number" class="form-control" name="stock" required>
+                                        </div>
 
-            <div class="col-md-4">
-              <label class="form-label">Hạn sử dụng</label>
-              <input type="date" class="form-control" name="expiryDate" required min="<%= java.time.LocalDate.now() %>">
-            </div>
-          </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Hạn sử dụng</label>
+                                            <input type="date" class="form-control" name="expiryDate" required min="<%= java.time.LocalDate.now() %>">
+                                        </div>
+                                    </div>
 
-          <div class="modal-footer mt-3">
-            <button type="submit" class="btn btn-success">Save</button>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
-
-        <!-- Edit Medicine Modal -->
-<div class="modal fade" id="editMedicineModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title"><i class="bi bi-pencil-square"></i> Edit Medicine</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-            <div class="modal-body">
-                <form method="post" action="${pageContext.request.contextPath}/Medicine/update">
-                    <!-- Hidden fields -->
-                    <input type="hidden" name="medicineCode" id="edit-medicineCode">
-                    <input type="hidden" name="batchId" id="edit-batchId">
-
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Medicine Name</label>
-                            <input type="text" class="form-control" name="name" id="edit-name" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Category</label>
-                            <input type="text" class="form-control" name="category" id="edit-category" required>
-                        </div>
-                        <div class="col-md-12">
-                            <label class="form-label">Description</label>
-                            <textarea class="form-control" name="description" id="edit-description" rows="2"></textarea>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Active Ingredient</label>
-                            <input type="text" class="form-control" name="activeIngredient" id="edit-activeIngredient">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Dosage Form</label>
-                            <input type="text" class="form-control" name="dosageForm" id="edit-dosageForm">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Strength</label>
-                            <input type="text" class="form-control" name="strength" id="edit-strength">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Unit</label>
-                            <input type="text" class="form-control" name="unit" id="edit-unit">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Manufacturer</label>
-                            <input type="text" class="form-control" name="manufacturer" id="edit-manufacturer">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Nhà cung cấp</label>
-                            <select class="form-select" name="supplierId" id="edit-supplierId" required>
-                                <option value="">-- Chọn nhà cung cấp --</option>
-                                <c:forEach var="s" items="${supplierList}">
-                                    <option value="${s.supplierId}">${s.name}</option>
-                                </c:forEach>
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Origin</label>
-                            <input type="text" class="form-control" name="origin" id="edit-origin">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Drug Group</label>
-                            <input type="text" class="form-control" name="drugGroup" id="edit-drugGroup">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Drug Type</label>
-                            <input type="text" class="form-control" name="drugType" id="edit-drugType">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Stock Quantity</label>
-                            <input type="number" class="form-control" name="stock" id="edit-stock">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Expiry Date</label>
-                            <input type="date" class="form-control" name="expiryDate" id="edit-expiryDate"
-                                   min="<%= java.time.LocalDate.now() %>">
+                                    <div class="modal-footer mt-3">
+                                        <button type="submit" class="btn btn-success">Save</button>
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
+                </div>
 
-                    <div class="modal-footer mt-3">
-                        <button type="submit" class="btn btn-success">Update</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <!-- Edit Medicine Modal -->
+                <div class="modal fade" id="editMedicineModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title"><i class="bi bi-pencil-square"></i> Edit Medicine</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form method="post" action="${pageContext.request.contextPath}/Medicine/update">
+                                    <!-- Hidden fields -->
+                                    <input type="hidden" name="medicineCode" id="edit-medicineCode">
+                                    <input type="hidden" name="batchId" id="edit-batchId">
+
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Medicine Name</label>
+                                            <input type="text" class="form-control" name="name" id="edit-name" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Category</label>
+                                            <input type="text" class="form-control" name="category" id="edit-category" required>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label class="form-label">Description</label>
+                                            <textarea class="form-control" name="description" id="edit-description" rows="2"></textarea>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Active Ingredient</label>
+                                            <input type="text" class="form-control" name="activeIngredient" id="edit-activeIngredient">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Dosage Form</label>
+                                            <input type="text" class="form-control" name="dosageForm" id="edit-dosageForm">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Strength</label>
+                                            <input type="text" class="form-control" name="strength" id="edit-strength">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Unit</label>
+                                            <input type="text" class="form-control" name="unit" id="edit-unit">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Manufacturer</label>
+                                            <input type="text" class="form-control" name="manufacturer" id="edit-manufacturer">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Nhà cung cấp</label>
+                                            <select class="form-select" name="supplierId" id="edit-supplierId" required>
+                                                <option value="">-- Chọn nhà cung cấp --</option>
+                                                <c:forEach var="s" items="${supplierList}">
+                                                    <option value="${s.supplierId}">${s.name}</option>
+                                                </c:forEach>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Origin</label>
+                                            <input type="text" class="form-control" name="origin" id="edit-origin">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Drug Group</label>
+                                            <input type="text" class="form-control" name="drugGroup" id="edit-drugGroup">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Drug Type</label>
+                                            <input type="text" class="form-control" name="drugType" id="edit-drugType">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Stock Quantity</label>
+                                            <input type="number" class="form-control" name="stock" id="edit-stock">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Expiry Date</label>
+                                            <input type="date" class="form-control" name="expiryDate" id="edit-expiryDate"
+                                                   min="<%= java.time.LocalDate.now() %>">
+                                        </div>
+                                    </div>
+
+                                    <div class="modal-footer mt-3">
+                                        <button type="submit" class="btn btn-success">Update</button>
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
                     </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+                </div>
 
                 <%@ include file="/admin/footer.jsp" %>
                 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
                 <script>
-  const editModal = document.getElementById('editMedicineModal');
-editModal.addEventListener('show.bs.modal', function (event) {
-    const button = event.relatedTarget; // Nút bấm mở modal
-    const dataset = button.dataset;
+                                                              const editModal = document.getElementById('editMedicineModal');
+                                                              editModal.addEventListener('show.bs.modal', function (event) {
+                                                                  const button = event.relatedTarget; // Nút bấm mở modal
+                                                                  const dataset = button.dataset;
 
-    document.getElementById('edit-medicineCode').value = dataset.medicinecode;
-    document.getElementById('edit-batchId').value = dataset.batchid;
-    document.getElementById('edit-supplierId').value = dataset.supplierid;
-    document.getElementById('edit-name').value = dataset.name;
-    document.getElementById('edit-category').value = dataset.category;
-    document.getElementById('edit-description').value = dataset.description;
-    document.getElementById('edit-activeIngredient').value = dataset.activeingredient;
-    document.getElementById('edit-dosageForm').value = dataset.dosageform;
-    document.getElementById('edit-strength').value = dataset.strength;
-    document.getElementById('edit-unit').value = dataset.unit;
-    document.getElementById('edit-manufacturer').value = dataset.manufacturer;
-    document.getElementById('edit-origin').value = dataset.origin;
-    document.getElementById('edit-drugGroup').value = dataset.druggroup;
-    document.getElementById('edit-drugType').value = dataset.drugtype;
-    document.getElementById('edit-stock').value = dataset.stock;
-    document.getElementById('edit-expiryDate').value = dataset.expirydate;
-});
+                                                                  document.getElementById('edit-medicineCode').value = dataset.medicinecode;
+                                                                  document.getElementById('edit-batchId').value = dataset.batchid;
+                                                                  document.getElementById('edit-supplierId').value = dataset.supplierid;
+                                                                  document.getElementById('edit-name').value = dataset.name;
+                                                                  document.getElementById('edit-category').value = dataset.category;
+                                                                  document.getElementById('edit-description').value = dataset.description;
+                                                                  document.getElementById('edit-activeIngredient').value = dataset.activeingredient;
+                                                                  document.getElementById('edit-dosageForm').value = dataset.dosageform;
+                                                                  document.getElementById('edit-strength').value = dataset.strength;
+                                                                  document.getElementById('edit-unit').value = dataset.unit;
+                                                                  document.getElementById('edit-manufacturer').value = dataset.manufacturer;
+                                                                  document.getElementById('edit-origin').value = dataset.origin;
+                                                                  document.getElementById('edit-drugGroup').value = dataset.druggroup;
+                                                                  document.getElementById('edit-drugType').value = dataset.drugtype;
+                                                                  document.getElementById('edit-stock').value = dataset.stock;
+                                                                  document.getElementById('edit-expiryDate').value = dataset.expirydate;
+                                                              });
 
                                                               // Script cho Filter Dropdown
                                                               document.addEventListener("DOMContentLoaded", function () {
-    const filterOptions = document.querySelectorAll(".filter-option");
-    const filterButton = document.getElementById("filterButton");
+                                                                  const filterOptions = document.querySelectorAll(".filter-option");
+                                                                  const filterButton = document.getElementById("filterButton");
 
-    // 4 hidden inputs
-    const filterCategory = document.getElementById("filterCategory");
-    const filterActiveIngredient = document.getElementById("filterActiveIngredient");
-    const filterDrugGroup = document.getElementById("filterDrugGroup");
-    const filterDrugType = document.getElementById("filterDrugType");
+                                                                  // 4 hidden inputs
+                                                                  const filterCategory = document.getElementById("filterCategory");
+                                                                  const filterActiveIngredient = document.getElementById("filterActiveIngredient");
+                                                                  const filterDrugGroup = document.getElementById("filterDrugGroup");
+                                                                  const filterDrugType = document.getElementById("filterDrugType");
 
-    function updateButtonText() {
-        // Chỉ lấy những giá trị đã chọn, bỏ "All" hoặc rỗng
-        const values = [
-            filterCategory.value,
-            filterActiveIngredient.value,
-            filterDrugGroup.value,
-            filterDrugType.value
-        ].filter(v => v && v.toLowerCase() !== "all");
+                                                                  function updateButtonText() {
+                                                                      // Chỉ lấy những giá trị đã chọn, bỏ "All" hoặc rỗng
+                                                                      const values = [
+                                                                          filterCategory.value,
+                                                                          filterActiveIngredient.value,
+                                                                          filterDrugGroup.value,
+                                                                          filterDrugType.value
+                                                                      ].filter(v => v && v.toLowerCase() !== "all");
 
-        filterButton.textContent = values.length > 0 ? values.join(" | ") : "Chọn tiêu chí lọc";
-    }
+                                                                      filterButton.textContent = values.length > 0 ? values.join(" | ") : "Chọn tiêu chí lọc";
+                                                                  }
 
-    filterOptions.forEach(option => {
-        option.addEventListener("click", function (e) {
-            e.preventDefault();
-            e.stopPropagation(); // Ngăn sự kiện lan truyền
+                                                                  filterOptions.forEach(option => {
+                                                                      option.addEventListener("click", function (e) {
+                                                                          e.preventDefault();
+                                                                          e.stopPropagation(); // Ngăn sự kiện lan truyền
 
-            const type = this.dataset.type;
-            const value = this.innerText.trim();
+                                                                          const type = this.dataset.type;
+                                                                          const value = this.innerText.trim();
 
-            // Set value vào hidden input
-            switch (type) {
-                case "category":
-                    filterCategory.value = value;
-                    break;
-                case "activeIngredient":
-                    filterActiveIngredient.value = value;
-                    break;
-                case "drugGroup":
-                    filterDrugGroup.value = value;
-                    break;
-                case "drugType":
-                    filterDrugType.value = value;
-                    break;
-            }
+                                                                          // Set value vào hidden input
+                                                                          switch (type) {
+                                                                              case "category":
+                                                                                  filterCategory.value = value;
+                                                                                  break;
+                                                                              case "activeIngredient":
+                                                                                  filterActiveIngredient.value = value;
+                                                                                  break;
+                                                                              case "drugGroup":
+                                                                                  filterDrugGroup.value = value;
+                                                                                  break;
+                                                                              case "drugType":
+                                                                                  filterDrugType.value = value;
+                                                                                  break;
+                                                                          }
 
-            updateButtonText();
+                                                                          updateButtonText();
 
-            // Đóng tất cả dropdown
-            document.querySelectorAll('.dropdown-menu').forEach(menu => menu.classList.remove('show'));
-        });
-    });
+                                                                          // Đóng tất cả dropdown
+                                                                          document.querySelectorAll('.dropdown-menu').forEach(menu => menu.classList.remove('show'));
+                                                                      });
+                                                                  });
 
-    // Khởi tạo hiển thị ban đầu
-    updateButtonText();
-});
+                                                                  // Khởi tạo hiển thị ban đầu
+                                                                  updateButtonText();
+                                                              });
 
                 </script>
                 </body>

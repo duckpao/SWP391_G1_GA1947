@@ -349,53 +349,120 @@ VALUES (?, ?, ?, ?, '', NULL, GETDATE(), GETDATE())
         }
     }
 
-    // Delete user by ID (ensure no deletion of Admin)
-    public boolean delete(int userId) throws SQLException {
-        User user = findById(userId);
-        if (user == null) {
-            return false;
-        }
-        if ("Admin".equals(user.getRole())) {
-            throw new SQLException("Cannot delete Admin account!");
-        }
-        String sqlDeleteUser = "DELETE FROM Users WHERE user_id=?";
-        String sqlDeleteSupplier = "DELETE FROM Suppliers WHERE user_id=?";
-        try {
-            connection.setAutoCommit(false);
-            // Nếu role là Supplier thì xóa từ bảng Suppliers trước
-            if ("Supplier".equalsIgnoreCase(user.getRole())) {
-                try (PreparedStatement psSupp = connection.prepareStatement(sqlDeleteSupplier)) {
-                    psSupp.setInt(1, userId);
-                    psSupp.executeUpdate();
-                }
-            }
-            boolean deleted = false;
-            try (PreparedStatement psUser = connection.prepareStatement(sqlDeleteUser)) {
-                psUser.setInt(1, userId);
-                int rowsAffected = psUser.executeUpdate();
-                deleted = rowsAffected > 0;
-            }
-            connection.commit();
-            return deleted;
-        } catch (SQLException e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException ex) {
-                    ex.printStackTrace();
-                }
-            }
-            throw e;
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.setAutoCommit(true);
-                } catch (SQLException ex) {
-                    ex.printStackTrace();
-                }
-            }
-        }
+public boolean delete(int userId) throws SQLException {
+    User user = findById(userId);
+    if (user == null || "Admin".equals(user.getRole())) {
+        return false;
     }
+   
+    connection.setAutoCommit(false);
+    try {
+        // Supplier
+        if ("Supplier".equalsIgnoreCase(user.getRole())) {
+            PreparedStatement ps = connection.prepareStatement("SELECT supplier_id FROM Suppliers WHERE user_id=?");
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                int sid = rs.getInt(1);
+                
+                // Handle dependents for Supplier
+                // DeliveryNotes: Set po_id to NULL for POs of this supplier
+                execUpdate("UPDATE DeliveryNotes SET po_id = NULL WHERE po_id IN (SELECT po_id FROM PurchaseOrders WHERE supplier_id=?)", sid);
+                
+                // AdvancedShippingNotices: Set supplier_id to NULL
+                execUpdate("UPDATE AdvancedShippingNotices SET supplier_id = NULL WHERE supplier_id=?", sid);
+                
+                // Invoices: Set supplier_id to NULL
+                execUpdate("UPDATE Invoices SET supplier_id = NULL WHERE supplier_id=?", sid);
+                
+                // Batches: Set supplier_id to NULL
+                execUpdate("UPDATE Batches SET supplier_id = NULL WHERE supplier_id=?", sid);
+                
+                // Tasks: Set po_id to NULL
+                execUpdate("UPDATE Tasks SET po_id = NULL WHERE po_id IN (SELECT po_id FROM PurchaseOrders WHERE supplier_id=?)", sid);
+                
+                // SupplierTransactions: Delete
+                execUpdate("DELETE FROM SupplierTransactions WHERE supplier_id=?", sid);
+                
+                // Now safe to delete POs (cascade to items)
+                execUpdate("DELETE FROM PurchaseOrders WHERE supplier_id=?", sid);
+                
+                // Delete Supplier
+                execUpdate("DELETE FROM Suppliers WHERE supplier_id=?", sid);
+            }
+        }
+       
+        // Nullify foreign keys
+        execUpdate("UPDATE AuditReports SET auditor_id=NULL WHERE auditor_id=?", userId);
+        execUpdate("UPDATE SystemLogs SET user_id=NULL WHERE user_id=?", userId);
+        execUpdate("UPDATE Transactions SET user_id=NULL WHERE user_id=?", userId);
+        execUpdate("UPDATE DeliveryNotes SET received_by=NULL WHERE received_by=?", userId);
+        execUpdate("UPDATE PurchaseOrders SET manager_id=NULL WHERE manager_id=?", userId);
+        execUpdate("UPDATE MedicationRequests SET doctor_id=NULL WHERE doctor_id=?", userId);
+        execUpdate("UPDATE IssueSlip SET pharmacist_id=NULL WHERE pharmacist_id=?", userId);
+        execUpdate("UPDATE Tasks SET staff_id=NULL WHERE staff_id=?", userId);
+        execUpdate("UPDATE Messages SET sender_id=NULL WHERE sender_id=?", userId);
+        execUpdate("UPDATE Messages SET receiver_id=NULL WHERE receiver_id=?", userId);
+        execUpdate("DELETE FROM Notifications WHERE sender_id=?", userId);
+        execUpdate("DELETE FROM Tickets WHERE user_id=? OR responded_by=?", userId, userId);
+       
+        // Delete user
+        PreparedStatement ps = connection.prepareStatement("DELETE FROM Users WHERE user_id=?");
+        ps.setInt(1, userId);
+        boolean ok = ps.executeUpdate() > 0;
+       
+        connection.commit();
+        return ok;
+    } catch (Exception e) {
+        connection.rollback();
+        throw e;
+    } finally {
+        connection.setAutoCommit(true);
+    }
+}
+
+private void execUpdate(String sql, int... params) throws SQLException {
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        for (int i = 0; i < params.length; i++) {
+            ps.setInt(i + 1, params[i]);
+        }
+        ps.executeUpdate();
+    }
+}
+/**
+ * Reactivate a deactivated user
+ */
+public boolean reactivate(int userId) throws SQLException {
+    String sql = "UPDATE Users SET is_active = 1, updated_at = GETDATE() WHERE user_id = ?";
+    
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        ps.setInt(1, userId);
+        int rowsAffected = ps.executeUpdate();
+        
+        if (rowsAffected > 0) {
+            System.out.println("✅ Reactivated user #" + userId);
+            
+            // Log action
+            String logSql = "INSERT INTO SystemLogs (user_id, action, table_name, record_id, details, log_date) " +
+                           "VALUES (?, 'REACTIVATE', 'Users', ?, 'User account reactivated', GETDATE())";
+            try (PreparedStatement psLog = connection.prepareStatement(logSql)) {
+                psLog.setInt(1, userId);
+                psLog.setInt(2, userId);
+                psLog.executeUpdate();
+            } catch (SQLException e) {
+                System.err.println("⚠️ Could not log reactivation: " + e.getMessage());
+            }
+            
+            return true;
+        }
+        return false;
+        
+    } catch (SQLException e) {
+        System.err.println("❌ Error reactivating user: " + e.getMessage());
+        e.printStackTrace();
+        throw e;
+    }
+}
 
     // Count total users
     public int countAll() throws SQLException {

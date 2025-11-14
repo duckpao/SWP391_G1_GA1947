@@ -8,6 +8,7 @@ import jakarta.servlet.http.*;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import model.User;
 
 /**
  * ✅ Hiển thị danh sách đơn hàng ĐÃ GIAO (Completed status)
@@ -20,7 +21,21 @@ public class ViewDeliveredOrderServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        User currentUser = (User) session.getAttribute("user");
         
+        // Check authentication
+        if (currentUser == null) {
+            response.sendRedirect(request.getContextPath() + "/login.jsp");
+            return;
+        }
+        
+        // Check authorization
+        String role = currentUser.getRole();
+        if (!"Admin".equals(role) && !"Pharmacist".equals(role)) {
+            response.sendRedirect(request.getContextPath() + "/unauthorized.jsp");
+            return;
+        }
         System.out.println("====================================");
         System.out.println("ViewDeliveredOrderServlet - Loading delivered orders");
         System.out.println("====================================");
@@ -55,7 +70,6 @@ public class ViewDeliveredOrderServlet extends HttpServlet {
             request.setAttribute("totalOrders", deliveredOrders.size());
             
             // Hiển thị message từ session
-            HttpSession session = request.getSession(false);
             if (session != null) {
                 String successMsg = (String) session.getAttribute("successMessage");
                 String errorMsg = (String) session.getAttribute("errorMessage");

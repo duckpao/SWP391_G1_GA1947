@@ -4675,3 +4675,43 @@ BEGIN
     PRINT '⚠️ batch_id already exists in IssueSlipItem';
 END
 GO
+
+USE SWP391;
+GO
+
+IF OBJECT_ID('trg_UpdateMedicineCurrentQuantity', 'TR') IS NOT NULL 
+    DROP TRIGGER trg_UpdateMedicineCurrentQuantity;
+GO
+
+CREATE TRIGGER trg_UpdateMedicineCurrentQuantity 
+ON Batches 
+AFTER INSERT, UPDATE 
+AS 
+BEGIN 
+    SET NOCOUNT ON; 
+    
+    -- ✅ CHỈ CẬP NHẬT KHI batch_quantity HOẶC status THAY ĐỔI
+    IF NOT UPDATE(batch_quantity) AND NOT UPDATE(status)
+        RETURN;
+    
+    -- Lấy danh sách medicine_code bị ảnh hưởng 
+    DECLARE @AffectedMedicines TABLE (medicine_code NVARCHAR(50)); 
+    
+    INSERT INTO @AffectedMedicines 
+    SELECT DISTINCT medicine_code FROM inserted 
+    UNION 
+    SELECT DISTINCT medicine_code FROM deleted; 
+    
+    -- ✅ CẬP NHẬT VỚI ROWLOCK
+    UPDATE Batches WITH (ROWLOCK)
+    SET current_quantity = ( 
+        SELECT ISNULL(SUM(b2.batch_quantity), 0) 
+        FROM Batches b2 WITH (NOLOCK) -- ✅ NOLOCK khi đọc
+        WHERE b2.medicine_code = Batches.medicine_code 
+        AND b2.status = 'Approved' 
+    ) 
+    WHERE medicine_code IN (SELECT medicine_code FROM @AffectedMedicines); 
+END; 
+GO
+
+PRINT '✅ Trigger updated successfully!';

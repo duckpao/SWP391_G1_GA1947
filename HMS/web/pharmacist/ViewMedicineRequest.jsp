@@ -19,25 +19,26 @@
                 box-sizing: border-box;
             }
 
-            html, body {
-                height: 100%;
-            }
+        body {
+            display: flex;
+            flex-direction: column;
+            background-color: #f9fafb;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+        }
 
-            body {
-                display: flex;
-                flex-direction: column;
-                background-color: #f9fafb;
-                font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-                font-size: 14px;
-                line-height: 1.5;
-                color: #374151;
-            }
+        .page-wrapper {
+            display: flex;
+            flex: 1;
+        }
 
-            .page-wrapper {
-                display: flex;
-                flex: 1;
-                min-height: calc(100vh - 60px);
-            }
+        .sidebar {
+            width: 250px;
+            background-color: #ffffff;
+            border-right: 1px solid #e5e7eb;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.08);
+            padding-top: 15px;
+        }
 
             /* White theme sidebar */
             
@@ -49,141 +50,126 @@
                 overflow-y: auto;
             }
 
-            h2 {
-                font-size: 28px;
-                margin-bottom: 25px;
-                font-weight: 700;
-                color: #1f2937;
-                letter-spacing: -0.5px;
-            }
+        .alert-danger {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
 
-            /* Alert styling */
-            .alert {
-                border-radius: 10px;
-                padding: 16px 20px;
-                margin-bottom: 24px;
-                font-weight: 500;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            }
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
 
-            .alert-danger {
-                background: #fee2e2;
-                color: #991b1b;
-                border: 1px solid #fecaca;
-            }
+        table {
+            width: 100%;
+            margin: 0;
+        }
 
-            /* Table container */
-            .table-container {
-                background: white;
-                border-radius: 12px;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-                overflow: hidden;
-            }
+        thead {
+            background: #6b7280;
+            color: white;
+        }
 
-            table {
-                background: white;
-                border-collapse: collapse;
-                width: 100%;
-                margin: 0;
-            }
+        th {
+            padding: 14px 12px;
+            font-weight: 600;
+            text-align: center;
+        }
 
-            thead {
-                background: #6b7280;
-                color: white;
-            }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+            text-align: center;
+        }
 
-            th {
-                padding: 14px 12px;
-                font-weight: 600;
-                font-size: 13px;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-                text-align: center;
-            }
+        tbody tr:hover {
+            background-color: #f9fafb;
+        }
 
-            td {
-                padding: 12px;
-                border-bottom: 1px solid #e5e7eb;
-                font-size: 14px;
-                text-align: center;
-            }
+        .status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
 
-            tbody tr:hover {
-                background-color: #f9fafb;
-            }
+        .status.Pending {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
 
-            tbody tr:last-child td {
-                border-bottom: none;
-            }
+        .status.Approved {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
 
-            /* Status badges */
-            .status {
-                padding: 6px 12px;
-                border-radius: 20px;
-                font-size: 12px;
-                font-weight: 600;
-                display: inline-block;
-            }
+        .status.Fulfilled {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
 
-            .status.Pending {
-                background-color: #fef3c7;
-                color: #92400e;
-            }
+        .status.Canceled, .status.Rejected {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
 
-            .status.Approved {
-                background-color: #d1fae5;
-                color: #065f46;
-            }
+        .btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
 
-            .status.Fulfilled {
-                background-color: #dbeafe;
-                color: #1e40af;
-            }
+        .btn-success {
+            background-color: #10b981;
+            color: white;
+        }
 
-            .status.Canceled {
-                background-color: #fee2e2;
-                color: #991b1b;
-            }
+        .btn-success:hover {
+            background-color: #059669;
+            transform: translateY(-2px);
+        }
 
-            /* Gray button styling */
-            .btn {
-                padding: 8px 16px;
-                border-radius: 8px;
-                font-weight: 600;
-                font-size: 13px;
-                transition: all 0.3s ease;
-                border: none;
-                cursor: pointer;
-            }
+        .btn-danger {
+            background-color: #ef4444;
+            color: white;
+        }
 
-            .btn-success {
-                background-color: #10b981;
-                color: white;
-            }
+        .btn-danger:hover {
+            background-color: #dc2626;
+            transform: translateY(-2px);
+        }
 
-            .btn-success:hover {
-                background-color: #059669;
-                transform: translateY(-2px);
-                box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-            }
+        .btn-primary {
+            background-color: #3b82f6;
+            color: white;
+        }
 
-            .btn-danger {
-                background-color: #ef4444;
-                color: white;
-            }
+        .btn-primary:hover {
+            background-color: #2563eb;
+        }
 
-            .btn-danger:hover {
-                background-color: #dc2626;
-                transform: translateY(-2px);
-                box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-            }
+        .badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
 
-            .btn-sm {
-                padding: 6px 12px;
-                font-size: 12px;
-            }
+        .bg-secondary {
+            background-color: #6b7280;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <%@ include file="/admin/header.jsp" %>
 
             .badge {
                 padding: 6px 12px;
@@ -367,20 +353,132 @@
             </div>
         </div>
 
-        <%@ include file="/admin/footer.jsp" %>
+        <div class="main">
+            <h2>Danh sách yêu cầu thuốc</h2>
 
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+            <!-- ✅ HIỂN THỊ THÔNG BÁO THÀNH CÔNG -->
+            <c:if test="${not empty success}">
+                <div class="alert alert-success">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span>${success}</span>
+                </div>
+            </c:if>
 
-        <script>
-                                                                      function addRejectReason(form) {
-                                                                          var reason = prompt("Nhập lý do từ chối yêu cầu:");
-                                                                          if (reason == null || reason.trim() === "") {
-                                                                              alert("Bạn phải nhập lý do từ chối!");
-                                                                              return false;
-                                                                          }
-                                                                          form.reason.value = reason;
-                                                                          return true;
-                                                                      }
-        </script>
-    </body>
+            <c:if test="${not empty error}">
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <span>${error}</span>
+                </div>
+            </c:if>
+
+            <c:choose>
+                <c:when test="${not empty requestList}">
+                    <div class="table-container">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Request ID</th>
+                                    <th>Bác sĩ</th>
+                                    <th>Trạng thái</th>
+                                    <th>Ngày yêu cầu</th>
+                                    <th>Tên thuốc</th>
+                                    <th>Số lượng</th>
+                                    <th>Ghi chú</th>
+                                    <th>Thao tác</th>
+                                    <th>Phiếu xuất</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <c:forEach var="req" items="${requestList}">
+                                    <tr>
+                                        <td><strong>${req.requestId}</strong></td>
+                                        <td>${req.doctorName}</td>
+                                        <td><span class="status ${req.status}">${req.status}</span></td>
+                                        <td>${req.requestDate}</td>
+                                        <td>
+                                            <c:forEach var="item" items="${req.items}">
+                                                ${item.medicineName}<br/>
+                                            </c:forEach>
+                                        </td>
+                                        <td>
+                                            <c:forEach var="item" items="${req.items}">
+                                                ${item.quantity}<br/>
+                                            </c:forEach>
+                                        </td>
+                                        <td>${req.notes}</td>
+                                        <td>
+                                            <c:choose>
+                                                <c:when test="${req.status == 'Pending'}">
+                                                    <div style="display: flex; gap: 8px; justify-content: center;">
+                                                        <!-- ✅ FORM CHẤP NHẬN VỚI CONFIRM -->
+                                                        <form action="${pageContext.request.contextPath}/PharmacistUpdateRequest" 
+                                                              method="post" 
+                                                              onsubmit="return confirm('Bạn có chắc chắn muốn CHẤP NHẬN yêu cầu này?\n\n⚠️ Hệ thống sẽ tự động:\n- Trừ kho thuốc theo FIFO (lô hết hạn sớm nhất)\n- Tạo phiếu xuất kho\n- Ghi nhận giao dịch');">
+                                                            <input type="hidden" name="action" value="approve"/>
+                                                            <input type="hidden" name="requestId" value="${req.requestId}"/>
+                                                            <button type="submit" class="btn btn-success btn-sm">
+                                                                <i class="bi bi-check-circle"></i> Chấp nhận
+                                                            </button>
+                                                        </form>
+
+                                                        <!-- ✅ FORM TỪ CHỐI VỚI REASON -->
+                                                        <form action="${pageContext.request.contextPath}/PharmacistUpdateRequest" 
+                                                              method="post" 
+                                                              onsubmit="return addRejectReason(this)">
+                                                            <input type="hidden" name="action" value="reject"/>
+                                                            <input type="hidden" name="requestId" value="${req.requestId}"/>
+                                                            <input type="hidden" name="reason" value=""/>
+                                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                                <i class="bi bi-x-circle"></i> Từ chối
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span class="badge bg-secondary">Đã xử lý</span>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </td>
+                                        <td>
+                                            <c:choose>
+                                                <c:when test="${req.status == 'Approved' || req.status == 'Fulfilled'}">
+                                                    <a href="${pageContext.request.contextPath}/pharmacist/viewIssueSlip?requestId=${req.requestId}"
+                                                       class="btn btn-primary btn-sm">
+                                                        <i class="bi bi-eye"></i> Xem
+                                                    </a>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    -
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+                            </tbody>
+                        </table>
+                    </div>
+                </c:when>
+                <c:otherwise>
+                    <div class="empty-state">
+                        <h3>Không có yêu cầu thuốc nào</h3>
+                    </div>
+                </c:otherwise>
+            </c:choose>
+        </div>
+    </div>
+
+    <%@ include file="/admin/footer.jsp" %>
+
+    <script>
+        function addRejectReason(form) {
+            var reason = prompt("Nhập lý do từ chối yêu cầu:");
+            if (reason == null || reason.trim() === "") {
+                alert("Bạn phải nhập lý do từ chối!");
+                return false;
+            }
+            form.reason.value = reason;
+            return confirm("Xác nhận TỪ CHỐI yêu cầu này với lý do:\n\n" + reason);
+        }
+    </script>
+</body>
 </html>

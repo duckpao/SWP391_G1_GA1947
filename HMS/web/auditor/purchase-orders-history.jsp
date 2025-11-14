@@ -779,51 +779,52 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <c:choose>
-                                    <c:when test="${empty historicalOrders}">
-                                        <tr>
-                                            <td colspan="8">
-                                                <div class="empty-state">
-                                                    <div class="empty-state-icon">
-                                                        <i class="bi bi-inbox"></i>
-                                                    </div>
-                                                    <h5>No Historical Orders Found</h5>
-                                                    <p>Try adjusting your filters or check back later</p>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <c:forEach var="po" items="${historicalOrders}">
-                                            <tr>
-                                                <td><strong>#${po.poId}</strong></td>
-                                                <td>
-                                                    <fmt:formatDate value="${po.orderDate}" pattern="dd/MM/yyyy"/>
-                                                </td>
-                                                <td>${po.supplierName}</td>
-                                                <td>${po.managerName}</td>
-                                                <td>
-                                                    <span class="badge badge-success">${po.status}</span>
-                                                </td>
-                                                <td>
-                                                    <span class="badge badge-primary">${po.itemCount} items</span>
-                                                </td>
-                                                <td>
-                                                    <strong>
-                                                        <fmt:formatNumber value="${po.totalAmount}" pattern="#,###"/> đ
-                                                    </strong>
-                                                </td>
-                                                <td>
-                                                    <a href="${pageContext.request.contextPath}/purchase-orders?action=view&id=${po.poId}" 
-                                                       class="action-btn">
-                                                        <i class="bi bi-eye"></i> View
-                                                    </a>
-                                                </td>
-                                            </tr>
-                                        </c:forEach>
-                                    </c:otherwise>
-                                </c:choose>
-                            </tbody>
+    <c:choose>
+        <c:when test="${empty historicalOrders}">
+            <tr>
+                <td colspan="8">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
+                            <i class="bi bi-inbox"></i>
+                        </div>
+                        <h5>No Historical Orders Found</h5>
+                        <p>Try adjusting your filters or check back later</p>
+                    </div>
+                </td>
+            </tr>
+        </c:when>
+        <c:otherwise>
+            <c:forEach var="po" items="${historicalOrders}">
+                <tr>
+                    <td><strong>#${po.poId}</strong></td>
+                    <td>
+                        <fmt:formatDate value="${po.orderDate}" pattern="dd/MM/yyyy"/>
+                    </td>
+                    <td>${po.supplierName}</td>
+                    <td>${po.managerName}</td>
+                    <td>
+                        <!-- ✅ Luôn hiển thị "Completed" -->
+                        <span class="badge badge-success">Completed</span>
+                    </td>
+                    <td>
+                        <span class="badge badge-primary">${po.itemCount} items</span>
+                    </td>
+                    <td>
+                        <strong>
+                            <fmt:formatNumber value="${po.totalAmount}" pattern="#,###"/> đ
+                        </strong>
+                    </td>
+                    <td>
+                        <a href="${pageContext.request.contextPath}/purchase-orders?action=view&id=${po.poId}" 
+                           class="action-btn">
+                            <i class="bi bi-eye"></i> View
+                        </a>
+                    </td>
+                </tr>
+            </c:forEach>
+        </c:otherwise>
+    </c:choose>
+</tbody>
                         </table>
                     </div>
                 </div>

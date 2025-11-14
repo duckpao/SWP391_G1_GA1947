@@ -512,23 +512,18 @@
                 <c:forEach var="order" items="${completedOrders}">
                     <div class="order-card">
                         <div class="order-card-header">
-                            <div class="order-id">
-                                <span class="order-number">PO #${order.poId}</span>
-                                <c:choose>
-                                    <c:when test="${order.status == 'BatchCreated'}">
-                                        <span class="status-badge success">
-                                            <i class="bi bi-check-circle-fill"></i>
-                                            Batch Created
-                                        </span>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <span class="status-badge completed">
-                                            <i class="bi bi-box-seam"></i>
-                                            Completed
-                                        </span>
-                                    </c:otherwise>
-                                </c:choose>
-                            </div>
+    <div class="order-id">
+        <span class="order-number">PO #${order.poId}</span>
+        <!-- ✅ THAY ĐỔI: Luôn hiển thị "Completed" -->
+        <span class="status-badge completed">
+            <i class="bi bi-box-seam"></i>
+            Completed
+        </span>
+    </div>
+    <button class="order-expand" onclick="toggleOrderDetails(${order.poId}, 'completed')">
+        <i class="bi bi-chevron-down"></i>
+    </button>
+</div>
                             <button class="order-expand" onclick="toggleOrderDetails(${order.poId}, 'completed')">
                                 <i class="bi bi-chevron-down"></i>
                             </button>

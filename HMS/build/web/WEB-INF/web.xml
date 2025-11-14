@@ -249,6 +249,22 @@
         <servlet-name>RateSupplierServlet</servlet-name>
         <servlet-class>Controller.RateSupplierServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>ManagerSentOrdersServlet</servlet-name>
+        <servlet-class>Controller.ManagerSentOrdersServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ManagerInTransitOrdersServlet</servlet-name>
+        <servlet-class>Controller.ManagerInTransitOrdersServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ManagerCompletedOrdersServlet</servlet-name>
+        <servlet-class>Controller.ManagerCompletedOrdersServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ViewASNDetailsServlet</servlet-name>
+        <servlet-class>Controller.ViewASNDetailsServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>VNPaymentServlet</servlet-name>
         <url-pattern>/vnpay-payment</url-pattern>
@@ -268,6 +284,22 @@
     <servlet-mapping>
         <servlet-name>RateSupplierServlet</servlet-name>
         <url-pattern>/manager/rate-supplier</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ManagerSentOrdersServlet</servlet-name>
+        <url-pattern>/manager/sent-orders</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ManagerInTransitOrdersServlet</servlet-name>
+        <url-pattern>/manager/intransit-orders</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ManagerCompletedOrdersServlet</servlet-name>
+        <url-pattern>/manager/completed-orders</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ViewASNDetailsServlet</servlet-name>
+        <url-pattern>/manager/view-asn</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout> 30 </session-timeout>

@@ -14,6 +14,8 @@ import java.sql.Date;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import model.ASNItem;
+import model.AdvancedShippingNotice;
 import model.SupplierRating;
 import model.Task;
 
@@ -1193,4 +1195,285 @@ private void logManagerAction(int managerId, String action, int recordId, String
         System.err.println("Error logging action: " + e.getMessage());
     }
 }
+
+
+/**
+ * Get all SENT orders (status = 'Sent' or 'Approved' or 'Rejected')
+ * Shows orders waiting for supplier action
+ */
+public List<PurchaseOrder> getSentOrders(int managerId) {
+    List<PurchaseOrder> orders = new ArrayList<>();
+    String query = "SELECT po.po_id, po.manager_id, po.supplier_id, po.status, " +
+                  "po.order_date, po.expected_delivery_date, po.notes, po.updated_at, " +
+                  "s.name as supplier_name, u.username as manager_name " +
+                  "FROM PurchaseOrders po " +
+                  "LEFT JOIN Suppliers s ON po.supplier_id = s.supplier_id " +
+                  "LEFT JOIN Users u ON po.manager_id = u.user_id " +
+                  "WHERE po.manager_id = ? AND po.status IN ('Sent', 'Approved', 'Rejected') " +
+                  "ORDER BY po.order_date DESC";
+    
+    try (PreparedStatement ps = connection.prepareStatement(query)) {
+        ps.setInt(1, managerId);
+        ResultSet rs = ps.executeQuery();
+        
+        while (rs.next()) {
+            PurchaseOrder po = new PurchaseOrder();
+            po.setPoId(rs.getInt("po_id"));
+            po.setManagerId(rs.getInt("manager_id"));
+            po.setSupplierId(rs.getInt("supplier_id"));
+            po.setStatus(rs.getString("status"));
+            po.setOrderDate(rs.getTimestamp("order_date"));
+            po.setExpectedDeliveryDate(rs.getDate("expected_delivery_date"));
+            po.setNotes(rs.getString("notes"));
+            po.setUpdatedAt(rs.getTimestamp("updated_at"));
+            po.setSupplierName(rs.getString("supplier_name"));
+            po.setManagerName(rs.getString("manager_name"));
+            orders.add(po);
+        }
+        
+        System.out.println("Loaded " + orders.size() + " sent orders for Manager #" + managerId);
+    } catch (SQLException e) {
+        System.err.println("Error getting sent orders: " + e.getMessage());
+        e.printStackTrace();
+    }
+    
+    return orders;
+}
+
+/**
+ * Get all IN TRANSIT orders
+ * Orders with ASN status = 'Sent' or 'InTransit'
+ */
+public List<PurchaseOrder> getInTransitOrders(int managerId) {
+    List<PurchaseOrder> orders = new ArrayList<>();
+    String query = "SELECT DISTINCT po.po_id, po.manager_id, po.supplier_id, po.status, " +
+                  "po.order_date, po.expected_delivery_date, po.notes, po.updated_at, " +
+                  "s.name as supplier_name, u.username as manager_name, " +
+                  "asn.asn_id, asn.tracking_number, asn.carrier, asn.status as asn_status, " +
+                  "asn.shipment_date, asn.submitted_by " +
+                  "FROM PurchaseOrders po " +
+                  "INNER JOIN AdvancedShippingNotices asn ON po.po_id = asn.po_id " +
+                  "LEFT JOIN Suppliers s ON po.supplier_id = s.supplier_id " +
+                  "LEFT JOIN Users u ON po.manager_id = u.user_id " +
+                  "WHERE po.manager_id = ? AND asn.status IN ('Sent', 'InTransit') " +
+                  "ORDER BY asn.shipment_date DESC";
+    
+    try (PreparedStatement ps = connection.prepareStatement(query)) {
+        ps.setInt(1, managerId);
+        ResultSet rs = ps.executeQuery();
+        
+        while (rs.next()) {
+            PurchaseOrder po = new PurchaseOrder();
+            po.setPoId(rs.getInt("po_id"));
+            po.setManagerId(rs.getInt("manager_id"));
+            po.setSupplierId(rs.getInt("supplier_id"));
+            po.setStatus(rs.getString("status"));
+            po.setOrderDate(rs.getTimestamp("order_date"));
+            po.setExpectedDeliveryDate(rs.getDate("expected_delivery_date"));
+            po.setNotes(rs.getString("notes"));
+            po.setUpdatedAt(rs.getTimestamp("updated_at"));
+            po.setSupplierName(rs.getString("supplier_name"));
+            po.setManagerName(rs.getString("manager_name"));
+            
+            // ASN info
+            po.setAsnId(rs.getInt("asn_id"));
+            po.setTrackingNumber(rs.getString("tracking_number"));
+            po.setCarrier(rs.getString("carrier"));
+            po.setAsnStatus(rs.getString("asn_status"));
+            po.setHasAsn(true);
+            
+            orders.add(po);
+        }
+        
+        System.out.println("Loaded " + orders.size() + " in-transit orders for Manager #" + managerId);
+    } catch (SQLException e) {
+        System.err.println("Error getting in-transit orders: " + e.getMessage());
+        e.printStackTrace();
+    }
+    
+    return orders;
+}
+
+/**
+ * Get all COMPLETED orders
+ * Orders with status = 'Completed' or 'Paid'
+ */
+public List<PurchaseOrder> getCompletedOrders(int managerId) {
+    List<PurchaseOrder> orders = new ArrayList<>();
+    String query = "SELECT po.po_id, po.manager_id, po.supplier_id, po.status, " +
+                  "po.order_date, po.expected_delivery_date, po.notes, po.updated_at, " +
+                  "s.name as supplier_name, s.performance_rating, u.username as manager_name, " +
+                  "asn.asn_id, asn.tracking_number, asn.carrier, asn.status as asn_status, " +
+                  "asn.shipment_date, " +
+                  "(SELECT COUNT(*) FROM SupplierRatings sr " +
+                  " WHERE sr.po_id = po.po_id AND sr.manager_id = ?) as is_rated, " +
+                  "(SELECT rating FROM SupplierRatings sr " +
+                  " WHERE sr.po_id = po.po_id AND sr.manager_id = ?) as rating_value " +
+                  "FROM PurchaseOrders po " +
+                  "LEFT JOIN AdvancedShippingNotices asn ON po.po_id = asn.po_id " +
+                  "LEFT JOIN Suppliers s ON po.supplier_id = s.supplier_id " +
+                  "LEFT JOIN Users u ON po.manager_id = u.user_id " +
+                  "WHERE po.manager_id = ? AND po.status IN ('Completed', 'Paid') " +
+                  "ORDER BY po.updated_at DESC";
+    
+    try (PreparedStatement ps = connection.prepareStatement(query)) {
+        ps.setInt(1, managerId);
+        ps.setInt(2, managerId);
+        ps.setInt(3, managerId);
+        ResultSet rs = ps.executeQuery();
+        
+        while (rs.next()) {
+            PurchaseOrder po = new PurchaseOrder();
+            po.setPoId(rs.getInt("po_id"));
+            po.setManagerId(rs.getInt("manager_id"));
+            po.setSupplierId(rs.getInt("supplier_id"));
+            po.setStatus(rs.getString("status"));
+            po.setOrderDate(rs.getTimestamp("order_date"));
+            po.setExpectedDeliveryDate(rs.getDate("expected_delivery_date"));
+            po.setNotes(rs.getString("notes"));
+            po.setUpdatedAt(rs.getTimestamp("updated_at"));
+            po.setSupplierName(rs.getString("supplier_name"));
+            po.setManagerName(rs.getString("manager_name"));
+            
+            // ASN info (nếu có)
+            int asnId = rs.getInt("asn_id");
+            if (!rs.wasNull()) {
+                po.setAsnId(asnId);
+                po.setTrackingNumber(rs.getString("tracking_number"));
+                po.setCarrier(rs.getString("carrier"));
+                po.setAsnStatus(rs.getString("asn_status"));
+                po.setHasAsn(true);
+            }
+            
+            orders.add(po);
+        }
+        
+        System.out.println("Loaded " + orders.size() + " completed orders for Manager #" + managerId);
+    } catch (SQLException e) {
+        System.err.println("Error getting completed orders: " + e.getMessage());
+        e.printStackTrace();
+    }
+    
+    return orders;
+}
+
+/**
+ * Get ASN details by PO ID
+ */
+public AdvancedShippingNotice getASNByPoId(int poId) {
+    String query = "SELECT asn.*, s.name as supplier_name, po.status as po_status, " +
+                  "po.expected_delivery_date, " +
+                  "(SELECT COUNT(*) FROM ASNItems WHERE asn_id = asn.asn_id) as total_items, " +
+                  "(SELECT SUM(quantity) FROM ASNItems WHERE asn_id = asn.asn_id) as total_quantity " +
+                  "FROM AdvancedShippingNotices asn " +
+                  "LEFT JOIN Suppliers s ON asn.supplier_id = s.supplier_id " +
+                  "LEFT JOIN PurchaseOrders po ON asn.po_id = po.po_id " +
+                  "WHERE asn.po_id = ? " +
+                  "ORDER BY asn.created_at DESC";
+    
+    try (PreparedStatement ps = connection.prepareStatement(query)) {
+        ps.setInt(1, poId);
+        ResultSet rs = ps.executeQuery();
+        
+        if (rs.next()) {
+            AdvancedShippingNotice asn = new AdvancedShippingNotice();
+            asn.setAsnId(rs.getInt("asn_id"));
+            asn.setPoId(rs.getInt("po_id"));
+            asn.setSupplierId(rs.getInt("supplier_id"));
+            asn.setShipmentDate(rs.getDate("shipment_date"));
+            asn.setCarrier(rs.getString("carrier"));
+            asn.setTrackingNumber(rs.getString("tracking_number"));
+            asn.setStatus(rs.getString("status"));
+            asn.setNotes(rs.getString("notes"));
+            asn.setSubmittedBy(rs.getString("submitted_by"));
+            asn.setApprovedBy(rs.getString("approved_by"));
+            asn.setSubmittedAt(rs.getTimestamp("submitted_at"));
+            asn.setApprovedAt(rs.getTimestamp("approved_at"));
+            asn.setRejectionReason(rs.getString("rejection_reason"));
+            asn.setCreatedAt(rs.getTimestamp("created_at"));
+            asn.setUpdatedAt(rs.getTimestamp("updated_at"));
+            
+            // Additional info
+            asn.setSupplierName(rs.getString("supplier_name"));
+            asn.setPoStatus(rs.getString("po_status"));
+            asn.setExpectedDeliveryDate(rs.getDate("expected_delivery_date"));
+            asn.setTotalItems(rs.getInt("total_items"));
+            asn.setTotalQuantity(rs.getInt("total_quantity"));
+            
+            System.out.println("Loaded ASN #" + asn.getAsnId() + " for PO #" + poId);
+            return asn;
+        }
+    } catch (SQLException e) {
+        System.err.println("Error getting ASN for PO #" + poId + ": " + e.getMessage());
+        e.printStackTrace();
+    }
+    
+    return null;
+}
+
+/**
+ * Get ASN items by ASN ID
+ */
+public List<ASNItem> getASNItems(int asnId) {
+    List<ASNItem> items = new ArrayList<>();
+    String query = "SELECT ai.*, m.name as medicine_name, m.category, m.strength, " +
+                  "m.dosage_form, m.manufacturer, m.unit, m.active_ingredient " +
+                  "FROM ASNItems ai " +
+                  "LEFT JOIN Medicines m ON ai.medicine_code = m.medicine_code " +
+                  "WHERE ai.asn_id = ?";
+    
+    try (PreparedStatement ps = connection.prepareStatement(query)) {
+        ps.setInt(1, asnId);
+        ResultSet rs = ps.executeQuery();
+        
+        while (rs.next()) {
+            ASNItem item = new ASNItem();
+            item.setItemId(rs.getInt("item_id"));
+            item.setAsnId(rs.getInt("asn_id"));
+            item.setMedicineCode(rs.getString("medicine_code"));
+            item.setQuantity(rs.getInt("quantity"));
+            item.setLotNumber(rs.getString("lot_number"));
+            
+            // Medicine details (match với ASNItem model của bạn)
+            item.setMedicineName(rs.getString("medicine_name"));
+            item.setMedicineCategory(rs.getString("category")); // ✅ medicineCategory
+            item.setStrength(rs.getString("strength"));
+            item.setDosageForm(rs.getString("dosage_form"));
+            item.setManufacturer(rs.getString("manufacturer"));
+            item.setUnit(rs.getString("unit"));
+            item.setActiveIngredient(rs.getString("active_ingredient"));
+            
+            items.add(item);
+        }
+        
+        System.out.println("Loaded " + items.size() + " items for ASN #" + asnId);
+    } catch (SQLException e) {
+        System.err.println("Error getting ASN items: " + e.getMessage());
+        e.printStackTrace();
+    }
+    
+    return items;
+}
+
+/**
+ * Get rejection reason for a PO (if rejected)
+ */
+public String getRejectionReason(int poId) {
+    String query = "SELECT notes FROM PurchaseOrders WHERE po_id = ? AND status = 'Rejected'";
+    try (PreparedStatement ps = connection.prepareStatement(query)) {
+        ps.setInt(1, poId);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            String notes = rs.getString("notes");
+            if (notes != null && notes.contains("Rejection Reason:")) {
+                return notes.substring(notes.indexOf("Rejection Reason:") + 17).trim();
+            }
+            return notes;
+        }
+    } catch (SQLException e) {
+        System.err.println("Error getting rejection reason: " + e.getMessage());
+    }
+    return null;
+}
+
 }

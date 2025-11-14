@@ -528,7 +528,7 @@
                                         <th>Nhà cung cấp</th>
                                         <th>Ngày nhập</th>
                                         <th>Hạn sử dụng</th>
-                                        <th>Tồn kho</th>
+                                        <th>SL CỦA LÔ</th>
                                         <th>Trạng thái</th>
                                         <th>Chỉnh sửa</th>
                                         <th>Action</th>
@@ -543,7 +543,7 @@
                                             <td>${b.supplierName}</td>
                                             <td><fmt:formatDate value="${b.receivedDate}" pattern="dd/MM/yyyy"/></td>
                                             <td><fmt:formatDate value="${b.expiryDate}" pattern="yyyy-MM-dd"/></td>
-                                            <td>${b.currentQuantity}</td>
+                                            <td>${b.batchQuantity}</td>
                                             <td>
                                                 <span class="status-badge
                                                       ${b.status == 'Available' ? 'status-available' :
@@ -561,7 +561,7 @@
                                                             data-supplier="${b.supplierName}"
                                                             data-expiry="<fmt:formatDate value='${b.expiryDate}' pattern='yyyy-MM-dd'/>"
                                                             data-received="<fmt:formatDate value='${b.receivedDate}' pattern='yyyy-MM-dd'/>"
-                                                            data-current="${b.currentQuantity}"
+                                                            data-current="${b.batchQuantity}"
                                                             data-status="${b.status}"
                                                             data-quarantinenotes="${b.quarantineNotes}">
                                                         <i class="bi bi-pencil-square"></i>
@@ -646,8 +646,8 @@
 
 
                             <div class="mb-3">
-                                <label>Tồn kho</label>
-                                <input type="number" id="edit-current" name="currentQuantity" class="form-control" required>
+                                <label>SL của Lô</label>
+                                <input type="number" id="edit-current" name="batchQuantity" class="form-control" required>
                             </div>
 
                             <div class="mb-3">
@@ -816,7 +816,7 @@
                         document.getElementById("hidden-received").value = button.dataset.received || "";
                         // ✅ chỉ hiển thị
                         document.getElementById("edit-expiry").value = button.dataset.expiry || "";
-                        document.getElementById("edit-current").value = button.dataset.current || "";
+                        document.getElementById("edit-batch").value = button.dataset.batchquantity || "";
                         document.getElementById("edit-status").value = button.dataset.status || "Received";
                         document.getElementById("edit-quarantine-notes").value = button.dataset.quarantinenotes || "";
 

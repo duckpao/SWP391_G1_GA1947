@@ -409,13 +409,11 @@
 <%@ include file="/admin/header.jsp" %>
 <body>
     <div class="dashboard-container">
-        <!-- Sidebar -->
         <div class="sidebar">
             <div class="sidebar-header">
                 <h4><i class="bi bi-hospital"></i> Manager</h4>
                 <hr class="sidebar-divider">
             </div>
-
             <nav>
                 <a class="nav-link" href="${pageContext.request.contextPath}/manager-dashboard">
                     <i class="bi bi-speedometer2"></i> Dashboard
@@ -426,9 +424,25 @@
                 <a class="nav-link active" href="${pageContext.request.contextPath}/cancelled-tasks">
                     <i class="bi bi-ban"></i> Cancelled Orders
                 </a>
-                
+                    <hr class="nav-divider">
+
+<!-- Order History Section -->
+<h6 style="font-size: 11px; font-weight: 600; color: #9ca3af; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
+    ORDER HISTORY
+</h6>
+<a class="nav-link" href="${pageContext.request.contextPath}/manager/sent-orders">
+    <i class="bi bi-send-check"></i> Sent Orders
+</a>
+                    <a class="nav-link" href="${pageContext.request.contextPath}/manage/transit">
+                    <i class="bi bi-truck"></i> Transit Orders
+                </a>
+
+<a class="nav-link" href="${pageContext.request.contextPath}/manager/completed-orders">
+    <i class="bi bi-check-circle"></i> Completed
+</a>
+               
                 <hr class="nav-divider">
-                
+               
                 <!-- Reports Section -->
                 <a class="nav-link" href="${pageContext.request.contextPath}/inventory-report">
                     <i class="bi bi-boxes"></i> Inventory Report
@@ -439,16 +453,15 @@
                 <a class="nav-link" href="${pageContext.request.contextPath}/stock-alerts">
                     <i class="bi bi-exclamation-triangle"></i> Stock Alerts
                 </a>
-                
+               
                 <hr class="nav-divider">
-                
+               
                 <!-- Management Section -->
                 <a class="nav-link" href="${pageContext.request.contextPath}/tasks/assign">
                     <i class="bi bi-pencil"></i> Assign Tasks
                 </a>
-                <a class="nav-link" href="${pageContext.request.contextPath}/manage/transit">
-                    <i class="bi bi-truck"></i> Transit Orders
-                </a>
+
+</li>
             </nav>
         </div>
 

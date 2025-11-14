@@ -507,9 +507,10 @@
 <a class="nav-link" href="${pageContext.request.contextPath}/manager/sent-orders">
     <i class="bi bi-send-check"></i> Sent Orders
 </a>
-<a class="nav-link" href="${pageContext.request.contextPath}/manager/intransit-orders">
-    <i class="bi bi-truck"></i> In Transit
-</a>
+                    <a class="nav-link" href="${pageContext.request.contextPath}/manage/transit">
+                    <i class="bi bi-truck"></i> Transit Orders
+                </a>
+
 <a class="nav-link" href="${pageContext.request.contextPath}/manager/completed-orders">
     <i class="bi bi-check-circle"></i> Completed
 </a>
@@ -533,17 +534,7 @@
                 <a class="nav-link" href="${pageContext.request.contextPath}/tasks/assign">
                     <i class="bi bi-pencil"></i> Assign Tasks
                 </a>
-                <a class="nav-link" href="${pageContext.request.contextPath}/manage/transit">
-                    <i class="bi bi-truck"></i> Transit Orders
-                </a>
-                    <li class="nav-item">
-    <a class="nav-link" href="${pageContext.request.contextPath}/manager/rate-supplier">
-        <i class="bi bi-star-fill"></i>
-        Rate Suppliers
-        <c:if test="${unratedCount > 0}">
-            <span class="badge bg-warning">${unratedCount}</span>
-        </c:if>
-    </a>
+
 </li>
             </nav>
         </div>

@@ -254,10 +254,6 @@
         <servlet-class>Controller.ManagerSentOrdersServlet</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>ManagerInTransitOrdersServlet</servlet-name>
-        <servlet-class>Controller.ManagerInTransitOrdersServlet</servlet-class>
-    </servlet>
-    <servlet>
         <servlet-name>ManagerCompletedOrdersServlet</servlet-name>
         <servlet-class>Controller.ManagerCompletedOrdersServlet</servlet-class>
     </servlet>
@@ -288,10 +284,6 @@
     <servlet-mapping>
         <servlet-name>ManagerSentOrdersServlet</servlet-name>
         <url-pattern>/manager/sent-orders</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>ManagerInTransitOrdersServlet</servlet-name>
-        <url-pattern>/manager/intransit-orders</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>ManagerCompletedOrdersServlet</servlet-name>

@@ -74,7 +74,7 @@ public class ViewASNDetailsServlet extends HttpServlet {
         User user = (User) session.getAttribute("user");
 
         if (!"Manager".equals(user.getRole())) {
-            response.sendRedirect(request.getContextPath() + "/unauthorized.jsp");
+            response.sendRedirect(request.getContextPath() + "/login.jsp");
             return;
         }
 

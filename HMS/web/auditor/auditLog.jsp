@@ -607,34 +607,7 @@
                             <input type="text" class="form-control" name="username" 
                                    placeholder="Search username..." value="${username}">
                         </div>
-                        <div class="form-group">
-                            <label>Role</label>
-                            <select class="form-control" name="role">
-                                <option value="">All Roles</option>
-                                <c:forEach items="${roles}" var="r">
-                                    <option value="${r}" ${role eq r ? 'selected' : ''}>${r}</option>
-                                </c:forEach>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Action</label>
-                            <select class="form-control" name="actionFilter">
-                                <option value="">All Actions</option>
-                                <c:forEach items="${actions}" var="act">
-                                    <option value="${act}" ${actionFilter eq act ? 'selected' : ''}>${act}</option>
-                                </c:forEach>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Category</label>
-                            <select class="form-control" name="category">
-                                <option value="">All Categories</option>
-                                <option value="Security" ${category eq 'Security' ? 'selected' : ''}>Security</option>
-                                <option value="Inventory" ${category eq 'Inventory' ? 'selected' : ''}>Inventory</option>
-                                <option value="Procurement" ${category eq 'Procurement' ? 'selected' : ''}>Procurement</option>
-                                <option value="Other" ${category eq 'Other' ? 'selected' : ''}>Other</option>
-                            </select>
-                        </div>
+
                     </div>
                     <div style="display: flex; gap: 12px;">
                         <button type="submit" class="btn btn-primary">
@@ -721,32 +694,34 @@
                     
                 </div>
                 
-                <!-- Pagination -->
-                <c:if test="${totalPages > 1}">
-                    <ul class="pagination">
-                        <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
-                            <a href="?action=view&page=${currentPage - 1}&pageSize=${pageSize}&startDate=${startDate}&endDate=${endDate}&username=${username}&role=${role}&actionFilter=${actionFilter}&tableName=${tableName}&riskLevel=${riskLevel}&category=${category}">
-                                Previous
-                            </a>
-                        </li>
-                        
-                        <c:forEach begin="1" end="${totalPages}" var="i">
-                            <c:if test="${i >= currentPage - 2 && i <= currentPage + 2}">
-                                <li class="page-item ${currentPage == i ? 'active' : ''}">
-                                    <a href="?action=view&page=${i}&pageSize=${pageSize}&startDate=${startDate}&endDate=${endDate}&username=${username}&role=${role}&actionFilter=${actionFilter}&tableName=${tableName}&riskLevel=${riskLevel}&category=${category}">
-                                        ${i}
-                                    </a>
-                                </li>
-                            </c:if>
-                        </c:forEach>
-                        
-                        <li class="page-item ${currentPage == totalPages ? 'disabled' : ''}">
-                            <a href="?action=view&page=${currentPage + 1}&pageSize=${pageSize}&startDate=${startDate}&endDate=${endDate}&username=${username}&role=${role}&actionFilter=${actionFilter}&tableName=${tableName}&riskLevel=${riskLevel}&category=${category}">
-                                Next
-                            </a>
-                        </li>
-                    </ul>
-                </c:if>
+                <!-- ✅ FIXED PAGINATION - Preserve ALL filters -->
+<c:if test="${totalPages > 1}">
+    <ul class="pagination">
+        <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
+            <a href="?action=view&page=${currentPage - 1}&pageSize=${pageSize}&startDate=${startDate}&endDate=${endDate}&username=${username}&role=${role}&actionFilter=${actionFilter}&tableName=${tableName}&riskLevel=${riskLevel}&category=${category}">
+                Previous
+            </a>
+        </li>
+        
+        <c:forEach begin="1" end="${totalPages}" var="i">
+            <c:if test="${i >= currentPage - 2 && i <= currentPage + 2}">
+                <li class="page-item ${currentPage == i ? 'active' : ''}">
+                    <a href="?action=view&page=${i}&pageSize=${pageSize}&startDate=${startDate}&endDate=${endDate}&username=${username}&role=${role}&actionFilter=${actionFilter}&tableName=${tableName}&riskLevel=${riskLevel}&category=${category}">
+                        ${i}
+                    </a>
+                </li>
+            </c:if>
+        </c:forEach>
+        
+        <li class="page-item ${currentPage == totalPages ? 'disabled' : ''}">
+            <a href="?action=view&page=${currentPage + 1}&pageSize=${pageSize}&startDate=${startDate}&endDate=${endDate}&username=${username}&role=${role}&actionFilter=${actionFilter}&tableName=${tableName}&riskLevel=${riskLevel}&category=${category}">
+                Next
+            </a>
+        </li>
+    </ul>
+</c:if>
+
+
             </div>
         </div>
     </div>

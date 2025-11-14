@@ -781,67 +781,64 @@
                         </div>
                     </c:if>
 
-                    <!-- Batch Details Table -->
-                    <c:if test="${reportType == 'batch' && not empty reports}">
-                        <div class="table-responsive">
-                            <table id="reportTable">
-                                <thead>
-                                    <tr>
-                                        <th>Batch ID</th>
-                                        <th>Medicine Code</th>
-                                        <th>Medicine Name</th>
-                                        <th>Lot Number</th>
-                                        <th>Status</th>
-                                        <th>Current Qty</th>
-                                        <th>Expiry Date</th>
-                                        <th>Received Date</th>
-                                        <th>Supplier</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <c:forEach items="${reports}" var="report">
-                                        <tr>
-                                            <td><strong>#${report.batchId}</strong></td>
-                                            <td><code>${report.medicineCode}</code></td>
-                                            <td>${report.medicineName}</td>
-                                            <td>${report.lotNumber}</td>
-                                            <td>
-                                                <c:choose>
-                                                    <c:when test="${report.status == 'Approved'}">
-                                                        <span class="badge badge-success">${report.status}</span>
-                                                    </c:when>
-                                                    <c:when test="${report.status == 'Quarantined'}">
-                                                        <span class="status-quarantined">${report.status}</span>
-                                                    </c:when>
-                                                    <c:otherwise>
-                                                        <span class="badge badge-primary">${report.status}</span>
-                                                    </c:otherwise>
-                                                </c:choose>
-                                            </td>
-                                            <td><strong>${report.currentQuantity}</strong></td>
-                                            <td><fmt:formatDate value="${report.expiryDate}" pattern="yyyy-MM-dd"/></td>
-                                            <td><fmt:formatDate value="${report.receivedDate}" pattern="yyyy-MM-dd"/></td>
-                                            <td>
-                                                <c:choose>
-                                                    <c:when test="${report.supplierName != null}">
-                                                        ${report.supplierName}
-                                                    </c:when>
-                                                    <c:otherwise>N/A</c:otherwise>
-                                                </c:choose>
-                                            </td>
-                                        </tr>
-                                    </c:forEach>
-                                </tbody>
-                            </table>
-                        </div>
-                    </c:if>
+<!-- Batch Details Table -->
+<c:if test="${reportType == 'batch' && not empty reports}">
+    <div class="table-responsive">
+        <table id="reportTable">
+            <thead>
+                <tr>
+                    <th>Batch ID</th>
+                    <th>Medicine Code</th>
+                    <th>Medicine Name</th>
+                    <th>Lot Number</th>
+                    <th>Status</th>
+                    <th>Batch Qty</th> <!-- ✅ ĐỔI TÊN CỘT -->
+                    <th>Expiry Date</th>
+                    <th>Received Date</th>
+                    <th>Supplier</th>
+                </tr>
+            </thead>
+            <tbody>
+                <c:forEach items="${reports}" var="report">
+                    <tr>
+                        <td><strong>#${report.batchId}</strong></td>
+                        <td><code>${report.medicineCode}</code></td>
+                        <td>${report.medicineName}</td>
+                        <td>${report.lotNumber}</td>
+                        <td>
+                            <c:choose>
+                                <c:when test="${report.status == 'Approved'}">
+                                    <span class="badge badge-success">${report.status}</span>
+                                </c:when>
+                                <c:when test="${report.status == 'Quarantined'}">
+                                    <span class="status-quarantined">${report.status}</span>
+                                </c:when>
+                                <c:otherwise>
+                                    <span class="badge badge-primary">${report.status}</span>
+                                </c:otherwise>
+                            </c:choose>
+                        </td>
+                        <td><strong>${report.batchQuantity}</strong></td> <!-- ✅ ĐỔI FIELD -->
+                        <td><fmt:formatDate value="${report.expiryDate}" pattern="yyyy-MM-dd"/></td>
+                        <td><fmt:formatDate value="${report.receivedDate}" pattern="yyyy-MM-dd"/></td>
+                        <td>
+                            <c:choose>
+                                <c:when test="${report.supplierName != null}">
+                                    ${report.supplierName}
+                                </c:when>
+                                <c:otherwise>N/A</c:otherwise>
+                            </c:choose>
+                        </td>
+                    </tr>
+                </c:forEach>
+            </tbody>
+        </table>
+    </div>
+</c:if>
 
                     <!-- Export Buttons -->
                     <c:if test="${not empty reports}">
                         <div class="button-group">
-                            <button onclick="exportToCSV()" class="btn btn-success">
-                                <i class="bi bi-file-earmark-csv"></i> Export CSV
-                            </button>
                             <button onclick="printTable()" class="btn btn-primary">
                                 <i class="bi bi-printer"></i> Print
                             </button>

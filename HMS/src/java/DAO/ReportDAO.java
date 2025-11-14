@@ -323,50 +323,50 @@ public class ReportDAO extends DBContext {
     /**
      * Get batch-level inventory details with date range filter
      */
-    public List<InventoryReport> getBatchInventoryDetails(Date startDate, Date endDate) {
-        List<InventoryReport> reports = new ArrayList<>();
-        
-        String query = "SELECT b.batch_id, m.medicine_code, m.name as medicine_name, " +
-                      "b.lot_number, b.status, b.current_quantity, " +
-                      "b.expiry_date, b.received_date, " +
-                      "s.name as supplier_name " +
-                      "FROM Batches b " +
-                      "INNER JOIN Medicines m ON b.medicine_code = m.medicine_code " +
-                      "LEFT JOIN Suppliers s ON b.supplier_id = s.supplier_id " +
-                      "WHERE b.status NOT IN ('Rejected') ";
-        
-        if (startDate != null && endDate != null) {
-            query += "AND b.received_date BETWEEN ? AND ? ";
-        }
-        
-        query += "ORDER BY m.name, b.expiry_date ASC";
-        
-        try (PreparedStatement ps = connection.prepareStatement(query)) {
-            int paramIndex = 1;
-            if (startDate != null && endDate != null) {
-                ps.setDate(paramIndex++, startDate);
-                ps.setDate(paramIndex++, endDate);
-            }
-            
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                InventoryReport report = new InventoryReport();
-                report.setBatchId(rs.getInt("batch_id"));
-                report.setMedicineCode(rs.getString("medicine_code"));
-                report.setMedicineName(rs.getString("medicine_name"));
-                report.setLotNumber(rs.getString("lot_number"));
-                report.setStatus(rs.getString("status"));
-                report.setCurrentQuantity(rs.getInt("current_quantity"));
-                report.setExpiryDate(rs.getDate("expiry_date"));
-                report.setReceivedDate(rs.getDate("received_date"));
-                report.setSupplierName(rs.getString("supplier_name"));
-                
-                reports.add(report);
-            }
-        } catch (SQLException e) {
-            System.err.println("Error getting batch inventory: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return reports;
+public List<InventoryReport> getBatchInventoryDetails(Date startDate, Date endDate) {
+    List<InventoryReport> reports = new ArrayList<>();
+    
+    String query = "SELECT b.batch_id, m.medicine_code, m.name as medicine_name, " +
+                  "b.lot_number, b.status, b.batch_quantity, " + // ✅ THÊM batch_quantity
+                  "b.expiry_date, b.received_date, " +
+                  "s.name as supplier_name " +
+                  "FROM Batches b " +
+                  "INNER JOIN Medicines m ON b.medicine_code = m.medicine_code " +
+                  "LEFT JOIN Suppliers s ON b.supplier_id = s.supplier_id " +
+                  "WHERE b.status NOT IN ('Rejected') ";
+    
+    if (startDate != null && endDate != null) {
+        query += "AND b.received_date BETWEEN ? AND ? ";
     }
+    
+    query += "ORDER BY m.name, b.expiry_date ASC";
+    
+    try (PreparedStatement ps = connection.prepareStatement(query)) {
+        int paramIndex = 1;
+        if (startDate != null && endDate != null) {
+            ps.setDate(paramIndex++, startDate);
+            ps.setDate(paramIndex++, endDate);
+        }
+        
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            InventoryReport report = new InventoryReport();
+            report.setBatchId(rs.getInt("batch_id"));
+            report.setMedicineCode(rs.getString("medicine_code"));
+            report.setMedicineName(rs.getString("medicine_name"));
+            report.setLotNumber(rs.getString("lot_number"));
+            report.setStatus(rs.getString("status"));
+            report.setBatchQuantity(rs.getInt("batch_quantity")); // ✅ THÊM dòng này
+            report.setExpiryDate(rs.getDate("expiry_date"));
+            report.setReceivedDate(rs.getDate("received_date"));
+            report.setSupplierName(rs.getString("supplier_name"));
+            
+            reports.add(report);
+        }
+    } catch (SQLException e) {
+        System.err.println("Error getting batch inventory: " + e.getMessage());
+        e.printStackTrace();
+    }
+    return reports;
+}
 }

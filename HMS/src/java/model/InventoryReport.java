@@ -13,6 +13,7 @@ public class InventoryReport {
     private int quarantinedQuantity;
     private Date nearestExpiry;
     private Date lastReceived;
+    private int batchQuantity;
     
     // For supplier report
     private int supplierId;
@@ -29,6 +30,13 @@ public class InventoryReport {
     
     // Constructors
     public InventoryReport() {}
+        public int getBatchQuantity() {
+        return batchQuantity;
+    }
+
+    public void setBatchQuantity(int batchQuantity) {
+        this.batchQuantity = batchQuantity;
+    }
     
     // Getters and Setters
     public String getMedicineCode() { return medicineCode; }

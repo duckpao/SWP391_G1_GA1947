@@ -1,63 +1,79 @@
 package Controller;
 
 import DAO.MedicationRequestDAO;
-import java.io.IOException;
-import java.sql.SQLException;
-import jakarta.servlet.ServletException;
+import jakarta.servlet.*;
 import jakarta.servlet.http.*;
+import java.io.IOException;
 
 public class PharmacistUpdateRequest extends HttpServlet {
 
-    private MedicationRequestDAO dao = new MedicationRequestDAO();
+@Override
+protected void doPost(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
+    
+    String action = request.getParameter("action");
+    String requestIdStr = request.getParameter("requestId");
+    
+    if (requestIdStr == null || requestIdStr.isEmpty()) {
+        request.getSession().setAttribute("error", "Request ID không hợp lệ!");
+        response.sendRedirect(request.getContextPath() + "/pharmacist/View_MedicineRequest");
+        return;
+    }
+    
+    int requestId = Integer.parseInt(requestIdStr);
+    MedicationRequestDAO dao = new MedicationRequestDAO();
+    
+    try {
+        if ("approve".equals(action)) {
+            HttpSession session = request.getSession();
+            Integer pharmacistId = (Integer) session.getAttribute("userId");
+            
+            if (pharmacistId == null) {
+                session.setAttribute("error", "Không tìm thấy thông tin Pharmacist!");
+                response.sendRedirect(request.getContextPath() + "/pharmacist/View_MedicineRequest");
+                return;
+            }
+            
+            // ✅ THÊM TIMEOUT HANDLER
+            System.out.println("🔄 Starting approval process for request #" + requestId);
+            long startTime = System.currentTimeMillis();
+            
+            dao.approveRequestWithInventory(requestId, pharmacistId);
+            
+            long duration = System.currentTimeMillis() - startTime;
+            System.out.println("✅ Approval completed in " + duration + "ms");
+            
+            session.setAttribute("success", "✅ Đã CHẤP NHẬN yêu cầu #" + requestId + " thành công! Phiếu xuất đã được tạo.");
+            
+        } else if ("reject".equals(action)) {
+            String reason = request.getParameter("reason");
+            
+            if (reason == null || reason.trim().isEmpty()) {
+                request.getSession().setAttribute("error", "Phải nhập lý do từ chối!");
+            } else {
+                boolean success = dao.rejectRequest(requestId, reason);
+                if (success) {
+                    request.getSession().setAttribute("success", "✅ Đã TỪ CHỐI yêu cầu #" + requestId);
+                } else {
+                    request.getSession().setAttribute("error", "Không thể từ chối yêu cầu!");
+                }
+            }
+        }
+    } catch (java.sql.SQLTimeoutException e) {
+        System.err.println("⏱️ Timeout: " + e.getMessage());
+        request.getSession().setAttribute("error", "❌ Xử lý quá lâu! Vui lòng thử lại.");
+    } catch (Exception e) {
+        System.err.println("❌ Unexpected error: " + e.getMessage());
+        e.printStackTrace();
+        request.getSession().setAttribute("error", "❌ Lỗi không xác định: " + e.getMessage());
+    }
+    
+    response.sendRedirect(request.getContextPath() + "/pharmacist/View_MedicineRequest");
+}
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
-        HttpSession session = request.getSession(false); // không tạo mới nếu chưa có
-        if (session == null || session.getAttribute("userId") == null) {
-            // Chưa đăng nhập → redirect về trang login
-            response.sendRedirect(request.getContextPath() + "/login.jsp");
-            return;
-        }
-
-        int pharmacistId;
-        try {
-            pharmacistId = (Integer) session.getAttribute("userId");
-        } catch (ClassCastException e) {
-            response.sendRedirect(request.getContextPath() + "/login.jsp");
-            return;
-        }
-
-        String action = request.getParameter("action");
-        String idStr = request.getParameter("requestId");
-        if (action == null || idStr == null) {
-            response.sendRedirect(request.getContextPath() + "/pharmacist/View_MedicineRequest");
-            return;
-        }
-
-        int requestId;
-        try {
-            requestId = Integer.parseInt(idStr);
-        } catch (NumberFormatException e) {
-            response.sendRedirect(request.getContextPath() + "/pharmacist/View_MedicineRequest");
-            return;
-        }
-
-        try {
-            if (action.equals("approve")) {
-                dao.approveRequest(requestId, pharmacistId);
-            } else if (action.equals("reject")) {
-                String reason = request.getParameter("reason");
-                dao.rejectRequest(requestId, reason);
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            session.setAttribute("error", e.getMessage());
-        }
-
-        // Quay lại trang danh sách
-        response.sendRedirect(request.getContextPath() + "/pharmacist/View_MedicineRequest");
+        doPost(request, response);
     }
 }

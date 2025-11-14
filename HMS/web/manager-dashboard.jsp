@@ -81,7 +81,6 @@
             padding: 40px;
             overflow-y: auto;
             background: #f9fafb;
-            min-height: 100vh;
         }
         .page-header {
             margin-bottom: 30px;
@@ -484,45 +483,61 @@
     <div class="dashboard-container">
         <!-- Sidebar -->
         <div class="sidebar">
-            <div class="sidebar-header">
-                <h4><i class="bi bi-hospital"></i> Manager</h4>
-                <hr class="sidebar-divider">
-            </div>
-            <nav>
-                <a class="nav-link active" href="${pageContext.request.contextPath}/manager-dashboard">
-                    <i class="bi bi-speedometer2"></i> Dashboard
-                </a>
-                <a class="nav-link" href="${pageContext.request.contextPath}/create-stock">
-                    <i class="bi bi-plus-circle"></i> New Stock Request
-                </a>
-                <a class="nav-link" href="${pageContext.request.contextPath}/cancelled-tasks">
-                    <i class="bi bi-ban"></i> Cancelled Orders
-                </a>
-               
-                <hr class="nav-divider">
-               
-                <!-- Reports Section -->
-                <a class="nav-link" href="${pageContext.request.contextPath}/inventory-report">
-                    <i class="bi bi-boxes"></i> Inventory Report
-                </a>
-                <a class="nav-link" href="${pageContext.request.contextPath}/expiry-report?days=30">
-                    <i class="bi bi-calendar-times"></i> Expiry Report
-                </a>
-                <a class="nav-link" href="${pageContext.request.contextPath}/stock-alerts">
-                    <i class="bi bi-exclamation-triangle"></i> Stock Alerts
-                </a>
-               
-                <hr class="nav-divider">
-               
-                <!-- Management Section -->
-                <a class="nav-link" href="${pageContext.request.contextPath}/tasks/assign">
-                    <i class="bi bi-pencil"></i> Assign Tasks
-                </a>
-                <a class="nav-link" href="${pageContext.request.contextPath}/manage/transit">
-                    <i class="bi bi-truck"></i> Transit Orders
-                </a>
-            </nav>
-        </div>
+                <div class="sidebar-header">
+                    <h4><i class="bi bi-hospital"></i> Manager</h4>
+                    <hr class="sidebar-divider">
+                </div>
+                <nav>
+                    <a class="nav-link active " href="${pageContext.request.contextPath}/manager-dashboard">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </a>
+                    <a class="nav-link " href="${pageContext.request.contextPath}/create-stock">
+                        <i class="bi bi-plus-circle"></i> New Stock Request
+                    </a>
+                    <a class="nav-link" href="${pageContext.request.contextPath}/cancelled-tasks">
+                        <i class="bi bi-ban"></i> Cancelled Orders
+                    </a>
+                    <hr class="nav-divider">
+
+                    <!-- Order History Section -->
+                    <h6 style="font-size: 11px; font-weight: 600; color: #9ca3af; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
+                        ORDER HISTORY
+                    </h6>
+                    <a class="nav-link" href="${pageContext.request.contextPath}/manager/sent-orders">
+                        <i class="bi bi-send-check"></i> Sent Orders
+                    </a>
+                    <a class="nav-link" href="${pageContext.request.contextPath}/manage/transit">
+                        <i class="bi bi-truck"></i> Transit Orders
+                    </a>
+
+                    <a class="nav-link" href="${pageContext.request.contextPath}/manager/completed-orders">
+                        <i class="bi bi-check-circle"></i> Completed
+                    </a>
+
+                    <hr class="nav-divider">
+
+                    <!-- Reports Section -->
+                    <a class="nav-link" href="${pageContext.request.contextPath}/inventory-report">
+                        <i class="bi bi-boxes"></i> Inventory Report
+                    </a>
+                    <a class="nav-link" href="${pageContext.request.contextPath}/expiry-report?days=30">
+                        <i class="bi bi-calendar-times"></i> Expiry Report
+                    </a>
+                    <a class="nav-link" href="${pageContext.request.contextPath}/stock-alerts">
+                        <i class="bi bi-exclamation-triangle"></i> Stock Alerts
+                    </a>
+
+                    <hr class="nav-divider">
+
+                    <!-- Management Section -->
+                    <a class="nav-link" href="${pageContext.request.contextPath}/tasks/assign">
+                        <i class="bi bi-pencil"></i> Assign Tasks
+                    </a>
+
+                    </li>
+                </nav>
+            </div> 
+
         <!-- Main Content -->
         <div class="main-content">
             <!-- Message Alert -->
@@ -532,6 +547,7 @@
                     ${message}
                 </div>
             </c:if>
+
             <!-- Statistics Cards -->
             <div class="stats-grid">
                 <div class="stat-card">
@@ -568,6 +584,7 @@
                     </div>
                 </div>
             </div>
+
             <!-- Stock Requests Section -->
             <div class="dashboard-card">
                 <div class="card-header">
@@ -618,13 +635,6 @@
                                                     <button class="btn btn-success" onclick="approveOrder(${order.poId})">
                                                         <i class="bi bi-send"></i> Send
                                                     </button>
-                                                                                                                    <c:if test="${order.status == 'Sent'}">
-                                                                <button class="btn btn-danger btn-sm"
-                                                                        onclick="confirmCancel(${order.poId})"
-                                                                        title="Cancel Order">
-                                                                    <i class="fas fa-times"></i> Cancel
-                                                                </button>
-                                                            </c:if>
                                                     <a href="${pageContext.request.contextPath}/edit-stock?poId=${order.poId}" class="btn btn-warning">
                                                         <i class="bi bi-pencil"></i> Edit
                                                     </a>
@@ -633,7 +643,7 @@
                                                     </button>
                                                 </c:if>
                                                 <c:if test="${order.status == 'Sent'}">
-                                                    <button class="btn btn-warning" onclick="cancelOrder(${order.poId})">
+                                                    <button class="btn btn-danger" onclick="confirmCancel(${order.poId})">
                                                         <i class="bi bi-x-circle"></i> Cancel
                                                     </button>
                                                 </c:if>
@@ -675,24 +685,20 @@
                                                                 </div>
                                                             </c:if>
                                                         </div>
-                                                        <!-- Order Items Section - COMPLETE VERSION WITH ALL MEDICINE DETAILS -->
                                                         <div>
                                                             <h6><i class="bi bi-capsule"></i> Order Items</h6>
                                                             <c:set var="items" value="${poItemsMap[order.poId]}" />
-                                                           
                                                             <c:if test="${empty items}">
                                                                 <div class="alert alert-warning">
                                                                     <i class="bi bi-exclamation-triangle"></i>
                                                                     No items found for PO #${order.poId}
                                                                 </div>
                                                             </c:if>
-                                                           
                                                             <c:if test="${not empty items}">
                                                                 <ul class="item-list">
                                                                     <c:forEach items="${items}" var="item">
                                                                         <li>
                                                                             <div style="flex: 1;">
-                                                                                <!-- Medicine Name, Strength & Code -->
                                                                                 <div class="medicine-main-info">
                                                                                     ${not empty item.medicineName ? item.medicineName : 'Unknown Medicine'}
                                                                                     <c:if test="${not empty item.medicineStrength}">
@@ -700,8 +706,6 @@
                                                                                     </c:if>
                                                                                     <span class="medicine-code-badge">${item.medicineCode}</span>
                                                                                 </div>
-                                                                               
-                                                                                <!-- Medicine Details Grid - ROW 1 -->
                                                                                 <div class="medicine-detail-row">
                                                                                     <c:if test="${not empty item.medicineDosageForm}">
                                                                                         <div class="medicine-detail-item">
@@ -713,172 +717,18 @@
                                                                                             <i class="bi bi-tag"></i> ${item.medicineCategory}
                                                                                         </div>
                                                                                     </c:if>
-                                                                                    <c:if test="${not empty item.medicineManufacturer}">
-                                                                                        <div class="medicine-detail-item">
-                                                                                            <i class="bi bi-building"></i> ${item.medicineManufacturer}
-                                                                                        </div>
-                                                                                    </c:if>
                                                                                 </div>
-                                                                               
-                                                                                <!-- Medicine Details Grid - ROW 2: Additional Info -->
-                                                                                <div class="medicine-detail-row" style="margin-top: 6px;">
-                                                                                    <c:if test="${not empty item.activeIngredient}">
-                                                                                        <div class="medicine-detail-item" style="color: #059669;">
-                                                                                            <i class="bi bi-droplet"></i> <strong>Active:</strong> ${item.activeIngredient}
-                                                                                        </div>
-                                                                                    </c:if>
-                                                                                    <c:if test="${not empty item.unit}">
-                                                                                        <div class="medicine-detail-item">
-                                                                                            <i class="bi bi-box"></i> <strong>Unit:</strong> ${item.unit}
-                                                                                        </div>
-                                                                                    </c:if>
-                                                                                </div>
-                                                                               
-                                                                                <!-- Get additional details from medicineMap if available -->
-                                                                                <c:set var="medicine" value="${medicineMap[item.medicineCode]}" />
-                                                                                <c:if test="${not empty medicine}">
-                                                                                    <div class="medicine-detail-row" style="margin-top: 6px;">
-                                                                                        <c:if test="${not empty medicine.countryOfOrigin}">
-                                                                                            <div class="medicine-detail-item">
-                                                                                                <i class="bi bi-globe"></i> ${medicine.countryOfOrigin}
-                                                                                            </div>
-                                                                                        </c:if>
-                                                                                        <c:if test="${not empty medicine.drugGroup}">
-                                                                                            <div class="medicine-detail-item">
-                                                                                                <i class="bi bi-collection"></i> ${medicine.drugGroup}
-                                                                                            </div>
-                                                                                        </c:if>
-                                                                                        <c:if test="${not empty medicine.drugType}">
-                                                                                            <div class="medicine-detail-item">
-                                                                                                <span style="padding: 2px 8px; background: #dbeafe; color: #1e40af; border-radius: 4px; font-size: 11px;">
-                                                                                                    ${medicine.drugType}
-                                                                                                </span>
-                                                                                            </div>
-                                                                                        </c:if>
-                                                                                    </div>
-                                                                                   
-                                                                                    <!-- Description if available -->
-                                                                                    <c:if test="${not empty medicine.description}">
-                                                                                        <div style="margin-top: 8px; padding: 8px; background: #f9fafb; border-radius: 6px; border-left: 3px solid #3b82f6;">
-                                                                                            <div style="font-size: 11px; font-weight: 600; color: #6b7280; margin-bottom: 4px;">
-                                                                                                <i class="bi bi-info-circle"></i> DESCRIPTION
-                                                                                            </div>
-                                                                                            <div style="font-size: 12px; color: #374151; line-height: 1.4;">
-                                                                                                ${medicine.description}
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    </c:if>
-                                                                                </c:if>
-                                                                               
-                                                                                <!-- Priority Badge -->
-                                                                                <div style="margin-top: 10px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                                                                                    <c:if test="${not empty item.priority}">
-                                                                                        <span class="status-badge" style="font-size: 11px;
-                                                                                              background: ${item.priority == 'Critical' ? '#fee2e2' :
-                                                                                                           item.priority == 'High' ? '#fef3c7' :
-                                                                                                           item.priority == 'Medium' ? '#dbeafe' : '#f3f4f6'};
-                                                                                              color: ${item.priority == 'Critical' ? '#991b1b' :
-                                                                                                      item.priority == 'High' ? '#92400e' :
-                                                                                                      item.priority == 'Medium' ? '#1e40af' : '#374151'};">
-                                                                                            <i class="bi bi-flag-fill"></i> Priority: ${item.priority}
-                                                                                        </span>
-                                                                                    </c:if>
-                                                                                   
-                                                                                    <!-- Unit Price if available -->
-                                                                                    <c:if test="${not empty item.unitPrice && item.unitPrice > 0}">
-                                                                                        <span style="font-size: 11px; padding: 4px 8px; background: #dcfce7; color: #166534; border-radius: 4px; font-weight: 600;">
-                                                                                            <i class="bi bi-currency-dollar"></i> ${item.unitPrice} VNĐ/unit
-                                                                                        </span>
-                                                                                    </c:if>
-                                                                                </div>
-                                                                               
-                                                                                <!-- Item Notes -->
-                                                                                <c:if test="${not empty item.notes}">
-                                                                                    <div style="margin-top: 8px; padding: 8px; background: #fffbeb; border-left: 3px solid #f59e0b; border-radius: 4px;">
-                                                                                        <div style="font-size: 11px; font-weight: 600; color: #92400e; margin-bottom: 4px;">
-                                                                                            <i class="bi bi-sticky"></i> NOTES
-                                                                                        </div>
-                                                                                        <div style="font-size: 12px; color: #78350f;">
-                                                                                            ${item.notes}
-                                                                                        </div>
-                                                                                    </div>
-                                                                                </c:if>
                                                                             </div>
-                                                                           
-                                                                            <!-- Quantity Badge - Right Side -->
-                                                                            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
-                                                                                <span class="quantity-badge" style="font-size: 16px; padding: 10px 18px;">
+                                                                            <div>
+                                                                                <span class="quantity-badge">
                                                                                     ${item.quantity} units
                                                                                 </span>
-                                                                               
-                                                                                <!-- Total Price if available -->
-                                                                                <c:if test="${not empty item.unitPrice && item.unitPrice > 0}">
-                                                                                    <span style="font-size: 13px; font-weight: 600; color: #059669;">
-                                                                                        Total: ${item.quantity * item.unitPrice} VNĐ
-                                                                                    </span>
-                                                                                </c:if>
                                                                             </div>
                                                                         </li>
                                                                     </c:forEach>
                                                                 </ul>
-                                                               
-                                                                <!-- Order Summary -->
-                                                                <div style="margin-top: 16px; padding: 12px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb;">
-                                                                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                                                                        <span style="font-weight: 600; color: #374151;">
-                                                                            <i class="bi bi-box-seam"></i> Total Items: ${items.size()}
-                                                                        </span>
-                                                                        <c:set var="totalQuantity" value="0" />
-                                                                        <c:forEach items="${items}" var="item">
-                                                                            <c:set var="totalQuantity" value="${totalQuantity + item.quantity}" />
-                                                                        </c:forEach>
-                                                                        <span style="font-weight: 600; color: #3b82f6;">
-                                                                            <i class="bi bi-boxes"></i> Total Quantity: ${totalQuantity} units
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
                                                             </c:if>
                                                         </div>
-                                                        <!-- CSS Styles for better display -->
-                                                        <style>
-                                                        .medicine-detail-row {
-                                                            display: flex;
-                                                            flex-wrap: wrap;
-                                                            gap: 12px;
-                                                            margin-top: 8px;
-                                                        }
-                                                        .medicine-detail-item {
-                                                            display: flex;
-                                                            align-items: center;
-                                                            gap: 4px;
-                                                            font-size: 12px;
-                                                            color: #6b7280;
-                                                        }
-                                                        .medicine-detail-item i {
-                                                            font-size: 13px;
-                                                        }
-                                                        .item-list {
-                                                            list-style: none;
-                                                            padding: 0;
-                                                            margin: 0;
-                                                        }
-                                                        .item-list li {
-                                                            padding: 20px;
-                                                            border: 1px solid #e5e7eb;
-                                                            display: flex;
-                                                            justify-content: space-between;
-                                                            align-items: flex-start;
-                                                            background: white;
-                                                            margin-bottom: 16px;
-                                                            border-radius: 10px;
-                                                            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-                                                            transition: all 0.3s ease;
-                                                        }
-                                                        .item-list li:hover {
-                                                            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-                                                            border-color: #3b82f6;
-                                                        }
-                                                        </style>
                                                     </div>
                                                 </div>
                                             </td>
@@ -892,6 +742,7 @@
             </div>
         </div>
     </div>
+
     <!-- Delete Confirmation Modal -->
     <div id="deleteModal" class="modal">
         <div class="modal-content">
@@ -912,6 +763,7 @@
             </form>
         </div>
     </div>
+
     <!-- Cancel Order Modal -->
     <div id="cancelModal" class="modal">
         <div class="modal-content">
@@ -919,9 +771,8 @@
                 <h5 style="color: #92400e;"><i class="bi bi-x-circle"></i> Cancel Stock Request</h5>
                 <button class="close-btn" onclick="closeModal('cancelModal')">&times;</button>
             </div>
-            <form action="${pageContext.request.contextPath}/approve-stock" method="post">
+            <form action="${pageContext.request.contextPath}/cancel-stock-request" method="post">
                 <div class="modal-body">
-                    <input type="hidden" name="action" value="cancel">
                     <input type="hidden" name="poId" id="cancelPoId">
                     <div class="alert alert-warning">
                         <i class="bi bi-exclamation-triangle"></i>
@@ -936,44 +787,18 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('cancelModal')">Close</button>
-                    <button type="submit" class="btn btn-warning"><i class="bi bi-x-circle"></i> Cancel Order</button>
+                    <button type="submit" class="btn btn-danger"><i class="bi bi-x-circle"></i> Cancel Order</button>
                 </div>
             </form>
         </div>
     </div>
+
     <script>
-                function confirmCancel(poId) {
-    // Hiển thị modal hoặc prompt để nhập lý do
-    const reason = prompt("Please provide cancellation reason:\n\n(This action cannot be undone)");
-   
-    // Nếu user nhấn Cancel hoặc không nhập gì
-    if (reason === null || reason.trim() === '') {
-        return; // Hủy operation
-    }
-   
-    // ✅ Tạo form động và submit
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = 'cancel-stock-request';
-   
-    // Hidden input cho PO ID
-    const poIdInput = document.createElement('input');
-    poIdInput.type = 'hidden';
-    poIdInput.name = 'poId';
-    poIdInput.value = poId;
-   
-    // Hidden input cho reason
-    const reasonInput = document.createElement('input');
-    reasonInput.type = 'hidden';
-    reasonInput.name = 'reason';
-    reasonInput.value = reason;
-   
-    form.appendChild(poIdInput);
-    form.appendChild(reasonInput);
-   
-    document.body.appendChild(form);
-    form.submit();
-}
+        function confirmCancel(poId) {
+            document.getElementById('cancelPoId').value = poId;
+            document.getElementById('cancelModal').classList.add('show');
+        }
+
         function toggleDetails(poId) {
             const detailsRow = document.getElementById('details-' + poId);
             if (detailsRow.style.display === 'none') {
@@ -982,41 +807,41 @@
                 detailsRow.style.display = 'none';
             }
         }
+
         function approveOrder(poId) {
             if (confirm('Send this purchase order to supplier?')) {
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = '${pageContext.request.contextPath}/approve-stock';
-               
+
                 const actionInput = document.createElement('input');
                 actionInput.type = 'hidden';
                 actionInput.name = 'action';
                 actionInput.value = 'approve';
-               
+
                 const poIdInput = document.createElement('input');
                 poIdInput.type = 'hidden';
                 poIdInput.name = 'poId';
                 poIdInput.value = poId;
-               
+
                 form.appendChild(actionInput);
                 form.appendChild(poIdInput);
                 document.body.appendChild(form);
                 form.submit();
             }
         }
+
         function deleteOrder(poId) {
             document.getElementById('deletePoId').value = poId;
             document.getElementById('deleteModal').classList.add('show');
         }
-        function cancelOrder(poId) {
-            document.getElementById('cancelPoId').value = poId;
-            document.getElementById('cancelModal').classList.add('show');
-        }
+
         function closeModal(modalId) {
             document.getElementById(modalId).classList.remove('show');
         }
+
         // Close modal when clicking outside
-        window.onclick = function(event) {
+        window.onclick = function (event) {
             const deleteModal = document.getElementById('deleteModal');
             const cancelModal = document.getElementById('cancelModal');
             if (event.target === deleteModal) {
@@ -1026,6 +851,17 @@
                 cancelModal.classList.remove('show');
             }
         }
+
+        // Auto-hide alerts after 5 seconds
+        setTimeout(() => {
+            document.querySelectorAll('.alert').forEach(alert => {
+                if (!alert.closest('.modal-body')) {
+                    alert.style.transition = 'opacity 0.5s';
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 500);
+                }
+            });
+        }, 5000);
     </script>
 </body>
 <%@ include file="/admin/footer.jsp" %>

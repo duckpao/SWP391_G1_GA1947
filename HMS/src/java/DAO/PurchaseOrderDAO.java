@@ -11,42 +11,60 @@ import model.PurchaseOrderItem;
 public class PurchaseOrderDAO extends DBContext {
 
     /**
-     * Get all purchase orders with optional filters NOW INCLUDES ASN STATUS (In
-     * Transit, Delivered, etc.)
+     * Get all purchase orders with optional filters
+     * Shows ACTUAL PO status, not ASN status
      */
     public List<PurchaseOrder> getAllPurchaseOrders(String status, Integer supplierId,
             Date fromDate, Date toDate, String searchKeyword) {
         List<PurchaseOrder> list = new ArrayList<>();
 
-        // Use the view created in database for complete status information
+        // ✅ FIXED: Use direct query instead of view to control status display
         StringBuilder sql = new StringBuilder(
-                "SELECT po_id, manager_id, supplier_id, po_status, "
-                + "order_date, expected_delivery_date, notes, updated_at, "
-                + "supplier_name, manager_name, total_amount, item_count, "
-                + "asn_id, tracking_number, carrier, asn_status, has_asn, "
-                + "display_status, status_badge_class "
-                + "FROM vw_PurchaseOrdersWithShipping "
+                "SELECT "
+                + "po.po_id, po.manager_id, po.supplier_id, po.status AS po_status, "
+                + "po.order_date, po.expected_delivery_date, po.notes, po.updated_at, "
+                + "s.name AS supplier_name, "
+                + "u.username AS manager_name, "
+                // Get ASN info if exists
+                + "asn.asn_id, asn.tracking_number, asn.carrier, asn.status AS asn_status, "
+                + "CASE WHEN asn.asn_id IS NOT NULL THEN 1 ELSE 0 END AS has_asn, "
+                // Calculate totals
+                + "ISNULL(SUM(poi.quantity * ISNULL(poi.unit_price, 0)), 0) AS total_amount, "
+                + "COUNT(DISTINCT poi.item_id) AS item_count "
+                + "FROM PurchaseOrders po "
+                + "LEFT JOIN Suppliers s ON po.supplier_id = s.supplier_id "
+                + "LEFT JOIN Users u ON po.manager_id = u.user_id "
+                + "LEFT JOIN PurchaseOrderItems poi ON po.po_id = poi.po_id "
+                // Get latest ASN
+                + "LEFT JOIN ( "
+                + "  SELECT asn.*, "
+                + "  ROW_NUMBER() OVER (PARTITION BY asn.po_id ORDER BY asn.created_at DESC) AS rn "
+                + "  FROM AdvancedShippingNotices asn "
+                + ") asn ON po.po_id = asn.po_id AND asn.rn = 1 "
                 + "WHERE 1=1 "
         );
 
         // Add filters
         if (status != null && !status.isEmpty()) {
-            sql.append("AND po_status = ? ");
+            sql.append("AND po.status = ? ");
         }
         if (supplierId != null) {
-            sql.append("AND supplier_id = ? ");
+            sql.append("AND po.supplier_id = ? ");
         }
         if (fromDate != null) {
-            sql.append("AND order_date >= ? ");
+            sql.append("AND po.order_date >= ? ");
         }
         if (toDate != null) {
-            sql.append("AND order_date <= ? ");
+            sql.append("AND po.order_date <= ? ");
         }
         if (searchKeyword != null && !searchKeyword.isEmpty()) {
-            sql.append("AND (supplier_name LIKE ? OR notes LIKE ? OR CAST(po_id AS NVARCHAR) LIKE ?) ");
+            sql.append("AND (s.name LIKE ? OR po.notes LIKE ? OR CAST(po.po_id AS NVARCHAR) LIKE ?) ");
         }
 
-        sql.append("ORDER BY order_date DESC");
+        sql.append("GROUP BY po.po_id, po.manager_id, po.supplier_id, po.status, "
+                + "po.order_date, po.expected_delivery_date, po.notes, po.updated_at, "
+                + "s.name, u.username, asn.asn_id, asn.tracking_number, asn.carrier, asn.status "
+                + "ORDER BY po.order_date DESC");
 
         try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
             int paramIndex = 1;
@@ -74,11 +92,14 @@ public class PurchaseOrderDAO extends DBContext {
             while (rs.next()) {
                 PurchaseOrder po = new PurchaseOrder();
 
-                // Basic PO info
                 po.setPoId(rs.getInt("po_id"));
                 po.setManagerId(rs.getInt("manager_id"));
                 po.setSupplierId(rs.getInt("supplier_id"));
-                po.setStatus(rs.getString("po_status"));
+                
+                // ✅ FIXED: Use actual PO status
+                String poStatus = rs.getString("po_status");
+                po.setStatus(poStatus);
+                
                 po.setOrderDate(rs.getTimestamp("order_date"));
                 po.setExpectedDeliveryDate(rs.getDate("expected_delivery_date"));
                 po.setNotes(rs.getString("notes"));
@@ -88,19 +109,44 @@ public class PurchaseOrderDAO extends DBContext {
                 po.setTotalAmount(rs.getDouble("total_amount"));
                 po.setItemCount(rs.getInt("item_count"));
 
-                // ASN information
+                // ASN information (separate from PO status)
                 int asnId = rs.getInt("asn_id");
                 if (!rs.wasNull()) {
                     po.setAsnId(asnId);
                     po.setTrackingNumber(rs.getString("tracking_number"));
                     po.setCarrier(rs.getString("carrier"));
                     po.setAsnStatus(rs.getString("asn_status"));
-                    po.setHasAsn(rs.getBoolean("has_asn"));
+                    po.setHasAsn(true);
+                } else {
+                    po.setHasAsn(false);
                 }
 
-                // Display status (combined PO + ASN status)
-                po.setDisplayStatus(rs.getString("display_status"));
-                po.setStatusBadgeClass(rs.getString("status_badge_class"));
+                // ✅ Display status = PO status (not ASN status)
+                po.setDisplayStatus(poStatus);
+                
+                // Status badge based on PO status
+                String badgeClass = "badge-secondary";
+                switch (poStatus) {
+                    case "Completed":
+                    case "Paid":
+                        badgeClass = "badge-success";
+                        break;
+                    case "Approved":
+                    case "Received":
+                        badgeClass = "badge-primary";
+                        break;
+                    case "Sent":
+                        badgeClass = "badge-info";
+                        break;
+                    case "Draft":
+                        badgeClass = "badge-secondary";
+                        break;
+                    case "Rejected":
+                    case "Cancelled":
+                        badgeClass = "badge-danger";
+                        break;
+                }
+                po.setStatusBadgeClass(badgeClass);
 
                 list.add(po);
             }
@@ -112,16 +158,24 @@ public class PurchaseOrderDAO extends DBContext {
     }
 
     /**
-     * Get purchase order by ID with ASN details
+     * Get purchase order by ID
      */
     public PurchaseOrder getPurchaseOrderById(int poId) {
-        String sql = "SELECT po_id, manager_id, supplier_id, po_status, "
-                + "order_date, expected_delivery_date, notes, updated_at, "
-                + "supplier_name, manager_name, total_amount, item_count, "
-                + "asn_id, tracking_number, carrier, asn_status, has_asn, "
-                + "display_status, status_badge_class "
-                + "FROM vw_PurchaseOrdersWithShipping "
-                + "WHERE po_id = ?";
+        String sql = "SELECT "
+                + "po.po_id, po.manager_id, po.supplier_id, po.status AS po_status, "
+                + "po.order_date, po.expected_delivery_date, po.notes, po.updated_at, "
+                + "s.name AS supplier_name, "
+                + "u.username AS manager_name, "
+                + "asn.asn_id, asn.tracking_number, asn.carrier, asn.status AS asn_status "
+                + "FROM PurchaseOrders po "
+                + "LEFT JOIN Suppliers s ON po.supplier_id = s.supplier_id "
+                + "LEFT JOIN Users u ON po.manager_id = u.user_id "
+                + "LEFT JOIN ( "
+                + "  SELECT asn.*, "
+                + "  ROW_NUMBER() OVER (PARTITION BY asn.po_id ORDER BY asn.created_at DESC) AS rn "
+                + "  FROM AdvancedShippingNotices asn "
+                + ") asn ON po.po_id = asn.po_id AND asn.rn = 1 "
+                + "WHERE po.po_id = ?";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, poId);
@@ -132,7 +186,10 @@ public class PurchaseOrderDAO extends DBContext {
                 po.setPoId(rs.getInt("po_id"));
                 po.setManagerId(rs.getInt("manager_id"));
                 po.setSupplierId(rs.getInt("supplier_id"));
-                po.setStatus(rs.getString("po_status"));
+                
+                String poStatus = rs.getString("po_status");
+                po.setStatus(poStatus);
+                
                 po.setOrderDate(rs.getTimestamp("order_date"));
                 po.setExpectedDeliveryDate(rs.getDate("expected_delivery_date"));
                 po.setNotes(rs.getString("notes"));
@@ -147,11 +204,10 @@ public class PurchaseOrderDAO extends DBContext {
                     po.setTrackingNumber(rs.getString("tracking_number"));
                     po.setCarrier(rs.getString("carrier"));
                     po.setAsnStatus(rs.getString("asn_status"));
-                    po.setHasAsn(rs.getBoolean("has_asn"));
+                    po.setHasAsn(true);
                 }
 
-                po.setDisplayStatus(rs.getString("display_status"));
-                po.setStatusBadgeClass(rs.getString("status_badge_class"));
+                po.setDisplayStatus(poStatus);
 
                 return po;
             }
@@ -163,7 +219,7 @@ public class PurchaseOrderDAO extends DBContext {
     }
 
     /**
-     * Get items with COMPLETE medicine details
+     * Get items by PO ID
      */
     public List<PurchaseOrderItem> getItemsByPurchaseOrderId(int poId) {
         List<PurchaseOrderItem> items = new ArrayList<>();
@@ -194,7 +250,6 @@ public class PurchaseOrderDAO extends DBContext {
                 item.setPriority(rs.getString("priority"));
                 item.setNotes(rs.getString("notes"));
 
-                // Medicine details
                 item.setMedicineName(rs.getString("name"));
                 item.setMedicineCategory(rs.getString("category"));
                 item.setMedicineStrength(rs.getString("strength"));
@@ -262,47 +317,37 @@ public class PurchaseOrderDAO extends DBContext {
         return stats;
     }
 
+    /**
+     * ✅ FIXED: Get historical purchase orders - ONLY Completed status
+     */
     public List<PurchaseOrder> getHistoricalPurchaseOrders(Integer supplierId,
-        Date fromDate, Date toDate,
-        String searchKeyword) {
+        Date fromDate, Date toDate, String searchKeyword) {
     List<PurchaseOrder> list = new ArrayList<>();
+
     StringBuilder sql = new StringBuilder(
             "SELECT "
             + "po.po_id, po.manager_id, po.supplier_id, po.status AS po_status, "
             + "po.order_date, po.expected_delivery_date, po.notes, po.updated_at, "
             + "s.name AS supplier_name, u.username AS manager_name, "
-            + // Get ASN status
-            "asn.status AS asn_status, "
+            + "asn.status AS asn_status, "
             + "asn.tracking_number, "
             + "asn.carrier, "
             + "asn.approved_at, "
-            + // Calculate combined status
-            "CASE "
-            + "  WHEN asn.status = 'Delivered' THEN 'Delivered' "
-            + "  WHEN asn.status = 'InTransit' THEN 'In Transit' "
-            + "  WHEN asn.status = 'Sent' THEN 'Shipped' "
-            + "  WHEN po.status = 'Completed' THEN 'Completed' "
-            + "  WHEN po.status = 'Received' THEN 'Received' "
-            + "  ELSE po.status "
-            + "END AS display_status, "
-            + // Calculate totals
-            "ISNULL(SUM(poi.quantity * poi.unit_price), 0) AS total_amount, "
+            + "ISNULL(SUM(poi.quantity * poi.unit_price), 0) AS total_amount, "
             + "COUNT(DISTINCT poi.item_id) AS item_count "
             + "FROM PurchaseOrders po "
             + "LEFT JOIN Suppliers s ON po.supplier_id = s.supplier_id "
             + "LEFT JOIN Users u ON po.manager_id = u.user_id "
             + "LEFT JOIN PurchaseOrderItems poi ON po.po_id = poi.po_id "
-            + // Join with LATEST ASN for each PO
-            "INNER JOIN ( "  // ⚠️ Changed from LEFT JOIN to INNER JOIN
+            + "LEFT JOIN ( "
             + "  SELECT asn.*, "
             + "  ROW_NUMBER() OVER (PARTITION BY asn.po_id ORDER BY asn.created_at DESC) AS rn "
             + "  FROM AdvancedShippingNotices asn "
-            + "  WHERE asn.status = 'Delivered' "  // ⚠️ Only get Delivered ASNs
             + ") asn ON po.po_id = asn.po_id AND asn.rn = 1 "
-            + "WHERE 1=1 "  // ASN must exist and be Delivered
+            // ✅ CRITICAL: Lấy cả Completed VÀ BatchCreated
+            + "WHERE po.status IN ('Completed', 'BatchCreated') "
     );
 
-    // Add additional filters
     if (supplierId != null) {
         sql.append("AND po.supplier_id = ? ");
     }
@@ -322,8 +367,7 @@ public class PurchaseOrderDAO extends DBContext {
             + "ORDER BY po.order_date DESC");
 
     System.out.println("====================================");
-    System.out.println("DEBUG: Historical PO Query (DELIVERED ONLY)");
-    System.out.println("SQL: " + sql.toString());
+    System.out.println("DEBUG: Historical PO Query (Completed + BatchCreated)");
     System.out.println("====================================");
 
     try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
@@ -331,22 +375,18 @@ public class PurchaseOrderDAO extends DBContext {
 
         if (supplierId != null) {
             ps.setInt(paramIndex++, supplierId);
-            System.out.println("Filter - Supplier ID: " + supplierId);
         }
         if (fromDate != null) {
             ps.setDate(paramIndex++, fromDate);
-            System.out.println("Filter - From Date: " + fromDate);
         }
         if (toDate != null) {
             ps.setDate(paramIndex++, toDate);
-            System.out.println("Filter - To Date: " + toDate);
         }
         if (searchKeyword != null && !searchKeyword.isEmpty()) {
             String keyword = "%" + searchKeyword + "%";
             ps.setString(paramIndex++, keyword);
             ps.setString(paramIndex++, keyword);
             ps.setString(paramIndex++, keyword);
-            System.out.println("Filter - Keyword: " + keyword);
         }
 
         ResultSet rs = ps.executeQuery();
@@ -358,9 +398,9 @@ public class PurchaseOrderDAO extends DBContext {
             po.setManagerId(rs.getInt("manager_id"));
             po.setSupplierId(rs.getInt("supplier_id"));
 
-            // Use display_status
-            String displayStatus = rs.getString("display_status");
-            po.setStatus(displayStatus);
+            // ✅ Lấy status thật từ DB
+            String poStatus = rs.getString("po_status");
+            po.setStatus(poStatus);
 
             po.setOrderDate(rs.getTimestamp("order_date"));
             po.setExpectedDeliveryDate(rs.getDate("expected_delivery_date"));
@@ -371,28 +411,38 @@ public class PurchaseOrderDAO extends DBContext {
             po.setTotalAmount(rs.getDouble("total_amount"));
             po.setItemCount(rs.getInt("item_count"));
 
-            // ASN info (guaranteed to exist because of INNER JOIN)
+            // ASN info (optional)
             String asnStatus = rs.getString("asn_status");
-            String trackingNumber = rs.getString("tracking_number");
-            String carrier = rs.getString("carrier");
-            Timestamp approvedAt = rs.getTimestamp("approved_at");
+            if (asnStatus != null) {
+                po.setAsnStatus(asnStatus);
+                po.setTrackingNumber(rs.getString("tracking_number"));
+                po.setCarrier(rs.getString("carrier"));
+                po.setHasAsn(true);
+            } else {
+                po.setHasAsn(false);
+            }
 
-            po.setAsnStatus(asnStatus);
-            po.setTrackingNumber(trackingNumber);
-            po.setCarrier(carrier);
-            po.setHasAsn(true);
+            // ✅ DISPLAY STATUS: Map BatchCreated -> Completed
+            String displayStatus;
+            if ("BatchCreated".equals(poStatus)) {
+                displayStatus = "Completed";
+            } else {
+                displayStatus = poStatus; // Completed
+            }
+            po.setDisplayStatus(displayStatus);
+            
+            // ✅ Badge luôn là success cho cả 2 trường hợp
+            po.setStatusBadgeClass("badge-success");
 
             System.out.println("PO #" + po.getPoId()
-                    + " - PO Status: " + rs.getString("po_status")
-                    + " - ASN Status: " + asnStatus
-                    + " - Display Status: " + displayStatus
-                    + " - Tracking: " + trackingNumber
-                    + " - Approved: " + approvedAt);
+                    + " - Real Status: " + poStatus
+                    + " - Display: " + displayStatus
+                    + " - ASN: " + asnStatus);
 
             list.add(po);
         }
 
-        System.out.println("Total historical orders found (Delivered only): " + count);
+        System.out.println("Total historical orders found: " + count);
         System.out.println("====================================");
 
     } catch (SQLException e) {
@@ -402,10 +452,10 @@ public class PurchaseOrderDAO extends DBContext {
     return list;
 }
 
-    /**
-     * === FIXED: Get trend data considering ASN status ===
-     */
-    public List<Map<String, Object>> getTrendDataByMonth(Integer supplierId, Date fromDate, Date toDate) {
+/**
+ * ✅ FIXED: Get trend data - Bao gồm cả BatchCreated
+ */
+public List<Map<String, Object>> getTrendDataByMonth(Integer supplierId, Date fromDate, Date toDate) {
     List<Map<String, Object>> trendData = new ArrayList<>();
     StringBuilder sql = new StringBuilder(
             "SELECT "
@@ -415,13 +465,8 @@ public class PurchaseOrderDAO extends DBContext {
             + "ISNULL(SUM(poi.quantity * poi.unit_price), 0) AS total_amount "
             + "FROM PurchaseOrders po "
             + "LEFT JOIN PurchaseOrderItems poi ON po.po_id = poi.po_id "
-            + "INNER JOIN ( "  // ⚠️ Changed to INNER JOIN
-            + "  SELECT asn.*, "
-            + "  ROW_NUMBER() OVER (PARTITION BY asn.po_id ORDER BY asn.created_at DESC) AS rn "
-            + "  FROM AdvancedShippingNotices asn "
-            + "  WHERE asn.status = 'Delivered' "  // ⚠️ Only Delivered
-            + ") asn ON po.po_id = asn.po_id AND asn.rn = 1 "
-            + "WHERE 1=1 "
+            // ✅ Lấy cả Completed VÀ BatchCreated
+            + "WHERE po.status IN ('Completed', 'BatchCreated') "
     );
 
     if (supplierId != null) {
@@ -465,29 +510,25 @@ public class PurchaseOrderDAO extends DBContext {
     }
     return trendData;
 }
-    /**
-     * === FIXED: Get supplier performance considering ASN status ===
-     */
-    public List<Map<String, Object>> getSupplierPerformance(Date fromDate, Date toDate) {
+
+/**
+ * ✅ FIXED: Get supplier performance - Bao gồm cả BatchCreated
+ */
+public List<Map<String, Object>> getSupplierPerformance(Date fromDate, Date toDate) {
     List<Map<String, Object>> performance = new ArrayList<>();
     StringBuilder sql = new StringBuilder(
             "SELECT "
             + "s.supplier_id, "
             + "s.name AS supplier_name, "
             + "COUNT(po.po_id) AS total_orders, "
-            + "COUNT(po.po_id) AS completed_orders, "  // All are completed because of Delivered filter
+            + "COUNT(CASE WHEN po.status IN ('Completed', 'BatchCreated') THEN 1 END) AS completed_orders, "
             + "ISNULL(SUM(poi.quantity * poi.unit_price), 0) AS total_amount, "
-            + "AVG(DATEDIFF(day, po.order_date, asn.approved_at)) AS avg_delivery_days "
+            + "AVG(DATEDIFF(day, po.order_date, po.updated_at)) AS avg_delivery_days "
             + "FROM Suppliers s "
             + "LEFT JOIN PurchaseOrders po ON s.supplier_id = po.supplier_id "
             + "LEFT JOIN PurchaseOrderItems poi ON po.po_id = poi.po_id "
-            + "INNER JOIN ( "  // ⚠️ INNER JOIN for Delivered only
-            + "  SELECT asn.*, "
-            + "  ROW_NUMBER() OVER (PARTITION BY asn.po_id ORDER BY asn.created_at DESC) AS rn "
-            + "  FROM AdvancedShippingNotices asn "
-            + "  WHERE asn.status = 'Delivered' "
-            + ") asn ON po.po_id = asn.po_id AND asn.rn = 1 "
-            + "WHERE 1=1 "
+            // ✅ Chỉ tính các đơn đã hoàn thành
+            + "WHERE po.status IN ('Completed', 'BatchCreated') "
     );
 
     if (fromDate != null) {
@@ -528,4 +569,245 @@ public class PurchaseOrderDAO extends DBContext {
     }
     return performance;
 }
+     // 1️⃣ Lấy danh sách các đơn đã giao
+public List<PurchaseOrder> getDeliveredOrders() throws SQLException {
+    List<PurchaseOrder> list = new ArrayList<>();
+    
+    String sql = """
+        SELECT 
+            po.po_id,
+            po.status,
+            po.order_date,
+            po.expected_delivery_date,
+            po.supplier_id,
+            po.manager_id,
+            po.notes,
+            s.name AS supplier_name,
+            u.username AS manager_name,
+            ISNULL(SUM(poi.quantity * poi.unit_price), 0) AS total_amount,
+            COUNT(DISTINCT poi.item_id) AS item_count
+        FROM PurchaseOrders po
+        LEFT JOIN Suppliers s ON po.supplier_id = s.supplier_id
+        LEFT JOIN Users u ON po.manager_id = u.user_id
+        LEFT JOIN PurchaseOrderItems poi ON po.po_id = poi.po_id
+        WHERE po.status = 'Completed'
+        GROUP BY po.po_id, po.status, po.order_date, po.expected_delivery_date, 
+                 po.supplier_id, po.manager_id, po.notes, s.name, u.username
+        ORDER BY po.order_date DESC
+    """;
+
+    try (Connection conn = getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+
+        System.out.println("====================================");
+        System.out.println("DEBUG: getDeliveredOrders() - Query executed");
+        System.out.println("====================================");
+
+        int count = 0;
+        while (rs.next()) {
+            count++;
+            PurchaseOrder po = new PurchaseOrder();
+            po.setPoId(rs.getInt("po_id"));
+            po.setStatus(rs.getString("status"));
+            po.setOrderDate(rs.getTimestamp("order_date"));
+            po.setExpectedDeliveryDate(rs.getDate("expected_delivery_date"));
+            po.setSupplierId(rs.getInt("supplier_id"));
+            po.setManagerId(rs.getInt("manager_id"));
+            po.setNotes(rs.getString("notes"));
+            po.setSupplierName(rs.getString("supplier_name"));
+            po.setManagerName(rs.getString("manager_name"));
+            po.setTotalAmount(rs.getDouble("total_amount"));
+            po.setItemCount(rs.getInt("item_count"));
+            
+            // ✅ KHÔNG load items ở đây - sẽ load ở Servlet
+            
+            System.out.println("Found PO #" + po.getPoId() + 
+                             " - Status: " + po.getStatus() + 
+                             " - Item count: " + po.getItemCount());
+            
+            list.add(po);
+        }
+        
+        System.out.println("Total orders found: " + count);
+        System.out.println("====================================");
+    }
+    
+    return list;
+}
+    
+   /** 🔹 Lấy thông tin đơn hàng + danh sách item chi tiết */
+public PurchaseOrder getOrderWithItems(int poId) throws SQLException {
+    PurchaseOrder order = null;
+
+    String sqlOrder = """
+        SELECT po.po_id, po.order_date, po.status, po.supplier_id, po.manager_id,
+               s.name AS supplier_name, u.username AS manager_name
+        FROM PurchaseOrders po
+        JOIN Suppliers s ON po.supplier_id = s.supplier_id
+        LEFT JOIN Users u ON po.manager_id = u.user_id
+        WHERE po.po_id = ?
+    """;
+
+    String sqlItems = """
+        SELECT poi.item_id, poi.medicine_code, poi.quantity, poi.unit_price,
+               m.name AS medicine_name, m.strength, m.dosage_form, 
+               m.category, m.active_ingredient
+        FROM PurchaseOrderItems poi
+        JOIN Medicines m ON poi.medicine_code = m.medicine_code
+        WHERE poi.po_id = ?
+    """;
+
+    try (Connection conn = getConnection();
+         PreparedStatement psOrder = conn.prepareStatement(sqlOrder);
+         PreparedStatement psItems = conn.prepareStatement(sqlItems)) {
+
+        // --- 1️⃣ Lấy thông tin đơn hàng ---
+        psOrder.setInt(1, poId);
+        ResultSet rs = psOrder.executeQuery();
+
+        if (rs.next()) {
+            order = new PurchaseOrder();
+            order.setPoId(rs.getInt("po_id"));
+            order.setOrderDate(rs.getTimestamp("order_date"));
+            order.setStatus(rs.getString("status"));
+            order.setSupplierId(rs.getInt("supplier_id"));
+            order.setSupplierName(rs.getString("supplier_name"));
+            order.setManagerName(rs.getString("manager_name"));
+        }
+
+        // --- 2️⃣ Lấy danh sách thuốc trong đơn ---
+        if (order != null) {
+            List<PurchaseOrderItem> items = new ArrayList<>();
+            psItems.setInt(1, poId);
+            ResultSet rs2 = psItems.executeQuery();
+
+            while (rs2.next()) {
+                PurchaseOrderItem item = new PurchaseOrderItem();
+                item.setItemId(rs2.getInt("item_id"));
+                item.setMedicineCode(rs2.getString("medicine_code"));
+                item.setMedicineName(rs2.getString("medicine_name"));
+                item.setMedicineStrength(rs2.getString("strength"));
+                item.setMedicineDosageForm(rs2.getString("dosage_form"));
+                item.setMedicineCategory(rs2.getString("category"));
+                item.setActiveIngredient(rs2.getString("active_ingredient"));
+                item.setQuantity(rs2.getInt("quantity"));
+                item.setUnitPrice(rs2.getDouble("unit_price"));
+                items.add(item);
+            }
+
+            order.setItems(items);
+        }
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+        throw e;
+    }
+
+    return order;
+}
+    public boolean updateOrderStatusToBatchCreated(int poId) {
+        String sql = """
+            UPDATE PurchaseOrders 
+            SET status = 'BatchCreated', 
+                updated_at = GETDATE() 
+            WHERE po_id = ? 
+            AND status = 'Completed'
+        """;
+        
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, poId);
+            int result = ps.executeUpdate();
+            
+            if (result > 0) {
+                System.out.println("✅ Đơn hàng #" + poId + " đã chuyển sang trạng thái BatchCreated");
+                return true;
+            } else {
+                System.out.println("⚠️ Đơn hàng #" + poId + " không được cập nhật (có thể không ở trạng thái Completed)");
+                return false;
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("❌ Lỗi khi cập nhật trạng thái đơn hàng: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * ✅ Lấy danh sách đơn hàng đã giao NHƯNG CHƯA TẠO LÔ
+     * (status = 'Completed' - chưa chuyển sang 'BatchCreated')
+     */
+    public List<PurchaseOrder> getDeliveredOrdersNotBatched() {
+        List<PurchaseOrder> list = new ArrayList<>();
+        String sql = """
+            SELECT 
+                po.po_id, 
+                po.manager_id, 
+                po.supplier_id, 
+                po.status, 
+                po.order_date, 
+                po.expected_delivery_date, 
+                po.notes,
+                s.name AS supplier_name
+            FROM PurchaseOrders po
+            LEFT JOIN Suppliers s ON po.supplier_id = s.supplier_id
+            WHERE po.status = 'Completed'
+            ORDER BY po.order_date DESC
+        """;
+        
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            
+            while (rs.next()) {
+                PurchaseOrder order = new PurchaseOrder();
+                order.setPoId(rs.getInt("po_id"));
+                order.setManagerId(rs.getInt("manager_id"));
+                order.setSupplierId(rs.getInt("supplier_id"));
+                order.setStatus(rs.getString("status"));
+                order.setOrderDate(rs.getTimestamp("order_date"));
+                order.setExpectedDeliveryDate(rs.getDate("expected_delivery_date"));
+                order.setNotes(rs.getString("notes"));
+                order.setSupplierName(rs.getString("supplier_name"));
+                list.add(order);
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("❌ Lỗi khi lấy danh sách đơn hàng chưa tạo lô: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return list;
+    }
+
+    /**
+     * ✅ Kiểm tra xem đơn hàng đã tạo lô chưa
+     */
+    public boolean hasOrderCreatedBatches(int poId) {
+        String sql = """
+            SELECT COUNT(*) AS batch_count 
+            FROM Batches 
+            WHERE quarantine_notes LIKE ?
+        """;
+        
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setString(1, "%Lô từ đơn hàng #" + poId + "%");
+            ResultSet rs = ps.executeQuery();
+            
+            if (rs.next()) {
+                int count = rs.getInt("batch_count");
+                return count > 0;
+            }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return false;
+    }
 }

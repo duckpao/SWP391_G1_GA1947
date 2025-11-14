@@ -94,115 +94,131 @@ public class PurchaseOrderHistoryServlet extends HttpServlet {
      * Handle viewing historical purchase orders
      */
     private void handleViewHistory(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+        throws ServletException, IOException {
 
-        PurchaseOrderDAO poDAO = new PurchaseOrderDAO();
-        SupplierDAO supplierDAO = new SupplierDAO();
+    PurchaseOrderDAO poDAO = new PurchaseOrderDAO();
+    SupplierDAO supplierDAO = new SupplierDAO();
 
-        try {
-            // Get filter parameters
-            String supplierIdParam = request.getParameter("supplierId");
-            String fromDateParam = request.getParameter("fromDate");
-            String toDateParam = request.getParameter("toDate");
-            String searchKeyword = request.getParameter("search");
+    try {
+        // Get filter parameters
+        String supplierIdParam = request.getParameter("supplierId");
+        String fromDateParam = request.getParameter("fromDate");
+        String toDateParam = request.getParameter("toDate");
+        String searchKeyword = request.getParameter("search");
 
-            // Parse parameters
-            Integer supplierId = null;
-            if (supplierIdParam != null && !supplierIdParam.isEmpty()) {
-                try {
-                    supplierId = Integer.parseInt(supplierIdParam);
-                } catch (NumberFormatException e) {
-                    System.err.println("Invalid supplier ID: " + supplierIdParam);
-                }
-            }
-
-            Date fromDate = null;
-            if (fromDateParam != null && !fromDateParam.isEmpty()) {
-                try {
-                    fromDate = Date.valueOf(fromDateParam);
-                } catch (IllegalArgumentException e) {
-                    System.err.println("Invalid from date: " + fromDateParam);
-                }
-            } else {
-                // Lấy từ năm 2000 (đủ xa)
-                java.util.Calendar cal = java.util.Calendar.getInstance();
-                cal.set(2000, 0, 1); // 2000-01-01
-                fromDate = new Date(cal.getTimeInMillis());
-            }
-
-            Date toDate = null;
-            if (toDateParam != null && !toDateParam.isEmpty()) {
-                try {
-                    toDate = Date.valueOf(toDateParam);
-                } catch (IllegalArgumentException e) {
-                    System.err.println("Invalid to date: " + toDateParam);
-                }
-            } else {
-                // Lấy đến năm 2099 (đủ xa)
-                java.util.Calendar cal = java.util.Calendar.getInstance();
-                cal.set(2099, 11, 31); // 2099-12-31
-                toDate = new Date(cal.getTimeInMillis());
-            }
-
-            // Get historical purchase orders
-            List<PurchaseOrder> historicalOrders = poDAO.getHistoricalPurchaseOrders(
-                    supplierId, fromDate, toDate, searchKeyword
-            );
-
-            // Get all suppliers for filter dropdown
-            List<Supplier> suppliers = supplierDAO.getAllSuppliers();
-
-            // Get trend data for charts
-            List<Map<String, Object>> trendData = poDAO.getTrendDataByMonth(
-                    supplierId, fromDate, toDate
-            );
-
-            // Get supplier performance
-            List<Map<String, Object>> supplierPerformance = poDAO.getSupplierPerformance(
-                    fromDate, toDate
-            );
-
-            // Calculate statistics
-            int totalHistoricalOrders = historicalOrders.size();
-            double totalHistoricalAmount = historicalOrders.stream()
-                    .mapToDouble(PurchaseOrder::getTotalAmount)
-                    .sum();
-            double avgOrderValue = totalHistoricalOrders > 0
-                    ? totalHistoricalAmount / totalHistoricalOrders
-                    : 0;
-
-            // Set attributes for JSP
-            request.setAttribute("historicalOrders", historicalOrders);
-            request.setAttribute("suppliers", suppliers);
-            request.setAttribute("trendData", new Gson().toJson(trendData));
-            request.setAttribute("supplierPerformance", supplierPerformance);
-            request.setAttribute("totalHistoricalOrders", totalHistoricalOrders);
-            request.setAttribute("totalHistoricalAmount", totalHistoricalAmount);
-            request.setAttribute("avgOrderValue", avgOrderValue);
-
-            // Keep filter values
-            request.setAttribute("selectedSupplierId", supplierIdParam);
-            request.setAttribute("fromDate", fromDateParam != null ? fromDateParam : fromDate.toString());
-            request.setAttribute("toDate", toDateParam != null ? toDateParam : toDate.toString());
-            request.setAttribute("searchKeyword", searchKeyword);
-
-            // Forward to JSP
-            request.getRequestDispatcher("/auditor/purchase-orders-history.jsp").forward(request, response);
-
-        } catch (Exception e) {
-            System.err.println("Error in handleViewHistory: " + e.getMessage());
-            e.printStackTrace();
-            request.setAttribute("errorMessage", "Error loading historical data: " + e.getMessage());
-            request.getRequestDispatcher("/error.jsp").forward(request, response);
-        } finally {
-            if (poDAO != null) {
-                poDAO.closeConnection();
-            }
-            if (supplierDAO != null) {
-                supplierDAO.closeConnection();
+        // Parse parameters
+        Integer supplierId = null;
+        if (supplierIdParam != null && !supplierIdParam.isEmpty()) {
+            try {
+                supplierId = Integer.parseInt(supplierIdParam);
+            } catch (NumberFormatException e) {
+                System.err.println("Invalid supplier ID: " + supplierIdParam);
             }
         }
+
+        Date fromDate = null;
+        if (fromDateParam != null && !fromDateParam.isEmpty()) {
+            try {
+                fromDate = Date.valueOf(fromDateParam);
+            } catch (IllegalArgumentException e) {
+                System.err.println("Invalid from date: " + fromDateParam);
+            }
+        } else {
+            // Lấy từ năm 2000
+            java.util.Calendar cal = java.util.Calendar.getInstance();
+            cal.set(2000, 0, 1);
+            fromDate = new Date(cal.getTimeInMillis());
+        }
+
+        Date toDate = null;
+        if (toDateParam != null && !toDateParam.isEmpty()) {
+            try {
+                toDate = Date.valueOf(toDateParam);
+            } catch (IllegalArgumentException e) {
+                System.err.println("Invalid to date: " + toDateParam);
+            }
+        } else {
+            // Lấy đến năm 2099
+            java.util.Calendar cal = java.util.Calendar.getInstance();
+            cal.set(2099, 11, 31);
+            toDate = new Date(cal.getTimeInMillis());
+        }
+
+        // ✅ Get historical purchase orders (Completed + BatchCreated)
+        List<PurchaseOrder> historicalOrders = poDAO.getHistoricalPurchaseOrders(
+                supplierId, fromDate, toDate, searchKeyword
+        );
+
+        // Get all suppliers for filter dropdown
+        List<Supplier> suppliers = supplierDAO.getAllSuppliers();
+
+        // Get trend data for charts (Completed + BatchCreated)
+        List<Map<String, Object>> trendData = poDAO.getTrendDataByMonth(
+                supplierId, fromDate, toDate
+        );
+
+        // Get supplier performance (Completed + BatchCreated)
+        List<Map<String, Object>> supplierPerformance = poDAO.getSupplierPerformance(
+                fromDate, toDate
+        );
+
+        // Calculate statistics
+        int totalHistoricalOrders = historicalOrders.size();
+        double totalHistoricalAmount = historicalOrders.stream()
+                .mapToDouble(PurchaseOrder::getTotalAmount)
+                .sum();
+        double avgOrderValue = totalHistoricalOrders > 0
+                ? totalHistoricalAmount / totalHistoricalOrders
+                : 0;
+
+        // ✅ Debug log
+        System.out.println("=== HISTORY SUMMARY ===");
+        System.out.println("Total orders (Completed + BatchCreated): " + totalHistoricalOrders);
+        System.out.println("Total amount: " + totalHistoricalAmount);
+        
+        long completedCount = historicalOrders.stream()
+                .filter(po -> "Completed".equals(po.getStatus()))
+                .count();
+        long batchCreatedCount = historicalOrders.stream()
+                .filter(po -> "BatchCreated".equals(po.getStatus()))
+                .count();
+                
+        System.out.println("- Completed: " + completedCount);
+        System.out.println("- BatchCreated: " + batchCreatedCount);
+        System.out.println("======================");
+
+        // Set attributes for JSP
+        request.setAttribute("historicalOrders", historicalOrders);
+        request.setAttribute("suppliers", suppliers);
+        request.setAttribute("trendData", new Gson().toJson(trendData));
+        request.setAttribute("supplierPerformance", supplierPerformance);
+        request.setAttribute("totalHistoricalOrders", totalHistoricalOrders);
+        request.setAttribute("totalHistoricalAmount", totalHistoricalAmount);
+        request.setAttribute("avgOrderValue", avgOrderValue);
+
+        // Keep filter values
+        request.setAttribute("selectedSupplierId", supplierIdParam);
+        request.setAttribute("fromDate", fromDateParam != null ? fromDateParam : fromDate.toString());
+        request.setAttribute("toDate", toDateParam != null ? toDateParam : toDate.toString());
+        request.setAttribute("searchKeyword", searchKeyword);
+
+        // Forward to JSP
+        request.getRequestDispatcher("/auditor/purchase-orders-history.jsp").forward(request, response);
+
+    } catch (Exception e) {
+        System.err.println("Error in handleViewHistory: " + e.getMessage());
+        e.printStackTrace();
+        request.setAttribute("errorMessage", "Error loading historical data: " + e.getMessage());
+        request.getRequestDispatcher("/error.jsp").forward(request, response);
+    } finally {
+        if (poDAO != null) {
+            poDAO.closeConnection();
+        }
+        if (supplierDAO != null) {
+            supplierDAO.closeConnection();
+        }
     }
+}
 
     /**
      * Handle AJAX request for trend data

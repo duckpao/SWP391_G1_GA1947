@@ -3,29 +3,23 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/src/java/Controller/CreateStockServlet.java</file>
-            <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/src/java/Controller/CancelStockRequestServlet.java</file>
-            <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/src/java/Controller/CreateServlet.java</file>
-            <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/src/java/DAO/SystemLogsDAO.java</file>
-            <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/src/java/Controller/ManageRequestsServlet.java</file>
-            <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/src/java/model/MedicationRequest.java</file>
-            <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/src/java/Controller/VNPayReturnServlet.java</file>
-            <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/src/java/Controller/ManageBatches.java</file>
-            <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/src/java/Controller/AdminNotificationServlet.java</file>
-            <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/src/java/util/LoggingUtil.java</file>
-            <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/web/vnpay_jsp/vnpay_return.jsp</file>
-            <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/src/java/Controller/ViewASNServlet.java</file>
-            <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/src/java/Controller/ManageStockServlet.java</file>
-            <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/src/java/Controller/InventoryReportServlet.java</file>
-            <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/src/java/Controller/SupplierConfirmOrderServlet.java</file>
-            <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/web/manager-transit-orders.jsp</file>
-            <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/src/java/Controller/ManageTransitServlet.java</file>
-            <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/src/java/DAO/PurchaseOrderDAO.java</file>
-            <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/src/java/Controller/ApproveStockServlet.java</file>
-            <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/src/java/Controller/PurchaseOrderServlet.java</file>
-            <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/src/java/Controller/CreateASNServlet.java</file>
-            <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/src/java/DAO/ManagerDAO.java</file>
-            <file>file:/C:/Users/ADMIN/java/SWP391/SWP391_G1_GA1947/HMS/src/java/DAO/ASNDAO.java</file>
+            <file>file:/C:/App/SWP/dev%20last%20day/SWP391_G1_GA1947/HMS/web/pharmacist/sidebar.jsp</file>
+            <file>file:/C:/App/SWP/dev%20last%20day/SWP391_G1_GA1947/HMS/web/pharmacist/ViewMedicineRequest.jsp</file>
+            <file>file:/C:/App/SWP/dev%20last%20day/SWP391_G1_GA1947/HMS/web/pharmacist/recordExpiredDamaged.jsp</file>
+            <file>file:/C:/App/SWP/dev%20last%20day/SWP391_G1_GA1947/HMS/web/WEB-INF/web.xml</file>
+            <file>file:/C:/App/SWP/dev%20last%20day/SWP391_G1_GA1947/HMS/web/css/sidebar.css</file>
+            <file>file:/C:/App/SWP/dev%20last%20day/SWP391_G1_GA1947/HMS/web/pharmacist/add_batch_form.jsp</file>
+            <file>file:/C:/App/SWP/dev%20last%20day/SWP391_G1_GA1947/HMS/src/java/DAO/MedicineDAO.java</file>
+            <file>file:/C:/App/SWP/dev%20last%20day/SWP391_G1_GA1947/HMS/src/java/Controller/ViewDeliveredOrderServlet.java</file>
+            <file>file:/C:/App/SWP/dev%20last%20day/SWP391_G1_GA1947/HMS/src/java/Controller/ViewMedicineServlet.java</file>
+            <file>file:/C:/App/SWP/dev%20last%20day/SWP391_G1_GA1947/HMS/web/admin/user_form_create.jsp</file>
+            <file>file:/C:/App/SWP/dev%20last%20day/SWP391_G1_GA1947/HMS/web/jsp/viewMedicine.jsp</file>
+            <file>file:/C:/App/SWP/dev%20last%20day/SWP391_G1_GA1947/HMS/web/pharmacist/ViewDeliveredOrder.jsp</file>
+            <file>file:/C:/App/SWP/dev%20last%20day/SWP391_G1_GA1947/HMS/web/pharmacist/ViewIssueSlip.jsp</file>
+            <file>file:/C:/App/SWP/dev%20last%20day/SWP391_G1_GA1947/HMS/web/admin/dashboard.jsp</file>
+            <file>file:/C:/App/SWP/dev%20last%20day/SWP391_G1_GA1947/HMS/web/pharmacist/Manage-Batches.jsp</file>
+            <file>file:/C:/App/SWP/dev%20last%20day/SWP391_G1_GA1947/HMS/web/pharmacist/pharmacist-dashboard.jsp</file>
+            <file>file:/C:/App/SWP/dev%20last%20day/SWP391_G1_GA1947/HMS/src/java/com/vnpay/common/Config.java</file>
         </group>
     </open-files>
 </project-private>

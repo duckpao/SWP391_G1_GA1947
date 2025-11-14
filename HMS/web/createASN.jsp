@@ -2,227 +2,296 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
-<jsp:include page="/admin/header.jsp" />
-
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Shipping Notice (ASN)</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/supplier-dashboard.css">
+    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #ffffff;
-            color: #2c3e50;
+        /* Additional styles for create-asn page */
+        .create-asn-container {
+            margin-left: 0;
+            padding: var(--spacing-2xl);
             min-height: 100vh;
+            background: var(--gray-50);
         }
 
-        .main-content {
-            padding: 30px;
-            background: #ffffff;
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1100px;
+        .create-asn-wrapper {
+            max-width: 1200px;
             margin: 0 auto;
         }
 
-        /* Header */
+        /* Page Header */
         .page-header {
-            background: white;
-            border-radius: 12px;
-            padding: 28px 32px;
-            margin-bottom: 30px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            border: 1px solid #e9ecef;
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl) var(--spacing-2xl);
+            margin-bottom: var(--spacing-2xl);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-200);
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: var(--spacing-lg);
         }
 
         .back-btn {
             width: 48px;
             height: 48px;
-            border-radius: 10px;
-            border: 1.5px solid #dee2e6;
-            background: white;
-            color: #495057;
+            border-radius: var(--radius-lg);
+            border: 1.5px solid var(--gray-300);
+            background: var(--white);
+            color: var(--gray-600);
             font-size: 20px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all var(--transition-base);
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
         .back-btn:hover {
-            background: #f8f9fa;
-            border-color: #adb5bd;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            background: var(--gray-50);
+            border-color: var(--gray-400);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            color: var(--gray-900);
+        }
+
+        .page-header-content {
+            flex: 1;
         }
 
         .page-header h1 {
             font-size: 28px;
-            color: #2c3e50;
-            font-weight: 700;
-            flex: 1;
+            color: var(--gray-900);
+            font-weight: 800;
+            margin-bottom: var(--spacing-xs);
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: var(--spacing-md);
         }
 
-        .header-icon {
-            width: 40px;
-            height: 40px;
-            background: #f8f9fa;
-            border-radius: 10px;
+        .page-header-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: var(--radius-lg);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
-            border: 1px solid #dee2e6;
-            color: #495057;
+            font-size: 24px;
+            color: var(--white);
         }
 
-        /* PO Info Box */
+        .page-subtitle {
+            font-size: 15px;
+            color: var(--gray-500);
+            font-weight: 500;
+        }
+
+        /* Info Alert */
+        .info-alert {
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            border-left: 4px solid var(--primary);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+            display: flex;
+            align-items: flex-start;
+            gap: var(--spacing-md);
+            border: 1px solid var(--primary-light);
+        }
+
+        .info-alert i {
+            font-size: 24px;
+            color: var(--primary);
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .info-alert-content {
+            flex: 1;
+        }
+
+        .info-alert-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 6px;
+        }
+
+        .info-alert-text {
+            font-size: 14px;
+            color: var(--gray-700);
+            line-height: 1.6;
+        }
+
+        /* PO Info Card */
         .po-info-card {
-            background: white;
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 24px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            border: 1px solid #e9ecef;
-            border-left: 4px solid #495057;
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            margin-bottom: var(--spacing-xl);
+            box-shadow: var(--shadow-sm);
+            border: 2px solid var(--gray-200);
+            border-left: 4px solid var(--primary);
         }
 
         .po-info-header {
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 700;
-            color: #495057;
-            margin-bottom: 16px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            color: var(--gray-900);
+            margin-bottom: var(--spacing-lg);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: var(--spacing-sm);
+            padding-bottom: var(--spacing-md);
+            border-bottom: 2px solid var(--gray-100);
+        }
+
+        .po-info-header i {
+            color: var(--primary);
+            font-size: 20px;
         }
 
         .po-info-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: var(--spacing-lg);
         }
 
         .po-info-item {
-            padding: 14px;
-            background: #f9fafb;
-            border-radius: 8px;
-            border: 1px solid #e5e7eb;
+            padding: var(--spacing-lg);
+            background: var(--gray-50);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--gray-200);
+            transition: all var(--transition-base);
+        }
+
+        .po-info-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary-light);
         }
 
         .po-info-item label {
-            font-size: 12px;
-            color: #6b7280;
-            font-weight: 500;
+            font-size: 11px;
+            color: var(--gray-500);
+            font-weight: 600;
             display: block;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
             text-transform: uppercase;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.5px;
         }
 
         .po-info-item span {
             font-size: 15px;
-            color: #2c3e50;
-            font-weight: 600;
+            color: var(--gray-900);
+            font-weight: 700;
+            display: block;
+        }
+
+        .po-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: linear-gradient(135d, #d1fae5, #a7f3d0);
+            color: #065f46;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 700;
+            border: 1px solid #c3e6cb;
         }
 
         /* Form Card */
         .form-card {
-            background: white;
-            border-radius: 12px;
-            padding: 32px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            border: 1px solid #e9ecef;
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-2xl);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-200);
         }
 
         .form-section {
-            margin-bottom: 32px;
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        .form-section:last-child {
+            margin-bottom: 0;
         }
 
         .section-title {
             font-size: 18px;
             font-weight: 700;
-            color: #2c3e50;
-            margin-bottom: 20px;
+            color: var(--gray-900);
+            margin-bottom: var(--spacing-lg);
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding-bottom: 12px;
-            border-bottom: 2px solid #f3f4f6;
+            gap: var(--spacing-sm);
+            padding-bottom: var(--spacing-md);
+            border-bottom: 2px solid var(--gray-100);
         }
 
         .section-title i {
-            color: #495057;
-            font-size: 20px;
+            color: var(--primary);
+            font-size: 22px;
         }
 
         .form-group {
-            margin-bottom: 24px;
+            margin-bottom: var(--spacing-lg);
         }
 
         .form-group label {
             display: block;
             font-size: 14px;
             font-weight: 600;
-            color: #374151;
-            margin-bottom: 8px;
+            color: var(--gray-700);
+            margin-bottom: var(--spacing-sm);
         }
 
         .required {
-            color: #dc3545;
+            color: var(--danger);
+            margin-left: 2px;
         }
 
         .form-control {
             width: 100%;
-            padding: 12px 16px;
-            border: 1.5px solid #dee2e6;
-            border-radius: 8px;
+            padding: 14px 16px;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-lg);
             font-size: 15px;
             font-family: 'Inter', sans-serif;
-            transition: all 0.2s ease;
-            color: #2c3e50;
-            background: white;
+            transition: all var(--transition-base);
+            color: var(--gray-900);
+            background: var(--white);
+            font-weight: 500;
         }
 
         .form-control:focus {
             outline: none;
-            border-color: #495057;
-            box-shadow: 0 0 0 3px rgba(73, 80, 87, 0.1);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
         }
 
         .form-control:hover {
-            border-color: #adb5bd;
+            border-color: var(--gray-300);
         }
 
         select.form-control {
             cursor: pointer;
             appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23495057' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath fill='%232563eb' d='M8 11L3 6h10z'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
-            background-position: right 12px center;
-            padding-right: 36px;
+            background-position: right 14px center;
+            padding-right: 44px;
         }
 
         textarea.form-control {
@@ -234,235 +303,155 @@
         .form-row {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
+            gap: var(--spacing-lg);
         }
 
         .help-text {
             font-size: 13px;
-            color: #6b7280;
+            color: var(--gray-500);
             margin-top: 6px;
             font-style: italic;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .help-text i {
+            font-size: 14px;
+            color: var(--info);
         }
 
         /* Items Table */
+        .items-table-wrapper {
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            border: 1px solid var(--gray-200);
+            margin-top: var(--spacing-lg);
+        }
+
         .items-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 16px;
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
+            background: var(--white);
+        }
+
+        .items-table thead {
+            background: var(--gray-50);
         }
 
         .items-table th {
-            background: #f9fafb;
-            padding: 14px 12px;
+            padding: var(--spacing-md);
             text-align: left;
-            font-size: 13px;
-            font-weight: 600;
-            color: #495057;
-            border-bottom: 2px solid #e5e7eb;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--gray-600);
+            border-bottom: 2px solid var(--gray-200);
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
         .items-table td {
-            padding: 16px 12px;
-            border-bottom: 1px solid #f3f4f6;
+            padding: var(--spacing-lg) var(--spacing-md);
+            border-bottom: 1px solid var(--gray-100);
             font-size: 14px;
-            color: #2c3e50;
+            color: var(--gray-900);
+            font-weight: 500;
         }
 
         .items-table tbody tr:hover {
-            background: #f9fafb;
+            background: var(--gray-50);
         }
 
         .items-table tbody tr:last-child td {
             border-bottom: none;
         }
 
-        /* Buttons */
+        .items-table code {
+            padding: 4px 8px;
+            background: var(--gray-100);
+            border-radius: var(--radius-sm);
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: var(--gray-900);
+            font-weight: 600;
+            border: 1px solid var(--gray-200);
+        }
+
+        /* Form Actions */
         .form-actions {
             display: flex;
-            gap: 12px;
-            margin-top: 32px;
-            padding-top: 24px;
-            border-top: 2px solid #f3f4f6;
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-2xl);
+            padding-top: var(--spacing-xl);
+            border-top: 2px solid var(--gray-100);
         }
 
         .btn {
-            padding: 12px 24px;
+            padding: 14px 28px;
             border: none;
-            border-radius: 8px;
+            border-radius: var(--radius-lg);
             font-weight: 600;
-            font-size: 14px;
+            font-size: 15px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all var(--transition-base);
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: var(--spacing-sm);
             text-decoration: none;
         }
 
-        .btn-primary {
-            background: #495057;
-            color: white;
-            flex: 1;
-            border: 1.5px solid #343a40;
+        .btn i {
+            font-size: 18px;
         }
 
-        .btn-primary:hover {
-            background: #343a40;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(73, 80, 87, 0.2);
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: var(--white);
+            flex: 1;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
         }
 
         .btn-primary:active {
             transform: translateY(0);
         }
 
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .btn-secondary {
-            background: white;
-            color: #495057;
-            border: 1.5px solid #dee2e6;
+            background: var(--white);
+            color: var(--gray-700);
+            border: 2px solid var(--gray-300);
         }
 
         .btn-secondary:hover {
-            background: #f8f9fa;
-            border-color: #adb5bd;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            background: var(--gray-50);
+            border-color: var(--gray-400);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
         }
 
         .btn-secondary:active {
             transform: translateY(0);
         }
 
-        .btn i {
-            font-size: 16px;
-        }
-
-        /* Notification */
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 16px 24px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 600;
-            animation: slideIn 0.3s ease;
-            max-width: 500px;
-            min-width: 300px;
-        }
-
-        .notification .message {
-            flex: 1;
-            line-height: 1.4;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        @keyframes slideOut {
-            from {
-                transform: translateX(0);
-                opacity: 1;
-            }
-            to {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-        }
-
-        .notification.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .notification.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .notification .icon {
-            font-size: 24px;
-        }
-
-        .notification .close-btn {
-            margin-left: auto;
-            background: none;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-            color: inherit;
-            opacity: 0.7;
-            transition: opacity 0.2s;
-        }
-
-        .notification .close-btn:hover {
-            opacity: 1;
-        }
-
-        /* Info Alert */
-        .info-alert {
-            background: #f8f9fa;
-            border-left: 4px solid #495057;
-            border: 1px solid #dee2e6;
-            padding: 16px 20px;
-            border-radius: 8px;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: start;
-            gap: 12px;
-        }
-
-        .info-alert i {
-            font-size: 20px;
-            color: #495057;
-            flex-shrink: 0;
-            margin-top: 2px;
-        }
-
-        .info-alert-content {
-            flex: 1;
-        }
-
-        .info-alert-title {
-            font-size: 14px;
-            font-weight: 700;
-            color: #2c3e50;
-            margin-bottom: 4px;
-        }
-
-        .info-alert-text {
-            font-size: 13px;
-            color: #6b7280;
-            line-height: 1.5;
-        }
-
+        /* Responsive */
         @media (max-width: 768px) {
-            .main-content {
-                padding: 15px;
+            .create-asn-container {
+                padding: var(--spacing-lg);
             }
 
             .page-header {
-                padding: 20px;
+                padding: var(--spacing-lg);
             }
 
             .page-header h1 {
@@ -470,7 +459,7 @@
             }
 
             .form-card {
-                padding: 20px;
+                padding: var(--spacing-lg);
             }
 
             .po-info-grid,
@@ -492,19 +481,23 @@
 
             .items-table th,
             .items-table td {
-                padding: 10px 8px;
+                padding: var(--spacing-sm);
             }
         }
     </style>
 </head>
+<%@ include file="/admin/header.jsp" %>
 <body>
 
 <!-- Notifications -->
 <c:if test="${not empty param.success}">
     <div class="notification success" id="notification">
-        <i class="bi bi-check-circle-fill icon"></i>
-        <span class="message">${param.success}</span>
-        <button class="close-btn" onclick="closeNotification()">
+        <i class="bi bi-check-circle-fill"></i>
+        <div class="notification-content">
+            <div class="notification-title">Success</div>
+            <div class="notification-message">${param.success}</div>
+        </div>
+        <button class="notification-close" onclick="closeNotification()">
             <i class="bi bi-x"></i>
         </button>
     </div>
@@ -512,27 +505,33 @@
 
 <c:if test="${not empty param.error}">
     <div class="notification error" id="notification">
-        <i class="bi bi-exclamation-triangle-fill icon"></i>
-        <span class="message">${param.error}</span>
-        <button class="close-btn" onclick="closeNotification()">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <div class="notification-content">
+            <div class="notification-title">Error</div>
+            <div class="notification-message">${param.error}</div>
+        </div>
+        <button class="notification-close" onclick="closeNotification()">
             <i class="bi bi-x"></i>
         </button>
     </div>
 </c:if>
 
-<div class="main-content">
-    <div class="container">
+<div class="create-asn-container">
+    <div class="create-asn-wrapper">
         <!-- Page Header -->
         <div class="page-header">
             <button class="back-btn" onclick="window.location.href='supplier-dashboard'">
                 <i class="bi bi-arrow-left"></i>
             </button>
-            <h1>
-                <span class="header-icon">
-                    <i class="bi bi-file-earmark-plus"></i>
-                </span>
-                Create Advanced Shipping Notice (ASN)
-            </h1>
+            <div class="page-header-content">
+                <h1>
+                    <span class="page-header-icon">
+                        <i class="bi bi-file-earmark-plus"></i>
+                    </span>
+                    Create Shipping Notice
+                </h1>
+                <p class="page-subtitle">Notify the hospital about your upcoming shipment</p>
+            </div>
         </div>
 
         <!-- Info Alert -->
@@ -575,8 +574,9 @@
                 </div>
                 <div class="po-info-item">
                     <label>Status</label>
-                    <span style="color: #28a745;">
-                        <i class="bi bi-check-circle"></i> Approved
+                    <span class="po-status-badge">
+                        <i class="bi bi-check-circle-fill"></i>
+                        Approved
                     </span>
                 </div>
             </div>
@@ -599,7 +599,10 @@
                             <label>Shipment Date <span class="required">*</span></label>
                             <input type="date" name="shipmentDate" class="form-control" required 
                                    min="<%= new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date()) %>">
-                            <div class="help-text">Select when the shipment will depart</div>
+                            <div class="help-text">
+                                <i class="bi bi-info-circle"></i>
+                                Select when the shipment will depart
+                            </div>
                         </div>
 
                         <div class="form-group">
@@ -616,7 +619,10 @@
                                 <option value="UPS">UPS</option>
                                 <option value="Other">Other</option>
                             </select>
-                            <div class="help-text">Choose the shipping carrier</div>
+                            <div class="help-text">
+                                <i class="bi bi-info-circle"></i>
+                                Choose the shipping carrier
+                            </div>
                         </div>
                     </div>
 
@@ -624,14 +630,20 @@
                         <label>Tracking Number <span class="required">*</span></label>
                         <input type="text" name="trackingNumber" class="form-control" required 
                                placeholder="Enter the carrier's tracking number">
-                        <div class="help-text">Provide the tracking number for shipment monitoring</div>
+                        <div class="help-text">
+                            <i class="bi bi-info-circle"></i>
+                            Provide the tracking number for shipment monitoring
+                        </div>
                     </div>
 
                     <div class="form-group">
                         <label>Additional Notes</label>
                         <textarea name="notes" class="form-control" 
                                   placeholder="Enter any special handling instructions, temperature requirements, or other important information about this shipment..."></textarea>
-                        <div class="help-text">Optional: Add any special instructions or notes</div>
+                        <div class="help-text">
+                            <i class="bi bi-info-circle"></i>
+                            Optional: Add any special instructions or notes
+                        </div>
                     </div>
                 </div>
 
@@ -642,26 +654,28 @@
                         Items Being Shipped (${po.items.size()} items)
                     </div>
 
-                    <table class="items-table">
-                        <thead>
-                            <tr>
-                                <th style="width: 15%;">Code</th>
-                                <th style="width: 45%;">Medicine Name</th>
-                                <th style="width: 20%;">Quantity</th>
-                                <th style="width: 20%;">Unit</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <c:forEach var="item" items="${po.items}">
+                    <div class="items-table-wrapper">
+                        <table class="items-table">
+                            <thead>
                                 <tr>
-                                    <td><strong>${item.medicineCode}</strong></td>
-                                    <td>${item.medicineName}</td>
-                                    <td><strong>${item.quantity}</strong></td>
-                                    <td>${item.unit != null ? item.unit : '-'}</td>
+                                    <th style="width: 15%;">Code</th>
+                                    <th style="width: 45%;">Medicine Name</th>
+                                    <th style="width: 20%;">Quantity</th>
+                                    <th style="width: 20%;">Unit</th>
                                 </tr>
-                            </c:forEach>
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                <c:forEach var="item" items="${po.items}">
+                                    <tr>
+                                        <td><code>${item.medicineCode}</code></td>
+                                        <td><strong>${item.medicineName}</strong></td>
+                                        <td><strong>${item.quantity}</strong></td>
+                                        <td>${item.unit != null ? item.unit : '-'}</td>
+                                    </tr>
+                                </c:forEach>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <!-- Form Actions -->
@@ -670,7 +684,7 @@
                         <i class="bi bi-x-circle"></i>
                         Cancel
                     </button>
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
                         <i class="bi bi-check-circle"></i>
                         Create Shipping Notice
                     </button>
@@ -685,9 +699,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         const notification = document.getElementById('notification');
         if (notification) {
-            setTimeout(function() {
-                closeNotification();
-            }, 5000);
+            setTimeout(closeNotification, 5000);
         }
     });
 
@@ -735,27 +747,21 @@
         }
 
         // Confirm submission
-        return confirm('Are you sure you want to create this shipping notice?\n\nThe hospital will be notified about the shipment and tracking information.');
-    }
-
-    // Disable back button after form submission to prevent duplicate submissions
-    let formSubmitted = false;
-    document.querySelector('form').addEventListener('submit', function() {
-        if (formSubmitted) {
-            return false;
-        }
-        formSubmitted = true;
+        const confirmed = confirm('Are you sure you want to create this shipping notice?\n\nThe hospital will be notified about the shipment and tracking information.');
         
-        // Disable submit button
-        const submitBtn = document.querySelector('.btn-primary');
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Creating...';
-        submitBtn.style.cursor = 'not-allowed';
-        submitBtn.style.opacity = '0.6';
-    });
+        if (confirmed) {
+            // Disable submit button and show loading state
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Creating...';
+            submitBtn.style.cursor = 'not-allowed';
+            submitBtn.style.opacity = '0.6';
+        }
+        
+        return confirmed;
+    }
 </script>
 
-<jsp:include page="/admin/footer.jsp" />
-
+<%@ include file="/admin/footer.jsp" %>
 </body>
 </html>

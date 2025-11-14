@@ -245,6 +245,26 @@
         <servlet-name>SupplierConfirmPaymentServlet</servlet-name>
         <servlet-class>Controller.SupplierConfirmPaymentServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>RateSupplierServlet</servlet-name>
+        <servlet-class>Controller.RateSupplierServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ManagerSentOrdersServlet</servlet-name>
+        <servlet-class>Controller.ManagerSentOrdersServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ManagerCompletedOrdersServlet</servlet-name>
+        <servlet-class>Controller.ManagerCompletedOrdersServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ViewASNDetailsServlet</servlet-name>
+        <servlet-class>Controller.ViewASNDetailsServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>StaffTaskServlet</servlet-name>
+        <servlet-class>Controller.StaffTaskServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>VNPaymentServlet</servlet-name>
         <url-pattern>/vnpay-payment</url-pattern>
@@ -260,6 +280,26 @@
     <servlet-mapping>
         <servlet-name>SupplierConfirmPaymentServlet</servlet-name>
         <url-pattern>/supplier-confirm-payment</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>RateSupplierServlet</servlet-name>
+        <url-pattern>/manager/rate-supplier</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ManagerSentOrdersServlet</servlet-name>
+        <url-pattern>/manager/sent-orders</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ManagerCompletedOrdersServlet</servlet-name>
+        <url-pattern>/manager/completed-orders</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ViewASNDetailsServlet</servlet-name>
+        <url-pattern>/manager/view-asn</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>StaffTaskServlet</servlet-name>
+        <url-pattern>/staff/tasks</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout> 30 </session-timeout>
@@ -595,6 +635,22 @@
     <servlet-mapping>
         <servlet-name>BatchAddServlet</servlet-name>
         <url-pattern>/pharmacist/Batch-Add</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>ViewDeliveredOrderServlet</servlet-name>
+        <servlet-class>Controller.ViewDeliveredOrderServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ViewDeliveredOrderServlet</servlet-name>
+        <url-pattern>/pharmacist/view-order-details</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>BatchQualityCheckServlet</servlet-name>
+        <servlet-class>Controller.BatchQualityCheckServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>BatchQualityCheckServlet</servlet-name>
+        <url-pattern>/pharmacist/BatchQualityCheck</url-pattern>
     </servlet-mapping>
     <welcome-file-list>
         <welcome-file>home.jsp</welcome-file>

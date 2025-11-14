@@ -379,65 +379,51 @@
                     <a class="nav-link" href="${pageContext.request.contextPath}/auditlog?action=statistics">
                         <i class="bi bi-graph-up"></i> Statistics
                     </a>
-                    <a class="nav-link" href="${pageContext.request.contextPath}/auditlog?action=alerts">
-                        <i class="bi bi-exclamation-triangle"></i> Security Alerts
-                    </a>
                 </nav>
             </div>
 
             <!-- Main Content -->
             <div class="main-content">
                 <div class="page-header">
-                    <h2><i class="bi bi-speedometer2"></i> Auditor Dashboard</h2>
-                </div>
+                        <h2><i class="bi bi-receipt"></i> Auditor Dashboard</h2>
+                    </div>
 
-                <!-- Quick Stats -->
-                <div class="stats-grid">
-                    <div class="stat-card primary">
-                        <div class="stat-content">
-                            <div class="stat-info">
-                                <h6>Total Orders</h6>
-                                <h3>156</h3>
+                    <!-- Statistics Cards -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-content">
+                                <div class="stat-info">
+                                    <h6>Total Orders</h6>
+                                    <h3>${totalOrders}</h3>
+                                </div>
+                                <div class="stat-icon" style="color: #3b82f6;">
+                                    <i class="bi bi-cart"></i>
+                                </div>
                             </div>
-                            <div class="stat-icon" style="color: #3b82f6;">
-                                <i class="bi bi-cart"></i>
+                        </div>
+                        <div class="stat-card success">
+                            <div class="stat-content">
+                                <div class="stat-info">
+                                    <h6>Completed</h6>
+                                    <h3>${completedOrders}</h3>
+                                </div>
+                                <div class="stat-icon" style="color: #10b981;">
+                                    <i class="bi bi-check-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stat-card warning">
+                            <div class="stat-content">
+                                <div class="stat-info">
+                                    <h6>Pending</h6>
+                                    <h3>${pendingOrders}</h3>
+                                </div>
+                                <div class="stat-icon" style="color: #f59e0b;">
+                                    <i class="bi bi-clock"></i>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="stat-card success">
-                        <div class="stat-content">
-                            <div class="stat-info">
-                                <h6>Completed</h6>
-                                <h3>124</h3>
-                            </div>
-                            <div class="stat-icon" style="color: #10b981;">
-                                <i class="bi bi-check-circle"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="stat-card warning">
-                        <div class="stat-content">
-                            <div class="stat-info">
-                                <h6>Pending</h6>
-                                <h3>32</h3>
-                            </div>
-                            <div class="stat-icon" style="color: #f59e0b;">
-                                <i class="bi bi-clock"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="stat-card info">
-                        <div class="stat-content">
-                            <div class="stat-info">
-                                <h6>Total Value</h6>
-                                <h3>$458K</h3>
-                            </div>
-                            <div class="stat-icon" style="color: #3b82f6;">
-                                <i class="bi bi-cash-stack"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
                 <!-- Quick Actions -->
                 <div class="dashboard-card">
@@ -466,16 +452,7 @@
                                 <strong>Statistics</strong>
                                 <small>View audit statistics</small>
                             </a>
-                            <a href="${pageContext.request.contextPath}/auditlog?action=alerts" class="action-btn">
-                                <i class="bi bi-exclamation-triangle"></i>
-                                <strong>Security Alerts</strong>
-                                <small>Check suspicious activities</small>
-                            </a>
-                            <a href="${pageContext.request.contextPath}/auditlog?action=export" class="action-btn">
-                                <i class="bi bi-download"></i>
-                                <strong>Export Report</strong>
-                                <small>Generate audit reports</small>
-                            </a>
+
                         </div>
                     </div>
                 </div>

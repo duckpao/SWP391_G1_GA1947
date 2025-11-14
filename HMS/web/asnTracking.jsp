@@ -3,7 +3,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
 <!-- ASN TRACKING TAB -->
-<div id="asn-tracking-tab" class="tab-content">
+<div class="tab-content" id="asn-tracking-tab">
     <!-- ASN Statistics Cards -->
         <!-- Notification for ASN Tab (shown when tab is active) -->
     <c:if test="${not empty param.asnSuccess}">

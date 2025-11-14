@@ -461,4 +461,6 @@
 </div>
 
 </body>
+<%@ include file="/admin/footer.jsp" %>
+
 </html>

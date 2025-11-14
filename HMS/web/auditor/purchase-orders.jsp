@@ -458,9 +458,7 @@
                         <a class="nav-link" href="${pageContext.request.contextPath}/auditlog?action=statistics">
                             <i class="bi bi-graph-up"></i> Statistics
                         </a>
-                        <a class="nav-link" href="${pageContext.request.contextPath}/auditlog?action=alerts">
-                            <i class="bi bi-exclamation-triangle"></i> Security Alerts
-                        </a>
+
 
                     </nav>
                 </div>
@@ -510,7 +508,7 @@
                             <div class="stat-content">
                                 <div class="stat-info">
                                     <h6>Total Amount</h6>
-                                    <h3><fmt:formatNumber value="${totalAmount}" type="currency" currencySymbol="$"/></h3>
+                                    <h3><fmt:formatNumber value="${totalAmount}" type="currency" currencySymbol="VNĐ"/></h3>
                                 </div>
                                 <div class="stat-icon" style="color: #3b82f6;">
                                     <i class="bi bi-cash-stack"></i>
@@ -566,9 +564,6 @@
                                 <button type="button" class="btn btn-secondary" onclick="clearFilters()">
                                     <i class="bi bi-x-circle"></i> Clear
                                 </button>
-                                <button type="button" class="btn btn-success" onclick="exportToExcel()">
-                                    <i class="bi bi-file-earmark-excel"></i> Export Excel
-                                </button>
                             </div>
                         </form>
                     </div>
@@ -588,8 +583,8 @@
                         <th>Order Date</th>
                         <th>Supplier</th>
                         <th>Manager</th>
-                        <th>Status</th>
-                        <th>Shipping Status</th>
+                        <th>PO Status</th>
+                        <th>Shipping Info</th>
                         <th>Items</th>
                         <th>Total Amount</th>
                         <th>Expected Delivery</th>
@@ -616,29 +611,65 @@
                                     <td>${po.supplierName}</td>
                                     <td>${po.managerName}</td>
                                     
-                                    <!-- Combined Status Column -->
+                                    <!-- ✅ FIXED: Show actual PO status -->
                                     <td>
-                                        <span class="${po.finalStatusBadgeClass}">
-                                            ${po.finalDisplayStatus}
-                                        </span>
+                                        <c:choose>
+                                            <c:when test="${po.status == 'Completed' || po.status == 'Paid'}">
+                                                <span class="badge badge-success">${po.status}</span>
+                                            </c:when>
+                                            <c:when test="${po.status == 'Approved' || po.status == 'Received'}">
+                                                <span class="badge badge-primary">${po.status}</span>
+                                            </c:when>
+                                            <c:when test="${po.status == 'Sent'}">
+                                                <span class="badge" style="background: #bfdbfe; color: #1e40af;">${po.status}</span>
+                                            </c:when>
+                                            <c:when test="${po.status == 'Draft'}">
+                                                <span class="badge badge-secondary">${po.status}</span>
+                                            </c:when>
+                                            <c:when test="${po.status == 'Rejected' || po.status == 'Cancelled'}">
+                                                <span class="badge" style="background: #fecaca; color: #991b1b;">${po.status}</span>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <span class="badge badge-secondary">${po.status}</span>
+                                            </c:otherwise>
+                                        </c:choose>
                                     </td>
                                     
-                                    <!-- Shipping Status Column -->
+                                    <!-- ✅ Shipping info in separate column -->
                                     <td>
                                         <c:choose>
                                             <c:when test="${po.hasAsn}">
-                                                <span class="${po.asnStatusBadgeClass}">
-                                                    ${po.asnStatusDisplay}
-                                                </span>
+                                                <c:choose>
+                                                    <c:when test="${po.asnStatus == 'Delivered'}">
+                                                        <span class="badge" style="background: #d1fae5; color: #065f46;">
+                                                            <i class="bi bi-check-circle"></i> Delivered
+                                                        </span>
+                                                    </c:when>
+                                                    <c:when test="${po.asnStatus == 'InTransit'}">
+                                                        <span class="badge" style="background: #dbeafe; color: #1e40af;">
+                                                            <i class="bi bi-truck"></i> In Transit
+                                                        </span>
+                                                    </c:when>
+                                                    <c:when test="${po.asnStatus == 'Sent'}">
+                                                        <span class="badge" style="background: #e0e7ff; color: #4338ca;">
+                                                            <i class="bi bi-send"></i> Shipped
+                                                        </span>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <span class="badge badge-secondary">${po.asnStatus}</span>
+                                                    </c:otherwise>
+                                                </c:choose>
                                                 <c:if test="${not empty po.trackingNumber}">
                                                     <br>
-                                                    <small style="color: #6b7280;">
-                                                        <i class="bi bi-truck"></i> ${po.trackingNumber}
+                                                    <small style="color: #6b7280; font-size: 11px;">
+                                                        ${po.trackingNumber}
                                                     </small>
                                                 </c:if>
                                             </c:when>
                                             <c:otherwise>
-                                                <span class="badge bg-secondary">No Shipment</span>
+                                                <span style="color: #9ca3af; font-size: 13px;">
+                                                    <i class="bi bi-dash-circle"></i> No shipment
+                                                </span>
                                             </c:otherwise>
                                         </c:choose>
                                     </td>

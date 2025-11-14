@@ -1,90 +1,186 @@
 package Controller;
 
+import DAO.PurchaseOrderDAO;
 import DAO.BatchDAO;
-import model.Batches;
-import model.Medicine;
-import model.Supplier;
+import model.PurchaseOrder;
+import model.PurchaseOrderItem;
+import jakarta.servlet.*;
+import jakarta.servlet.http.*;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
-import jakarta.servlet.RequestDispatcher;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 
-
+/**
+ * ✅ Servlet thêm lô thuốc từ Purchase Order
+ * FIXED: Cho phép thêm nhiều lần (mỗi lần 1 lô mới)
+ */
 public class BatchAddServlet extends HttpServlet {
-
+    
+    private PurchaseOrderDAO orderDAO = new PurchaseOrderDAO();
+    private BatchDAO batchDAO = new BatchDAO();
+    
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
+        
+        String poIdStr = request.getParameter("poId");
+        
+        if (poIdStr == null || poIdStr.isEmpty()) {
+            request.setAttribute("errorMessage", "Thiếu thông tin đơn hàng!");
+            request.getRequestDispatcher("/pharmacist/view-order-details")
+                   .forward(request, response);
+            return;
+        }
+        
         try {
-            BatchDAO dao = new BatchDAO();
-
-            // ✅ Lấy dữ liệu cần cho form
-            List<Map<String, Object>> batchList = dao.getBatchList();
-            List<Medicine> medicineList = dao.getAllMedicines();
-            List<Supplier> supplierList = dao.getAllSuppliers();
-            String nextLotNumber = dao.generateNextLotNumber(); // ⚡ dùng hàm mới
-
-            // ✅ Đưa sang JSP
-            request.setAttribute("batches", batchList);
-            request.setAttribute("medicineList", medicineList);
-            request.setAttribute("supplierList", supplierList);
-            request.setAttribute("nextLotNumber", nextLotNumber);
-
-            RequestDispatcher dispatcher = request.getRequestDispatcher("/pharmacist/Manage-Batches.jsp");
-            dispatcher.forward(request, response);
-
-        } catch (SQLException e) {
+            int poId = Integer.parseInt(poIdStr);
+            
+            System.out.println("====================================");
+            System.out.println("BatchAddServlet - Loading PO #" + poId);
+            System.out.println("====================================");
+            
+            // ✅ Lấy thông tin đơn hàng và items
+            PurchaseOrder order = orderDAO.getPurchaseOrderById(poId);
+            
+            if (order == null) {
+                request.setAttribute("errorMessage", "Không tìm thấy đơn hàng #" + poId);
+                request.getRequestDispatcher("/pharmacist/view-order-details")
+                       .forward(request, response);
+                return;
+            }
+            
+            // ✅ Load items
+            List<PurchaseOrderItem> items = orderDAO.getItemsByPurchaseOrderId(poId);
+            order.setItems(items);
+            
+            System.out.println("Loaded PO #" + poId + " with " + items.size() + " items");
+            for (PurchaseOrderItem item : items) {
+                System.out.println("  └─ " + item.getMedicineName() + " x" + item.getQuantity());
+            }
+            
+            // ✅ REMOVED: Check hasOrderCreatedBatches()
+            // Cho phép tạo nhiều lô từ cùng 1 đơn
+            
+            request.setAttribute("order", order);
+            request.setAttribute("items", items);
+            
+            System.out.println("Forwarding to add_batch_form.jsp");
+            System.out.println("====================================");
+            
+            request.getRequestDispatcher("/pharmacist/add_batch_form.jsp")
+                   .forward(request, response);
+            
+        } catch (NumberFormatException e) {
+            System.err.println("Invalid PO ID: " + poIdStr);
+            request.setAttribute("errorMessage", "Mã đơn hàng không hợp lệ!");
+            request.getRequestDispatcher("/pharmacist/view-order-details")
+                   .forward(request, response);
+                   
+        } catch (Exception e) {
+            System.err.println("Error loading PO: " + e.getMessage());
             e.printStackTrace();
-            response.sendRedirect(request.getContextPath() + "/pharmacist/manage-batch");
+            
+            request.setAttribute("errorMessage", "Lỗi khi tải đơn hàng: " + e.getMessage());
+            request.getRequestDispatcher("/pharmacist/view-order-details")
+                   .forward(request, response);
         }
     }
-
+    
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
+        
+        request.setCharacterEncoding("UTF-8");
+        
+        String poIdStr = request.getParameter("poId");
+        String medicineCode = request.getParameter("medicineCode");
+        String quantityStr = request.getParameter("quantity");
+        String expiryDateStr = request.getParameter("expiryDate");
+        String notes = request.getParameter("notes");
+        
+        System.out.println("====================================");
+        System.out.println("BatchAddServlet POST - Creating batch");
+        System.out.println("PO ID: " + poIdStr);
+        System.out.println("Medicine: " + medicineCode);
+        System.out.println("Quantity: " + quantityStr);
+        System.out.println("Expiry: " + expiryDateStr);
+        System.out.println("====================================");
+        
+        HttpSession session = request.getSession();
+        
         try {
-            BatchDAO dao = new BatchDAO();
-            Batches batch = new Batches();
-
-            // ✅ Lấy mã lô tự động
-            String lotNumber = dao.generateNextLotNumber();
-            batch.setLotNumber(lotNumber);
-
-            // ✅ Lấy dữ liệu từ form
-            batch.setMedicineCode(request.getParameter("medicineCode"));
-            batch.setSupplierId(Integer.parseInt(request.getParameter("supplierId")));
-            batch.setReceivedDate(java.sql.Date.valueOf(request.getParameter("receivedDate")));
-            batch.setExpiryDate(java.sql.Date.valueOf(request.getParameter("expiryDate")));
-
-            int initialQty = Integer.parseInt(request.getParameter("initialQuantity"));
-            batch.setInitialQuantity(initialQty);
-            batch.setCurrentQuantity(initialQty); // ban đầu current = initial
-
-            batch.setStatus(request.getParameter("status"));
-            batch.setQuarantineNotes(request.getParameter("quarantineNotes"));
-
-            // ✅ Insert vào DB
-            boolean success = dao.insertBatch(batch);
-
-            if (success) {
-                response.sendRedirect(request.getContextPath() + "/pharmacist/manage-batch");
-            } else {
-                request.setAttribute("errorMessage", "Thêm lô thuốc thất bại.");
-                doGet(request, response);
+            // Validate inputs
+            if (poIdStr == null || medicineCode == null || quantityStr == null || expiryDateStr == null) {
+                session.setAttribute("errorMessage", "Vui lòng điền đầy đủ thông tin!");
+                response.sendRedirect(request.getContextPath() + "/pharmacist/Batch-Add?poId=" + poIdStr);
+                return;
             }
-
+            
+            int poId = Integer.parseInt(poIdStr);
+            int quantity = Integer.parseInt(quantityStr);
+            java.sql.Date expiryDate = java.sql.Date.valueOf(expiryDateStr);
+            java.sql.Date receivedDate = new java.sql.Date(System.currentTimeMillis());
+            
+            // Validate expiry date
+            if (expiryDate.before(receivedDate)) {
+                session.setAttribute("errorMessage", "Ngày hết hạn phải sau ngày hiện tại!");
+                response.sendRedirect(request.getContextPath() + "/pharmacist/Batch-Add?poId=" + poId);
+                return;
+            }
+            
+            // Get order info
+            PurchaseOrder order = orderDAO.getPurchaseOrderById(poId);
+            if (order == null) {
+                session.setAttribute("errorMessage", "Không tìm thấy đơn hàng!");
+                response.sendRedirect(request.getContextPath() + "/pharmacist/view-order-details");
+                return;
+            }
+            
+            int supplierId = order.getSupplierId();
+            
+            // ✅ Insert batch
+            boolean success = batchDAO.insertBatchFromPO(
+                poId, medicineCode, supplierId, quantity, receivedDate, expiryDate
+            );
+            
+            if (success) {
+                System.out.println("✅ Batch created successfully for PO #" + poId);
+                
+                // ✅ Update PO status to 'BatchCreated'
+                boolean statusUpdated = orderDAO.updateOrderStatusToBatchCreated(poId);
+                
+                if (statusUpdated) {
+                    System.out.println("✅ PO #" + poId + " status updated to BatchCreated");
+                    session.setAttribute("successMessage", 
+                        "Đã tạo lô thuốc thành công! Đơn hàng #" + poId + " đã chuyển sang trạng thái 'BatchCreated'");
+                } else {
+                    System.err.println("⚠️ Batch created but failed to update PO status");
+                    session.setAttribute("successMessage", 
+                        "Đã tạo lô thuốc thành công! (Cảnh báo: Không thể cập nhật trạng thái đơn hàng)");
+                }
+                
+            } else {
+                System.err.println("❌ Failed to create batch");
+                session.setAttribute("errorMessage", "Không thể tạo lô thuốc!");
+            }
+            
+            // ✅ Redirect về trang "Đơn hàng đã giao" (ViewDeliveredOrderServlet)
+            response.sendRedirect(request.getContextPath() + "/pharmacist/view-order-details");
+            
+        } catch (NumberFormatException e) {
+            System.err.println("Invalid input: " + e.getMessage());
+            session.setAttribute("errorMessage", "Dữ liệu nhập không hợp lệ!");
+            response.sendRedirect(request.getContextPath() + "/pharmacist/Batch-Add?poId=" + poIdStr);
+            
+        } catch (IllegalArgumentException e) {
+            System.err.println("Invalid date format: " + e.getMessage());
+            session.setAttribute("errorMessage", "Định dạng ngày không hợp lệ!");
+            response.sendRedirect(request.getContextPath() + "/pharmacist/Batch-Add?poId=" + poIdStr);
+            
         } catch (Exception e) {
+            System.err.println("Error creating batch: " + e.getMessage());
             e.printStackTrace();
-            request.setAttribute("errorMessage", "Đã xảy ra lỗi khi thêm lô thuốc.");
-            doGet(request, response);
+            session.setAttribute("errorMessage", "Lỗi hệ thống: " + e.getMessage());
+            response.sendRedirect(request.getContextPath() + "/pharmacist/Batch-Add?poId=" + poIdStr);
         }
     }
 }

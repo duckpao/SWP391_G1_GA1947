@@ -26,7 +26,7 @@ public class BatchAddServlet extends HttpServlet {
         
         if (poIdStr == null || poIdStr.isEmpty()) {
             request.setAttribute("errorMessage", "Thiếu thông tin đơn hàng!");
-            request.getRequestDispatcher("/pharmacist/ViewDeliveredOrder")
+            request.getRequestDispatcher("/pharmacist/view-order-details")
                    .forward(request, response);
             return;
         }
@@ -43,7 +43,7 @@ public class BatchAddServlet extends HttpServlet {
             
             if (order == null) {
                 request.setAttribute("errorMessage", "Không tìm thấy đơn hàng #" + poId);
-                request.getRequestDispatcher("/pharmacist/ViewDeliveredOrder")
+                request.getRequestDispatcher("/pharmacist/view-order-details")
                        .forward(request, response);
                 return;
             }
@@ -63,7 +63,7 @@ public class BatchAddServlet extends HttpServlet {
             request.setAttribute("order", order);
             request.setAttribute("items", items);
             
-            System.out.println("Forwarding to batch-add.jsp");
+            System.out.println("Forwarding to add_batch_form.jsp");
             System.out.println("====================================");
             
             request.getRequestDispatcher("/pharmacist/add_batch_form.jsp")
@@ -72,7 +72,7 @@ public class BatchAddServlet extends HttpServlet {
         } catch (NumberFormatException e) {
             System.err.println("Invalid PO ID: " + poIdStr);
             request.setAttribute("errorMessage", "Mã đơn hàng không hợp lệ!");
-            request.getRequestDispatcher("/pharmacist/ViewDeliveredOrder")
+            request.getRequestDispatcher("/pharmacist/view-order-details")
                    .forward(request, response);
                    
         } catch (Exception e) {
@@ -80,7 +80,7 @@ public class BatchAddServlet extends HttpServlet {
             e.printStackTrace();
             
             request.setAttribute("errorMessage", "Lỗi khi tải đơn hàng: " + e.getMessage());
-            request.getRequestDispatcher("/pharmacist/ViewDeliveredOrder")
+            request.getRequestDispatcher("/pharmacist/view-order-details")
                    .forward(request, response);
         }
     }
@@ -131,7 +131,7 @@ public class BatchAddServlet extends HttpServlet {
             PurchaseOrder order = orderDAO.getPurchaseOrderById(poId);
             if (order == null) {
                 session.setAttribute("errorMessage", "Không tìm thấy đơn hàng!");
-                response.sendRedirect(request.getContextPath() + "/pharmacist/ViewDeliveredOrder");
+                response.sendRedirect(request.getContextPath() + "/pharmacist/view-order-details");
                 return;
             }
             
@@ -144,18 +144,27 @@ public class BatchAddServlet extends HttpServlet {
             
             if (success) {
                 System.out.println("✅ Batch created successfully for PO #" + poId);
-                session.setAttribute("successMessage", "Đã tạo lô thuốc thành công!");
                 
-                // ✅ OPTIONAL: Update PO status to 'BatchCreated'
-                // orderDAO.updateOrderStatusToBatchCreated(poId);
+                // ✅ Update PO status to 'BatchCreated'
+                boolean statusUpdated = orderDAO.updateOrderStatusToBatchCreated(poId);
+                
+                if (statusUpdated) {
+                    System.out.println("✅ PO #" + poId + " status updated to BatchCreated");
+                    session.setAttribute("successMessage", 
+                        "Đã tạo lô thuốc thành công! Đơn hàng #" + poId + " đã chuyển sang trạng thái 'BatchCreated'");
+                } else {
+                    System.err.println("⚠️ Batch created but failed to update PO status");
+                    session.setAttribute("successMessage", 
+                        "Đã tạo lô thuốc thành công! (Cảnh báo: Không thể cập nhật trạng thái đơn hàng)");
+                }
                 
             } else {
                 System.err.println("❌ Failed to create batch");
                 session.setAttribute("errorMessage", "Không thể tạo lô thuốc!");
             }
             
-            // ✅ Redirect về trang thêm lô (cho phép thêm lô tiếp)
-            response.sendRedirect(request.getContextPath() + "/pharmacist/Batch-Add?poId=" + poId);
+            // ✅ Redirect về trang "Đơn hàng đã giao" (ViewDeliveredOrderServlet)
+            response.sendRedirect(request.getContextPath() + "/pharmacist/view-order-details");
             
         } catch (NumberFormatException e) {
             System.err.println("Invalid input: " + e.getMessage());

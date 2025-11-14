@@ -26,7 +26,8 @@ public class ViewDeliveredOrderServlet extends HttpServlet {
         System.out.println("====================================");
         
         try {
-            // ✅ Lấy danh sách đơn hàng với status = 'Completed'
+            // ✅ Lấy danh sách đơn hàng với status = 'Completed' 
+            // (Chưa chuyển sang 'BatchCreated')
             List<PurchaseOrder> deliveredOrders = orderDAO.getDeliveredOrders();
             
             System.out.println("Total orders found: " + deliveredOrders.size());
@@ -82,7 +83,7 @@ public class ViewDeliveredOrderServlet extends HttpServlet {
             
             request.setAttribute("errorMessage", "Lỗi database: " + e.getMessage());
             request.setAttribute("deliveredOrders", List.of());
-            request.getRequestDispatcher("/pharmacist/view-order-details.jsp")
+            request.getRequestDispatcher("/pharmacist/ViewDeliveredOrder.jsp")
                    .forward(request, response);
                    
         } catch (Exception e) {
@@ -91,7 +92,7 @@ public class ViewDeliveredOrderServlet extends HttpServlet {
             
             request.setAttribute("errorMessage", "Lỗi hệ thống: " + e.getMessage());
             request.setAttribute("deliveredOrders", List.of());
-            request.getRequestDispatcher("/pharmacist/view-order-details.jsp")
+            request.getRequestDispatcher("/pharmacist/ViewDeliveredOrder.jsp")
                    .forward(request, response);
         }
     }

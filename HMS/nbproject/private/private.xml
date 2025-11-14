@@ -4,11 +4,17 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/C:/Users/ADMIN/Documents/HMS/SWP391_G1_GA1947/HMS/src/java/Controller/ViewMedicineServlet.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/HMS/SWP391_G1_GA1947/HMS/src/java/DAO/DBContext.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/HMS/SWP391_G1_GA1947/HMS/src/java/DAO/BatchDAO.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/HMS/SWP391_G1_GA1947/HMS/web/pharmacist/ViewDeliveredOrder.jsp</file>
             <file>file:/C:/Users/ADMIN/Documents/HMS/SWP391_G1_GA1947/HMS/web/jsp/viewMedicine.jsp</file>
-            <file>file:/C:/Users/ADMIN/Documents/HMS/SWP391_G1_GA1947/HMS/src/java/DAO/ReportDAO.java</file>
-            <file>file:/C:/Users/ADMIN/Documents/HMS/SWP391_G1_GA1947/HMS/src/java/DAO/MedicineDAO.java</file>
-            <file>file:/C:/Users/ADMIN/Documents/HMS/SWP391_G1_GA1947/HMS/src/java/Controller/InventoryReportServlet.java</file>
-            <file>file:/C:/Users/ADMIN/Documents/HMS/SWP391_G1_GA1947/HMS/web/inventory-report.jsp</file>
+            <file>file:/C:/Users/ADMIN/Documents/HMS/SWP391_G1_GA1947/HMS/web/pharmacist/add_batch_form.jsp</file>
+            <file>file:/C:/Users/ADMIN/Documents/HMS/SWP391_G1_GA1947/HMS/src/java/Controller/ViewDeliveredOrderServlet.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/HMS/SWP391_G1_GA1947/HMS/src/java/Controller/BatchAddServlet.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/HMS/SWP391_G1_GA1947/HMS/src/java/DAO/PurchaseOrderDAO.java</file>
+            <file>file:/C:/Users/ADMIN/Documents/HMS/SWP391_G1_GA1947/HMS/web/debug_orders.jsp</file>
+            <file>file:/C:/Users/ADMIN/Documents/HMS/SWP391_G1_GA1947/HMS/web/WEB-INF/web.xml</file>
+            <file>file:/C:/Users/ADMIN/Documents/HMS/SWP391_G1_GA1947/HMS/src/java/model/Batches.java</file>
         </group>
     </open-files>
 </project-private>

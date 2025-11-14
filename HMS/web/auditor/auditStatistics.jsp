@@ -77,9 +77,7 @@
                 <a class="nav-link active" href="${pageContext.request.contextPath}/auditlog?action=statistics">
                     <i class="bi bi-graph-up"></i> Statistics
                 </a>
-                <a class="nav-link" href="${pageContext.request.contextPath}/auditlog?action=alerts">
-                    <i class="bi bi-exclamation-triangle"></i> Security Alerts
-                </a>
+
             </nav>
         </div>
 

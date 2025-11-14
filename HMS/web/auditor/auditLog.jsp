@@ -539,9 +539,7 @@
                 <a class="nav-link" href="${pageContext.request.contextPath}/auditlog?action=statistics">
                     <i class="bi bi-graph-up"></i> Statistics
                 </a>
-                <a class="nav-link" href="${pageContext.request.contextPath}/auditlog?action=alerts">
-                    <i class="bi bi-exclamation-triangle"></i> Security Alerts
-                </a>
+
             </nav>
         </div>
 
@@ -553,9 +551,7 @@
                     <a href="auditlog?action=statistics" class="btn btn-info">
                         <i class="bi bi-graph-up"></i> Statistics
                     </a>
-                    <a href="auditlog?action=alerts" class="btn btn-warning">
-                        <i class="bi bi-exclamation-triangle"></i> Alerts
-                    </a>
+
                 </div>
             </div>
             
@@ -630,24 +626,6 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>Table Name</label>
-                            <select class="form-control" name="tableName">
-                                <option value="">All Tables</option>
-                                <c:forEach items="${tables}" var="tbl">
-                                    <option value="${tbl}" ${tableName eq tbl ? 'selected' : ''}>${tbl}</option>
-                                </c:forEach>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Risk Level</label>
-                            <select class="form-control" name="riskLevel">
-                                <option value="">All Levels</option>
-                                <option value="high" ${riskLevel eq 'high' ? 'selected' : ''}>High</option>
-                                <option value="medium" ${riskLevel eq 'medium' ? 'selected' : ''}>Medium</option>
-                                <option value="low" ${riskLevel eq 'low' ? 'selected' : ''}>Low</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
                             <label>Category</label>
                             <select class="form-control" name="category">
                                 <option value="">All Categories</option>
@@ -681,11 +659,7 @@
                                 <th>User</th>
                                 <th>Role</th>
                                 <th>Action</th>
-                                <th>Table</th>
                                 <th>Details</th>
-                                <th>IP Address</th>
-                                <th>Risk</th>
-                                <th>Category</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -723,13 +697,11 @@
                                         </c:choose>
                                         ${log.action}
                                     </td>
-                                    <td><code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-size: 12px;">${log.tableName != null ? log.tableName : '-'}</code></td>
+                                    
                                     <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${log.details}">
                                         ${log.details}
                                     </td>
-                                    <td><small>${log.ipAddress}</small></td>
-                                    <td><span class="badge risk-${log.riskLevel}">${log.riskLevel}</span></td>
-                                    <td><span class="badge category-${log.category.toLowerCase()}">${log.category}</span></td>
+
                                 </tr>
                             </c:forEach>
                             <c:if test="${empty logs}">

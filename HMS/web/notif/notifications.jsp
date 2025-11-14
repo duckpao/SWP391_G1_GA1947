@@ -265,6 +265,7 @@
             gap: 6px;
             position: relative;
             z-index: 10;
+            flex-wrap: wrap;
         }
        
         .notification-item:hover .notification-actions {
@@ -281,11 +282,16 @@
             cursor: pointer;
             position: relative;
             z-index: 10;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
         }
         .action-btn:hover {
             background: var(--gray-50);
             border-color: var(--gray-400);
             transform: translateY(-1px);
+            text-decoration: none;
         }
         .action-btn.btn-check {
             color: var(--success);
@@ -295,6 +301,7 @@
         .action-btn.btn-check:hover {
             background: #f0fdf4;
             border-color: var(--success);
+            color: var(--success);
         }
         .action-btn.btn-delete {
             color: var(--danger);
@@ -304,6 +311,18 @@
         .action-btn.btn-delete:hover {
             background: #fef2f2;
             border-color: var(--danger);
+            color: var(--danger);
+        }
+        .action-btn.btn-view-task {
+            color: var(--primary-blue);
+            border-color: #bfdbfe;
+            pointer-events: auto !important;
+            font-weight: 600;
+        }
+        .action-btn.btn-view-task:hover {
+            background: #eff6ff;
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
         }
        
         /* Empty State */
@@ -338,46 +357,37 @@
         .empty-state p {
             color: var(--gray-500);
         }
-        /* WebSocket Status */
-        .ws-indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
+        
+        /* Alert */
+        .alert {
+            padding: 16px;
             border-radius: 8px;
-            font-size: 0.85rem;
-            background: var(--gray-50);
-            border: 1px solid var(--gray-200);
-            color: var(--gray-600);
-            font-weight: 500;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
-        .ws-indicator .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--gray-400);
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
         }
-        .ws-indicator.connected {
-            background: #f0fdf4;
-            border-color: #bbf7d0;
-            color: var(--success);
+        .alert-warning {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fcd34d;
         }
-        .ws-indicator.connected .dot {
-            background: var(--success);
-            animation: pulse-dot 2s infinite;
+        .alert-success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #86efac;
         }
-        @keyframes pulse-dot {
-            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.4); }
-            50% { opacity: 0.8; box-shadow: 0 0 0 4px rgba(5, 150, 105, 0); }
+        .alert-danger {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
         }
-        .ws-indicator.connecting .dot {
-            background: var(--warning);
-            animation: blink 1s infinite;
-        }
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
+        
         /* Notification Content */
         .notification-title {
             font-size: 1.05rem;
@@ -402,27 +412,7 @@
         .notification-meta i {
             color: var(--gray-400);
         }
-        /* Link Button */
-        .link-btn {
-            padding: 6px 14px;
-            border-radius: 6px;
-            border: 1px solid var(--primary-blue);
-            background: white;
-            color: var(--primary-blue);
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .link-btn:hover {
-            background: var(--primary-blue);
-            color: white;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(44, 95, 141, 0.2);
-        }
+        
         /* Toast Notification */
         .toast-medical {
             position: fixed;
@@ -459,6 +449,7 @@
         .toast-medical.toast-success i { color: var(--success); }
         .toast-medical.toast-danger i { color: var(--danger); }
         .toast-medical.toast-warning i { color: var(--warning); }
+        
         /* Responsive */
         @media (max-width: 768px) {
             .notification-header {
@@ -481,19 +472,6 @@
             .notification-actions {
                 opacity: 1;
             }
-        }
-        /* Loading Animation */
-        .loading-spinner {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid var(--gray-300);
-            border-radius: 50%;
-            border-top-color: var(--primary-blue);
-            animation: spin 0.6s linear infinite;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -620,6 +598,33 @@
                                             </h5>
                                         </div>
                                         <div class="notification-actions">
+                                            <%-- CHECK IF THIS IS A TASK ASSIGNMENT NOTIFICATION --%>
+                                            <c:set var="isTaskNotification" value="false"/>
+                                            <c:if test="${notif.title.contains('Task') || notif.title.contains('task') || 
+                                                          notif.message.contains('Task #') || notif.message.contains('task #')}">
+                                                <c:set var="isTaskNotification" value="true"/>
+                                            </c:if>
+                                            
+                                            <%-- VIEW TASK BUTTON for Auditor/Pharmacist --%>
+                                            <c:if test="${isTaskNotification && 
+                                                         (sessionScope.user.role == 'Auditor' || 
+                                                          sessionScope.user.role == 'Pharmacist')}">
+                                                <a href="${pageContext.request.contextPath}/staff/tasks" 
+                                                   class="action-btn btn-view-task"
+                                                   title="Xem tasks">
+                                                    <i class="fas fa-tasks"></i> View Task
+                                                </a>
+                                            </c:if>
+                                            
+                                            <%-- VIEW ASSIGNED TASKS BUTTON for Manager --%>
+                                            <c:if test="${isTaskNotification && sessionScope.user.role == 'Manager'}">
+                                                <a href="${pageContext.request.contextPath}/tasks/assign" 
+                                                   class="action-btn btn-view-task"
+                                                   title="Xem assigned tasks">
+                                                    <i class="fas fa-clipboard-list"></i> View Assigned
+                                                </a>
+                                            </c:if>
+                                            
                                             <c:if test="${!notif.read}">
                                                 <button class="action-btn btn-check" 
                                                         data-notif-id="${notif.notificationId}"
@@ -659,7 +664,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Context path - check if already declared
+        // Context path
         if (typeof contextPath === 'undefined') {
             var contextPath = '${pageContext.request.contextPath}';
         }

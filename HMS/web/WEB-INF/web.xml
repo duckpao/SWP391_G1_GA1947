@@ -261,6 +261,10 @@
         <servlet-name>ViewASNDetailsServlet</servlet-name>
         <servlet-class>Controller.ViewASNDetailsServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>StaffTaskServlet</servlet-name>
+        <servlet-class>Controller.StaffTaskServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>VNPaymentServlet</servlet-name>
         <url-pattern>/vnpay-payment</url-pattern>
@@ -292,6 +296,10 @@
     <servlet-mapping>
         <servlet-name>ViewASNDetailsServlet</servlet-name>
         <url-pattern>/manager/view-asn</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>StaffTaskServlet</servlet-name>
+        <url-pattern>/staff/tasks</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout> 30 </session-timeout>

@@ -1476,4 +1476,68 @@ public String getRejectionReason(int poId) {
     return null;
 }
 
+/**
+ * Get all tasks assigned to a specific staff member
+ */
+public List<Task> getTasksByStaffId(int staffId) {
+    List<Task> tasks = new ArrayList<>();
+    String query = "SELECT t.task_id, t.po_id, t.staff_id, t.task_type, t.deadline, t.status, " +
+                  "t.created_at, t.updated_at, " +
+                  "u.username as staff_name, po.notes as po_notes " +
+                  "FROM Tasks t " +
+                  "LEFT JOIN Users u ON t.staff_id = u.user_id " +
+                  "LEFT JOIN PurchaseOrders po ON t.po_id = po.po_id " +
+                  "WHERE t.staff_id = ? " +
+                  "ORDER BY t.deadline ASC, t.created_at DESC";
+    
+    try (PreparedStatement ps = connection.prepareStatement(query)) {
+        ps.setInt(1, staffId);
+        ResultSet rs = ps.executeQuery();
+        
+        while (rs.next()) {
+            Task task = new Task();
+            task.setTaskId(rs.getInt("task_id"));
+            task.setPoId(rs.getInt("po_id"));
+            task.setStaffId(rs.getInt("staff_id"));
+            task.setTaskType(rs.getString("task_type"));
+            task.setDeadline(rs.getDate("deadline"));
+            task.setStatus(rs.getString("status"));
+            task.setCreatedAt(rs.getDate("created_at"));
+            task.setUpdatedAt(rs.getDate("updated_at"));
+            task.setStaffName(rs.getString("staff_name"));
+            task.setPoNotes(rs.getString("po_notes"));
+            tasks.add(task);
+        }
+        
+        System.out.println("Loaded " + tasks.size() + " tasks for Staff #" + staffId);
+    } catch (SQLException e) {
+        System.err.println("Error getting tasks for staff #" + staffId + ": " + e.getMessage());
+        e.printStackTrace();
+    }
+    
+    return tasks;
+}
+
+/**
+ * Update task status (Pending -> In Progress -> Completed)
+ */
+public boolean updateTaskStatus(int taskId, String newStatus) {
+    String query = "UPDATE Tasks SET status = ?, updated_at = GETDATE() " +
+                  "WHERE task_id = ?";
+    
+    try (PreparedStatement ps = connection.prepareStatement(query)) {
+        ps.setString(1, newStatus);
+        ps.setInt(2, taskId);
+        
+        int result = ps.executeUpdate();
+        
+        System.out.println("Update Task #" + taskId + " status to '" + newStatus + "': Affected rows = " + result);
+        
+        return result > 0;
+    } catch (SQLException e) {
+        System.err.println("Error updating task status #" + taskId + ": " + e.getMessage());
+        e.printStackTrace();
+        return false;
+    }
+}
 }

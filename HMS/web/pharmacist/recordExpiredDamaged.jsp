@@ -14,6 +14,7 @@
         <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <link href="${pageContext.request.contextPath}/css/sidebar.css" rel="stylesheet">
 
         <style>
             * {
@@ -43,51 +44,7 @@
             }
 
             /* White theme sidebar */
-            .sidebar {
-                width: 250px;
-                background-color: #ffffff;
-                color: #6c757d;
-                display: flex;
-                flex-direction: column;
-                padding-top: 15px;
-                border-right: 1px solid #e5e7eb;
-                box-shadow: 2px 0 10px rgba(0, 0, 0, 0.08);
-            }
-
-            .menu a {
-                display: flex;
-                align-items: center;
-                padding: 12px 25px;
-                color: #6b7280;
-                text-decoration: none;
-                font-size: 14px;
-                font-weight: 500;
-                transition: all 0.3s ease;
-                border-radius: 0;
-                margin: 4px 0;
-            }
-
-            .menu a i {
-                width: 20px;
-                margin-right: 12px;
-                color: #6b7280;
-            }
-
-            .menu a:hover {
-                background-color: #f3f4f6;
-                color: #495057;
-                transform: translateX(4px);
-            }
-
-            .menu a.active {
-                background-color: #f3f4f6;
-                color: #6b7280;
-                font-weight: 600;
-            }
-
-            .menu a.active i {
-                color: #6b7280;
-            }
+            
 
             /* Main content */
             .main {
@@ -297,28 +254,8 @@
 
         <div class="page-wrapper">
             <!-- Sidebar -->
-            <div class="sidebar">
-                <div class="menu">
-                    <a href="${pageContext.request.contextPath}/view-medicine?dashboard=pharmacist">
-                        <i class="bi bi-capsule"></i> Quản lý thuốc
-                    </a>
-                    <a href="${pageContext.request.contextPath}/pharmacist/View_MedicineRequest">
-                        <i class="bi bi-file-earmark-plus"></i> Yêu cầu thuốc
-                    </a>
-                    <a href="${pageContext.request.contextPath}/pharmacist/view-order-details">
-                        <i class="bi bi-box-seam"></i> Đơn hàng đã giao
-                    </a>
-                    <a href="${pageContext.request.contextPath}/pharmacist/manage-batch">
-                        <i class="bi bi-box-seam"></i> Quản lý số lô/lô hàng
-                    </a>
-                    <a href="${pageContext.request.contextPath}/pharmacist/recordExpiredDamaged" class="active">
-                        <i class="bi bi-exclamation-triangle"></i> Thuốc hết hạn/hư hỏng
-                    </a>
-                    <a href="${pageContext.request.contextPath}/report">
-                        <i class="bi bi-graph-up"></i> Báo cáo thống kê
-                    </a>
-                </div>
-            </div>
+            <c:set var="pageParam" value="pharmacist/recordExpiredDamaged" scope="request"/>
+            <%@ include file="/pharmacist/sidebar.jsp" %>
 
             <!-- Main content -->
             <div class="main">

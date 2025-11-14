@@ -491,27 +491,198 @@
             </div>
 
             <!-- Completed Orders Tab -->
-            <div class="tab-content" id="completed-tab">
-                <div class="tab-header">
-                    <h2>Completed Orders</h2>
-                    <p>Successfully delivered orders</p>
-                </div>
+<div class="tab-content" id="completed-tab">
+    <div class="tab-header">
+        <h2>Completed Orders</h2>
+        <p>Orders that have been completed and processed</p>
+    </div>
 
-                <c:choose>
-                    <c:when test="${empty completedOrders}">
-                        <div class="empty-state">
-                            <div class="empty-icon">
-                                <i class="bi bi-box-seam"></i>
-                            </div>
-                            <h3>No Completed Orders</h3>
-                            <p>You don't have any completed orders yet</p>
-                        </div>
-                    </c:when>
-                    <c:otherwise>
-                        <!-- Similar structure as approved -->
-                    </c:otherwise>
-                </c:choose>
+    <c:choose>
+        <c:when test="${empty completedOrders}">
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+                <h3>No Completed Orders</h3>
+                <p>You don't have any completed orders yet</p>
             </div>
+        </c:when>
+        <c:otherwise>
+            <div class="orders-grid">
+                <c:forEach var="order" items="${completedOrders}">
+                    <div class="order-card">
+                        <div class="order-card-header">
+                            <div class="order-id">
+                                <span class="order-number">PO #${order.poId}</span>
+                                <c:choose>
+                                    <c:when test="${order.status == 'BatchCreated'}">
+                                        <span class="status-badge success">
+                                            <i class="bi bi-check-circle-fill"></i>
+                                            Batch Created
+                                        </span>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <span class="status-badge completed">
+                                            <i class="bi bi-box-seam"></i>
+                                            Completed
+                                        </span>
+                                    </c:otherwise>
+                                </c:choose>
+                            </div>
+                            <button class="order-expand" onclick="toggleOrderDetails(${order.poId}, 'completed')">
+                                <i class="bi bi-chevron-down"></i>
+                            </button>
+                        </div>
+
+                        <div class="order-card-body">
+                            <div class="order-meta-grid">
+                                <div class="meta-item">
+                                    <i class="bi bi-calendar3"></i>
+                                    <div>
+                                        <span class="meta-label">Order Date</span>
+                                        <span class="meta-value">
+                                            <fmt:formatDate value="${order.orderDate}" pattern="dd MMM yyyy"/>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="meta-item">
+                                    <i class="bi bi-calendar-check"></i>
+                                    <div>
+                                        <span class="meta-label">Completed Date</span>
+                                        <span class="meta-value">
+                                            <fmt:formatDate value="${order.updatedAt}" pattern="dd MMM yyyy"/>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="meta-item">
+                                    <i class="bi bi-box"></i>
+                                    <div>
+                                        <span class="meta-label">Total Items</span>
+                                        <span class="meta-value">${order.items.size()} items</span>
+                                    </div>
+                                </div>
+
+                                <div class="meta-item">
+                                    <i class="bi bi-cash"></i>
+                                    <div>
+                                        <span class="meta-label">Total Amount</span>
+                                        <span class="meta-value">
+                                            <fmt:formatNumber value="${order.totalAmount}" pattern="#,##0"/> VND
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Shipping Info -->
+                            <c:if test="${order.hasAsn}">
+                                <div class="alert alert-info" style="margin-top: 16px;">
+                                    <i class="bi bi-truck"></i>
+                                    <div>
+                                        <strong>Shipping Information</strong>
+                                        <p style="margin: 4px 0;">
+                                            Tracking: <code>${order.trackingNumber}</code> | 
+                                            Carrier: ${order.carrier}
+                                        </p>
+                                    </div>
+                                </div>
+                            </c:if>
+
+                            <!-- Batch Status -->
+                            <c:if test="${order.status == 'BatchCreated'}">
+                                <div class="alert alert-success" style="margin-top: 16px;">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    <div>
+                                        <strong>Batches Created</strong>
+                                        <p>Pharmacist has created inventory batches for this order</p>
+                                    </div>
+                                </div>
+                            </c:if>
+
+                            <!-- Items Preview -->
+                            <div class="order-items-preview">
+                                <h4>Items Preview</h4>
+                                <ul class="items-list">
+                                    <c:forEach var="item" items="${order.items}" end="2">
+                                        <li>
+                                            <span class="item-name">${item.medicineName}</span>
+                                            <span class="item-quantity">${item.quantity} units</span>
+                                        </li>
+                                    </c:forEach>
+                                    <c:if test="${order.items.size() > 3}">
+                                        <li class="items-more">
+                                            +${order.items.size() - 3} more items
+                                        </li>
+                                    </c:if>
+                                </ul>
+                            </div>
+
+                            <c:if test="${not empty order.notes}">
+                                <div class="order-notes">
+                                    <i class="bi bi-info-circle"></i>
+                                    <div>
+                                        <strong>Notes:</strong>
+                                        <p>${order.notes}</p>
+                                    </div>
+                                </div>
+                            </c:if>
+                        </div>
+
+                        <!-- Expanded Details -->
+                        <div class="order-details-expanded" id="details-completed-${order.poId}">
+                            <div class="details-section">
+                                <h4>Complete Item List</h4>
+                                <table class="items-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Code</th>
+                                            <th>Medicine Name</th>
+                                            <th>Category</th>
+                                            <th>Quantity</th>
+                                            <th>Unit Price</th>
+                                            <th>Subtotal</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <c:forEach var="item" items="${order.items}">
+                                            <tr>
+                                                <td><code>${item.medicineCode}</code></td>
+                                                <td>${item.medicineName}</td>
+                                                <td>${item.medicineCategory}</td>
+                                                <td><strong>${item.quantity}</strong></td>
+                                                <td>
+                                                    <fmt:formatNumber value="${item.unitPrice}" pattern="#,##0"/> VND
+                                                </td>
+                                                <td>
+                                                    <strong>
+                                                        <fmt:formatNumber value="${item.quantity * item.unitPrice}" pattern="#,##0"/> VND
+                                                    </strong>
+                                                </td>
+                                            </tr>
+                                        </c:forEach>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr style="background: #f9fafb; font-weight: 600;">
+                                            <td colspan="5" style="text-align: right; padding: 12px;">
+                                                <strong>Total Amount:</strong>
+                                            </td>
+                                            <td style="padding: 12px;">
+                                                <strong style="color: #10b981; font-size: 16px;">
+                                                    <fmt:formatNumber value="${order.totalAmount}" pattern="#,##0"/> VND
+                                                </strong>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </c:forEach>
+            </div>
+        </c:otherwise>
+    </c:choose>
+</div>
 
             <!-- ASN Tracking Tab -->
             <%@ include file="/asnTracking.jsp" %>

@@ -778,4 +778,78 @@ public Supplier getSupplierById(int supplierId) {
     }
     return null;
 }
+
+/**
+ * Get COMPLETED orders for supplier
+ * Includes both 'Completed' and 'BatchCreated' statuses
+ * @param supplierId The supplier ID
+ * @return List of completed purchase orders with full details
+ */
+public List<PurchaseOrder> getCompletedOrdersBySupplier(int supplierId) {
+    List<PurchaseOrder> orders = new ArrayList<>();
+    String sql = "SELECT po.po_id, po.manager_id, po.supplier_id, po.status, "
+            + "po.order_date, po.expected_delivery_date, po.notes, po.updated_at, "
+            + "u.username AS manager_name, "
+            + "asn.asn_id, asn.tracking_number, asn.carrier, asn.status AS asn_status, "
+            + "asn.shipment_date, "
+            + "(SELECT COUNT(*) FROM Batches b WHERE b.medicine_code IN "
+            + "  (SELECT medicine_code FROM PurchaseOrderItems WHERE po_id = po.po_id)) AS batch_count "
+            + "FROM PurchaseOrders po "
+            + "LEFT JOIN Users u ON po.manager_id = u.user_id "
+            + "LEFT JOIN AdvancedShippingNotices asn ON po.po_id = asn.po_id "
+            + "WHERE po.supplier_id = ? "
+            + "AND po.status IN ('Completed', 'BatchCreated') "
+            + "ORDER BY po.updated_at DESC";
+
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        ps.setInt(1, supplierId);
+        ResultSet rs = ps.executeQuery();
+
+        while (rs.next()) {
+            PurchaseOrder po = new PurchaseOrder();
+            po.setPoId(rs.getInt("po_id"));
+            po.setManagerId(rs.getInt("manager_id"));
+            po.setSupplierId(rs.getInt("supplier_id"));
+            po.setStatus(rs.getString("status"));
+            po.setOrderDate(rs.getTimestamp("order_date"));
+            po.setExpectedDeliveryDate(rs.getDate("expected_delivery_date"));
+            po.setNotes(rs.getString("notes"));
+            po.setUpdatedAt(rs.getTimestamp("updated_at"));
+            po.setManagerName(rs.getString("manager_name"));
+
+            // ASN info
+            int asnId = rs.getInt("asn_id");
+            if (asnId > 0) {
+                po.setAsnId(asnId);
+                po.setTrackingNumber(rs.getString("tracking_number"));
+                po.setCarrier(rs.getString("carrier"));
+                po.setAsnStatus(rs.getString("asn_status"));
+                po.setHasAsn(true);
+            }
+            
+            // Batch info
+            int batchCount = rs.getInt("batch_count");
+            po.setBatchCount(batchCount); // Add this field to PurchaseOrder model
+
+            // Get items
+            List<PurchaseOrderItem> items = getPurchaseOrderItems(po.getPoId());
+            po.setItems(items);
+
+            // Calculate total
+            double total = items.stream()
+                    .mapToDouble(item -> item.getQuantity() * item.getUnitPrice())
+                    .sum();
+            po.setTotalAmount(total);
+
+            orders.add(po);
+        }
+        
+        System.out.println("✅ Loaded " + orders.size() + " completed/batchCreated orders for Supplier #" + supplierId);
+    } catch (SQLException e) {
+        System.err.println("Error in getCompletedOrdersBySupplier: " + e.getMessage());
+        e.printStackTrace();
+    }
+    return orders;
+}
+
 }

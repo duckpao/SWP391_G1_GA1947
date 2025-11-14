@@ -240,7 +240,7 @@
                     <a href="/HMS/doctor-dashboard" class="header-logo">
                     </c:when>
                     <c:when test="${sessionScope.user.role == 'Pharmacist'}">
-                        <a href="/HMS/pharmacist-dashboard" class="header-logo">
+                        <a href="/HMS/view-medicine" class="header-logo">
                         </c:when>
                         <c:when test="${sessionScope.user.role == 'Manager'}">
                             <a href="/HMS/manager-dashboard" class="header-logo">

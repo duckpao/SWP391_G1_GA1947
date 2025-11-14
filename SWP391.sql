@@ -1,3 +1,4 @@
+
 USE master;
 GO
 
@@ -4340,3 +4341,280 @@ END;
 GO
 
 PRINT '✅ SupplierRatings table and stored procedure created successfully!';
+USE SWP391; 
+GO 
+-- ===================================================== 
+-- BƯỚC 1: Thêm cột batch_quantity vào bảng Batches 
+-- ===================================================== 
+PRINT 'Step 1: Adding batch_quantity column...'; 
+IF NOT EXISTS (SELECT * FROM sys.columns 
+WHERE object_id = OBJECT_ID('Batches') 
+AND name = 'batch_quantity') 
+BEGIN 
+ALTER TABLE Batches ADD batch_quantity INT NOT NULL DEFAULT 0 
+CHECK (batch_quantity >= 0); 
+PRINT '✅ Added batch_quantity column'; 
+END 
+ELSE 
+BEGIN 
+PRINT '⚠️ batch_quantity column already exists'; 
+END 
+GO 
+-- ===================================================== 
+-- BƯỚC 2: Cập nhật logic cho current_quantity 
+-- Current_quantity giờ là tổng của tất cả batch_quantity 
+-- cùng medicine_code có status = 'Approved' 
+-- ===================================================== 
+PRINT ''; 
+PRINT 'Step 2: Creating computed column logic...'; 
+-- Drop old constraint if exists 
+DECLARE @ConstraintName NVARCHAR(200); 
+SELECT @ConstraintName = dc.name 
+FROM sys.default_constraints dc 
+INNER JOIN sys.columns c ON dc.parent_object_id = c.object_id 
+AND dc.parent_column_id = c.column_id 
+WHERE dc.parent_object_id = OBJECT_ID('Batches') 
+AND c.name = 'current_quantity'; 
+IF @ConstraintName IS NOT NULL 
+BEGIN 
+DECLARE @DropSQL NVARCHAR(500) = 'ALTER TABLE Batches DROP CONSTRAINT ' + QUOTENAME(@ConstraintName); 
+EXEC sp_executesql @DropSQL; 
+PRINT 'Dropped old DEFAULT constraint for current_quantity'; 
+END 
+GO 
+-- ===================================================== 
+-- BƯỚC 3: Tạo trigger để tự động cập nhật current_quantity 
+-- Khi batch_quantity thay đổi hoặc status = 'Approved' 
+-- ===================================================== 
+PRINT ''; 
+PRINT 'Step 3: Creating trigger to auto-update current_quantity...'; 
+IF OBJECT_ID('trg_UpdateMedicineCurrentQuantity', 'TR') IS NOT NULL 
+DROP TRIGGER trg_UpdateMedicineCurrentQuantity; 
+GO 
+CREATE TRIGGER trg_UpdateMedicineCurrentQuantity 
+ON Batches 
+AFTER INSERT, UPDATE 
+AS 
+BEGIN 
+SET NOCOUNT ON; 
+-- Lấy danh sách medicine_code bị ảnh hưởng 
+DECLARE @AffectedMedicines TABLE (medicine_code NVARCHAR(50)); 
+INSERT INTO @AffectedMedicines 
+SELECT DISTINCT medicine_code FROM inserted 
+UNION 
+SELECT DISTINCT medicine_code FROM deleted; 
+-- Cập nhật current_quantity cho mỗi medicine 
+-- current_quantity = tổng batch_quantity của các lô Approved 
+UPDATE Batches 
+SET current_quantity = ( 
+SELECT ISNULL(SUM(b2.batch_quantity), 0) 
+FROM Batches b2 
+WHERE b2.medicine_code = Batches.medicine_code 
+AND b2.status = 'Approved' 
+) 
+WHERE medicine_code IN (SELECT medicine_code FROM @AffectedMedicines); 
+END; 
+GO 
+PRINT '✅ Created trigger: trg_UpdateMedicineCurrentQuantity'; 
+-- ===================================================== 
+-- BƯỚC 4: Tạo stored procedure để approve batch 
+-- ===================================================== 
+PRINT ''; 
+PRINT 'Step 4: Creating stored procedure for batch approval...'; 
+IF OBJECT_ID('sp_ApproveBatch', 'P') IS NOT NULL 
+DROP PROCEDURE sp_ApproveBatch; 
+GO 
+CREATE PROCEDURE sp_ApproveBatch 
+@batch_id INT, 
+@approved_by INT, 
+@notes NVARCHAR(MAX) = NULL 
+AS 
+BEGIN 
+SET NOCOUNT ON; 
+BEGIN TRANSACTION; 
+BEGIN TRY 
+-- Kiểm tra batch tồn tại và đang ở trạng thái Quarantined 
+DECLARE @current_status NVARCHAR(20); 
+DECLARE @medicine_code NVARCHAR(50); 
+DECLARE @batch_qty INT; 
+SELECT 
+@current_status = status, 
+@medicine_code = medicine_code, 
+@batch_qty = batch_quantity 
+FROM Batches 
+WHERE batch_id = @batch_id; 
+IF @current_status IS NULL 
+BEGIN 
+ROLLBACK TRANSACTION; 
+SELECT 'ERROR' AS status, N'Lô thuốc không tồn tại' AS message; 
+RETURN; 
+END 
+IF @current_status != 'Quarantined' AND @current_status != 'Received' 
+BEGIN 
+ROLLBACK TRANSACTION; 
+SELECT 'ERROR' AS status, 
+N'Chỉ có thể approve lô đang ở trạng thái Quarantined hoặc Received' AS message; 
+RETURN; 
+END 
+-- Update batch status 
+UPDATE Batches 
+SET status = 'Approved', 
+quarantine_notes = CASE 
+WHEN @notes IS NOT NULL THEN @notes 
+ELSE quarantine_notes 
+END, 
+updated_at = GETDATE() 
+WHERE batch_id = @batch_id; 
+-- Log transaction 
+INSERT INTO Transactions (batch_id, user_id, type, quantity, notes) 
+VALUES (@batch_id, @approved_by, 'QuarantineRelease', @batch_qty, 
+N'Phê duyệt lô thuốc'); 
+-- Trigger sẽ tự động cập nhật current_quantity 
+COMMIT TRANSACTION; 
+SELECT 'SUCCESS' AS status, 
+N'Đã phê duyệt lô thuốc thành công' AS message, 
+@batch_id AS batch_id, 
+@medicine_code AS medicine_code, 
+@batch_qty AS batch_quantity; 
+END TRY 
+BEGIN CATCH 
+ROLLBACK TRANSACTION; 
+SELECT 'ERROR' AS status, 
+ERROR_MESSAGE() AS message; 
+END CATCH 
+END; 
+GO 
+PRINT '✅ Created procedure: sp_ApproveBatch'; 
+-- ===================================================== 
+-- BƯỚC 5: Migration dữ liệu cũ 
+-- ===================================================== 
+PRINT ''; 
+PRINT 'Step 5: Migrating existing data...'; 
+-- Cập nhật batch_quantity = initial_quantity cho các lô cũ 
+UPDATE Batches 
+SET batch_quantity = initial_quantity 
+WHERE batch_quantity = 0; 
+PRINT '✅ Updated batch_quantity for existing batches'; 
+-- Recalculate current_quantity 
+UPDATE Batches 
+SET current_quantity = ( 
+SELECT ISNULL(SUM(b2.batch_quantity), 0) 
+FROM Batches b2 
+WHERE b2.medicine_code = Batches.medicine_code 
+AND b2.status = 'Approved' 
+); 
+PRINT '✅ Recalculated current_quantity'; 
+-- ===================================================== 
+-- BƯỚC 6: Tạo view để tracking 
+-- ===================================================== 
+PRINT ''; 
+PRINT 'Step 6: Creating tracking view...'; 
+IF OBJECT_ID('vw_MedicineStockSummary', 'V') IS NOT NULL 
+DROP VIEW vw_MedicineStockSummary; 
+GO 
+CREATE VIEW vw_MedicineStockSummary AS 
+SELECT 
+m.medicine_code, 
+m.name AS medicine_name, 
+m.category, 
+m.strength, 
+m.dosage_form, 
+m.manufacturer, 
+COUNT(b.batch_id) AS total_batches, 
+SUM(CASE WHEN b.status = 'Approved' THEN 1 ELSE 0 END) AS approved_batches, 
+SUM(CASE WHEN b.status = 'Quarantined' THEN 1 ELSE 0 END) AS quarantined_batches, 
+SUM(CASE WHEN b.status = 'Approved' THEN b.batch_quantity ELSE 0 END) AS total_quantity, 
+MIN(CASE WHEN b.status = 'Approved' AND b.expiry_date > GETDATE() 
+THEN b.expiry_date END) AS nearest_expiry_date 
+FROM Medicines m 
+LEFT JOIN Batches b ON m.medicine_code = b.medicine_code 
+GROUP BY 
+m.medicine_code, m.name, m.category, m.strength, 
+m.dosage_form, m.manufacturer; 
+GO 
+PRINT '✅ Created view: vw_MedicineStockSummary'; 
+-- ===================================================== 
+-- VERIFICATION 
+-- ===================================================== 
+PRINT ''; 
+PRINT '========================================'; 
+PRINT 'VERIFICATION RESULTS'; 
+PRINT '========================================'; 
+-- Check column exists 
+SELECT 
+c.name AS ColumnName, 
+t.name AS DataType, 
+c.max_length AS MaxLength, 
+c.is_nullable AS IsNullable 
+FROM sys.columns c 
+INNER JOIN sys.types t ON c.user_type_id = t.user_type_id 
+WHERE c.object_id = OBJECT_ID('Batches') 
+AND c.name IN ('batch_quantity', 'current_quantity', 'initial_quantity'); 
+-- Sample data 
+PRINT ''; 
+PRINT 'Sample batch data:'; 
+SELECT TOP 5 
+batch_id, 
+medicine_code, 
+lot_number, 
+batch_quantity, 
+current_quantity, 
+status 
+FROM Batches 
+ORDER BY batch_id DESC; 
+-- Medicine stock summary 
+PRINT ''; 
+PRINT 'Medicine stock summary:'; 
+SELECT TOP 5 * FROM vw_MedicineStockSummary 
+ORDER BY total_quantity DESC; 
+PRINT ''; 
+PRINT '=========================================='; 
+PRINT 'DATABASE UPDATE COMPLETED!'; 
+PRINT '=========================================='; 
+GO
+
+
+
+
+
+
+
+
+
+
+
+USE SWP391; 
+GO 
+-- ===================================================== 
+-- Thêm status "BatchCreated" vào PurchaseOrders 
+-- ===================================================== 
+PRINT 'Step 1: Updating PurchaseOrders status constraint...'; 
+-- Drop constraint cũ 
+DECLARE @ConstraintName NVARCHAR(200); 
+SELECT @ConstraintName = cc.name 
+FROM sys.check_constraints cc 
+WHERE cc.parent_object_id = OBJECT_ID('PurchaseOrders') 
+AND cc.definition LIKE '%status%'; 
+IF @ConstraintName IS NOT NULL 
+BEGIN 
+DECLARE @DropSQL NVARCHAR(500) = 'ALTER TABLE PurchaseOrders DROP CONSTRAINT ' + QUOTENAME(@ConstraintName); 
+EXEC sp_executesql @DropSQL; 
+PRINT 'Dropped old constraint: ' + @ConstraintName; 
+END 
+-- Thêm constraint mới với "BatchCreated" 
+ALTER TABLE PurchaseOrders 
+ADD CONSTRAINT CK_PurchaseOrders_Status 
+CHECK (status IN ('Draft','Sent','Approved','Received','Rejected','Completed','Cancelled','Paid','BatchCreated')); 
+PRINT '✅ Added "BatchCreated" status to PurchaseOrders'; 
+-- Verify 
+SELECT 
+cc.name AS ConstraintName, 
+cc.definition AS AllowedStatuses 
+FROM sys.check_constraints cc 
+WHERE cc.parent_object_id = OBJECT_ID('PurchaseOrders') 
+AND cc.definition LIKE '%status%'; 
+PRINT ''; 
+PRINT '=========================================='; 
+PRINT 'DATABASE UPDATE COMPLETED!'; 
+PRINT '=========================================='; 
+GO

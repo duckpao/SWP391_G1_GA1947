@@ -497,36 +497,36 @@
         <div class="page-wrapper">
             <!-- Sidebar -->
             <div class="sidebar">
-                <div class="menu">
-                    <a href="${pageContext.request.contextPath}/view-medicine" class="active">
-                        <i class="bi bi-capsule"></i> Quản lý thuốc
-                    </a>
-
-                    <c:if test="${sessionScope.role eq 'Doctor'}">
-                        <a href="${pageContext.request.contextPath}/create-request">
-                            <i class="bi bi-file-earmark-plus"></i> Yêu cầu thuốc
-                        </a>
-                    </c:if>
-
-                    <c:if test="${sessionScope.role eq 'Pharmacist'}">
-                        <a href="${pageContext.request.contextPath}/pharmacist/View_MedicineRequest">
-                            <i class="bi bi-file-earmark-plus"></i> Yêu cầu thuốc
-                        </a>
-                        <a href="${pageContext.request.contextPath}/pharmacist/view-order-details">
-                            <i class="bi bi-box-seam"></i> Đơn hàng đã giao
-                        </a>
-                        <a href="${pageContext.request.contextPath}/pharmacist/manage-batch">
-                            <i class="bi bi-box-seam"></i> Quản lý số lô/lô hàng
-                        </a>
-                        <a href="${pageContext.request.contextPath}/pharmacist/recordExpiredDamaged">
-                            <i class="bi bi-exclamation-triangle"></i> Thuốc hết hạn/hư hỏng
-                        </a>
-                        <a href="${pageContext.request.contextPath}/report">
-                            <i class="bi bi-graph-up"></i> Báo cáo thống kê
-                        </a>
-                    </c:if>
-                </div>
-            </div>
+    <div class="menu">
+        <a href="${pageContext.request.contextPath}/view-medicine" class="active">
+            <i class="bi bi-capsule"></i> Quản lý thuốc
+        </a>
+        
+        <c:if test="${sessionScope.role eq 'Doctor' or sessionScope.role eq 'Admin'}">
+            <a href="${pageContext.request.contextPath}/create-request">
+                <i class="bi bi-file-earmark-plus"></i> Yêu cầu thuốc (Doctor)
+            </a>
+        </c:if>
+        
+        <c:if test="${sessionScope.role eq 'Pharmacist' or sessionScope.role eq 'Admin'}">
+            <a href="${pageContext.request.contextPath}/pharmacist/View_MedicineRequest">
+                <i class="bi bi-file-earmark-text"></i> Yêu cầu thuốc (Pharmacist)
+            </a>
+            <a href="${pageContext.request.contextPath}/pharmacist/view-order-details">
+                <i class="bi bi-box-seam"></i> Đơn hàng đã giao
+            </a>
+            <a href="${pageContext.request.contextPath}/pharmacist/manage-batch">
+                <i class="bi bi-box-seam"></i> Quản lý số lô/lô hàng
+            </a>
+            <a href="${pageContext.request.contextPath}/pharmacist/recordExpiredDamaged">
+                <i class="bi bi-exclamation-triangle"></i> Thuốc hết hạn/hư hỏng
+            </a>
+            <a href="${pageContext.request.contextPath}/report">
+                <i class="bi bi-graph-up"></i> Báo cáo thống kê
+            </a>
+        </c:if>
+    </div>
+</div>
 
             <!-- Main Content -->
             <div class="main">
@@ -634,35 +634,31 @@
 
                 <!-- Action Buttons -->
                 <div class="d-flex mb-3 gap-2">
-                    <c:if test="${sessionScope.role eq 'Doctor'}">
-                        <a href="${pageContext.request.contextPath}/create-request" class="btn btn-primary">
-                            <i class="bi bi-file-earmark-plus"></i> Create Request
-                        </a>
-
-                    </c:if>
-
-                    <c:if test="${not empty sessionScope.success}">
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            ${sessionScope.success}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                        <c:remove var="success" scope="session"/>
-                    </c:if>
-
-                    <c:if test="${not empty sessionScope.error}">
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            ${sessionScope.error}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                        <c:remove var="error" scope="session"/>
-                    </c:if>
-
-                    <c:if test="${sessionScope.role eq 'Pharmacist'}">
-                        <button class="btn btn-success ms-auto" data-bs-toggle="modal" data-bs-target="#addMedicineModal">
-                            <i class="bi bi-plus-circle"></i> Add New Medicine
-                        </button>
-                    </c:if>
-                </div>
+    <c:if test="${sessionScope.role eq 'Doctor' or sessionScope.role eq 'Admin'}">
+        <a href="${pageContext.request.contextPath}/create-request" class="btn btn-primary">
+            <i class="bi bi-file-earmark-plus"></i> Create Request
+        </a>
+    </c:if>
+    <c:if test="${not empty sessionScope.success}">
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            ${sessionScope.success}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <c:remove var="success" scope="session"/>
+    </c:if>
+    <c:if test="${not empty sessionScope.error}">
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            ${sessionScope.error}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <c:remove var="error" scope="session"/>
+    </c:if>
+    <c:if test="${sessionScope.role eq 'Pharmacist' or sessionScope.role eq 'Admin'}">
+        <button class="btn btn-success ms-auto" data-bs-toggle="modal" data-bs-target="#addMedicineModal">
+            <i class="bi bi-plus-circle"></i> Add New Medicine
+        </button>
+    </c:if>
+</div>
 
                 <!-- Medicine Table -->
                 <c:choose>

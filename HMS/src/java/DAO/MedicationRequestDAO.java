@@ -22,14 +22,10 @@ public class MedicationRequestDAO extends DBContext {
             ps.setString(2, request.getNotes());
             
             int affectedRows = ps.executeUpdate();
-            System.out.println("Affected rows: " + affectedRows);
-            
             if (affectedRows > 0) {
                 try (ResultSet rs = ps.getGeneratedKeys()) {
                     if (rs.next()) {
-                        int requestId = rs.getInt(1);
-                        System.out.println("Generated request_id: " + requestId);
-                        return requestId;
+                        return rs.getInt(1);
                     }
                 }
             }
@@ -167,12 +163,6 @@ public class MedicationRequestDAO extends DBContext {
     }
 
     public boolean updateRequest(MedicationRequest req, List<MedicationRequestItem> items) {
-        System.out.println("=== UPDATE REQUEST ===");
-        System.out.println("Request ID: " + req.getRequestId());
-        System.out.println("Notes: " + req.getNotes());
-        System.out.println("Status: " + req.getStatus());
-        System.out.println("Items count: " + items.size());
-        
         String sql = "UPDATE MedicationRequests SET notes = ?, status = ? WHERE request_id = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, req.getNotes());
@@ -180,12 +170,10 @@ public class MedicationRequestDAO extends DBContext {
             ps.setInt(3, req.getRequestId());
             
             int rowsAffected = ps.executeUpdate();
-            System.out.println("Rows affected: " + rowsAffected);
             
             if (rowsAffected > 0) {
                 deleteRequestItems(req.getRequestId());
                 addRequestItems(req.getRequestId(), items);
-                System.out.println("Update successful!");
                 return true;
             }
         } catch (SQLException e) {
@@ -196,24 +184,13 @@ public class MedicationRequestDAO extends DBContext {
     }
 
     public boolean cancelRequest(int requestId) {
-        System.out.println("=== CANCEL REQUEST ===");
-        System.out.println("Request ID: " + requestId);
-        
         String sql = "UPDATE MedicationRequests SET status = 'Canceled' WHERE request_id = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, requestId);
             int rowsAffected = ps.executeUpdate();
-            System.out.println("SQL executed. Rows affected: " + rowsAffected);
-            
-            if (rowsAffected > 0) {
-                System.out.println("✅ Cancel successful!");
-                return true;
-            } else {
-                System.err.println("❌ No rows updated. Request ID might not exist.");
-                return false;
-            }
+            return rowsAffected > 0;
         } catch (SQLException e) {
-            System.err.println("❌ SQL Error in cancelRequest: " + e.getMessage());
+            System.err.println("Error in cancelRequest: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
@@ -223,8 +200,7 @@ public class MedicationRequestDAO extends DBContext {
         String sql = "DELETE FROM MedicationRequestItems WHERE request_id = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, requestId);
-            int deleted = ps.executeUpdate();
-            System.out.println("Deleted " + deleted + " items");
+            ps.executeUpdate();
         } catch (SQLException e) {
             System.err.println("Error in deleteRequestItems: " + e.getMessage());
             e.printStackTrace();
@@ -285,176 +261,226 @@ public class MedicationRequestDAO extends DBContext {
     }
 
     /**
-     * ✅ APPROVE REQUEST WITH FULL INVENTORY PROCESSING
-     * - Trừ kho theo FIFO (First In First Out)
-     * - Tạo transactions
-     * - Tạo IssueSlip (phiếu xuất)
-     * - Update status thành 'Approved'
-     * 
-     * @param requestId ID của medication request
-     * @param pharmacistId ID của pharmacist approve
-     * @throws SQLException nếu có lỗi database hoặc không đủ tồn kho
+     * ✅ APPROVE REQUEST - FIFO + TRỪ BATCH_QUANTITY VÀ CURRENT_QUANTITY
+     * - Lấy lô có hạn sử dụng gần nhất (FIFO)
+     * - Trừ batch_quantity
+     * - Trigger tự động cập nhật current_quantity
+     * - Lưu batch_id vào IssueSlipItem
      */
-    public void approveRequestWithInventory(int requestId, int pharmacistId) throws SQLException {
-        Connection conn = new DBContext().getConnection();
-        try {
-            conn.setAutoCommit(false);
+public void approveRequestWithInventory(int requestId, int pharmacistId) throws SQLException {
+    Connection conn = null;
+    PreparedStatement psItems = null;
+    PreparedStatement psBatch = null;
+    PreparedStatement psUpdate = null;
+    PreparedStatement psTrans = null;
+    PreparedStatement psStatus = null;
+    PreparedStatement psSlip = null;
+    PreparedStatement psSlipItem = null;
+    ResultSet rs = null;
+    ResultSet rsBatch = null;
+    ResultSet rsSlip = null;
+    
+    try {
+        // ✅ SỬ DỤNG CONNECTION CÓ SẴN thay vì tạo mới
+        conn = this.connection;
+        conn.setAutoCommit(false);
+        
+        System.out.println("========================================");
+        System.out.println("→ Starting approveRequestWithInventory");
+        System.out.println("  Request ID: " + requestId);
+        System.out.println("  Pharmacist ID: " + pharmacistId);
+
+        // 1️⃣ Lấy items của request
+        String sqlItems = "SELECT item_id, medicine_code, quantity FROM MedicationRequestItems WHERE request_id=?";
+        List<IssuedBatchInfo> issuedBatches = new ArrayList<>();
+
+        psItems = conn.prepareStatement(sqlItems);
+        psItems.setInt(1, requestId);
+        rs = psItems.executeQuery();
+        
+        while (rs.next()) {
+            String medicineCode = rs.getString("medicine_code");
+            int qtyNeeded = rs.getInt("quantity");
             
-            System.out.println("========================================");
-            System.out.println("→ Starting approveRequestWithInventory");
-            System.out.println("  Request ID: " + requestId);
-            System.out.println("  Pharmacist ID: " + pharmacistId);
+            System.out.println("  → Processing medicine: " + medicineCode + " (qty: " + qtyNeeded + ")");
 
-            // 1️⃣ Lấy items của request
-            String sqlItems = "SELECT item_id, medicine_code, quantity FROM MedicationRequestItems WHERE request_id=?";
-            Map<String, Integer> issuedMedicines = new HashMap<>();
-
-            try (PreparedStatement psItems = conn.prepareStatement(sqlItems)) {
-                psItems.setInt(1, requestId);
-                try (ResultSet rs = psItems.executeQuery()) {
-                    while (rs.next()) {
-                        String medicineCode = rs.getString("medicine_code");
-                        int qtyNeeded = rs.getInt("quantity");
-                        
-                        System.out.println("  → Processing medicine: " + medicineCode + " (qty: " + qtyNeeded + ")");
-
-                        // 2️⃣ Trừ kho batch FIFO chỉ lấy lô có status='Approved'
-                        String sqlBatch = "SELECT batch_id, current_quantity "
-                                + "FROM Batches "
-                                + "WHERE medicine_code=? AND current_quantity>0 AND status='Approved' "
-                                + "ORDER BY expiry_date ASC";
-
-                        try (PreparedStatement psBatch = conn.prepareStatement(sqlBatch)) {
-                            psBatch.setString(1, medicineCode);
-                            try (ResultSet rsBatch = psBatch.executeQuery()) {
-                                int totalIssued = 0;
-                                boolean foundApprovedBatch = false;
-
-                                while (qtyNeeded > 0 && rsBatch.next()) {
-                                    foundApprovedBatch = true;
-
-                                    int batchId = rsBatch.getInt("batch_id");
-                                    int currentQty = rsBatch.getInt("current_quantity");
-                                    int deduct = Math.min(currentQty, qtyNeeded);
-
-                                    System.out.println("    → Deducting from batch " + batchId + ": " + deduct + " units");
-
-                                    // Cập nhật số lượng trong lô
-                                    try (PreparedStatement psUpdate = conn.prepareStatement(
-                                            "UPDATE Batches SET current_quantity=? WHERE batch_id=?")) {
-                                        psUpdate.setInt(1, currentQty - deduct);
-                                        psUpdate.setInt(2, batchId);
-                                        psUpdate.executeUpdate();
-                                    }
-
-                                    // Ghi nhận giao dịch xuất kho
-                                    try (PreparedStatement psTrans = conn.prepareStatement(
-                                            "INSERT INTO Transactions(batch_id, user_id, type, quantity, transaction_date, notes) "
-                                            + "VALUES(?,?,?,?,GETDATE(),?)")) {
-                                        psTrans.setInt(1, batchId);
-                                        psTrans.setInt(2, pharmacistId);
-                                        psTrans.setString(3, "Out");
-                                        psTrans.setInt(4, deduct);
-                                        psTrans.setString(5, "Xuất kho cho yêu cầu " + requestId
-                                                + " (MedicineCode=" + medicineCode + ")");
-                                        psTrans.executeUpdate();
-                                    }
-
-                                    qtyNeeded -= deduct;
-                                    totalIssued += deduct;
-                                }
-
-                                if (!foundApprovedBatch) {
-                                    throw new SQLException("Không có lô thuốc trạng thái 'Approved' cho mã " + medicineCode);
-                                }
-
-                                if (qtyNeeded > 0) {
-                                    throw new SQLException("Không đủ tồn kho (Approved) cho thuốc Code=" + medicineCode);
-                                }
-
-                                issuedMedicines.put(medicineCode, totalIssued);
-                                System.out.println("    ✓ Total issued for " + medicineCode + ": " + totalIssued);
-                            }
+            // 2️⃣ ✅ CHECK STOCK TRƯỚC KHI TRỪ
+            String sqlCheckStock = "SELECT ISNULL(SUM(batch_quantity), 0) as total_stock " +
+                                  "FROM Batches " +
+                                  "WHERE medicine_code=? AND status='Approved' AND batch_quantity>0";
+            
+            try (PreparedStatement psCheck = conn.prepareStatement(sqlCheckStock)) {
+                psCheck.setString(1, medicineCode);
+                try (ResultSet rsCheck = psCheck.executeQuery()) {
+                    if (rsCheck.next()) {
+                        int totalStock = rsCheck.getInt("total_stock");
+                        if (totalStock < qtyNeeded) {
+                            throw new SQLException("❌ Không đủ tồn kho cho thuốc: " + medicineCode + 
+                                                 " (cần: " + qtyNeeded + ", có: " + totalStock + ")");
                         }
                     }
                 }
             }
 
-            // 3️⃣ Update trạng thái request
-            try (PreparedStatement psStatus = conn.prepareStatement(
-                    "UPDATE MedicationRequests SET status='Approved' WHERE request_id=?")) {
-                psStatus.setInt(1, requestId);
-                psStatus.executeUpdate();
-                System.out.println("  ✓ Updated request status to Approved");
-            }
+            // 3️⃣ Trừ kho FIFO (WITH ROWLOCK để tránh deadlock)
+            String sqlBatch = "SELECT TOP 100 batch_id, batch_quantity, expiry_date " +
+                            "FROM Batches WITH (ROWLOCK, UPDLOCK) " + // ✅ THÊM LOCK HINT
+                            "WHERE medicine_code=? AND batch_quantity>0 AND status='Approved' " +
+                            "ORDER BY expiry_date ASC";
 
-            // 4️⃣ Tạo phiếu xuất (IssueSlip)
-            String slipCode = generateSlipCode(conn);
-            int slipId;
-            String sqlInsertSlip = "INSERT INTO IssueSlip(slip_code, request_id, pharmacist_id, notes, created_date) " +
-                                 "VALUES(?,?,?, ?, GETDATE())";
+            psBatch = conn.prepareStatement(sqlBatch);
+            psBatch.setString(1, medicineCode);
+            rsBatch = psBatch.executeQuery();
+            
+            int totalIssued = 0;
 
-            try (PreparedStatement psSlip = conn.prepareStatement(sqlInsertSlip, 
-                    java.sql.Statement.RETURN_GENERATED_KEYS)) {
-                psSlip.setString(1, slipCode);
-                psSlip.setInt(2, requestId);
-                psSlip.setInt(3, pharmacistId);
-                psSlip.setString(4, "Xuất kho tự động");
-                psSlip.executeUpdate();
+            while (qtyNeeded > 0 && rsBatch.next()) {
+                int batchId = rsBatch.getInt("batch_id");
+                int batchQty = rsBatch.getInt("batch_quantity");
+                int deduct = Math.min(batchQty, qtyNeeded);
 
-                try (ResultSet rsSlip = psSlip.getGeneratedKeys()) {
-                    if (rsSlip.next()) {
-                        slipId = rsSlip.getInt(1);
-                        System.out.println("  ✓ Created IssueSlip: " + slipCode + " (ID: " + slipId + ")");
-                    } else {
-                        throw new SQLException("Không lấy được slip_id khi tạo phiếu xuất");
-                    }
+                System.out.println("    → Deducting from batch " + batchId + ": " + deduct + " units");
+
+                // ✅ TRỪ BATCH_QUANTITY
+                String sqlUpdate = "UPDATE Batches SET batch_quantity=batch_quantity-?, updated_at=GETDATE() WHERE batch_id=?";
+                psUpdate = conn.prepareStatement(sqlUpdate);
+                psUpdate.setInt(1, deduct);
+                psUpdate.setInt(2, batchId);
+                int updated = psUpdate.executeUpdate();
+                
+                if (updated == 0) {
+                    throw new SQLException("❌ Không thể cập nhật batch " + batchId);
                 }
+                psUpdate.close();
+
+                // ✅ LƯU THÔNG TIN BATCH
+                IssuedBatchInfo info = new IssuedBatchInfo();
+                info.medicineCode = medicineCode;
+                info.batchId = batchId;
+                info.quantity = deduct;
+                issuedBatches.add(info);
+
+                // ✅ GHI TRANSACTION
+                String sqlTrans = "INSERT INTO Transactions(batch_id, user_id, type, quantity, transaction_date, notes) " +
+                                "VALUES(?,?,'Out',?,GETDATE(),?)";
+                psTrans = conn.prepareStatement(sqlTrans);
+                psTrans.setInt(1, batchId);
+                psTrans.setInt(2, pharmacistId);
+                psTrans.setInt(3, deduct);
+                psTrans.setString(4, "Xuất kho cho yêu cầu " + requestId);
+                psTrans.executeUpdate();
+                psTrans.close();
+
+                qtyNeeded -= deduct;
+                totalIssued += deduct;
+            }
+            
+            rsBatch.close();
+            psBatch.close();
+
+            if (qtyNeeded > 0) {
+                throw new SQLException("❌ Không đủ tồn kho cho thuốc: " + medicineCode + " (còn thiếu: " + qtyNeeded + ")");
             }
 
-            // 5️⃣ Thêm chi tiết phiếu xuất
-            String sqlInsertItem = "INSERT INTO IssueSlipItem(slip_id, medicine_code, quantity) VALUES(?,?,?)";
-            try (PreparedStatement psItem = conn.prepareStatement(sqlInsertItem)) {
-                for (Map.Entry<String, Integer> entry : issuedMedicines.entrySet()) {
-                    psItem.setInt(1, slipId);
-                    psItem.setString(2, entry.getKey());
-                    psItem.setInt(3, entry.getValue());
-                    psItem.executeUpdate();
-                    System.out.println("    → Added to slip: " + entry.getKey() + " x " + entry.getValue());
-                }
+            System.out.println("    ✓ Total issued for " + medicineCode + ": " + totalIssued);
+        }
+        
+        rs.close();
+        psItems.close();
+
+        // 4️⃣ Update status request
+        String sqlStatus = "UPDATE MedicationRequests SET status='Approved' WHERE request_id=?";
+        psStatus = conn.prepareStatement(sqlStatus);
+        psStatus.setInt(1, requestId);
+        psStatus.executeUpdate();
+        psStatus.close();
+        System.out.println("  ✓ Updated request status to Approved");
+
+        // 5️⃣ Tạo IssueSlip
+        String slipCode = generateSlipCode(conn);
+        int slipId;
+        String sqlInsertSlip = "INSERT INTO IssueSlip(slip_code, request_id, pharmacist_id, notes, created_date) " +
+                             "VALUES(?,?,?,'Xuất kho tự động theo FIFO',GETDATE())";
+
+        psSlip = conn.prepareStatement(sqlInsertSlip, java.sql.Statement.RETURN_GENERATED_KEYS);
+        psSlip.setString(1, slipCode);
+        psSlip.setInt(2, requestId);
+        psSlip.setInt(3, pharmacistId);
+        psSlip.executeUpdate();
+
+        rsSlip = psSlip.getGeneratedKeys();
+        if (rsSlip.next()) {
+            slipId = rsSlip.getInt(1);
+            System.out.println("  ✓ Created IssueSlip: " + slipCode + " (ID: " + slipId + ")");
+        } else {
+            throw new SQLException("Không tạo được IssueSlip");
+        }
+        rsSlip.close();
+        psSlip.close();
+
+        // 6️⃣ LƯU CHI TIẾT PHIẾU XUẤT
+        String sqlInsertItem = "INSERT INTO IssueSlipItem(slip_id, medicine_code, batch_id, quantity) VALUES(?,?,?,?)";
+        psSlipItem = conn.prepareStatement(sqlInsertItem);
+        
+        for (IssuedBatchInfo info : issuedBatches) {
+            psSlipItem.setInt(1, slipId);
+            psSlipItem.setString(2, info.medicineCode);
+            psSlipItem.setInt(3, info.batchId);
+            psSlipItem.setInt(4, info.quantity);
+            psSlipItem.addBatch();
+            System.out.println("    → Added to slip: " + info.medicineCode + " (batch " + info.batchId + ") x " + info.quantity);
+        }
+        psSlipItem.executeBatch();
+        psSlipItem.close();
+
+        conn.commit();
+        System.out.println("✅ Transaction committed successfully!");
+        System.out.println("========================================");
+
+    } catch (SQLException ex) {
+        System.err.println("❌ Error in approveRequestWithInventory: " + ex.getMessage());
+        ex.printStackTrace();
+        if (conn != null) {
+            try {
+                conn.rollback();
+                System.out.println("🔄 Transaction rolled back");
+            } catch (SQLException e) {
+                System.err.println("❌ Rollback failed: " + e.getMessage());
             }
-
-            conn.commit();
-            System.out.println("✅ Transaction committed successfully!");
-            System.out.println("========================================");
-
-        } catch (SQLException ex) {
-            conn.rollback();
-            System.err.println("❌ Error in approveRequestWithInventory: " + ex.getMessage());
-            System.err.println("========================================");
-            throw ex;
-        } finally {
-            conn.setAutoCommit(true);
-            conn.close();
+        }
+        throw ex;
+    } finally {
+        // ✅ ĐÓNG TẤT CẢ RESOURCES
+        try {
+            if (rsSlip != null) rsSlip.close();
+            if (rsBatch != null) rsBatch.close();
+            if (rs != null) rs.close();
+            if (psSlipItem != null) psSlipItem.close();
+            if (psSlip != null) psSlip.close();
+            if (psStatus != null) psStatus.close();
+            if (psTrans != null) psTrans.close();
+            if (psUpdate != null) psUpdate.close();
+            if (psBatch != null) psBatch.close();
+            if (psItems != null) psItems.close();
+            if (conn != null) {
+                conn.setAutoCommit(true); // ✅ RESET AUTO COMMIT
+            }
+        } catch (SQLException e) {
+            System.err.println("Error closing resources: " + e.getMessage());
         }
     }
+}
+    // ✅ INNER CLASS LƯU THÔNG TIN LÔ ĐÃ XUẤT
+    private static class IssuedBatchInfo {
+        String medicineCode;
+        int batchId;
+        int quantity;
+    }
 
-    /**
-     * ✅ REJECT REQUEST
-     * Từ chối request và lưu lý do vào notes
-     * 
-     * @param requestId ID của request
-     * @param reason Lý do từ chối
-     * @return true nếu thành công, false nếu thất bại
-     */
     public boolean rejectRequest(int requestId, String reason) {
         Connection conn = null;
         try {
             conn = new DBContext().getConnection();
-            
-            System.out.println("========================================");
-            System.out.println("→ Rejecting request #" + requestId);
-            System.out.println("  Reason: " + reason);
             
             String sql = "UPDATE MedicationRequests SET status='Rejected', " +
                         "notes=CONCAT(COALESCE(notes, ''), '\nRejected: ', ?) " +
@@ -464,21 +490,11 @@ public class MedicationRequestDAO extends DBContext {
                 ps.setString(1, reason);
                 ps.setInt(2, requestId);
                 int rows = ps.executeUpdate();
-                
-                if (rows > 0) {
-                    System.out.println("✅ Request rejected successfully!");
-                    System.out.println("========================================");
-                    return true;
-                } else {
-                    System.out.println("❌ No rows affected - request not found?");
-                    System.out.println("========================================");
-                    return false;
-                }
+                return rows > 0;
             }
         } catch (SQLException e) {
-            System.err.println("❌ Error in rejectRequest: " + e.getMessage());
+            System.err.println("Error in rejectRequest: " + e.getMessage());
             e.printStackTrace();
-            System.err.println("========================================");
             return false;
         } finally {
             if (conn != null) {
@@ -491,13 +507,6 @@ public class MedicationRequestDAO extends DBContext {
         }
     }
 
-    /**
-     * ✅ GET MEDICATION REQUEST BY ID (with doctor info)
-     * Lấy thông tin đầy đủ của request bao gồm doctor name và items
-     * 
-     * @param requestId ID của request
-     * @return MedicationRequest object hoặc null nếu không tìm thấy
-     */
     public MedicationRequest getMedicationRequestById(int requestId) {
         String sql = "SELECT mr.request_id, mr.doctor_id, mr.status, mr.request_date, " +
                      "mr.notes, u.username as doctor_name " +
@@ -518,26 +527,18 @@ public class MedicationRequestDAO extends DBContext {
                 req.setNotes(rs.getString("notes"));
                 req.setDoctorName(rs.getString("doctor_name"));
                 
-                // Get items
                 List<MedicationRequestItem> items = getRequestItems(requestId);
                 req.setItems(items);
                 
-                System.out.println("✓ Found medication request #" + requestId);
                 return req;
-            } else {
-                System.out.println("⚠️ Medication request #" + requestId + " not found");
             }
         } catch (SQLException e) {
-            System.err.println("❌ Error getting medication request: " + e.getMessage());
+            System.err.println("Error getting medication request: " + e.getMessage());
             e.printStackTrace();
         }
         return null;
     }
 
-    /**
-     * Helper method: Generate IssueSlip code
-     * Format: PX-YYYYMMDD-XXX
-     */
     private String generateSlipCode(Connection conn) throws SQLException {
         java.util.Date now = new java.util.Date();
         java.text.SimpleDateFormat sdfDate = new java.text.SimpleDateFormat("yyyyMMdd");

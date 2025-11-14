@@ -21,7 +21,21 @@ public class RecordExpiredDamagedServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
+        HttpSession session = request.getSession();
+        User currentUser = (User) session.getAttribute("user");
+        
+        // Check authentication
+        if (currentUser == null) {
+            response.sendRedirect(request.getContextPath() + "/login.jsp");
+            return;
+        }
+        
+        // Check authorization
+        String role = currentUser.getRole();
+        if (!"Admin".equals(role) && !"Pharmacist".equals(role)) {
+            response.sendRedirect(request.getContextPath() + "/unauthorized.jsp");
+            return;
+        }
         try (Connection conn = new DBContext().getConnection()) {
 
             if (conn == null) {
@@ -57,19 +71,25 @@ public class RecordExpiredDamagedServlet extends HttpServlet {
             throws ServletException, IOException {
 
         request.setCharacterEncoding("UTF-8");
-
+        HttpSession session = request.getSession();
+        User currentUser = (User) session.getAttribute("user");
+        
+        // Check authentication
+        if (currentUser == null) {
+            response.sendRedirect(request.getContextPath() + "/login.jsp");
+            return;
+        }
+        
+        // Check authorization
+        String role = currentUser.getRole();
+        if (!"Admin".equals(role) && !"Pharmacist".equals(role)) {
+            response.sendRedirect(request.getContextPath() + "/unauthorized.jsp");
+            return;
+        }
         try (Connection conn = new DBContext().getConnection()) {
 
             if (conn == null) {
                 throw new ServletException("Không thể kết nối database");
-            }
-
-            // Lấy user đăng nhập
-            HttpSession session = request.getSession();
-            User currentUser = (User) session.getAttribute("user");
-            if (currentUser == null) {
-                response.sendRedirect(request.getContextPath() + "/login.jsp");
-                return;
             }
 
             // Lấy dữ liệu từ form

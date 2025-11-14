@@ -4618,3 +4618,100 @@ PRINT '==========================================';
 PRINT 'DATABASE UPDATE COMPLETED!'; 
 PRINT '=========================================='; 
 GO
+
+USE SWP391;
+GO
+
+-- ✅ TRIGGER TỰ ĐỘNG CẬP NHẬT CURRENT_QUANTITY KHI BATCH_QUANTITY THAY ĐỔI
+IF OBJECT_ID('trg_UpdateCurrentQuantity', 'TR') IS NOT NULL 
+    DROP TRIGGER trg_UpdateCurrentQuantity;
+GO
+
+CREATE TRIGGER trg_UpdateCurrentQuantity
+ON Batches
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Lấy danh sách medicine_code bị ảnh hưởng
+    DECLARE @AffectedMedicines TABLE (medicine_code NVARCHAR(50));
+    
+    INSERT INTO @AffectedMedicines
+    SELECT DISTINCT medicine_code FROM inserted
+    UNION
+    SELECT DISTINCT medicine_code FROM deleted;
+    
+    -- Cập nhật current_quantity = tổng batch_quantity của các lô Approved
+    UPDATE Batches
+    SET current_quantity = (
+        SELECT ISNULL(SUM(b2.batch_quantity), 0)
+        FROM Batches b2
+        WHERE b2.medicine_code = Batches.medicine_code
+        AND b2.status = 'Approved'
+    )
+    WHERE medicine_code IN (SELECT medicine_code FROM @AffectedMedicines);
+END;
+GO
+
+PRINT '✅ Trigger trg_UpdateCurrentQuantity created successfully!';
+
+USE SWP391;
+GO
+
+-- Thêm cột batch_id vào IssueSlipItem
+IF NOT EXISTS (SELECT * FROM sys.columns 
+               WHERE object_id = OBJECT_ID('IssueSlipItem') 
+               AND name = 'batch_id')
+BEGIN
+    ALTER TABLE IssueSlipItem 
+    ADD batch_id INT NULL 
+    FOREIGN KEY REFERENCES Batches(batch_id);
+    
+    PRINT '✅ Added batch_id column to IssueSlipItem';
+END
+ELSE
+BEGIN
+    PRINT '⚠️ batch_id already exists in IssueSlipItem';
+END
+GO
+
+USE SWP391;
+GO
+
+IF OBJECT_ID('trg_UpdateMedicineCurrentQuantity', 'TR') IS NOT NULL 
+    DROP TRIGGER trg_UpdateMedicineCurrentQuantity;
+GO
+
+CREATE TRIGGER trg_UpdateMedicineCurrentQuantity 
+ON Batches 
+AFTER INSERT, UPDATE 
+AS 
+BEGIN 
+    SET NOCOUNT ON; 
+    
+    -- ✅ CHỈ CẬP NHẬT KHI batch_quantity HOẶC status THAY ĐỔI
+    IF NOT UPDATE(batch_quantity) AND NOT UPDATE(status)
+        RETURN;
+    
+    -- Lấy danh sách medicine_code bị ảnh hưởng 
+    DECLARE @AffectedMedicines TABLE (medicine_code NVARCHAR(50)); 
+    
+    INSERT INTO @AffectedMedicines 
+    SELECT DISTINCT medicine_code FROM inserted 
+    UNION 
+    SELECT DISTINCT medicine_code FROM deleted; 
+    
+    -- ✅ CẬP NHẬT VỚI ROWLOCK
+    UPDATE Batches WITH (ROWLOCK)
+    SET current_quantity = ( 
+        SELECT ISNULL(SUM(b2.batch_quantity), 0) 
+        FROM Batches b2 WITH (NOLOCK) -- ✅ NOLOCK khi đọc
+        WHERE b2.medicine_code = Batches.medicine_code 
+        AND b2.status = 'Approved' 
+    ) 
+    WHERE medicine_code IN (SELECT medicine_code FROM @AffectedMedicines); 
+END; 
+GO
+
+PRINT '✅ Trigger updated successfully!';

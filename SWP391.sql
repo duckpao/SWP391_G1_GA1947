@@ -4618,3 +4618,40 @@ PRINT '==========================================';
 PRINT 'DATABASE UPDATE COMPLETED!'; 
 PRINT '=========================================='; 
 GO
+
+USE SWP391;
+GO
+
+-- ✅ TRIGGER TỰ ĐỘNG CẬP NHẬT CURRENT_QUANTITY KHI BATCH_QUANTITY THAY ĐỔI
+IF OBJECT_ID('trg_UpdateCurrentQuantity', 'TR') IS NOT NULL 
+    DROP TRIGGER trg_UpdateCurrentQuantity;
+GO
+
+CREATE TRIGGER trg_UpdateCurrentQuantity
+ON Batches
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Lấy danh sách medicine_code bị ảnh hưởng
+    DECLARE @AffectedMedicines TABLE (medicine_code NVARCHAR(50));
+    
+    INSERT INTO @AffectedMedicines
+    SELECT DISTINCT medicine_code FROM inserted
+    UNION
+    SELECT DISTINCT medicine_code FROM deleted;
+    
+    -- Cập nhật current_quantity = tổng batch_quantity của các lô Approved
+    UPDATE Batches
+    SET current_quantity = (
+        SELECT ISNULL(SUM(b2.batch_quantity), 0)
+        FROM Batches b2
+        WHERE b2.medicine_code = Batches.medicine_code
+        AND b2.status = 'Approved'
+    )
+    WHERE medicine_code IN (SELECT medicine_code FROM @AffectedMedicines);
+END;
+GO
+
+PRINT '✅ Trigger trg_UpdateCurrentQuantity created successfully!';

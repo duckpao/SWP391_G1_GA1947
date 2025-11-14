@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import model.User;
 
 /**
  * ✅ Servlet quản lý lô thuốc
@@ -19,7 +20,21 @@ public class ManageBatches extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        User currentUser = (User) session.getAttribute("user");
         
+        // Check authentication
+        if (currentUser == null) {
+            response.sendRedirect(request.getContextPath() + "/login.jsp");
+            return;
+        }
+        
+        // Check authorization
+        String role = currentUser.getRole();
+        if (!"Admin".equals(role) && !"Pharmacist".equals(role)) {
+            response.sendRedirect(request.getContextPath() + "/unauthorized.jsp");
+            return;
+        }
         BatchDAO dao = new BatchDAO();
         
         try {

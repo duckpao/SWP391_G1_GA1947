@@ -4,25 +4,30 @@ import model.AuditLog;
 import model.AuditStatistics;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class AudtitLogDAO extends DBContext {
 
     /**
-     * Get audit logs with filters and pagination
+     * ✅ FIXED: Get audit logs with filters and pagination
+     * Returns Map with logs + totalRecords
      */
-    public List<AuditLog> getAuditLogs(int currentUserId, String startDate, String endDate,
+    public Map<String, Object> getAuditLogsWithTotal(int currentUserId, String startDate, String endDate,
             String username, String role, String action,
             String tableName, String riskLevel, String category,
             int pageNumber, int pageSize) {
+        
+        Map<String, Object> result = new HashMap<>();
         List<AuditLog> logs = new ArrayList<>();
+        int totalRecords = 0;
 
         try {
-            // Updated stored procedure call with currentUserId as first parameter
             String sql = "{CALL sp_GetAuditLogs(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}";
             CallableStatement cs = connection.prepareCall(sql);
 
-            // Parameter 1: @CurrentUserId (REQUIRED)
+            // Parameter 1: @CurrentUserId
             cs.setInt(1, currentUserId);
 
             // Parameter 2-3: Date range
@@ -38,7 +43,7 @@ public class AudtitLogDAO extends DBContext {
                 cs.setNull(3, Types.VARCHAR);
             }
 
-            // Parameter 4: @TargetUserId (optional - NULL to view multiple users if Admin)
+            // Parameter 4: @TargetUserId
             cs.setNull(4, Types.INTEGER);
 
             // Parameter 5-10: Filters
@@ -84,22 +89,23 @@ public class AudtitLogDAO extends DBContext {
 
             ResultSet rs = cs.executeQuery();
 
-            // Check for error response from stored procedure
+            // Check for error
             if (rs.next()) {
                 try {
                     String status = rs.getString("status");
                     if ("ERROR".equals(status)) {
-                        String message = rs.getString("message");
-                        System.err.println("Access denied: " + message);
+                        System.err.println("Access denied: " + rs.getString("message"));
                         rs.close();
                         cs.close();
-                        return logs; // Return empty list
+                        result.put("logs", logs);
+                        result.put("totalRecords", 0);
+                        return result;
                     }
                 } catch (SQLException e) {
-                    // Not an error response, process as normal data
+                    // Not error, process data
                 }
 
-                // Process data rows
+                // ✅ GET TOTAL_RECORDS FROM FIRST ROW
                 do {
                     AuditLog log = new AuditLog();
                     log.setLogId(rs.getInt("log_id"));
@@ -117,6 +123,12 @@ public class AudtitLogDAO extends DBContext {
                     log.setLogDate(rs.getTimestamp("log_date"));
                     log.setRiskLevel(rs.getString("risk_level"));
                     log.setCategory(rs.getString("category"));
+                    
+                    // ✅ GET TOTAL FROM EVERY ROW (same value)
+                    if (totalRecords == 0) {
+                        totalRecords = rs.getInt("total_records");
+                    }
+                    
                     logs.add(log);
                 } while (rs.next());
             }
@@ -128,7 +140,20 @@ public class AudtitLogDAO extends DBContext {
             e.printStackTrace();
         }
 
-        return logs;
+        result.put("logs", logs);
+        result.put("totalRecords", totalRecords);
+        return result;
+    }
+
+    // ✅ DEPRECATED: Keep for backward compatibility
+    @Deprecated
+    public List<AuditLog> getAuditLogs(int currentUserId, String startDate, String endDate,
+            String username, String role, String action,
+            String tableName, String riskLevel, String category,
+            int pageNumber, int pageSize) {
+        Map<String, Object> result = getAuditLogsWithTotal(currentUserId, startDate, endDate,
+                username, role, action, tableName, riskLevel, category, pageNumber, pageSize);
+        return (List<AuditLog>) result.get("logs");
     }
 
     /**

@@ -803,4 +803,26 @@ public boolean createPendingSupplierTransaction(int poId, int asnId, double amou
         return false;
     }
 }
+
+/**
+ * Rollback ASN status from Delivered back to InTransit
+ * Used when payment fails after delivery confirmation
+ */
+public boolean rollbackDeliveryStatus(int asnId) {
+    String sql = "UPDATE AdvancedShippingNotices SET status = 'InTransit', updated_at = GETDATE() WHERE asn_id = ?";
+    
+    try (Connection conn = new DBContext().getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        
+        ps.setInt(1, asnId);
+        int rows = ps.executeUpdate();
+        
+        System.out.println("Rollback ASN #" + asnId + ": " + (rows > 0 ? "SUCCESS" : "FAILED"));
+        return rows > 0;
+        
+    } catch (Exception e) {
+        e.printStackTrace();
+        return false;
+    }
+}
 }

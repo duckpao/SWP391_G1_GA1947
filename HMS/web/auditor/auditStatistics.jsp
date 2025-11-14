@@ -11,7 +11,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #f9fafb; color: #374151; }
@@ -76,9 +76,6 @@
                 </a>
                 <a class="nav-link active" href="${pageContext.request.contextPath}/auditlog?action=statistics">
                     <i class="bi bi-graph-up"></i> Statistics
-                </a>
-                <a class="nav-link" href="${pageContext.request.contextPath}/auditlog?action=alerts">
-                    <i class="bi bi-exclamation-triangle"></i> Security Alerts
                 </a>
             </nav>
         </div>
@@ -171,16 +168,10 @@
                                     <td><i class="bi bi-truck" style="color: #f59e0b;"></i> Shipping (ASN)</td>
                                     <td style="text-align: right;"><strong>${statistics.shippingActions}</strong></td>
                                 </tr>
-                                <tr>
-                                    <td><i class="bi bi-box-seam" style="color: #ef4444;"></i> Deliveries</td>
-                                    <td style="text-align: right;"><strong>${statistics.deliveryActions}</strong></td>
-                                </tr>
-                                <tr>
-                                    <td><i class="bi bi-arrow-left-right" style="color: #0ea5e9;"></i> Inventory Transactions</td>
-                                    <td style="text-align: right;"><strong>${statistics.inventoryActions}</strong></td>
-                                </tr>
+
                             </tbody>
                         </table>
+
                     </div>
                 </div>
                 
@@ -221,35 +212,6 @@
                 </div>
             </div>
             
-            <!-- Approval & Rejection Stats -->
-            <div class="card">
-                <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                    <h5><i class="bi bi-check-circle"></i> Approval & Rejection Statistics</h5>
-                </div>
-                <div class="card-body">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
-                        <div style="text-align: center; padding: 20px; background: #d1fae5; border-radius: 10px;">
-                            <i class="bi bi-check-circle" style="font-size: 48px; color: #10b981;"></i>
-                            <h3 style="color: #065f46; margin-top: 12px;">${statistics.totalApprovals}</h3>
-                            <p style="color: #059669; font-weight: 600;">Approvals</p>
-                        </div>
-                        <div style="text-align: center; padding: 20px; background: #fee2e2; border-radius: 10px;">
-                            <i class="bi bi-x-circle" style="font-size: 48px; color: #ef4444;"></i>
-                            <h3 style="color: #991b1b; margin-top: 12px;">${statistics.totalRejections}</h3>
-                            <p style="color: #dc2626; font-weight: 600;">Rejections</p>
-                        </div>
-                        <div style="text-align: center; padding: 20px; background: #dbeafe; border-radius: 10px;">
-                            <i class="bi bi-percent" style="font-size: 48px; color: #3b82f6;"></i>
-                            <h3 style="color: #1e40af; margin-top: 12px;">
-                                <fmt:formatNumber value="${statistics.totalApprovals * 100.0 / (statistics.totalApprovals + statistics.totalRejections)}" 
-                                                  maxFractionDigits="1" />%
-                            </h3>
-                            <p style="color: #2563eb; font-weight: 600;">Approval Rate</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
             <!-- Summary Report -->
             <div class="card">
                 <div class="card-header" style="background: #1f2937; color: white;">
@@ -284,15 +246,7 @@
                         <li>Manager-to-Supplier ratio: 
                             <strong>${statistics.managerActions} : ${statistics.supplierActions}</strong>
                         </li>
-                        <li>Rejection rate: 
-                            <strong>
-                                <fmt:formatNumber value="${statistics.totalRejections * 100.0 / (statistics.totalApprovals + statistics.totalRejections)}" 
-                                                  maxFractionDigits="1" />%
-                            </strong>
-                            <c:if test="${statistics.totalRejections * 100 / (statistics.totalApprovals + statistics.totalRejections) > 20}">
-                                <span class="badge badge-warning">High</span>
-                            </c:if>
-                        </li>
+                        
                     </ul>
                 </div>
             </div>
@@ -300,27 +254,40 @@
     </div>
     
     <script>
-        // Procurement Activities Chart
+        // Procurement Activities Chart (Updated with 5 categories)
         const procurementCtx = document.getElementById('procurementChart').getContext('2d');
         new Chart(procurementCtx, {
             type: 'doughnut',
             data: {
-                labels: ['Purchase Orders', 'Invoices', 'Shipping', 'Deliveries', 'Inventory'],
+                labels: ['Purchase Orders', 'Invoices', 'Shipping (ASN)', 'Approvals', 'Rejections'],
                 datasets: [{
                     data: [
                         ${statistics.purchaseOrderActions},
                         ${statistics.invoiceActions},
                         ${statistics.shippingActions},
-                        ${statistics.deliveryActions},
-                        ${statistics.inventoryActions}
+                        ${statistics.totalApprovals},
+                        ${statistics.totalRejections}
                     ],
-                    backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#0ea5e9']
+                    backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#34d399', '#ef4444']
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { position: 'bottom' } }
+                plugins: { 
+                    legend: { position: 'bottom' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                let value = context.parsed || 0;
+                                let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                let percentage = ((value / total) * 100).toFixed(1);
+                                return label + ': ' + value + ' (' + percentage + '%)';
+                            }
+                        }
+                    }
+                }
             }
         });
         

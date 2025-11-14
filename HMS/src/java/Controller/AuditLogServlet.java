@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.Map;
 import model.AuditLog;
 import model.AuditStatistics;
 import model.User;
@@ -100,98 +101,86 @@ public class AuditLogServlet extends HttpServlet {
     }
 
     private void viewAuditLogs(HttpServletRequest request, HttpServletResponse response, User user)
-            throws ServletException, IOException {
+        throws ServletException, IOException {
 
-        // Get filter parameters
-        String startDate = request.getParameter("startDate");
-        String endDate = request.getParameter("endDate");
-        String username = request.getParameter("username");
-        String role = request.getParameter("role");
-        String actionFilter = request.getParameter("actionFilter");
-        String tableName = request.getParameter("tableName");
-        String riskLevel = request.getParameter("riskLevel");
-        String category = request.getParameter("category");
+    // Get filter parameters
+    String startDate = request.getParameter("startDate");
+    String endDate = request.getParameter("endDate");
+    String username = request.getParameter("username");
+    String role = request.getParameter("role");
+    String actionFilter = request.getParameter("actionFilter");
+    String tableName = request.getParameter("tableName");
+    String riskLevel = request.getParameter("riskLevel");
+    String category = request.getParameter("category");
 
-        // Pagination
-        int pageNumber = 1;
-        int pageSize = 20;
+    // Pagination
+    int pageNumber = 1;
+    int pageSize = 20;
 
-        try {
-            if (request.getParameter("page") != null) {
-                pageNumber = Integer.parseInt(request.getParameter("page"));
-            }
-            if (request.getParameter("pageSize") != null) {
-                pageSize = Integer.parseInt(request.getParameter("pageSize"));
-            }
-        } catch (NumberFormatException e) {
-            pageNumber = 1;
+    try {
+        if (request.getParameter("page") != null) {
+            pageNumber = Integer.parseInt(request.getParameter("page"));
         }
-
-        // UPDATED: Pass currentUserId to DAO
-        List<AuditLog> logs = auditLogDAO.getAuditLogs(
-                user.getUserId(), // <-- Pass current user ID
-                startDate,
-                endDate,
-                username,
-                role,
-                actionFilter,
-                tableName,
-                riskLevel,
-                category,
-                pageNumber,
-                pageSize
-        );
-
-        // UPDATED: Pass currentUserId and role to getTotalLogsCount
-        int totalRecords = auditLogDAO.getTotalLogsCount(
-                user.getUserId(), // <-- Pass current user ID
-                user.getRole(), // <-- Pass current user role
-                startDate,
-                endDate,
-                username,
-                role,
-                actionFilter,
-                tableName,
-                riskLevel,
-                category
-        );
-
-        int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
-
-        // UPDATED: Pass currentUserId and role to filter options
-        List<String> actions = auditLogDAO.getDistinctActions(user.getUserId(), user.getRole());
-        List<String> tables = auditLogDAO.getDistinctTableNames(user.getUserId(), user.getRole());
-        List<String> roles = auditLogDAO.getDistinctRoles();
-
-        // Set attributes
-        request.setAttribute("logs", logs);
-        request.setAttribute("currentPage", pageNumber);
-        request.setAttribute("totalPages", totalPages);
-        request.setAttribute("totalRecords", totalRecords);
-        request.setAttribute("pageSize", pageSize);
-        request.setAttribute("actions", actions);
-        request.setAttribute("tables", tables);
-        request.setAttribute("roles", roles);
-
-        // NEW: Add user info for display
-        request.setAttribute("currentUser", user);
-        request.setAttribute("isAuditor", user.getRole().equals("Auditor"));
-
-        // Preserve filters
-        request.setAttribute("startDate", startDate);
-        request.setAttribute("endDate", endDate);
-        request.setAttribute("username", username);
-        request.setAttribute("role", role);
-        request.setAttribute("actionFilter", actionFilter);
-        request.setAttribute("tableName", tableName);
-        request.setAttribute("riskLevel", riskLevel);
-        request.setAttribute("category", category);
-
-        // Log this view action
-        LoggingUtil.logView(request, "AUDIT_LOGS");
-
-        request.getRequestDispatcher("auditor/auditLog.jsp").forward(request, response);
+        if (request.getParameter("pageSize") != null) {
+            pageSize = Integer.parseInt(request.getParameter("pageSize"));
+        }
+    } catch (NumberFormatException e) {
+        pageNumber = 1;
     }
+
+    // ✅ USE NEW METHOD THAT RETURNS BOTH LOGS + TOTAL
+    Map<String, Object> result = auditLogDAO.getAuditLogsWithTotal(
+            user.getUserId(),
+            startDate,
+            endDate,
+            username,
+            role,
+            actionFilter,
+            tableName,
+            riskLevel,
+            category,
+            pageNumber,
+            pageSize
+    );
+
+    List<AuditLog> logs = (List<AuditLog>) result.get("logs");
+    int totalRecords = (int) result.get("totalRecords");
+
+    // ✅ CALCULATE TOTAL PAGES FROM FILTERED RESULTS
+    int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
+
+    // Filter options
+    List<String> actions = auditLogDAO.getDistinctActions(user.getUserId(), user.getRole());
+    List<String> tables = auditLogDAO.getDistinctTableNames(user.getUserId(), user.getRole());
+    List<String> roles = auditLogDAO.getDistinctRoles();
+
+    // Set attributes
+    request.setAttribute("logs", logs);
+    request.setAttribute("currentPage", pageNumber);
+    request.setAttribute("totalPages", totalPages);
+    request.setAttribute("totalRecords", totalRecords); // ✅ NOW CORRECT
+    request.setAttribute("pageSize", pageSize);
+    request.setAttribute("actions", actions);
+    request.setAttribute("tables", tables);
+    request.setAttribute("roles", roles);
+
+    request.setAttribute("currentUser", user);
+    request.setAttribute("isAuditor", user.getRole().equals("Auditor"));
+
+    // ✅ PRESERVE ALL FILTERS FOR PAGINATION
+    request.setAttribute("startDate", startDate != null ? startDate : "");
+    request.setAttribute("endDate", endDate != null ? endDate : "");
+    request.setAttribute("username", username != null ? username : "");
+    request.setAttribute("role", role != null ? role : "");
+    request.setAttribute("actionFilter", actionFilter != null ? actionFilter : "");
+    request.setAttribute("tableName", tableName != null ? tableName : "");
+    request.setAttribute("riskLevel", riskLevel != null ? riskLevel : "");
+    request.setAttribute("category", category != null ? category : "");
+
+    LoggingUtil.logView(request, "AUDIT_LOGS");
+
+    request.getRequestDispatcher("auditor/auditLog.jsp").forward(request, response);
+}
 
     private void viewStatistics(HttpServletRequest request, HttpServletResponse response, User user)
             throws ServletException, IOException {

@@ -4655,3 +4655,23 @@ END;
 GO
 
 PRINT '✅ Trigger trg_UpdateCurrentQuantity created successfully!';
+
+USE SWP391;
+GO
+
+-- Thêm cột batch_id vào IssueSlipItem
+IF NOT EXISTS (SELECT * FROM sys.columns 
+               WHERE object_id = OBJECT_ID('IssueSlipItem') 
+               AND name = 'batch_id')
+BEGIN
+    ALTER TABLE IssueSlipItem 
+    ADD batch_id INT NULL 
+    FOREIGN KEY REFERENCES Batches(batch_id);
+    
+    PRINT '✅ Added batch_id column to IssueSlipItem';
+END
+ELSE
+BEGIN
+    PRINT '⚠️ batch_id already exists in IssueSlipItem';
+END
+GO

@@ -788,7 +788,6 @@
                                                             <th>Vai trò</th>
                                                             <th>Hành động</th>
                                                             <th>Chi tiết</th>
-                                                            <th>IP Address</th>
                                                             <th>Thời gian</th>
                                                         </tr>
                                                     </thead>
@@ -801,7 +800,6 @@
                                                                 <td><span class="badge badge-${log.role}">${log.role}</span></td>
                                                                 <td><strong>${log.action}</strong></td>
                                                                 <td>${log.details}</td>
-                                                                <td>${log.ipAddress}</td>
                                                                 <td><fmt:formatDate value="${log.logDate}" pattern="dd/MM/yyyy HH:mm:ss"/></td>
                                                             </tr>
                                                         </c:forEach>

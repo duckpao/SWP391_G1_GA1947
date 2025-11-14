@@ -19,7 +19,8 @@ public class PurchaseOrder {
     private String managerName;
     private double totalAmount;
     private int itemCount;
-    
+    private int batchCount;
+
     // ASN information
     private int asnId;
     private String trackingNumber;
@@ -47,6 +48,14 @@ public class PurchaseOrder {
         this.expectedDeliveryDate = expectedDeliveryDate;
         this.notes = notes;
         this.updatedAt = updatedAt;
+    }
+
+    public int getBatchCount() {
+        return batchCount;
+    }
+
+    public void setBatchCount(int batchCount) {
+        this.batchCount = batchCount;
     }
     
     // Basic Getters and Setters

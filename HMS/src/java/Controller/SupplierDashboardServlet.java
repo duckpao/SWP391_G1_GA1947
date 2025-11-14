@@ -52,8 +52,9 @@ public class SupplierDashboardServlet extends HttpServlet {
             supplier.getSupplierId(), "Sent");
         List<PurchaseOrder> approvedOrders = supplierDAO.getPurchaseOrdersBySupplier(
             supplier.getSupplierId(), "Approved");
-        List<PurchaseOrder> completedOrders = supplierDAO.getPurchaseOrdersBySupplier(
-            supplier.getSupplierId(), "Completed");
+// ✅ THAY ĐỔI NÀY: Sử dụng method mới để lấy cả Completed và BatchCreated
+List<PurchaseOrder> completedOrders = supplierDAO.getCompletedOrdersBySupplier(
+    supplier.getSupplierId());
         
         // Lấy tất cả ASNs của supplier
         List<AdvancedShippingNotice> allASNs = asnDAO.getASNsBySupplier(supplier.getSupplierId());

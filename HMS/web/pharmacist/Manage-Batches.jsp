@@ -497,7 +497,7 @@
                                                             data-supplier="${b.supplierName}"
                                                             data-expiry="<fmt:formatDate value='${b.expiryDate}' pattern='yyyy-MM-dd'/>"
                                                             data-received="<fmt:formatDate value='${b.receivedDate}' pattern='yyyy-MM-dd'/>"
-                                                            data-current="${b.batchQuantity}"
+                                                            data-batchquantity="${b.batchQuantity}"
                                                             data-status="${b.status}"
                                                             data-quarantinenotes="${b.quarantineNotes}">
                                                         <i class="bi bi-pencil-square"></i>
@@ -873,4 +873,5 @@
             </script>
         </body>
     </html>
+
 

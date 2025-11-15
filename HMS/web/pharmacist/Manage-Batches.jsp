@@ -583,7 +583,7 @@
 
                             <div class="mb-3">
                                 <label>SL của Lô</label>
-                                <input type="number" id="edit-current" name="batchQuantity" class="form-control" required>
+                                <input type="number" id="edit-batch" name="batchQuantity" class="form-control" required>
                             </div>
 
                             <div class="mb-3">
@@ -873,3 +873,4 @@
             </script>
         </body>
     </html>
+

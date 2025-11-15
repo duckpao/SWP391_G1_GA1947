@@ -27,20 +27,21 @@ public class BatchUpdateServlet extends HttpServlet {
             System.out.println("===== DEBUG UPDATE BATCH =====");
 System.out.println("batchId: " + request.getParameter("batchId"));
 System.out.println("expiryDate: " + request.getParameter("expiryDate"));
-System.out.println("currentQuantity: " + request.getParameter("currentQuantity"));
+//System.out.println("currentQuantity: " + request.getParameter("currentQuantity"));
+  System.out.println("batchQuantity: " + request.getParameter("batchQuantity"));
 System.out.println("status: " + request.getParameter("status"));
   System.out.println("quarantineNotes: " + request.getParameter("quarantineNotes"));
 
             int batchId = Integer.parseInt(request.getParameter("batchId"));
             String expiryDate = request.getParameter("expiryDate");
-            int currentQuantity = Integer.parseInt(request.getParameter("currentQuantity"));
+            int batchQuantity = Integer.parseInt(request.getParameter("batchQuantity"));
             String status = request.getParameter("status");
             String quarantineNotes = request.getParameter("quarantineNotes");
 
             Batches batch = new Batches();
             batch.setBatchId(batchId);
             batch.setExpiryDate(Date.valueOf(expiryDate));
-            batch.setCurrentQuantity(currentQuantity);
+            batch.setBatchQuantity(batchQuantity);
             batch.setStatus(status);
             batch.setQuarantineNotes(quarantineNotes); // ✅ thêm dòng này
 

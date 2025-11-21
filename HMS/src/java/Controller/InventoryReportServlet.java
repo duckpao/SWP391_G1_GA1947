@@ -23,7 +23,7 @@ public class InventoryReportServlet extends HttpServlet {
         Integer userId = (Integer) session.getAttribute("userId");
         
         // Check authorization
-        if (!(role != null && (role.equals("Manager") || role.equals("Auditor"))) || userId == null) {
+        if (!(role != null && (role.equals("Manager"))) || userId == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
